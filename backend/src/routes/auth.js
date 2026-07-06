@@ -9,13 +9,7 @@ const router = Router();
 
 // Retrieve Web API key for Identity Toolkit calls
 let firebaseApiKey = process.env.FIREBASE_API_KEY;
-if (!firebaseApiKey) {
-  const configPath = path.resolve(process.cwd(), "firebase-applet-config.json");
-  if (fs.existsSync(configPath)) {
-    const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-    firebaseApiKey = config.apiKey;
-  }
-}
+console.log(firebaseApiKey);
 
 // Set session cookie based on ID token
 router.post("/session", async (req, res) => {

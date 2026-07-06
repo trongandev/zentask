@@ -5,7 +5,6 @@ import { UserAvatar } from "./UserAvatar";
 import { UserLevelBadge } from "./UserLevelBadge";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserStore } from "../services/userService";
-import { getAuth, signOut } from "firebase/auth";
 
 interface HeaderProps {
   isLeftSidebarOpen: boolean;
@@ -44,7 +43,7 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       clearInterval(intervalId);
@@ -56,8 +55,11 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
   const handleLogout = async () => {
     try {
       await syncStudyTime();
-      const auth = getAuth();
-      await signOut(auth);
+      await fetch(`${import.meta.env.VITE_API_BACKEND}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      window.location.reload();
     } catch (error) {
       console.error("Error signing out: ", error);
     }
@@ -98,21 +100,16 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
     <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-10 flex-shrink-0">
       <div className="flex items-center gap-4">
         {/* Mobile menu toggle */}
-        <button 
-          onClick={onToggleMobileMenu} 
-          className="lg:hidden p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
-        >
+        <button onClick={onToggleMobileMenu} className="lg:hidden p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
           <Menu className="w-6 h-6" />
         </button>
 
         {/* Desktop sidebar toggle */}
-        {isLeftSidebarOpen &&    <button 
-          onClick={onToggleLeftSidebar} 
-          className="hidden lg:block p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
-        >
-          {isLeftSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
-        </button>}
-     
+        {isLeftSidebarOpen && (
+          <button onClick={onToggleLeftSidebar} className="hidden lg:block p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
+            {isLeftSidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
+          </button>
+        )}
 
         <div className="hidden xl:flex gap-4">
           {stats.map((stat, idx) => (
@@ -134,16 +131,11 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
           <Search className="w-5 h-5" />
         </button>
         <div className="relative" ref={notificationsRef}>
-          <button 
-            onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-            className="relative text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
-          >
+          <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="relative text-gray-400 hover:text-gray-600 transition-colors focus:outline-none">
             <Bell className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-[9px] font-bold text-white">
-              3
-            </span>
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-[9px] font-bold text-white">3</span>
           </button>
-          
+
           {isNotificationsOpen && (
             <div className="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in slide-in-from-top-2">
               <div className="px-4 pb-2 border-b border-gray-100 flex items-center justify-between">
@@ -156,7 +148,9 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
                     <Flame className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-900"><span className="font-bold">Nhắc nhở học tập:</span> Đừng quên hoàn thành bài học hôm nay để giữ chuỗi nhé!</p>
+                    <p className="text-sm text-gray-900">
+                      <span className="font-bold">Nhắc nhở học tập:</span> Đừng quên hoàn thành bài học hôm nay để giữ chuỗi nhé!
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">2 giờ trước</p>
                   </div>
                 </div>
@@ -165,7 +159,9 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
                     <Star className="w-5 h-5 text-orange-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-900"><span className="font-bold">Chúc mừng:</span> Bạn vừa đạt thành tích "Chăm chỉ"!</p>
+                    <p className="text-sm text-gray-900">
+                      <span className="font-bold">Chúc mừng:</span> Bạn vừa đạt thành tích "Chăm chỉ"!
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">5 giờ trước</p>
                   </div>
                 </div>
@@ -174,17 +170,15 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
                     <BookOpen className="w-5 h-5 text-teal-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-900"><span className="font-bold">Có bài học mới:</span> 50 từ vựng chủ đề Du lịch đã được thêm.</p>
+                    <p className="text-sm text-gray-900">
+                      <span className="font-bold">Có bài học mới:</span> 50 từ vựng chủ đề Du lịch đã được thêm.
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">1 ngày trước</p>
                   </div>
                 </div>
               </div>
               <div className="px-4 pt-2 border-t border-gray-100">
-                <Link 
-                  to="/notifications" 
-                  onClick={() => setIsNotificationsOpen(false)}
-                  className="block text-center text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors py-2"
-                >
+                <Link to="/notifications" onClick={() => setIsNotificationsOpen(false)} className="block text-center text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors py-2">
                   Xem tất cả
                 </Link>
               </div>
@@ -192,25 +186,15 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
           )}
         </div>
         <div className="h-8 w-px bg-gray-200"></div>
-        
+
         {!user ? (
-          <Link 
-            to="/auth"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl transition-colors text-sm"
-          >
+          <Link to="/auth" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl transition-colors text-sm">
             Tham gia ngay
           </Link>
         ) : (
           <div className="relative" ref={profileRef}>
-            <button 
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none"
-            >
-              <UserAvatar 
-                src={user.photoURL} 
-                level={user.level} 
-                className="w-10 h-10" 
-              />
+            <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center gap-3 hover:opacity-80 transition-opacity focus:outline-none">
+              <UserAvatar src={user.photoURL} level={user.level} className="w-10 h-10" />
               <div className="text-left hidden sm:block">
                 <p className="text-sm font-bold text-gray-900 leading-tight">{user.displayName}</p>
                 <UserLevelBadge level={user.level} size="sm" />
@@ -222,26 +206,20 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2">
                 <div className="px-4 py-2 border-b border-gray-100 mb-1 sm:hidden">
                   <p className="text-sm font-bold text-gray-900 leading-tight">{user.displayName}</p>
-                  <div className="mt-1"><UserLevelBadge level={user.level} size="sm" /></div>
+                  <div className="mt-1">
+                    <UserLevelBadge level={user.level} size="sm" />
+                  </div>
                 </div>
-                <Link 
-                  to="/profile"
-                  onClick={() => setIsProfileOpen(false)}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
+                <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                   <User className="w-4 h-4 text-gray-400" />
                   Thông tin tài khoản
                 </Link>
-                <Link 
-                  to="/settings"
-                  onClick={() => setIsProfileOpen(false)}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
+                <Link to="/settings" onClick={() => setIsProfileOpen(false)} className="w-full flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                   <Settings className="w-4 h-4 text-gray-400" />
                   Cài đặt
                 </Link>
                 <div className="h-px bg-gray-100 my-1"></div>
-                <button 
+                <button
                   onClick={() => {
                     handleLogout();
                     setIsProfileOpen(false);
