@@ -15,7 +15,12 @@ const port = process.env.PORT || 3001;
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: [
+      process.env.FRONTEND_URL, 
+      "https://lrm.io.vn", 
+      "http://localhost:3000", 
+      "http://localhost:5173"
+    ].filter(Boolean),
     credentials: true,
   }),
 );
