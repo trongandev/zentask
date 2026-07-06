@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal } from "lucide-react";
+import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal, Trash2, Folder as FolderIcon, Edit2, Target } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useFlashcardStore } from "../services/flashcardService";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import toast from "react-hot-toast";
+
+import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay, useDroppable } from "@dnd-kit/core";
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const RANK_CONFIG: any = {
   1: { name: "Bạc", maxTiers: 3, starsPerTier: 3 },
@@ -13,56 +17,377 @@ const RANK_CONFIG: any = {
   4: { name: "Kim Cương", maxTiers: 5, starsPerTier: 5 },
   5: { name: "Cao Thủ", maxTiers: 1, starsPerTier: 99 },
 };
+const TIER_NAMES: Record<number, string> = { 1: "I", 2: "II", 3: "III", 4: "IV", 5: "V" };
+
+const COLORS = [
+  "bg-blue-500",
+  "bg-blue-600",
+  "bg-blue-700",
+  "bg-blue-800",
+  "bg-red-500",
+  "bg-red-600",
+  "bg-red-700",
+  "bg-red-800",
+  "bg-yellow-500",
+  "bg-yellow-600",
+  "bg-yellow-700",
+  "bg-yellow-800",
+  "bg-green-500",
+  "bg-green-600",
+  "bg-green-700",
+  "bg-green-800",
+  "bg-purple-500",
+  "bg-purple-600",
+  "bg-purple-700",
+  "bg-purple-800",
+  "bg-pink-500",
+  "bg-pink-600",
+  "bg-pink-700",
+  "bg-pink-800",
+  "bg-orange-500",
+  "bg-orange-600",
+  "bg-orange-700",
+  "bg-orange-800",
+  "bg-teal-500",
+  "bg-teal-600",
+  "bg-teal-700",
+  "bg-teal-800",
+];
+
+const timeAgo = (date: any) => {
+  if (!date) return "Chưa học";
+  return "Gần đây";
+};
+
+// SORTABLE SET ITEM
+function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, setPopoverId, onEdit, onDelete }: any) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: set.id, data: { type: "set", set } });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.3 : 1,
+    zIndex: isDragging ? 99 : 1,
+  };
+
+  const progress = set.cardCount > 0 ? (set.learnedCount / set.cardCount) * 100 : 0;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      onContextMenu={(e) => onContextMenu(e, "set", set)}
+      onClick={onClick}
+      className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full group cursor-pointer relative overflow-hidden"
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div className={`w-12 h-12 rounded-2xl ${set.color || "bg-blue-500"} flex items-center justify-center text-white shadow-sm`}>
+          <BookOpen className="w-6 h-6" />
+        </div>
+        <div className="relative">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setPopoverId(popoverId === set.id ? null : set.id);
+            }}
+            className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <MoreVertical className="w-5 h-5" />
+          </button>
+
+          {popoverId === set.id && (
+            <div className="absolute right-0 mt-2 w-36 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 overflow-hidden">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPopoverId(null);
+                  onEdit(set);
+                }}
+                className="w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Sửa & Đổi màu
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPopoverId(null);
+                  onDelete(set);
+                }}
+                className="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+              >
+                Xóa
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">{set.title}</h3>
+
+      <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 font-medium">
+        <span className="flex items-center gap-1.5">
+          <BookOpen className="w-4 h-4" />
+          {set.cardCount} thẻ
+        </span>
+        <span className="flex items-center gap-1.5">
+          <Clock className="w-4 h-4" />
+          {timeAgo(set.lastStudied)}
+        </span>
+      </div>
+
+      <div className="mt-auto">
+        <div className="flex justify-between text-xs font-bold text-gray-700 mb-2">
+          <span>Tiến độ</span>
+          <span>{Math.round(progress)}%</span>
+        </div>
+        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden mb-4">
+          <div className={`h-full rounded-full transition-all ${progress === 100 && set.cardCount > 0 ? "bg-teal-500" : "bg-blue-500"}`} style={{ width: `${progress}%` }}></div>
+        </div>
+        <button className="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors pointer-events-none">
+          <Play className="w-4 h-4 fill-current" />
+          {set.cardCount === 0 ? "Thêm thẻ" : progress === 0 ? "Bắt đầu học" : progress === 100 ? "Ôn tập lại" : "Tiếp tục học"}
+        </button>
+      </div>
+
+      {set.isNew && <div className="absolute top-4 right-4 bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-md">MỚI</div>}
+    </div>
+  );
+}
+
+// FOLDER THEMES
+const FOLDER_THEMES: Record<string, { bg: string; text: string; fill: string }> = {
+  blue: { bg: "bg-blue-50/50", text: "text-blue-600", fill: "fill-blue-600/20" },
+  red: { bg: "bg-red-50/50", text: "text-red-600", fill: "fill-red-600/20" },
+  yellow: { bg: "bg-yellow-50/50", text: "text-yellow-600", fill: "fill-yellow-600/20" },
+  green: { bg: "bg-green-50/50", text: "text-green-600", fill: "fill-green-600/20" },
+  purple: { bg: "bg-purple-50/50", text: "text-purple-600", fill: "fill-purple-600/20" },
+  pink: { bg: "bg-pink-50/50", text: "text-pink-600", fill: "fill-pink-600/20" },
+  orange: { bg: "bg-orange-50/50", text: "text-orange-600", fill: "fill-orange-600/20" },
+  teal: { bg: "bg-teal-50/50", text: "text-teal-600", fill: "fill-teal-600/20" },
+};
+
+// DROPPABLE FOLDER
+function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClick, popoverId, setPopoverId, onEditSet, onDeleteSet }: any) {
+  const { setNodeRef } = useDroppable({ id: `folder-${folder.id}`, data: { type: "folder", folder } });
+
+  const colorName = folder.color ? folder.color.replace("bg-", "") : "blue-500";
+  const baseColor = colorName.split("-")[0];
+  const theme = FOLDER_THEMES[baseColor] || FOLDER_THEMES.blue;
+
+  return (
+    <div ref={setNodeRef} onContextMenu={(e) => onContextMenu(e, "folder", folder)} className={`${theme.bg} p-6 rounded-3xl border border-gray-200`}>
+      <h2 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}>
+        <FolderIcon className={`${theme.text} ${theme.fill}`} /> {folder.name}
+      </h2>
+      <SortableContext items={setsInFolder.map((s: any) => s.id)} strategy={rectSortingStrategy}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[150px]">
+          {setsInFolder.length === 0 && (
+            <div className="col-span-full flex items-center justify-center border-2 border-dashed border-gray-300 rounded-2xl text-gray-400 font-medium">Kéo thả bộ thẻ vào đây</div>
+          )}
+          {setsInFolder.map((s: any) => (
+            <SortableSetItem
+              key={s.id}
+              set={s}
+              onClick={() => onSetClick(s)}
+              onContextMenu={onContextMenu}
+              popoverId={popoverId}
+              setPopoverId={setPopoverId}
+              onEdit={onEditSet}
+              onDelete={onDeleteSet}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </div>
+  );
+}
 
 export function Flashcards() {
-  const { sets, fetchSets, createSet, loading } = useFlashcardStore();
+  const { sets, folders, fetchSets, fetchFolders, createSet, updateSet, deleteSet, createFolder, updateFolder, deleteFolder, loading } = useFlashcardStore();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Modals & Popovers
+  const [isModalOpen, setIsModalOpen] = useState(false); // Set create/edit
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false); // Folder create
+  const [editingSet, setEditingSet] = useState<any>(null);
+  const [editingFolder, setEditingFolder] = useState<any>(null);
+  const [setToDelete, setSetToDelete] = useState<any>(null);
+  const [folderToDelete, setFolderToDelete] = useState<any>(null); // { folder, step: 1|2 }
+  const [popoverId, setPopoverId] = useState<string | null>(null);
+
+  // Form States
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [selectedColor, setSelectedColor] = useState("bg-blue-500");
 
-  useEffect(() => {
-    fetchSets();
-  }, [fetchSets]);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [newFolderColor, setNewFolderColor] = useState("bg-blue-500");
 
-  const handleCreate = async () => {
-    if (!newTitle.trim()) {
-      toast.error("Vui lòng nhập tên bộ thẻ");
-      return;
-    }
-    const colors = ["bg-blue-500", "bg-purple-500", "bg-teal-500", "bg-orange-500", "bg-pink-500"];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    const res = await createSet(newTitle, newDesc, randomColor);
-    if (res) {
-      setIsModalOpen(false);
-      setNewTitle("");
-      setNewDesc("");
-    }
-  };
+  const [targetFolderIdForNewSet, setTargetFolderIdForNewSet] = useState<string | null>(null);
+
+  // Context Menu
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; type: "root" | "folder" | "set"; item: any } | null>(null);
+
+  // Debounce saving
+  const pendingUpdatesRef = React.useRef<Record<string, string | null>>({});
+  const saveTimeoutRef = React.useRef<any>(null);
 
   const currentRank = {
     rankId: user?.rankId || 1,
     name: RANK_CONFIG[user?.rankId || 1]?.name || "Bạc",
-    tier: user?.tier || 3,
+    tier: TIER_NAMES[user?.tier || 3] || "III",
     stars: user?.stars || 0,
     maxStars: RANK_CONFIG[user?.rankId || 1]?.starsPerTier || 3,
-    position: 142 // Hardcoded for now
+    position: 142,
   };
 
-  const romanTier = (tier: number) => {
-    const map: any = { 1: "I", 2: "II", 3: "III", 4: "IV", 5: "V" };
-    return map[tier] || "";
+  useEffect(() => {
+    fetchSets();
+    fetchFolders();
+  }, [fetchSets, fetchFolders]);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setPopoverId(null);
+      setContextMenu(null);
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // --- DND Logic ---
+  const { setNodeRef: rootDropRef } = useDroppable({ id: "root" });
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
+
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const handleDragStart = (event: any) => {
+    setActiveId(event.active.id);
+    setContextMenu(null);
   };
 
-  const timeAgo = (date: any) => {
-    if (!date) return "Chưa học";
-    // date could be firestore timestamp or iso string depending on how it's returned
-    return "Gần đây";
+  const handleDragEnd = async (event: any) => {
+    setActiveId(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeSetId = active.id;
+    const activeSet = sets.find((s) => s.id === activeSetId);
+    if (!activeSet) return;
+
+    const overId = over.id; // could be `folder-${id}`, `root`, or another `setId`
+
+    let newFolderId = activeSet.folderId;
+
+    if (String(overId).startsWith("folder-")) {
+      newFolderId = String(overId).replace("folder-", "");
+    } else if (overId === "root") {
+      newFolderId = null;
+    } else {
+      // dropped over another set
+      const overSet = sets.find((s) => s.id === overId);
+      if (overSet) {
+        newFolderId = overSet.folderId;
+      }
+    }
+
+    if (activeSet.folderId !== newFolderId) {
+      // Optimistic update locally
+      useFlashcardStore.setState((state) => ({
+        sets: state.sets.map((s) => (s.id === activeSet.id ? { ...s, folderId: newFolderId } : s)),
+      }));
+
+      // Debounce backend sync
+      pendingUpdatesRef.current[activeSet.id] = newFolderId;
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+
+      saveTimeoutRef.current = setTimeout(() => {
+        Object.entries(pendingUpdatesRef.current).forEach(([id, fId]) => {
+          updateSet(id, { folderId: fId });
+        });
+        pendingUpdatesRef.current = {};
+      }, 5000);
+    }
   };
+
+  // --- Context Menu Handlers ---
+  const handleContextMenu = (e: React.MouseEvent, type: "root" | "folder" | "set", item: any = null) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Calculate position keeping it within screen bounds
+    const x = Math.min(e.clientX, window.innerWidth - 200);
+    const y = Math.min(e.clientY, window.innerHeight - 200);
+
+    setContextMenu({ x, y, type, item });
+  };
+
+  const openCreateSetModal = (folderId: string | null = null) => {
+    setEditingSet(null);
+    setNewTitle("");
+    setNewDesc("");
+    setTargetFolderIdForNewSet(folderId);
+    setSelectedColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
+    setIsModalOpen(true);
+  };
+
+  const handleCreateOrUpdateSet = async () => {
+    if (!newTitle.trim()) {
+      toast.error("Vui lòng nhập tên bộ thẻ");
+      return;
+    }
+
+    let res;
+    if (editingSet) {
+      res = await updateSet(editingSet.id, { title: newTitle, description: newDesc, color: selectedColor });
+    } else {
+      res = await createSet(newTitle, newDesc, selectedColor);
+      if (res && targetFolderIdForNewSet) {
+        await updateSet(res.id, { folderId: targetFolderIdForNewSet });
+      }
+    }
+
+    if (res) {
+      setIsModalOpen(false);
+      setEditingSet(null);
+    }
+  };
+
+  const handleCreateOrUpdateFolder = async () => {
+    if (!newFolderName.trim()) {
+      toast.error("Vui lòng nhập tên thư mục");
+      return;
+    }
+
+    let res;
+    if (editingFolder) {
+      res = await updateFolder(editingFolder.id, { name: newFolderName, color: newFolderColor });
+    } else {
+      res = await createFolder(newFolderName, newFolderColor);
+    }
+
+    if (res) {
+      setIsFolderModalOpen(false);
+      setEditingFolder(null);
+      setNewFolderName("");
+    }
+  };
+
+  const handleDeleteFolderConfirmed = async (folderId: string, deleteSets: boolean) => {
+    await deleteFolder(folderId, deleteSets);
+    setFolderToDelete(null);
+  };
+
+  // Helper arrays
+  const unassignedSets = sets.filter((s) => !s.folderId);
+  const activeSetForOverlay = sets.find((s) => s.id === activeId);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8 min-h-screen" onContextMenu={(e) => handleContextMenu(e, "root")}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <img src="/mascot/Lopy (11).png" className="w-16 h-16 object-contain drop-shadow-md" alt="Mascot" />
@@ -71,156 +396,351 @@ export function Flashcards() {
             <p className="text-gray-500">Ôn tập và ghi nhớ từ vựng hiệu quả qua các bộ thẻ.</p>
           </div>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 whitespace-nowrap"
-        >
-          <Plus className="w-5 h-5" />
-          Tạo bộ thẻ mới
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditingFolder(null);
+              setNewFolderName("");
+              setNewFolderColor("bg-blue-500");
+              setIsFolderModalOpen(true);
+            }}
+            className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"
+          >
+            <FolderIcon className="w-5 h-5" /> Tạo Folder
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              openCreateSetModal(null);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 whitespace-nowrap"
+          >
+            <Plus className="w-5 h-5" /> Tạo bộ thẻ
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        
-        {/* Flashcards Section */}
-        <div className="lg:col-span-3 space-y-6">
-          {loading && sets.length === 0 ? (
-            <div className="flex justify-center p-12">
-              <div className="w-8 h-8 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
-            </div>
-          ) : sets.length === 0 ? (
-            <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Chưa có bộ thẻ nào</h3>
-              <p className="text-gray-500 mb-6">Hãy tạo bộ thẻ đầu tiên để bắt đầu học nhé.</p>
-              <button 
-                onClick={() => setIsModalOpen(true)}
-                className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 mx-auto hover:bg-blue-700 transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-                Tạo bộ thẻ
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {sets.map(set => {
-                const progress = set.cardCount > 0 ? (set.learnedCount / set.cardCount) * 100 : 0;
-                return (
-                  <div 
-                    key={set.id} 
-                    onClick={() => navigate(`/flashcard/${set.id}`)}
-                    className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full group cursor-pointer relative overflow-hidden"
-                  >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`w-12 h-12 rounded-2xl ${set.color || 'bg-blue-500'} flex items-center justify-center text-white shadow-sm`}>
-                        <BookOpen className="w-6 h-6" />
-                      </div>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); /* TODO: Options like edit/delete */ }}
-                        className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <MoreVertical className="w-5 h-5" />
-                      </button>
-                    </div>
-                    
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
-                      {set.title}
-                    </h3>
-                    
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 font-medium">
-                      <span className="flex items-center gap-1.5">
-                        <BookOpen className="w-4 h-4" />
-                        {set.cardCount} thẻ
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Clock className="w-4 h-4" />
-                        {timeAgo(set.lastStudied)}
-                      </span>
-                    </div>
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-3 space-y-8">
+            {/* Folders */}
+            {folders.map((folder) => (
+              <FolderDroppable
+                key={folder.id}
+                folder={folder}
+                setsInFolder={sets.filter((s) => s.folderId === folder.id)}
+                onContextMenu={handleContextMenu}
+                onSetClick={(s: any) => navigate(`/flashcard/${s.id}`)}
+                popoverId={popoverId}
+                setPopoverId={setPopoverId}
+                onEditSet={(s: any) => {
+                  setEditingSet(s);
+                  setNewTitle(s.title);
+                  setNewDesc(s.description || "");
+                  setSelectedColor(s.color || "bg-blue-500");
+                  setIsModalOpen(true);
+                }}
+                onDeleteSet={(s: any) => setSetToDelete(s)}
+              />
+            ))}
 
-                    <div className="mt-auto">
-                      <div className="flex justify-between text-xs font-bold text-gray-700 mb-2">
-                        <span>Tiến độ</span>
-                        <span>{Math.round(progress)}%</span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden mb-4">
-                        <div className={`h-full rounded-full transition-all ${progress === 100 && set.cardCount > 0 ? 'bg-teal-500' : 'bg-blue-500'}`} style={{ width: `${progress}%` }}></div>
-                      </div>
-                      
-                      <button className="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors">
-                        <Play className="w-4 h-4 fill-current" />
-                        {set.cardCount === 0 ? "Thêm thẻ" : progress === 0 ? "Bắt đầu học" : progress === 100 ? "Ôn tập lại" : "Tiếp tục học"}
-                      </button>
-                    </div>
-                    
-                    {set.isNew && (
-                      <div className="absolute top-4 right-4 bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-md">
-                        MỚI
+            {/* Unassigned Sets (Root) */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Bộ thẻ chưa phân loại</h2>
+
+              {loading && sets.length === 0 ? (
+                <div className="flex justify-center p-12">
+                  <div className="w-8 h-8 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+                </div>
+              ) : (
+                <SortableContext items={unassignedSets.map((s) => s.id)} strategy={rectSortingStrategy}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[150px] p-4 bg-gray-50/50 rounded-3xl border border-gray-100" ref={rootDropRef}>
+                    {unassignedSets.length === 0 && folders.length === 0 && (
+                      <div className="col-span-full flex flex-col items-center justify-center p-12 text-center border border-dashed border-gray-300 rounded-2xl">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Chưa có bộ thẻ nào</h3>
+                        <p className="text-gray-500 mb-6">Hãy tạo bộ thẻ đầu tiên hoặc thư mục để bắt đầu.</p>
                       </div>
                     )}
+                    {unassignedSets.map((set) => (
+                      <SortableSetItem
+                        key={set.id}
+                        set={set}
+                        onClick={() => navigate(`/flashcard/${set.id}`)}
+                        onContextMenu={handleContextMenu}
+                        popoverId={popoverId}
+                        setPopoverId={setPopoverId}
+                        onEdit={(s: any) => {
+                          setEditingSet(s);
+                          setNewTitle(s.title);
+                          setNewDesc(s.description || "");
+                          setSelectedColor(s.color || "bg-blue-500");
+                          setIsModalOpen(true);
+                        }}
+                        onDelete={(s: any) => setSetToDelete(s)}
+                      />
+                    ))}
                   </div>
-                )
-              })}
+                </SortableContext>
+              )}
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Rank Sidebar */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Current Rank Card */}
-          <div className="bg-gradient-to-b from-blue-900 to-indigo-950 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden cursor-pointer hover:shadow-2xl transition-all">
-            <div className="absolute top-1/2 -translate-y-1/2 right-0 opacity-20 pointer-events-none scale-150">
-              <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Background" className="w-40 h-40 object-contain drop-shadow-2xl" />
-            </div>
-            
-            <div className="relative z-10">
-              <h2 className="text-sm font-bold text-blue-200 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <Medal className="w-4 h-4" />
-                Rank Hiện Tại
-              </h2>
-              
-              <div className="flex items-center gap-4 mb-6">
-                <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Icon" className="w-16 h-16 object-contain drop-shadow-md" />
-                <span className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-100 to-white">
-                  {currentRank.name} {romanTier(currentRank.tier)}
-                </span>
+          {/* Rank Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Current Rank Card */}
+            <div className="bg-gradient-to-b from-blue-900 to-indigo-950 rounded-2xl p-5 text-white shadow-sm relative overflow-hidden transition-all">
+              <div className="absolute top-1/2 -translate-y-1/2 right-0 opacity-20 pointer-events-none scale-150">
+                <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Background" className="w-40 h-40 object-contain drop-shadow-2xl" />
               </div>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm font-bold text-blue-200">
-                  <span>Số sao</span>
-                  <span>{currentRank.stars} / {currentRank.maxStars}</span>
+
+              <div className="relative z-10">
+                <h2 className="text-xs font-bold text-blue-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Medal className="w-4 h-4" />
+                  Rank Hiện Tại
+                </h2>
+
+                <div className="flex items-center gap-4 mb-4">
+                  <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Icon" className="w-14 h-14 object-contain drop-shadow-md" />
+                  <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-100 to-white">
+                    {currentRank.name} {currentRank.tier}
+                  </span>
                 </div>
-                <div className="flex gap-1">
-                  {Array.from({ length: currentRank.maxStars }).map((_, i) => (
-                    <div 
-                      key={i} 
-                      className={cn(
-                        "flex-1 h-3 rounded-full transition-all",
-                        i < currentRank.stars ? "bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]" : "bg-slate-700"
-                      )}
-                    />
-                  ))}
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs font-bold text-blue-200">
+                    <span>Số sao</span>
+                    <span>
+                      {currentRank.stars} / {currentRank.maxStars === 99 ? "∞" : currentRank.maxStars}
+                    </span>
+                  </div>
+                  <div className="flex gap-1">
+                    {currentRank.maxStars === 99 ? (
+                      <div className="flex-1 h-2.5 rounded-full bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
+                    ) : (
+                      Array.from({ length: currentRank.maxStars }).map((_, i) => (
+                        <div key={i} className={cn("flex-1 h-2.5 rounded-full transition-all", i < currentRank.stars ? "bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]" : "bg-slate-700")} />
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
-              
-              <div className="mt-6 pt-6 border-t border-blue-800/50">
-                <div className="flex justify-between items-center text-sm font-medium">
-                  <span className="text-blue-300">Thứ hạng hiện tại</span>
-                  <span className="text-white font-bold bg-white/10 px-3 py-1 rounded-lg">#{currentRank.position}</span>
+
+                <div className="mt-4 pt-4 border-t border-blue-800/50">
+                  <div className="flex justify-between items-center text-xs font-medium mb-4">
+                    <span className="text-blue-300">Thứ hạng hiện tại</span>
+                    <span className="text-white font-bold bg-white/10 px-2.5 py-1 rounded-lg">#{currentRank.position}</span>
+                  </div>
+
+                  <button
+                    onClick={() => navigate("/arena")}
+                    className="w-full bg-yellow-500 hover:bg-yellow-400 text-yellow-950 font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    <Target className="w-5 h-5" /> Tham gia Rank
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-      </div>
+        <DragOverlay>
+          {activeSetForOverlay ? (
+            <div className="w-[300px] pointer-events-none">
+              <SortableSetItem set={activeSetForOverlay} onClick={() => {}} onContextMenu={() => {}} popoverId={null} setPopoverId={() => {}} onEdit={() => {}} onDelete={() => {}} />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
-      {/* Create Set Modal */}
+      {/* --- Context Menu Portal --- */}
+      {contextMenu && (
+        <div
+          className="fixed bg-white rounded-xl shadow-2xl border border-gray-100 py-2 w-48 z-[200] overflow-hidden animate-in fade-in zoom-in duration-200"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {contextMenu.type === "root" && (
+            <>
+              <button
+                onClick={() => {
+                  openCreateSetModal(null);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" /> Tạo bộ thẻ mới
+              </button>
+              <button
+                onClick={() => {
+                  setIsFolderModalOpen(true);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+              >
+                <FolderIcon className="w-4 h-4" /> Tạo Folder mới
+              </button>
+            </>
+          )}
+          {contextMenu.type === "folder" && (
+            <>
+              <button
+                onClick={() => {
+                  setEditingFolder(contextMenu.item);
+                  setNewFolderName(contextMenu.item.name);
+                  setNewFolderColor(contextMenu.item.color || "bg-blue-500");
+                  setIsFolderModalOpen(true);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+              >
+                <Edit2 className="w-4 h-4" /> Sửa thư mục
+              </button>
+              <button
+                onClick={() => {
+                  openCreateSetModal(contextMenu.item.id);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" /> Tạo thẻ trong folder
+              </button>
+              <div className="h-px bg-gray-100 my-1"></div>
+              <button
+                onClick={() => {
+                  setFolderToDelete({ folder: contextMenu.item, step: 1 });
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" /> Xóa folder
+              </button>
+              <button
+                onClick={() => {
+                  setFolderToDelete({ folder: contextMenu.item, step: 2 });
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100 flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" /> Xóa folder + thẻ
+              </button>
+            </>
+          )}
+          {contextMenu.type === "set" && (
+            <>
+              <button
+                onClick={() => {
+                  setEditingSet(contextMenu.item);
+                  setNewTitle(contextMenu.item.title);
+                  setNewDesc(contextMenu.item.description || "");
+                  setSelectedColor(contextMenu.item.color || "bg-blue-500");
+                  setIsModalOpen(true);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+              >
+                <Edit2 className="w-4 h-4" /> Sửa bộ thẻ
+              </button>
+              <button
+                onClick={() => {
+                  setSetToDelete(contextMenu.item);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" /> Xóa
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {isFolderModalOpen && (
+        <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{editingFolder ? "Sửa thư mục" : "Tạo Folder mới"}</h2>
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Tên thư mục</label>
+                <input
+                  type="text"
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  placeholder="VD: Tiếng Anh giao tiếp"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
+                  onKeyDown={(e) => {
+                    e.key === "Enter" && handleCreateOrUpdateFolder();
+                  }}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Màu sắc</label>
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
+                  {COLORS.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setNewFolderColor(c)}
+                      className={cn("w-6 h-6 rounded-full shadow-sm transition-transform flex-shrink-0", c, newFolderColor === c ? "ring-2 ring-offset-2 ring-blue-500 scale-125" : "hover:scale-110")}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setIsFolderModalOpen(false)} className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl transition-colors">
+                Hủy
+              </button>
+              <button onClick={handleCreateOrUpdateFolder} disabled={loading} className="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl transition-colors shadow-md">
+                Hoàn tất
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- Delete Folder Modal --- */}
+      {folderToDelete && (
+        <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+              <Trash2 className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Xóa Folder này?</h2>
+
+            {folderToDelete.step === 1 ? (
+              <p className="text-gray-500 text-sm mb-6">
+                Bạn đang xóa folder <strong className="text-gray-700">{folderToDelete.folder.name}</strong>.<br />
+                Các bộ thẻ bên trong sẽ được chuyển ra ngoài (không bị xóa).
+              </p>
+            ) : (
+              <p className="text-gray-500 text-sm mb-6">
+                Xóa folder <strong className="text-gray-700">{folderToDelete.folder.name}</strong> và <strong className="text-red-600">TẤT CẢ</strong> bộ thẻ bên trong.
+                <br />
+                Hành động này không thể hoàn tác!
+              </p>
+            )}
+
+            <div className="flex gap-3">
+              <button onClick={() => setFolderToDelete(null)} className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl transition-colors">
+                Hủy
+              </button>
+              <button
+                onClick={() => handleDeleteFolderConfirmed(folderToDelete.folder.id, folderToDelete.step === 2)}
+                disabled={loading}
+                className="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl transition-colors"
+              >
+                Xóa vĩnh viễn
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- Set Create/Edit Modal --- */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Tạo bộ thẻ mới</h2>
+              <h2 className="text-xl font-bold text-gray-900">{editingSet ? "Sửa bộ thẻ" : "Tạo bộ thẻ mới"}</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                 ✕
               </button>
@@ -228,36 +748,81 @@ export function Flashcards() {
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">Tên bộ thẻ</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={newTitle}
+                  autoFocus
+                  onKeyDown={(e) => e.key === "Enter" && handleCreateOrUpdateSet()}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Ví dụ: Từ vựng IELTS..." 
+                  placeholder="Ví dụ: Từ vựng IELTS..."
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
                 />
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">Mô tả (Tùy chọn)</label>
-                <textarea 
+                <textarea
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  placeholder="Mô tả về bộ thẻ này..." 
+                  placeholder="Mô tả về bộ thẻ này..."
                   rows={3}
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors resize-none"
                 />
               </div>
-              <button 
-                onClick={handleCreate}
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Màu sắc</label>
+                <div className="flex flex-wrap gap-2">
+                  {COLORS.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setSelectedColor(c)}
+                      className={cn("w-6 h-6 rounded-full shadow-sm transition-transform", c, selectedColor === c ? "ring-2 ring-offset-2 ring-blue-500 scale-125" : "hover:scale-110")}
+                    />
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={handleCreateOrUpdateSet}
                 disabled={loading}
-                className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
+                className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
               >
-                {loading ? "Đang tạo..." : "Hoàn tất"}
+                {loading ? "Đang xử lý..." : "Hoàn tất"}
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Delete Set Confirmation Modal */}
+      {setToDelete && (
+        <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+              <Trash2 className="w-8 h-8" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Xóa bộ thẻ này?</h2>
+            <p className="text-gray-500 text-sm mb-6">
+              Bạn có chắc chắn muốn xóa bộ thẻ <strong className="text-gray-700">{setToDelete.title}</strong>?<br />
+              <br />
+              <span className="text-red-500 font-medium">Lưu ý: Tất cả từ vựng bên trong bộ thẻ này cũng sẽ bị xóa vĩnh viễn.</span>
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setSetToDelete(null)} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">
+                Hủy
+              </button>
+              <button
+                onClick={async () => {
+                  await deleteSet(setToDelete.id);
+                  setSetToDelete(null);
+                }}
+                disabled={loading}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors shadow-sm disabled:opacity-50"
+              >
+                {loading ? "Đang xóa..." : "Xóa vĩnh viễn"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

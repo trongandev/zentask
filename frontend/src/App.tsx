@@ -20,6 +20,7 @@ import { Community } from "./pages/Community";
 import { Settings } from "./pages/Settings";
 import { Notifications } from "./pages/Notifications";
 import { Auth } from "./pages/Auth";
+import { Arena } from "./pages/Arena";
 import { AdminLayout } from "./components/AdminLayout";
 import { AdminTasks } from "./pages/AdminTasks";
 import { AdminUsers } from "./pages/AdminUsers";
@@ -140,6 +141,7 @@ function AppContent() {
         <Route path="tenses" element={<Tenses />} />
         <Route path="profile" element={<Profile />} />
         <Route path="profile/:id" element={<Profile />} />
+        <Route path="arena" element={<Arena />} />
         <Route path="leaderboard" element={<Leaderboard />} />
         <Route path="community" element={<Community />} />
         <Route path="settings" element={<Settings />} />

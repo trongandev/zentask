@@ -98,8 +98,35 @@ export function FlashcardDetail() {
     }
   };
 
-  const handleCreateAI = () => {
-    toast.error("Tính năng AI đang được phát triển...");
+  const handleCreateAI = async () => {
+    if (!term.trim()) {
+      toast.error("Vui lòng nhập từ vựng cần tạo");
+      return;
+    }
+    const res = await useFlashcardStore.getState().generateAI(term);
+    if (res && id) {
+      const examplesToSave = res.examples && res.examples.length > 0 ? res.examples.slice(0, 3).map((ex: any) => ({ en: ex.en || "", vi: ex.vi || "" })) : [];
+
+      const cardRes = await createCard(id, {
+        term: res.term || term,
+        phonetic: res.phonetic || "",
+        translation: res.translation || "",
+        notes: res.notes || "",
+        examples: examplesToSave,
+      });
+
+      if (cardRes) {
+        if (cardRes.xpResult) {
+          updateUser({ xp: cardRes.xpResult.xp, level: cardRes.xpResult.level });
+          if (cardRes.xpResult.levelUp) {
+            triggerLevelUp(cardRes.xpResult.level);
+          }
+        }
+        incrementTaskProgress("create_material", 1);
+        setIsModalOpen(false);
+        resetForm();
+      }
+    }
   };
 
   if (loading && !currentSet) {
@@ -250,15 +277,24 @@ export function FlashcardDetail() {
                 <div className="space-y-4">
                   <p className="text-gray-600 text-sm">Nhập từ vựng tiếng Anh, AI sẽ tự động điền phiên âm, nghĩa tiếng Việt và các ví dụ cụ thể.</p>
                   <input
+                    value={term}
+                    autoFocus
+                    onChange={(e) => setTerm(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleCreateAI();
+                      }
+                    }}
                     type="text"
                     placeholder="Ví dụ: determine"
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium outline-none focus:border-blue-500 focus:bg-white transition-colors"
                   />
                   <button
+                    disabled={loading}
                     onClick={handleCreateAI}
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                   >
-                    Tạo bằng AI ✨
+                    {loading ? "Đang tạo..." : "Tạo bằng AI ✨"}
                   </button>
                 </div>
               ) : (
