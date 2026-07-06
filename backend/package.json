@@ -19,6 +19,11 @@
     "express": "^5.2.1",
     "firebase-admin": "^14.1.0"
   },
+  "overrides": {
+    "jwks-rsa": {
+      "jose": "^5.9.6"
+    }
+  },
   "devDependencies": {
     "nodemon": "^3.1.14"
   }
