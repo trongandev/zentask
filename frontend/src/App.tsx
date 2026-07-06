@@ -1,0 +1,166 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
+import { Sidebar } from "./components/Sidebar";
+import { Header } from "./components/Header";
+import { Dashboard } from "./pages/Dashboard";
+import { Flashcards } from "./pages/Flashcards";
+import { FlashcardDetail } from "./pages/FlashcardDetail";
+import { FlashcardPractice } from "./pages/FlashcardPractice";
+import { Quiz } from "./pages/Quiz";
+import { Grammar } from "./pages/Grammar";
+import { Tenses } from "./pages/Tenses";
+import { Profile } from "./pages/Profile";
+import { Leaderboard } from "./pages/Leaderboard";
+import { Community } from "./pages/Community";
+import { Settings } from "./pages/Settings";
+import { Notifications } from "./pages/Notifications";
+import { Auth } from "./pages/Auth";
+import { AdminLayout } from "./components/AdminLayout";
+import { AdminTasks } from "./pages/AdminTasks";
+import { AdminUsers } from "./pages/AdminUsers";
+import { useAuth } from "./contexts/AuthContext";
+
+import { Posts } from "./pages/Posts";
+import { RightSidebar } from "./components/RightSidebar";
+import { LevelUpModal } from "./components/LevelUpModal";
+import { useUserStore } from "./services/userService";
+
+function MainLayout() {
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem("isLeftSidebarOpen");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem("isRightSidebarOpen");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isPracticePage = location.pathname.match(/\/flashcard\/[^\/]+\/practice/);
+
+  useEffect(() => {
+    localStorage.setItem("isLeftSidebarOpen", JSON.stringify(isLeftSidebarOpen));
+  }, [isLeftSidebarOpen]);
+
+  useEffect(() => {
+    localStorage.setItem("isRightSidebarOpen", JSON.stringify(isRightSidebarOpen));
+  }, [isRightSidebarOpen]);
+
+  return (
+    <div className="flex min-h-screen bg-[#F4F7FE] font-sans text-slate-900 overflow-hidden relative">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && <div className="fixed inset-0 bg-gray-900/50 z-[60] lg:hidden animate-in fade-in" onClick={() => setIsMobileMenuOpen(false)} />}
+
+      {/* Left Sidebar */}
+      <div
+        className={`
+        fixed lg:static inset-y-0 left-0 z-[70] lg:z-50
+        transition-all duration-300 ease-in-out flex-shrink-0 bg-white border-r border-gray-100
+        ${isMobileMenuOpen ? "translate-x-0 w-[80%] max-w-[300px]" : "-translate-x-full lg:translate-x-0"}
+        ${isLeftSidebarOpen ? "lg:w-64" : "lg:w-[88px]"}
+      `}
+      >
+        <div className={`h-full lg:h-screen lg:sticky top-0 ${isMobileMenuOpen ? "w-full" : isLeftSidebarOpen ? "lg:w-68" : "lg:w-[96px]"}`}>
+          <Sidebar
+            isOpen={isMobileMenuOpen ? true : isLeftSidebarOpen}
+            onToggle={() => {
+              if (window.innerWidth < 1024) {
+                setIsMobileMenuOpen(false);
+              } else {
+                setIsLeftSidebarOpen(!isLeftSidebarOpen);
+              }
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <Header isLeftSidebarOpen={isLeftSidebarOpen} onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
+
+        <main className="flex-1 overflow-y-auto p-4 md:p-8">
+          <Outlet />
+        </main>
+      </div>
+
+      {/* Right Sidebar */}
+      {!isPracticePage && (
+        <div className={`transition-all duration-300 ease-in-out hidden lg:block flex-shrink-0 relative z-50 bg-white border-l border-gray-100 ${isRightSidebarOpen ? "w-[320px]" : "w-[88px]"}`}>
+          <div className={`h-screen sticky top-0 ${isRightSidebarOpen ? "w-[320px]" : "w-[88px]"}`}>
+            <RightSidebar isOpen={isRightSidebarOpen} onClose={() => setIsRightSidebarOpen(false)} onOpen={() => setIsRightSidebarOpen(true)} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AppContent() {
+  const { user, loading } = useAuth();
+  const { levelUpData, clearLevelUp } = useUserStore();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F4F7FE]">
+        <div className="w-10 h-10 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+        <Route path="*" element={<Navigate to="/auth" replace />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <>
+    <Routes>
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Navigate to="/admin/daily-task" replace />} />
+        <Route path="daily-task" element={<AdminTasks />} />
+        <Route path="users" element={<AdminUsers />} />
+      </Route>
+      <Route path="/" element={<MainLayout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="flashcards" element={<Flashcards />} />
+        <Route path="flashcard/:id" element={<FlashcardDetail />} />
+        <Route path="flashcard/:id/practice" element={<FlashcardPractice />} />
+        <Route path="quiz" element={<Quiz />} />
+        <Route path="grammar" element={<Grammar />} />
+        <Route path="tenses" element={<Tenses />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="profile/:id" element={<Profile />} />
+        <Route path="leaderboard" element={<Leaderboard />} />
+        <Route path="community" element={<Community />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="setting" element={<Settings />} />
+        <Route path="notifications" element={<Notifications />} />
+        <Route path="posts" element={<Posts />} />
+        <Route path="post" element={<Posts />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
+    {levelUpData && (
+      <LevelUpModal newLevel={levelUpData.newLevel} onClose={clearLevelUp} />
+    )}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
+}

@@ -1,0 +1,126 @@
+{
+  "project_id": "enduring-vision-vj1d7",
+  "collections": [
+    {
+      "name": "users",
+      "description": "Store user profiles, including their role, level, and XP.",
+      "fields": [
+        { "name": "uid", "type": "string", "description": "The user's Firebase Auth UID" },
+        { "name": "email", "type": "string", "description": "The user's email address" },
+        { "name": "displayName", "type": "string", "description": "The user's display name" },
+        { "name": "photoURL", "type": "string", "description": "The user's avatar URL" },
+        { "name": "role", "type": "string", "description": "The user's role: 'user', 'teacher', 'collab', or 'admin'" },
+        { "name": "level", "type": "number", "description": "The user's level" },
+        { "name": "xp", "type": "number", "description": "User's current XP" },
+        { "name": "streak", "type": "number", "description": "Current learning streak in days" },
+        { "name": "maxStreak", "type": "number", "description": "Highest learning streak achieved" },
+        { "name": "lastCheckInDate", "type": "string", "description": "The date (YYYY-MM-DD) of the last check-in" },
+        { "name": "badges", "type": "array", "description": "Array of badge IDs the user has earned" },
+        { "name": "createdAt", "type": "timestamp", "description": "When the user document was created" },
+        { "name": "updatedAt", "type": "timestamp", "description": "When the user document was last updated" }
+      ],
+      "rules": [
+        { "allow": "read", "condition": "request.auth != null" },
+        { "allow": "create", "condition": "request.auth != null && request.auth.uid == request.resource.data.uid" },
+        { "allow": "update", "condition": "request.auth != null && request.auth.uid == resource.data.uid" },
+        { "allow": "delete", "condition": "false" }
+      ]
+    },
+    {
+      "name": "daily_tasks",
+      "description": "Store daily tasks configured by admin.",
+      "fields": [
+        { "name": "title", "type": "string", "description": "Task title" },
+        { "name": "description", "type": "string", "description": "Task description" },
+        { "name": "xpReward", "type": "number", "description": "XP rewarded upon completion" },
+        { "name": "type", "type": "string", "description": "Task type (e.g., grammar, quiz, vocabulary)" },
+        { "name": "icon", "type": "string", "description": "Task icon URL" },
+        { "name": "total", "type": "number", "description": "Total target amount for the task" },
+        { "name": "createdAt", "type": "timestamp", "description": "Creation time" },
+        { "name": "updatedAt", "type": "timestamp", "description": "Update time" }
+      ],
+      "rules": [
+        { "allow": "read", "condition": "request.auth != null" },
+        { "allow": "write", "condition": "request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'" }
+      ]
+    },
+    {
+      "name": "user_tasks",
+      "description": "Store progress of daily tasks per user.",
+      "fields": [
+        { "name": "userId", "type": "string", "description": "The user's ID" },
+        { "name": "taskId", "type": "string", "description": "The task's ID" },
+        { "name": "completed", "type": "boolean", "description": "Whether the task is completed" },
+        { "name": "completedAt", "type": "timestamp", "description": "When the task was completed" },
+        { "name": "date", "type": "string", "description": "The date string (YYYY-MM-DD) for the task" }
+      ],
+      "rules": [
+        { "allow": "read", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
+        { "allow": "create", "condition": "request.auth != null && request.auth.uid == request.resource.data.userId" },
+        { "allow": "update", "condition": "request.auth != null && request.auth.uid == resource.data.userId" }
+      ]
+    },
+    {
+      "name": "flashcard_sets",
+      "description": "Store flashcard sets/decks created by users.",
+      "fields": [
+        { "name": "userId", "type": "string", "description": "The creator's user ID" },
+        { "name": "title", "type": "string", "description": "The title of the flashcard set" },
+        { "name": "description", "type": "string", "description": "Description of the set" },
+        { "name": "cardCount", "type": "number", "description": "Total number of cards in the set" },
+        { "name": "learnedCount", "type": "number", "description": "Number of learned cards" },
+        { "name": "lastStudied", "type": "timestamp", "description": "When the set was last studied" },
+        { "name": "color", "type": "string", "description": "The color theme for the set card (e.g., bg-blue-500)" },
+        { "name": "isNew", "type": "boolean", "description": "Is this a newly created set" },
+        { "name": "createdAt", "type": "timestamp", "description": "Creation time" },
+        { "name": "updatedAt", "type": "timestamp", "description": "Update time" }
+      ],
+      "rules": [
+        { "allow": "read", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
+        { "allow": "create", "condition": "request.auth != null && request.auth.uid == request.resource.data.userId" },
+        { "allow": "update", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
+        { "allow": "delete", "condition": "request.auth != null && request.auth.uid == resource.data.userId" }
+      ]
+    },
+    {
+      "name": "flashcards",
+      "description": "Store individual flashcards belonging to a set.",
+      "fields": [
+        { "name": "setId", "type": "string", "description": "The ID of the flashcard set this card belongs to" },
+        { "name": "userId", "type": "string", "description": "The owner's user ID (for security rules)" },
+        { "name": "term", "type": "string", "description": "The term (e.g., English word)" },
+        { "name": "phonetic", "type": "string", "description": "The phonetic transcription" },
+        { "name": "translation", "type": "string", "description": "The translation (e.g., Vietnamese)" },
+        { "name": "examples", "type": "array", "description": "Array of examples {en: string, vi: string}" },
+        { "name": "notes", "type": "string", "description": "User notes about the word" },
+        { "name": "isLearned", "type": "boolean", "description": "Whether the user has learned this card" },
+        { "name": "createdAt", "type": "timestamp", "description": "Creation time" },
+        { "name": "updatedAt", "type": "timestamp", "description": "Update time" }
+      ],
+      "rules": [
+        { "allow": "read", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
+        { "allow": "create", "condition": "request.auth != null && request.auth.uid == request.resource.data.userId" },
+        { "allow": "update", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
+        { "allow": "delete", "condition": "request.auth != null && request.auth.uid == resource.data.userId" }
+      ]
+    },
+    {
+      "name": "user_daily_stats",
+      "description": "Store daily study stats for each user (study time, checkin status).",
+      "fields": [
+        { "name": "userId", "type": "string", "description": "The user's ID" },
+        { "name": "date", "type": "string", "description": "The date string (YYYY-MM-DD)" },
+        { "name": "studyMinutes", "type": "number", "description": "Total minutes studied on this day" },
+        { "name": "isCheckedIn", "type": "boolean", "description": "Whether the user checked in on this day" },
+        { "name": "tasksCompleted", "type": "number", "description": "Number of tasks completed on this day" },
+        { "name": "createdAt", "type": "timestamp", "description": "Creation time" },
+        { "name": "updatedAt", "type": "timestamp", "description": "Update time" }
+      ],
+      "rules": [
+        { "allow": "read", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
+        { "allow": "create", "condition": "request.auth != null && request.auth.uid == request.resource.data.userId" },
+        { "allow": "update", "condition": "request.auth != null && request.auth.uid == resource.data.userId" }
+      ]
+    }
+  ]
+}
