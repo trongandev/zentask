@@ -7,6 +7,8 @@ import flashcardRoutes from "./routes/flashcard.js";
 import userRoutes from "./routes/user.js";
 import configRoutes from "./routes/config.js";
 import dotenv from "dotenv";
+import compression from "compression";
+import morgan from "morgan";
 
 dotenv.config();
 
@@ -15,15 +17,12 @@ const port = process.env.PORT || 3001;
 
 app.use(
   cors({
-    origin: [
-      process.env.FRONTEND_URL, 
-      "https://lrm.io.vn", 
-      "http://localhost:3000", 
-      "http://localhost:5173"
-    ].filter(Boolean),
+    origin: true,
     credentials: true,
   }),
 );
+app.use(compression());
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 
