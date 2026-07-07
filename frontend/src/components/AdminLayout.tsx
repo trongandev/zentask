@@ -39,22 +39,14 @@ export function AdminLayout() {
         <nav className="flex-1 py-6 px-4 space-y-2">
           <NavLink
             to="/admin/daily-task"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-                isActive ? "bg-red-50 text-red-600" : "text-gray-600 hover:bg-gray-50"
-              }`
-            }
+            className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive ? "bg-red-50 text-red-600" : "text-gray-600 hover:bg-gray-50"}`}
           >
             <ListTodo className="w-5 h-5" />
             Nhiệm vụ
           </NavLink>
           <NavLink
             to="/admin/users"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-                isActive ? "bg-red-50 text-red-600" : "text-gray-600 hover:bg-gray-50"
-              }`
-            }
+            className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive ? "bg-red-50 text-red-600" : "text-gray-600 hover:bg-gray-50"}`}
           >
             <Users className="w-5 h-5" />
             Người dùng
@@ -62,21 +54,11 @@ export function AdminLayout() {
         </nav>
 
         <div className="p-4 border-t border-gray-100 space-y-2">
-          <NavLink
-            to="/"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all w-full"
-          >
+          <NavLink to="/" className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all w-full">
             <ArrowLeft className="w-5 h-5" />
             Về ứng dụng
           </NavLink>
-          <button
-            onClick={async () => {
-              const { getAuth, signOut } = await import("firebase/auth");
-              const auth = getAuth();
-              await signOut(auth);
-            }}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-600 hover:bg-red-50 transition-all w-full"
-          >
+          <button className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-600 hover:bg-red-50 transition-all w-full">
             <LogOut className="w-5 h-5" />
             Đăng xuất
           </button>

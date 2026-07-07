@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { getFirebaseInstances } from "../lib/firebase";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { Users, Edit2, Check, X } from "lucide-react";
 
 export function AdminUsers() {
@@ -8,37 +6,37 @@ export function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [editingRole, setEditingRole] = useState<string | null>(null);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const { db } = await getFirebaseInstances();
-      const usersSnapshot = await getDocs(collection(db, "users"));
-      const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setUsers(usersList);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchData = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const { db } = await getFirebaseInstances();
+  //     const usersSnapshot = await getDocs(collection(db, "users"));
+  //     const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  //     setUsers(usersList);
+  //   } catch (error) {
+  //     console.error("Error fetching users:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
 
-  const handleUpdateRole = async (userId: string, newRole: string) => {
-    try {
-      const { db } = await getFirebaseInstances();
-      await updateDoc(doc(db, "users", userId), {
-        role: newRole
-      });
-      setEditingRole(null);
-      fetchData();
-    } catch (error) {
-      console.error("Error updating user role:", error);
-      alert("Có lỗi xảy ra khi cập nhật vai trò.");
-    }
-  };
+  // const handleUpdateRole = async (userId: string, newRole: string) => {
+  //   try {
+  //     const { db } = await getFirebaseInstances();
+  //     await updateDoc(doc(db, "users", userId), {
+  //       role: newRole
+  //     });
+  //     setEditingRole(null);
+  //     fetchData();
+  //   } catch (error) {
+  //     console.error("Error updating user role:", error);
+  //     alert("Có lỗi xảy ra khi cập nhật vai trò.");
+  //   }
+  // };
 
   return (
     <div>
@@ -67,11 +65,15 @@ export function AdminUsers() {
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500">Đang tải...</td>
+                  <td colSpan={5} className="p-8 text-center text-gray-500">
+                    Đang tải...
+                  </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-500">Không tìm thấy người dùng nào.</td>
+                  <td colSpan={5} className="p-8 text-center text-gray-500">
+                    Không tìm thấy người dùng nào.
+                  </td>
                 </tr>
               ) : (
                 users.map((u) => (
@@ -88,10 +90,10 @@ export function AdminUsers() {
                     <td className="px-6 py-4">
                       {editingRole === u.id ? (
                         <div className="flex items-center gap-2">
-                          <select 
+                          <select
                             className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-sm font-medium focus:outline-none focus:border-red-500"
-                            defaultValue={u.role || 'user'}
-                            onChange={(e) => handleUpdateRole(u.id, e.target.value)}
+                            defaultValue={u.role || "user"}
+                            // onChange={(e) => handleUpdateRole(u.id, e.target.value)}
                             onBlur={() => setEditingRole(null)}
                             autoFocus
                           >
@@ -100,14 +102,13 @@ export function AdminUsers() {
                           </select>
                         </div>
                       ) : (
-                        <button 
+                        <button
                           onClick={() => setEditingRole(u.id)}
                           className={`inline-flex px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors hover:opacity-80 ${
-                            u.role === 'admin' ? 'bg-red-50 text-red-600' :
-                            'bg-gray-100 text-gray-600'
+                            u.role === "admin" ? "bg-red-50 text-red-600" : "bg-gray-100 text-gray-600"
                           }`}
                         >
-                          {u.role || 'user'}
+                          {u.role || "user"}
                         </button>
                       )}
                     </td>
@@ -117,9 +118,7 @@ export function AdminUsers() {
                     <td className="px-6 py-4">
                       <span className="font-extrabold text-blue-600">{u.xp?.toLocaleString() || 0} XP</span>
                     </td>
-                    <td className="px-6 py-4 text-right text-sm text-gray-500">
-                      {u.createdAt?.toDate ? new Date(u.createdAt.toDate()).toLocaleDateString('vi-VN') : 'Không rõ'}
-                    </td>
+                    <td className="px-6 py-4 text-right text-sm text-gray-500">{u.createdAt?.toDate ? new Date(u.createdAt.toDate()).toLocaleDateString("vi-VN") : "Không rõ"}</td>
                   </tr>
                 ))
               )}

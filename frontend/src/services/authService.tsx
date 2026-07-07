@@ -1,7 +1,5 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
-import { signInWithPopup } from "firebase/auth";
-import { getFirebaseInstances, googleProvider } from "../lib/firebase";
 
 interface AuthState {
   loading: boolean;
@@ -61,34 +59,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   loginWithGoogle: async () => {
     set({ loading: true });
-    try {
-      const { auth } = await getFirebaseInstances();
-      const userCred = await signInWithPopup(auth, googleProvider);
-      const idToken = await userCred.user.getIdToken();
-
-      const res = await fetch(`${API_URL}/api/auth/session`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ idToken }),
-      });
-      if (!res.ok) throw new Error("Failed to create session");
-
-      toast.success("Đăng nhập Google thành công");
-      window.location.href = "/";
-    } catch (err: any) {
-      console.error(err);
-      if (err.code === "auth/popup-closed-by-user") {
-        toast.error("Bạn đã đóng cửa sổ đăng nhập.");
-      } else if (err.code === "auth/unauthorized-domain") {
-        toast.error("Domain này chưa được cấp phép trong Firebase.");
-      } else if (err.code === "auth/internal-error") {
-        toast.error("Lỗi máy chủ Firebase. Vui lòng kiểm tra lại cấu hình.");
-      } else {
-        toast.error(err.message || "Có lỗi xảy ra khi đăng nhập bằng Google.");
-      }
-    } finally {
-      set({ loading: false });
-    }
+    window.location.href = `${API_URL}/api/auth/google`;
   },
 }));

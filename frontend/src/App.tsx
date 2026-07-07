@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation, Link } from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
 import { Dashboard } from "./pages/Dashboard";
@@ -24,6 +24,8 @@ import { Arena } from "./pages/Arena";
 import { AdminLayout } from "./components/AdminLayout";
 import { AdminTasks } from "./pages/AdminTasks";
 import { AdminUsers } from "./pages/AdminUsers";
+import { PrivacyPolicy } from "./pages/PrivacyPolicy";
+import { TermsOfService } from "./pages/TermsOfService";
 import { useAuth } from "./contexts/AuthContext";
 
 import { Posts } from "./pages/Posts";
@@ -85,8 +87,22 @@ function MainLayout() {
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <Header isLeftSidebarOpen={isLeftSidebarOpen} onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col">
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          <footer className="mt-8 text-center text-sm text-gray-500 pb-2 border-t border-gray-200 pt-5 ">
+            <div className="flex items-center justify-center gap-4 mb-2">
+              <Link to="/privacy-policy" className="hover:text-blue-600 transition-colors font-medium">
+                Chính sách bảo mật
+              </Link>
+              <span className="text-gray-300">•</span>
+              <Link to="/terms-of-service" className="hover:text-blue-600 transition-colors font-medium">
+                Điều khoản dịch vụ
+              </Link>
+            </div>
+            <p>&copy; {new Date().getFullYear()} Zentask. All rights reserved.</p>
+          </footer>
         </main>
       </div>
 
@@ -118,6 +134,8 @@ function AppContent() {
     return (
       <Routes>
         <Route path="/auth" element={<Auth />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
     );
@@ -125,36 +143,36 @@ function AppContent() {
 
   return (
     <>
-    <Routes>
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<Navigate to="/admin/daily-task" replace />} />
-        <Route path="daily-task" element={<AdminTasks />} />
-        <Route path="users" element={<AdminUsers />} />
-      </Route>
-      <Route path="/" element={<MainLayout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="flashcards" element={<Flashcards />} />
-        <Route path="flashcard/:id" element={<FlashcardDetail />} />
-        <Route path="flashcard/:id/practice" element={<FlashcardPractice />} />
-        <Route path="quiz" element={<Quiz />} />
-        <Route path="grammar" element={<Grammar />} />
-        <Route path="tenses" element={<Tenses />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="profile/:id" element={<Profile />} />
-        <Route path="arena" element={<Arena />} />
-        <Route path="leaderboard" element={<Leaderboard />} />
-        <Route path="community" element={<Community />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="setting" element={<Settings />} />
-        <Route path="notifications" element={<Notifications />} />
-        <Route path="posts" element={<Posts />} />
-        <Route path="post" element={<Posts />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Route>
-    </Routes>
-    {levelUpData && (
-      <LevelUpModal newLevel={levelUpData.newLevel} onClose={clearLevelUp} />
-    )}
+      <Routes>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Navigate to="/admin/daily-task" replace />} />
+          <Route path="daily-task" element={<AdminTasks />} />
+          <Route path="users" element={<AdminUsers />} />
+        </Route>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="flashcards" element={<Flashcards />} />
+          <Route path="flashcard/:id" element={<FlashcardDetail />} />
+          <Route path="flashcard/:id/practice" element={<FlashcardPractice />} />
+          <Route path="quiz" element={<Quiz />} />
+          <Route path="grammar" element={<Grammar />} />
+          <Route path="tenses" element={<Tenses />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="profile/:id" element={<Profile />} />
+          <Route path="arena" element={<Arena />} />
+          <Route path="leaderboard" element={<Leaderboard />} />
+          <Route path="community" element={<Community />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="setting" element={<Settings />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="posts" element={<Posts />} />
+          <Route path="post" element={<Posts />} />
+          <Route path="privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="terms-of-service" element={<TermsOfService />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+      {levelUpData && <LevelUpModal newLevel={levelUpData.newLevel} onClose={clearLevelUp} />}
     </>
   );
 }

@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { getFirebaseInstances } from "../lib/firebase";
-import { collection, getDocs, doc, deleteDoc, updateDoc, addDoc, serverTimestamp, query, orderBy, writeBatch } from "firebase/firestore";
 import { Plus, Trash2, Edit2, Check, ListTodo, DownloadCloud } from "lucide-react";
 
 export function AdminTasks() {
@@ -18,61 +16,61 @@ export function AdminTasks() {
     total: 10,
   });
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const { db } = await getFirebaseInstances();
-      const tasksQuery = query(collection(db, "daily_tasks"), orderBy("createdAt", "desc"));
-      const tasksSnapshot = await getDocs(tasksQuery);
-      const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTasks(tasksList);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchData = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const { db } = await getFirebaseInstances();
+  //     const tasksQuery = query(collection(db, "daily_tasks"), orderBy("createdAt", "desc"));
+  //     const tasksSnapshot = await getDocs(tasksQuery);
+  //     const tasksList = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  //     setTasks(tasksList);
+  //   } catch (error) {
+  //     console.error("Error fetching tasks:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
 
-  const handleSaveTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const { db } = await getFirebaseInstances();
-      if (isEditingTask) {
-        await updateDoc(doc(db, "daily_tasks", isEditingTask), {
-          ...taskForm,
-          updatedAt: serverTimestamp(),
-        });
-      } else {
-        await addDoc(collection(db, "daily_tasks"), {
-          ...taskForm,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-      }
-      setIsEditingTask(null);
-      setTaskForm({ title: "", description: "", xpReward: 10, type: "grammar", icon: "/daily-task/material-init.png", total: 10 });
-      fetchData();
-    } catch (error) {
-      console.error("Error saving task:", error);
-      alert("Có lỗi xảy ra khi lưu task.");
-    }
-  };
+  // const handleSaveTask = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     const { db } = await getFirebaseInstances();
+  //     if (isEditingTask) {
+  //       await updateDoc(doc(db, "daily_tasks", isEditingTask), {
+  //         ...taskForm,
+  //         updatedAt: serverTimestamp(),
+  //       });
+  //     } else {
+  //       await addDoc(collection(db, "daily_tasks"), {
+  //         ...taskForm,
+  //         createdAt: serverTimestamp(),
+  //         updatedAt: serverTimestamp(),
+  //       });
+  //     }
+  //     setIsEditingTask(null);
+  //     setTaskForm({ title: "", description: "", xpReward: 10, type: "grammar", icon: "/daily-task/material-init.png", total: 10 });
+  //     fetchData();
+  //   } catch (error) {
+  //     console.error("Error saving task:", error);
+  //     alert("Có lỗi xảy ra khi lưu task.");
+  //   }
+  // };
 
-  const handleDeleteTask = async (id: string) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa task này?")) return;
-    try {
-      const { db } = await getFirebaseInstances();
-      await deleteDoc(doc(db, "daily_tasks", id));
-      fetchData();
-    } catch (error) {
-      console.error("Error deleting task:", error);
-      alert("Có lỗi xảy ra khi xóa task.");
-    }
-  };
+  // const handleDeleteTask = async (id: string) => {
+  //   if (!window.confirm("Bạn có chắc chắn muốn xóa task này?")) return;
+  //   try {
+  //     const { db } = await getFirebaseInstances();
+  //     await deleteDoc(doc(db, "daily_tasks", id));
+  //     fetchData();
+  //   } catch (error) {
+  //     console.error("Error deleting task:", error);
+  //     alert("Có lỗi xảy ra khi xóa task.");
+  //   }
+  // };
 
   const startEditTask = (task: any) => {
     setIsEditingTask(task.id);
@@ -94,27 +92,62 @@ export function AdminTasks() {
   const handleImportDefaultTasks = async () => {
     if (!window.confirm("Bạn có muốn thêm các nhiệm vụ mặc định?")) return;
     try {
-      const { db } = await getFirebaseInstances();
+      // const { db } = await getFirebaseInstances();
       const defaultTasks = [
-        { title: "Khởi Tạo Chất Liệu", total: 10, icon: "/daily-task/material-init.png", xpReward: 20, description: "Thêm mới thành công 10 từ vựng vào bộ Thẻ lật cá nhân của bạn.", type: "vocabulary" },
-        { title: "Bậc Thầy Đố Vui", total: 2, icon: "/daily-task/master-of-riddles.png", xpReward: 20, description: "Tự thiết kế và xuất bản thành công 2 câu hỏi trắc nghiệm (Quiz) mới lên hệ thống.", type: "quiz" },
-        { title: "Điểm Tĩnh Mỗi Ngày", total: 1, icon: "/daily-task/calm-every-day.png", xpReward: 10, description: "Nhấn nút Điểm danh hàng ngày ngay khi đăng nhập ứng dụng để tích lũy chuỗi ngày học (Streak).", type: "system" },
-        { title: "Ôn Cố Tri Tân", total: 10, icon: "/daily-task/learn-past.png", xpReward: 20, description: "Hoàn thành việc lật và ôn tập lại 10 từ vựng cũ đã học trong kho dữ liệu.", type: "vocabulary" },
+        {
+          title: "Khởi Tạo Chất Liệu",
+          total: 10,
+          icon: "/daily-task/material-init.png",
+          xpReward: 20,
+          description: "Thêm mới thành công 10 từ vựng vào bộ Thẻ lật cá nhân của bạn.",
+          type: "vocabulary",
+        },
+        {
+          title: "Bậc Thầy Đố Vui",
+          total: 2,
+          icon: "/daily-task/master-of-riddles.png",
+          xpReward: 20,
+          description: "Tự thiết kế và xuất bản thành công 2 câu hỏi trắc nghiệm (Quiz) mới lên hệ thống.",
+          type: "quiz",
+        },
+        {
+          title: "Điểm Tĩnh Mỗi Ngày",
+          total: 1,
+          icon: "/daily-task/calm-every-day.png",
+          xpReward: 10,
+          description: "Nhấn nút Điểm danh hàng ngày ngay khi đăng nhập ứng dụng để tích lũy chuỗi ngày học (Streak).",
+          type: "system",
+        },
+        {
+          title: "Ôn Cố Tri Tân",
+          total: 10,
+          icon: "/daily-task/learn-past.png",
+          xpReward: 20,
+          description: "Hoàn thành việc lật và ôn tập lại 10 từ vựng cũ đã học trong kho dữ liệu.",
+          type: "vocabulary",
+        },
         { title: "Kẻ Gieo Hạt Tri Thức", total: 1, icon: "/daily-task/sower-of-knl.png", xpReward: 30, description: "Tạo và đăng tải 1 bài viết chia sẻ trong phần Cộng đồng.", type: "community" },
-        { title: "Người Bạn Đồng Hành", total: 3, icon: "/daily-task/companion.png", xpReward: 15, description: "Tặng 3 lượt tương tác vào các bài đăng của thành viên khác trong phần Cộng đồng.", type: "community" },
+        {
+          title: "Người Bạn Đồng Hành",
+          total: 3,
+          icon: "/daily-task/companion.png",
+          xpReward: 15,
+          description: "Tặng 3 lượt tương tác vào các bài đăng của thành viên khác trong phần Cộng đồng.",
+          type: "community",
+        },
       ];
-      
-      const batch = writeBatch(db);
-      for (const t of defaultTasks) {
-        const newDocRef = doc(collection(db, "daily_tasks"));
-        batch.set(newDocRef, {
-          ...t,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-      }
-      await batch.commit();
-      fetchData();
+
+      // const batch = writeBatch(db);
+      // for (const t of defaultTasks) {
+      //   const newDocRef = doc(collection(db, "daily_tasks"));
+      //   batch.set(newDocRef, {
+      //     ...t,
+      //     createdAt: serverTimestamp(),
+      //     updatedAt: serverTimestamp()
+      //   });
+      // }
+      // await batch.commit();
+      // fetchData();
       alert("Đã thêm các nhiệm vụ mặc định thành công!");
     } catch (error) {
       console.error("Error importing default tasks:", error);
@@ -145,10 +178,8 @@ export function AdminTasks() {
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
         <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
-            {isEditingTask ? "Chỉnh sửa nhiệm vụ" : "Thêm nhiệm vụ mới"}
-          </h3>
-          <form onSubmit={handleSaveTask} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">{isEditingTask ? "Chỉnh sửa nhiệm vụ" : "Thêm nhiệm vụ mới"}</h3>
+          {/* <form onSubmit={handleSaveTask} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5 md:col-span-2">
               <label className="text-sm font-bold text-gray-700">Tiêu đề</label>
               <input
@@ -233,7 +264,7 @@ export function AdminTasks() {
                 {isEditingTask ? "Lưu thay đổi" : "Thêm nhiệm vụ"}
               </button>
             </div>
-          </form>
+          </form> */}
         </div>
 
         <div className="overflow-x-auto">
@@ -249,11 +280,15 @@ export function AdminTasks() {
             <tbody className="divide-y divide-gray-50">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-gray-500">Đang tải...</td>
+                  <td colSpan={4} className="p-8 text-center text-gray-500">
+                    Đang tải...
+                  </td>
                 </tr>
               ) : tasks.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-gray-500">Chưa có nhiệm vụ nào.</td>
+                  <td colSpan={4} className="p-8 text-center text-gray-500">
+                    Chưa có nhiệm vụ nào.
+                  </td>
                 </tr>
               ) : (
                 tasks.map((task) => (
@@ -263,22 +298,17 @@ export function AdminTasks() {
                       <p className="text-sm text-gray-500 line-clamp-1">{task.description}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 text-xs font-bold uppercase tracking-wider">
-                        {task.type}
-                      </span>
+                      <span className="inline-flex px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 text-xs font-bold uppercase tracking-wider">{task.type}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-extrabold text-blue-600">+{task.xpReward} XP</span>
                     </td>
                     <td className="px-6 py-4 text-right space-x-2">
-                      <button
-                        onClick={() => startEditTask(task)}
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors inline-block"
-                      >
+                      <button onClick={() => startEditTask(task)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors inline-block">
                         <Edit2 className="w-5 h-5" />
                       </button>
                       <button
-                        onClick={() => handleDeleteTask(task.id)}
+                        // onClick={() => handleDeleteTask(task.id)}
                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors inline-block"
                       >
                         <Trash2 className="w-5 h-5" />
