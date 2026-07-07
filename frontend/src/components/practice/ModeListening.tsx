@@ -2,40 +2,40 @@ import React, { useState, useEffect, useRef } from "react";
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw, Volume2, VolumeX, Send } from "lucide-react";
+import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { useSM2 } from "../../hooks/useSM2";
 
 interface ModeListeningProps {
   cards: Flashcard[];
+  setId: string;
 }
 
-export function ModeListening({ cards }: ModeListeningProps) {
+
+export function ModeListening({ cards, setId }: ModeListeningProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const cardStartTime = useRef<number>(Date.now());
+  
+  const { playAudio, playSoundEffect, isLoading, isPlaying } = useTTSAudio();
+  const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
+
   
   const currentCard = cards[currentIndex];
 
-  const playAudio = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Stop current speech
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.9; // Slightly slower for listening mode
-      
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      
-      window.speechSynthesis.speak(utterance);
-    }
-  };
+  // Reset timer when card changes (after audio plays)
+  useEffect(() => {
+    cardStartTime.current = Date.now();
+  }, [currentIndex]);
+
 
   // Play audio automatically when card changes
   useEffect(() => {
     if (currentCard && !completed) {
-      setTimeout(() => playAudio(currentCard.term), 500);
+      const timer = setTimeout(() => playAudio(currentCard.term), 500);
+      return () => clearTimeout(timer);
     }
   }, [currentIndex, currentCard, completed]);
 
@@ -49,8 +49,17 @@ export function ModeListening({ cards }: ModeListeningProps) {
     e.preventDefault();
     if (!inputValue.trim() || status !== "idle") return;
 
+    const responseMs = Date.now() - cardStartTime.current;
     const isCorrect = inputValue.trim().toLowerCase() === currentCard.term.toLowerCase();
     setStatus(isCorrect ? "correct" : "wrong");
+    
+    if (isCorrect) {
+      reportCorrect(currentCard.id, "listening", currentCard.term, responseMs);
+      playSoundEffect('correct');
+    } else {
+      reportWrong(currentCard.id, "listening");
+      playSoundEffect('wrong');
+    }
 
     setTimeout(() => {
       if (isCorrect) {
@@ -59,6 +68,7 @@ export function ModeListening({ cards }: ModeListeningProps) {
           setInputValue("");
           setStatus("idle");
         } else {
+          flushProgress();
           setCompleted(true);
         }
       } else {
@@ -66,6 +76,7 @@ export function ModeListening({ cards }: ModeListeningProps) {
       }
     }, isCorrect ? 1000 : 1500);
   };
+
 
   if (completed) {
     return (
@@ -99,14 +110,17 @@ export function ModeListening({ cards }: ModeListeningProps) {
       <div className="w-full bg-white rounded-3xl p-12 shadow-lg border border-gray-100 mb-8 relative flex flex-col items-center">
         <button
           onClick={() => playAudio(currentCard.term)}
+          disabled={isLoading}
           className={cn(
             "w-32 h-32 rounded-full flex items-center justify-center transition-all duration-300 mb-6",
-            isSpeaking 
+            isPlaying 
               ? "bg-blue-100 text-blue-600 shadow-inner scale-95" 
               : "bg-blue-600 text-white shadow-xl shadow-blue-500/30 hover:bg-blue-700 hover:scale-105"
           )}
         >
-          {isSpeaking ? (
+          {isLoading ? (
+            <div className="w-10 h-10 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+          ) : isPlaying ? (
             <div className="flex gap-1 items-center justify-center h-10">
                <div className="w-1.5 h-full bg-blue-600 rounded-full animate-[bounce_1s_infinite_100ms]"></div>
                <div className="w-1.5 h-1/2 bg-blue-600 rounded-full animate-[bounce_1s_infinite_200ms]"></div>

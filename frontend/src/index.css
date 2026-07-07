@@ -10,6 +10,23 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
   }
+  
+  /* TipTap & Prose List Styles */
+  .prose ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+  .prose ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+  .prose li p {
+    margin: 0;
+  }
 }
 
 @layer utilities {

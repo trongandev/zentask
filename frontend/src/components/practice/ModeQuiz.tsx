@@ -1,18 +1,33 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw, Volume2 } from "lucide-react";
+import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { useSM2 } from "../../hooks/useSM2";
 
 interface ModeQuizProps {
   cards: Flashcard[];
+  setId: string;
 }
 
-export function ModeQuiz({ cards }: ModeQuizProps) {
+
+export function ModeQuiz({ cards, setId }: ModeQuizProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const cardStartTime = useRef<number>(Date.now());
+  
+  const { playAudio, playSoundEffect, isLoading, loadingText } = useTTSAudio();
+  const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
+
   
   const currentCard = cards[currentIndex];
+
+  // Reset timer on card change
+  useEffect(() => {
+    cardStartTime.current = Date.now();
+  }, [currentIndex]);
 
   // Generate options (1 correct, 3 random wrong)
   const options = useMemo(() => {
@@ -25,27 +40,33 @@ export function ModeQuiz({ cards }: ModeQuizProps) {
   const handleSelect = (optionId: string) => {
     if (selectedOptionId) return; // Prevent double click
     setSelectedOptionId(optionId);
+    const responseMs = Date.now() - cardStartTime.current;
     
     // Check if correct
     const isCorrect = optionId === currentCard.id;
+    if (isCorrect) {
+      reportCorrect(currentCard.id, "quiz", currentCard.term, responseMs);
+      playAudio(currentCard.term, undefined, 'correct');
+    } else {
+      reportWrong(currentCard.id, "quiz");
+      playSoundEffect('wrong');
+    }
     
     setTimeout(() => {
       setSelectedOptionId(null);
       if (currentIndex < cards.length - 1) {
         setCurrentIndex(curr => curr + 1);
       } else {
+        flushProgress();
         setCompleted(true);
       }
     }, 1500); // Wait 1.5s to show result
   };
 
-  const playAudio = (e: React.MouseEvent, text: string) => {
+
+  const handlePlayAudio = (e: React.MouseEvent, text: string) => {
     e.stopPropagation();
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      window.speechSynthesis.speak(utterance);
-    }
+    playAudio(text);
   };
 
   if (cards.length < 4) {
@@ -87,10 +108,15 @@ export function ModeQuiz({ cards }: ModeQuizProps) {
       <div className="w-full bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-8 relative flex flex-col items-center text-center">
         <h2 className="text-5xl font-extrabold text-gray-900 mb-4">{currentCard.term}</h2>
         <button 
-          onClick={(e) => playAudio(e, currentCard.term)}
-          className="p-3 rounded-full bg-gray-50 text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+          onClick={(e) => handlePlayAudio(e, currentCard.term)}
+          disabled={isLoading && loadingText === currentCard.term}
+          className="p-3 rounded-full bg-gray-50 text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors disabled:opacity-50"
         >
-          <Volume2 className="w-6 h-6" />
+          {isLoading && loadingText === currentCard.term ? (
+             <div className="w-6 h-6 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+          ) : (
+             <Volume2 className="w-6 h-6" />
+          )}
         </button>
       </div>
 

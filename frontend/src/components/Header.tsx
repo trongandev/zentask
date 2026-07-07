@@ -5,6 +5,8 @@ import { UserAvatar } from "./UserAvatar";
 import { UserLevelBadge } from "./UserLevelBadge";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserStore } from "../services/userService";
+import { useSocket } from "../contexts/SocketContext";
+import { timeAgo } from "../lib/utils";
 
 interface HeaderProps {
   isLeftSidebarOpen: boolean;
@@ -20,6 +22,8 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
+  const { notifications, markAsRead } = useSocket();
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   useEffect(() => {
     initTodayMinutes();
@@ -133,52 +137,90 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
         <div className="relative" ref={notificationsRef}>
           <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="relative text-gray-400 hover:text-gray-600 transition-colors focus:outline-none">
             <Bell className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-[9px] font-bold text-white">3</span>
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-[9px] font-bold text-white">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
 
           {isNotificationsOpen && (
             <div className="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in slide-in-from-top-2">
               <div className="px-4 pb-2 border-b border-gray-100 flex items-center justify-between">
                 <h3 className="font-bold text-gray-900">Thông báo</h3>
-                <span className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded-full">3 mới</span>
+                {unreadCount > 0 && (
+                  <span className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded-full">{unreadCount} mới</span>
+                )}
               </div>
               <div className="max-h-[300px] overflow-y-auto">
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex gap-3 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                    <Flame className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-900">
-                      <span className="font-bold">Nhắc nhở học tập:</span> Đừng quên hoàn thành bài học hôm nay để giữ chuỗi nhé!
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">2 giờ trước</p>
-                  </div>
-                </div>
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex gap-3 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                    <Star className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-900">
-                      <span className="font-bold">Chúc mừng:</span> Bạn vừa đạt thành tích "Chăm chỉ"!
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">5 giờ trước</p>
-                  </div>
-                </div>
-                <div className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex gap-3 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                    <BookOpen className="w-5 h-5 text-teal-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-900">
-                      <span className="font-bold">Có bài học mới:</span> 50 từ vựng chủ đề Du lịch đã được thêm.
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">1 ngày trước</p>
-                  </div>
-                </div>
+                {notifications.length === 0 ? (
+                  <div className="text-center text-sm text-gray-500 py-6">Không có thông báo mới</div>
+                ) : (
+                  notifications.slice(0, 5).map(n => {
+                    let Icon = Bell;
+                    let color = "text-blue-600";
+                    let bg = "bg-blue-100";
+                    let link = "/";
+
+                    if (n.type === "follow") {
+                      Icon = User;
+                      color = "text-purple-600";
+                      bg = "bg-purple-100";
+                      link = `/profile/${n.referenceId}`;
+                    } else if (n.type === "leaderboard") {
+                      Icon = Star;
+                      color = "text-yellow-600";
+                      bg = "bg-yellow-100";
+                      link = "/leaderboard";
+                    } else if (n.type?.startsWith("community")) {
+                      Icon = BookOpen;
+                      color = "text-green-600";
+                      bg = "bg-green-100";
+                      link = "/community";
+                    } else if (n.type === "learning_reminder") {
+                      Icon = Flame;
+                      color = "text-orange-600";
+                      bg = "bg-orange-100";
+                      link = "/flashcards";
+                    }
+
+                    return (
+                      <div 
+                        key={n.id} 
+                        onClick={() => {
+                          if (!n.isRead) markAsRead(n.id);
+                          setIsNotificationsOpen(false);
+                          navigate(link);
+                        }}
+                        className={`px-4 py-3 hover:bg-gray-50 cursor-pointer flex gap-3 transition-colors ${!n.isRead ? "bg-blue-50/30" : ""}`}
+                      >
+                        <div className={`w-10 h-10 rounded-full ${bg} flex items-center justify-center flex-shrink-0 relative`}>
+                          <Icon className={`w-5 h-5 ${color}`} />
+                          {!n.isRead && <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></div>}
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-900 line-clamp-2">
+                            <span className="font-bold">{n.title}:</span> {n.message}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">{timeAgo(n.createdAt)}</p>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
-              <div className="px-4 pt-2 border-t border-gray-100">
-                <Link to="/notifications" onClick={() => setIsNotificationsOpen(false)} className="block text-center text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors py-2">
+              <div className="px-4 pt-2 border-t border-gray-100 flex items-center justify-between">
+                <button 
+                  onClick={() => markAsRead()} 
+                  className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  Đánh dấu đã đọc
+                </button>
+                <Link 
+                  to="/notifications" 
+                  onClick={() => setIsNotificationsOpen(false)} 
+                  className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                >
                   Xem tất cả
                 </Link>
               </div>

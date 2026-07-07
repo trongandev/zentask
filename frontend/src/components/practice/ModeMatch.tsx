@@ -2,14 +2,18 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw } from "lucide-react";
+import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { useSM2 } from "../../hooks/useSM2";
 
 interface ModeMatchProps {
   cards: Flashcard[];
+  setId: string;
 }
+
 
 type MatchItem = { id: string; text: string; type: 'en' | 'vi'; flashcardId: string; isMatched: boolean };
 
-export function ModeMatch({ cards }: ModeMatchProps) {
+export function ModeMatch({ cards, setId }: ModeMatchProps) {
   const [completed, setCompleted] = useState(false);
   const [items, setItems] = useState<MatchItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -17,6 +21,10 @@ export function ModeMatch({ cards }: ModeMatchProps) {
   const [matchedPairs, setMatchedPairs] = useState<string[]>([]);
   const [startTime, setStartTime] = useState<number>(0);
   const [timeElapsed, setTimeElapsed] = useState<number>(0);
+
+  const { playAudio, playSoundEffect } = useTTSAudio();
+  const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
+
 
   // Initialize game
   useEffect(() => {
@@ -66,15 +74,24 @@ export function ModeMatch({ cards }: ModeMatchProps) {
 
       if (item1.flashcardId === item2.flashcardId && item1.type !== item2.type) {
         // Match!
+        const enItem = item1.type === 'en' ? item1 : item2;
+        reportCorrect(item1.flashcardId, "match");
+        playAudio(enItem.text, undefined, 'correct');
+        
         const newMatched = [...matchedPairs, newSelected[0], newSelected[1]];
         setMatchedPairs(newMatched);
         setSelectedIds([]);
         
         if (newMatched.length === items.length) {
-          setTimeout(() => setCompleted(true), 500);
+          setTimeout(() => {
+            flushProgress();
+            setCompleted(true);
+          }, 1500);
         }
       } else {
         // Wrong match
+        reportWrong(item1.flashcardId, "match");
+        playSoundEffect('wrong');
         setWrongPair(newSelected);
         setTimeout(() => {
           setWrongPair([]);

@@ -3,9 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Trophy, Flame, Star, BookOpen, Clock, Target, Award, Edit3, UserPlus, MapPin, Calendar, Link as LinkIcon, ChevronRight, Lock, Check, Medal } from "lucide-react";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserLevelBadge } from "../components/UserLevelBadge";
+import { RankCard } from "../components/shared/RankCard";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
 import { useConfigStore } from "../services/configService";
+import { useEtcStore } from "../services/etcService";
+import { useUserStore } from "../services/userService";
+import toast from "react-hot-toast";
 
 
 const SYSTEM_BADGES = [
@@ -34,51 +38,105 @@ export function Profile() {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
   const { levels: SYSTEM_LEVELS, fetchConfigs } = useConfigStore();
+  const { getUserProfile } = useEtcStore();
   const isCurrentUser = !id;
   const [activeTab, setActiveTab] = useState("overview"); // overview, badges, activities, levels
+  const [profileData, setProfileData] = useState<any>(null);
+  const [loading, setLoading] = useState(!isCurrentUser);
+  
+  const { toggleFollow, checkFollow } = useUserStore();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
 
   useEffect(() => {
     fetchConfigs();
   }, [fetchConfigs]);
 
-  // Mock data depending on whether it's the current user or someone else
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (id) {
+        setLoading(true);
+        const data = await getUserProfile(id);
+        setProfileData(data);
+        
+        if (authUser && authUser.uid !== id) {
+          const followStatus = await checkFollow(id);
+          setIsFollowing(!!followStatus);
+        }
+        
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [id, authUser, checkFollow, getUserProfile]);
+
+  const handleToggleFollow = async () => {
+    if (!id || !authUser) return toast.error("Vui lòng đăng nhập!");
+    if (isFollowLoading) return;
+    setIsFollowLoading(true);
+    const newStatus = await toggleFollow(id);
+    if (newStatus !== null) {
+      setIsFollowing(newStatus);
+      // Optimistically update follower count
+      setProfileData((prev: any) => ({
+        ...prev,
+        followers: prev.followers + (newStatus ? 1 : -1)
+      }));
+    }
+    setIsFollowLoading(false);
+  };
+
   const user = isCurrentUser
     ? {
-        name: authUser?.displayName || "An Trọng",
-        username: "@" + (authUser?.email?.split("@")[0] || "trongandev"),
+        name: authUser?.displayName || "Người dùng",
+        username: "@" + (authUser?.email?.split("@")[0] || "user"),
         avatar: authUser?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop",
         cover: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1200&auto=format&fit=crop",
-        bio: "Học tập không ngừng nghỉ. Đam mê ngôn ngữ và lập trình.",
+        bio: (authUser as any)?.bio || "Học tập không ngừng nghỉ. Đam mê ngôn ngữ và lập trình.",
         location: "Hồ Chí Minh, Việt Nam",
-        joined: "Tháng 8, 2023",
-        website: "github.com/trongandev",
+        joined: "Gần đây",
+        website: "",
         level: authUser?.level || 1,
         xp: authUser?.xp || 0,
         following: 124,
         followers: 892,
         achievedBadges: [1, 2, 3, 4],
-        rankId: authUser?.rankId || 2,
+        rankId: authUser?.rankId || 1,
         tier: authUser?.tier || 3,
-        stars: authUser?.stars || 2,
+        stars: authUser?.stars || 0,
+        streak: (authUser as any)?.streak || 0,
       }
-    : {
-        name: "Minh Anh",
-        username: "@minhanh_study",
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
-        cover: "https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=1200&auto=format&fit=crop",
-        bio: "Mục tiêu: IELTS 8.0 vào cuối năm nay 🎯",
-        location: "Hà Nội, Việt Nam",
-        joined: "Tháng 1, 2024",
-        website: "minhanh.blog",
-        level: 15,
-        xp: 12540,
-        following: 45,
-        followers: 210,
+    : profileData ? {
+        name: profileData.name,
+        username: profileData.username,
+        avatar: profileData.avatar,
+        cover: profileData.cover,
+        bio: profileData.bio,
+        location: "Việt Nam",
+        joined: profileData.joined,
+        website: "",
+        level: profileData.level,
+        xp: profileData.xp,
+        following: profileData.following || 0,
+        followers: profileData.followers || 0,
         achievedBadges: [1, 4, 5, 6, 8],
-        rankId: 5,
-        tier: 1,
-        stars: 82,
-      };
+        rankId: profileData.rankId,
+        tier: profileData.tier,
+        stars: profileData.stars,
+        streak: profileData.streak,
+      } : null;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <div className="text-center py-20 text-gray-500 font-medium text-lg">Không tìm thấy người dùng</div>;
+  }
 
   const RANK_CONFIG: Record<number, any> = {
     1: { name: "Bạc", maxTiers: 3, starsPerTier: 3 },
@@ -98,8 +156,8 @@ export function Profile() {
   };
 
   const stats = [
-    { label: "Chuỗi ngày", value: isCurrentUser ? `${authUser?.streak || 0} ngày` : "7 ngày", icon: Flame, color: "text-orange-500", bgColor: "bg-orange-50" },
-    { label: "Thẻ lật đã học", value: "1,240", icon: BookOpen, color: "text-blue-500", bgColor: "bg-blue-50" },
+    { label: "Chuỗi ngày", value: `${user.streak || 0} ngày`, icon: Flame, color: "text-orange-500", bgColor: "bg-orange-50" },
+    { label: "Thẻ lật đã học", value: isCurrentUser ? "1,240" : "850", icon: BookOpen, color: "text-blue-500", bgColor: "bg-blue-50" },
     { label: "Quiz hoàn thành", value: "156", icon: Target, color: "text-green-500", bgColor: "bg-green-50" },
     { label: "Giờ học", value: "84h", icon: Clock, color: "text-purple-500", bgColor: "bg-purple-50" },
   ];
@@ -151,9 +209,25 @@ export function Profile() {
                   Chỉnh sửa hồ sơ
                 </button>
               ) : (
-                <button className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center gap-2 transition-colors shadow-sm">
-                  <UserPlus className="w-4 h-4" />
-                  Theo dõi
+                <button 
+                  onClick={handleToggleFollow}
+                  disabled={isFollowLoading}
+                  className={cn(
+                    "px-6 py-2.5 font-semibold rounded-xl flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50",
+                    isFollowing 
+                      ? "bg-gray-100 hover:bg-gray-200 text-gray-700" 
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                  )}
+                >
+                  {isFollowing ? (
+                    <>
+                      <Check className="w-4 h-4" /> Đang theo dõi
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" /> Theo dõi
+                    </>
+                  )}
                 </button>
               )}
             </div>
@@ -275,48 +349,7 @@ export function Profile() {
                   <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Background" className="w-40 h-40 object-contain drop-shadow-2xl" />
                 </div>
                 
-                <div className="relative z-10">
-                  <h2 className="text-xs font-bold text-blue-200 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <Medal className="w-4 h-4" />
-                    Rank Hiện Tại
-                  </h2>
-                  
-                  <div className="flex items-center gap-4 mb-4">
-                    <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Icon" className="w-14 h-14 object-contain drop-shadow-md" />
-                    <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-100 to-white">
-                      {currentRank.name} {currentRank.tier}
-                    </span>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-bold text-blue-200">
-                      <span>Số sao</span>
-                      <span>{currentRank.stars} / {currentRank.maxStars === 99 ? "∞" : currentRank.maxStars}</span>
-                    </div>
-                    <div className="flex gap-1">
-                      {currentRank.maxStars === 99 ? (
-                        <div className="flex-1 h-2.5 rounded-full bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
-                      ) : (
-                        Array.from({ length: currentRank.maxStars }).map((_, i) => (
-                          <div 
-                            key={i} 
-                            className={cn(
-                              "flex-1 h-2.5 rounded-full transition-all",
-                              i < currentRank.stars ? "bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]" : "bg-slate-700"
-                            )}
-                          />
-                        ))
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-blue-800/50">
-                    <div className="flex justify-between items-center text-xs font-medium">
-                      <span className="text-blue-300">Thứ hạng hiện tại</span>
-                      <span className="text-white font-bold bg-white/10 px-2.5 py-1 rounded-lg">#{currentRank.position}</span>
-                    </div>
-                  </div>
-                </div>
+                <RankCard />
               </div>
 
               {/* Level Card Preview */}

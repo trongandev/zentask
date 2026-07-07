@@ -1,41 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
 import { Volume2, CheckCircle, XCircle, RotateCw } from "lucide-react";
+import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { useSM2 } from "../../hooks/useSM2";
 
 interface ModeFlashcardProps {
   cards: Flashcard[];
+  setId: string;
 }
 
-export function ModeFlashcard({ cards }: ModeFlashcardProps) {
+
+export function ModeFlashcard({ cards, setId }: ModeFlashcardProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [completed, setCompleted] = useState(false);
+  
+  const { playAudio, playSoundEffect, isLoading, loadingText } = useTTSAudio();
+  const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
+
   
   // We'll just loop through the cards for now. 
   // In a real Spaced Repetition System, we'd schedule them.
   const currentCard = cards[currentIndex];
 
   const handleNext = (remembered: boolean) => {
-    // Basic logic: if remembered, we just move on. If not, we could push it to the end of a queue, 
-    // but for simplicity, let's just go to next card until we reach the end.
+    playSoundEffect(remembered ? 'correct' : 'wrong');
+    const currentCard = cards[currentIndex];
+    if (remembered) {
+      reportCorrect(currentCard.id, "flashcard");
+    } else {
+      reportWrong(currentCard.id, "flashcard");
+    }
     setIsFlipped(false);
     setTimeout(() => {
       if (currentIndex < cards.length - 1) {
         setCurrentIndex(curr => curr + 1);
       } else {
+        flushProgress();
         setCompleted(true);
       }
     }, 150);
   };
 
-  const playAudio = (e: React.MouseEvent, text: string) => {
+
+  const handlePlayAudio = (e: React.MouseEvent, text: string) => {
     e.stopPropagation();
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      window.speechSynthesis.speak(utterance);
-    }
+    playAudio(text);
   };
 
   if (completed) {
@@ -77,10 +88,15 @@ export function ModeFlashcard({ cards }: ModeFlashcardProps) {
               <p className="text-xl text-gray-400 font-mono mb-6">{currentCard.phonetic}</p>
             )}
             <button 
-              onClick={(e) => playAudio(e, currentCard.term)}
-              className="p-4 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+              onClick={(e) => handlePlayAudio(e, currentCard.term)}
+              disabled={isLoading && loadingText === currentCard.term}
+              className="p-4 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors disabled:opacity-50"
             >
-              <Volume2 className="w-8 h-8" />
+              {isLoading && loadingText === currentCard.term ? (
+                <div className="w-8 h-8 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+              ) : (
+                <Volume2 className="w-8 h-8" />
+              )}
             </button>
             <p className="absolute bottom-6 text-sm text-gray-400 font-medium tracking-widest uppercase">Click để lật</p>
           </div>

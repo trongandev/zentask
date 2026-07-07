@@ -2,10 +2,14 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw, Lightbulb, Volume2 } from "lucide-react";
+import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { useSM2 } from "../../hooks/useSM2";
 
 interface ModeGuessProps {
   cards: Flashcard[];
+  setId: string;
 }
+
 
 interface LetterOption {
   id: string;
@@ -20,7 +24,7 @@ interface BlankSlot {
   filledWithId: string | null;
 }
 
-export function ModeGuess({ cards }: ModeGuessProps) {
+export function ModeGuess({ cards, setId }: ModeGuessProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
@@ -28,6 +32,10 @@ export function ModeGuess({ cards }: ModeGuessProps) {
   const [slots, setSlots] = useState<BlankSlot[]>([]);
   const [options, setOptions] = useState<LetterOption[]>([]);
   const [showMeaning, setShowMeaning] = useState(false);
+
+  const { playAudio, playSoundEffect } = useTTSAudio();
+  const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
+
 
   const currentCard = cards[currentIndex];
 
@@ -138,20 +146,26 @@ export function ModeGuess({ cards }: ModeGuessProps) {
     setStatus(isCorrect ? "correct" : "wrong");
     
     if (isCorrect) {
+      reportCorrect(currentCard.id, "guess");
+      playAudio(currentCard.term, undefined, 'correct');
       setTimeout(() => {
         if (currentIndex < cards.length - 1) {
           setCurrentIndex(curr => curr + 1);
         } else {
+          flushProgress();
           setCompleted(true);
         }
       }, 1500);
     } else {
       // Wrong: shake and reset the incorrectly placed tiles
+      reportWrong(currentCard.id, "guess");
+      playSoundEffect('wrong');
       setTimeout(() => {
         setStatus("idle");
       }, 800);
     }
   };
+
 
   const handleHint = () => {
     // Reveal one correct character

@@ -2,19 +2,33 @@ import React, { useState, useEffect, useRef } from "react";
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw, AlertTriangle, Send } from "lucide-react";
+import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { useSM2 } from "../../hooks/useSM2";
 
 interface ModeFillBlankProps {
   cards: Flashcard[];
+  setId: string;
 }
 
-export function ModeFillBlank({ cards }: ModeFillBlankProps) {
+
+export function ModeFillBlank({ cards, setId }: ModeFillBlankProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const inputRef = useRef<HTMLInputElement>(null);
+  const cardStartTime = useRef<number>(Date.now());
   
+  const { playAudio, playSoundEffect } = useTTSAudio();
+  const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
+
   const currentCard = cards[currentIndex];
+
+  // Reset timer when card changes
+  useEffect(() => {
+    cardStartTime.current = Date.now();
+  }, [currentIndex]);
+
 
   useEffect(() => {
     if (status === "idle" && inputRef.current) {
@@ -26,8 +40,17 @@ export function ModeFillBlank({ cards }: ModeFillBlankProps) {
     e.preventDefault();
     if (!inputValue.trim() || status !== "idle") return;
 
+    const responseMs = Date.now() - cardStartTime.current;
     const isCorrect = inputValue.trim().toLowerCase() === currentCard.term.toLowerCase();
     setStatus(isCorrect ? "correct" : "wrong");
+
+    if (isCorrect) {
+      reportCorrect(currentCard.id, "fill_blank", currentCard.term, responseMs);
+      playAudio(currentCard.term, undefined, 'correct');
+    } else {
+      reportWrong(currentCard.id, "fill_blank");
+      playSoundEffect('wrong');
+    }
 
     setTimeout(() => {
       if (isCorrect) {
@@ -36,6 +59,7 @@ export function ModeFillBlank({ cards }: ModeFillBlankProps) {
           setInputValue("");
           setStatus("idle");
         } else {
+          flushProgress();
           setCompleted(true);
         }
       } else {
@@ -44,6 +68,7 @@ export function ModeFillBlank({ cards }: ModeFillBlankProps) {
       }
     }, isCorrect ? 1000 : 1500); // Wait shorter if correct, longer if wrong
   };
+
 
   if (completed) {
     return (

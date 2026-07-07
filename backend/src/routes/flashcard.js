@@ -545,4 +545,214 @@ router.patch("/set/:setId/privacy", async (req, res) => {
   }
 });
 
+
+// ==================== SM-2 SPACED REPETITION ROUTES ====================
+
+/**
+ * Calculate SM-2 algorithm
+ * @param {number} quality - Quality score 0-5
+ * @param {object} current - Current progress data
+ */
+function calculateSM2(quality, current = {}) {
+  const EF_MIN = 1.3;
+  const easeFactor = current.easeFactor ?? 2.5;
+  const interval = current.interval ?? 1;
+  const repetitions = current.repetitions ?? 0;
+
+  // Calculate new EF
+  let newEF = easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+  newEF = Math.max(EF_MIN, newEF);
+
+  let newInterval;
+  let newRepetitions;
+
+  if (quality < 3) {
+    // Failed: reset
+    newRepetitions = 0;
+    newInterval = 1;
+  } else {
+    newRepetitions = repetitions + 1;
+    if (newRepetitions === 1) {
+      newInterval = 1;
+    } else if (newRepetitions === 2) {
+      newInterval = 6;
+    } else {
+      newInterval = Math.round(interval * newEF);
+    }
+  }
+
+  const dueDate = new Date();
+  dueDate.setDate(dueDate.getDate() + newInterval);
+
+  return {
+    easeFactor: newEF,
+    interval: newInterval,
+    repetitions: newRepetitions,
+    dueDate,
+    quality,
+  };
+}
+
+// Batch update progress (called after every 5 cards or session end)
+router.post("/progress/batch", async (req, res) => {
+  try {
+    const { updates } = req.body;
+    if (!updates || !Array.isArray(updates) || updates.length === 0) {
+      return res.status(400).json({ error: "updates array is required" });
+    }
+
+    const results = [];
+    const batch = db.batch();
+
+    for (const update of updates) {
+      const { cardId, setId, quality, mode } = update;
+      if (!cardId || !setId || quality === undefined) continue;
+
+      // Get existing progress
+      const progressQuery = await db.collection("flashcard_progress")
+        .where("userId", "==", req.uid)
+        .where("cardId", "==", cardId)
+        .limit(1)
+        .get();
+
+      const current = progressQuery.empty ? {} : progressQuery.docs[0].data();
+      const sm2 = calculateSM2(quality, current);
+
+      const progressData = {
+        userId: req.uid,
+        cardId,
+        setId,
+        easeFactor: sm2.easeFactor,
+        interval: sm2.interval,
+        repetitions: sm2.repetitions,
+        dueDate: sm2.dueDate,
+        quality: sm2.quality,
+        lastReviewedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      };
+
+      if (progressQuery.empty) {
+        const newRef = db.collection("flashcard_progress").doc();
+        batch.set(newRef, { ...progressData, createdAt: FieldValue.serverTimestamp() });
+      } else {
+        batch.update(progressQuery.docs[0].ref, progressData);
+      }
+
+      results.push({ cardId, ...sm2 });
+    }
+
+    await batch.commit();
+
+    res.json({ success: true, results });
+  } catch (error) {
+    console.error("Progress batch error:", error);
+    res.status(500).json({ error: "Failed to update progress" });
+  }
+});
+
+// Get progress for all cards in a set
+router.get("/set/:setId/progress", async (req, res) => {
+  try {
+    const { setId } = req.params;
+
+    // Verify set ownership
+    const setRef = db.collection("flashcard_sets").doc(setId);
+    const setDoc = await setRef.get();
+    if (!setDoc.exists || setDoc.data().userId !== req.uid) {
+      return res.status(404).json({ error: "Flashcard set not found" });
+    }
+
+    const snapshot = await db.collection("flashcard_progress")
+      .where("userId", "==", req.uid)
+      .where("setId", "==", setId)
+      .get();
+
+    const progress = {};
+    snapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      progress[data.cardId] = {
+        easeFactor: data.easeFactor,
+        interval: data.interval,
+        repetitions: data.repetitions,
+        dueDate: data.dueDate?.toDate?.()?.toISOString() ?? null,
+        quality: data.quality,
+        lastReviewedAt: data.lastReviewedAt?.toDate?.()?.toISOString() ?? null,
+      };
+    });
+
+    res.json(progress);
+  } catch (error) {
+    console.error("Get progress error:", error);
+    res.status(500).json({ error: "Failed to fetch progress" });
+  }
+});
+
+// Manual progress update (user sets level by hand)
+router.post("/progress/manual", async (req, res) => {
+  try {
+    const { cardId, setId, level } = req.body;
+    if (!cardId || !setId || !level) {
+      return res.status(400).json({ error: "cardId, setId, level are required" });
+    }
+
+    // level → quality mapping
+    const levelQualityMap = {
+      known: 5,    // Đã nhớ — treat as "perfect recall"
+      almost: 3,   // Gần nhớ — treat as "correct with hesitation"
+      unknown: 1,  // Chưa nhớ — treat as "failed"
+    };
+
+    const quality = levelQualityMap[level];
+    if (quality === undefined) {
+      return res.status(400).json({ error: "level must be known | almost | unknown" });
+    }
+
+    // Get existing progress
+    const progressQuery = await db.collection("flashcard_progress")
+      .where("userId", "==", req.uid)
+      .where("cardId", "==", cardId)
+      .limit(1)
+      .get();
+
+    const current = progressQuery.empty ? {} : progressQuery.docs[0].data();
+    const sm2 = calculateSM2(quality, current);
+
+    const progressData = {
+      userId: req.uid,
+      cardId,
+      setId,
+      easeFactor: sm2.easeFactor,
+      interval: sm2.interval,
+      repetitions: sm2.repetitions,
+      dueDate: sm2.dueDate,
+      quality: sm2.quality,
+      lastReviewedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+
+    if (progressQuery.empty) {
+      await db.collection("flashcard_progress").add({
+        ...progressData,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+    } else {
+      await progressQuery.docs[0].ref.update(progressData);
+    }
+
+    res.json({
+      success: true,
+      cardId,
+      easeFactor: sm2.easeFactor,
+      interval: sm2.interval,
+      repetitions: sm2.repetitions,
+      dueDate: sm2.dueDate,
+      quality: sm2.quality,
+    });
+  } catch (error) {
+    console.error("Manual progress error:", error);
+    res.status(500).json({ error: "Failed to set progress" });
+  }
+});
+
 export default router;
+

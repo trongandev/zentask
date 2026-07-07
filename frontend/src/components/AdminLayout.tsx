@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet, Navigate, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Shield, Users, ListTodo, LogOut, ArrowLeft } from "lucide-react";
+import { Shield, Users, ListTodo, LogOut, ArrowLeft, BookOpen, Type, HelpCircle, History } from "lucide-react";
 
 export function AdminLayout() {
   const { user } = useAuth();
@@ -25,6 +25,15 @@ export function AdminLayout() {
     return <Navigate to="/admin/daily-task" replace />;
   }
 
+const ADMIN_NAV_LINKS = [
+    { path: "/admin/daily-task", label: "Nhiệm vụ", icon: ListTodo },
+    { path: "/admin/users", label: "Người dùng", icon: Users },
+    { path: "/admin/vocab-sets", label: "Bộ từ vựng", icon: BookOpen },
+    { path: "/admin/vocab", label: "Từ vựng", icon: Type },
+    { path: "/admin/quizzes", label: "Quiz", icon: HelpCircle },
+    { path: "/admin/quiz-history", label: "Lịch sử Quiz", icon: History },
+  ];
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
       {/* Sidebar */}
@@ -36,21 +45,17 @@ export function AdminLayout() {
           </div>
         </div>
 
-        <nav className="flex-1 py-6 px-4 space-y-2">
-          <NavLink
-            to="/admin/daily-task"
-            className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive ? "bg-red-50 text-red-600" : "text-gray-600 hover:bg-gray-50"}`}
-          >
-            <ListTodo className="w-5 h-5" />
-            Nhiệm vụ
-          </NavLink>
-          <NavLink
-            to="/admin/users"
-            className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive ? "bg-red-50 text-red-600" : "text-gray-600 hover:bg-gray-50"}`}
-          >
-            <Users className="w-5 h-5" />
-            Người dùng
-          </NavLink>
+        <nav className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
+          {ADMIN_NAV_LINKS.map((link) => (
+            <NavLink
+              key={link.path}
+              to={link.path}
+              className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive ? "bg-red-50 text-red-600" : "text-gray-600 hover:bg-gray-50"}`}
+            >
+              <link.icon className="w-5 h-5" />
+              {link.label}
+            </NavLink>
+          ))}
         </nav>
 
         <div className="p-4 border-t border-gray-100 space-y-2">

@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { auth, db } from "../firebase.js";
 import { FieldValue } from "firebase-admin/firestore";
-import { SYSTEM_LEVELS, DAILY_TASKS } from "../config/system.js";
+import { SYSTEM_LEVELS } from "../config/system.js";
+import { getWeekString, getMonthString } from "../utils/dateUtils.js";
+import { createNotification } from "../utils/notifications.js";
 
 const router = Router();
 
@@ -45,16 +47,40 @@ export const addXpToUser = async (uid, xpToAdd) => {
     }
 
     const levelUp = newLevel > level;
-
+    
     t.update(userRef, { xp, level: newLevel });
+
+    // Update weekly and monthly leaderboards
+    const weekString = getWeekString();
+    const monthString = getMonthString();
+    
+    const weeklyRef = db.collection("leaderboard_weekly").doc(`${weekString}_${uid}`);
+    const monthlyRef = db.collection("leaderboard_monthly").doc(`${monthString}_${uid}`);
+    
+    t.set(weeklyRef, {
+      uid,
+      period: weekString,
+      xp: FieldValue.increment(xpToAdd),
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    t.set(monthlyRef, {
+      uid,
+      period: monthString,
+      xp: FieldValue.increment(xpToAdd),
+      updatedAt: FieldValue.serverTimestamp()
+    }, { merge: true });
+
     return { xp, level: newLevel, levelUp };
   });
 };
 
 // Helper: Increment daily task progress
 export const incrementDailyTask = async (uid, taskId, amount = 1) => {
-  const taskConfig = DAILY_TASKS.find(t => t.id === taskId);
-  if (!taskConfig) return { success: false, reason: "Task not found" };
+  // Fetch taskConfig from Firestore
+  const taskDoc = await db.collection("daily_tasks").doc(taskId).get();
+  if (!taskDoc.exists) return { success: false, reason: "Task not found" };
+  const taskConfig = taskDoc.data();
 
   const today = getLocalDateString();
   const statsQuery = await db.collection("user_daily_stats")
@@ -322,6 +348,43 @@ router.put("/profile", async (req, res) => {
   }
 });
 
+// Get user profile by UID
+router.get("/profile/:uid", async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const userRef = db.collection("users").doc(uid);
+    const doc = await userRef.get();
+    
+    if (!doc.exists) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const data = doc.data();
+    
+    // Return safe public data
+    res.json({
+      uid: data.uid,
+      name: data.displayName || "Người dùng",
+      username: data.username || "@" + (data.email ? data.email.split('@')[0] : "user"),
+      avatar: data.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop",
+      cover: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1200&auto=format&fit=crop",
+      bio: data.bio || "Chưa có thông tin",
+      level: data.level || 1,
+      xp: data.xp || 0,
+      streak: data.streak || 0,
+      rankId: data.rankId || 1,
+      tier: data.tier || 3,
+      stars: data.stars || 0,
+      followers: data.followers || 0,
+      following: data.following || 0,
+      joined: data.createdAt ? new Date(data.createdAt._seconds * 1000).toLocaleDateString('vi-VN') : "Gần đây"
+    });
+  } catch (error) {
+    console.error("Get profile error:", error);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
+
 // Get daily task progress
 router.get("/daily-tasks/progress", async (req, res) => {
   try {
@@ -340,6 +403,79 @@ router.get("/daily-tasks/progress", async (req, res) => {
     res.json(doc.tasks || {});
   } catch (error) {
     console.error("Get tasks progress error:", error);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
+
+// Follow / Unfollow User
+router.post("/follow/:uid", async (req, res) => {
+  try {
+    const { uid: targetUid } = req.params;
+    const currentUid = req.uid;
+
+    if (currentUid === targetUid) {
+      return res.status(400).json({ error: "Cannot follow yourself" });
+    }
+
+    const currentRef = db.collection("users").doc(currentUid);
+    const targetRef = db.collection("users").doc(targetUid);
+    const followRef = db.collection("user_follows").doc(`${currentUid}_${targetUid}`);
+
+    let isFollowing = false;
+
+    await db.runTransaction(async (t) => {
+      const followDoc = await t.get(followRef);
+      const currentUserDoc = await t.get(currentRef);
+      const targetUserDoc = await t.get(targetRef);
+
+      if (!targetUserDoc.exists) throw new Error("Target user not found");
+
+      if (followDoc.exists) {
+        // Unfollow
+        t.delete(followRef);
+        t.update(currentRef, { following: FieldValue.increment(-1) });
+        t.update(targetRef, { followers: FieldValue.increment(-1) });
+        isFollowing = false;
+      } else {
+        // Follow
+        t.set(followRef, {
+          followerId: currentUid,
+          followingId: targetUid,
+          createdAt: FieldValue.serverTimestamp()
+        });
+        t.update(currentRef, { following: FieldValue.increment(1) });
+        t.update(targetRef, { followers: FieldValue.increment(1) });
+        isFollowing = true;
+      }
+    });
+
+    if (isFollowing) {
+      const currentUser = await currentRef.get();
+      const name = currentUser.data()?.displayName || "Một người dùng";
+      await createNotification(
+        req.app,
+        targetUid,
+        "follow",
+        "Có người theo dõi mới",
+        `${name} đã bắt đầu theo dõi bạn.`,
+        currentUid
+      );
+    }
+
+    res.json({ status: "success", isFollowing });
+  } catch (error) {
+    console.error("Follow error:", error);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
+
+// Check if following
+router.get("/follow/:uid", async (req, res) => {
+  try {
+    const { uid: targetUid } = req.params;
+    const followDoc = await db.collection("user_follows").doc(`${req.uid}_${targetUid}`).get();
+    res.json({ isFollowing: followDoc.exists });
+  } catch (error) {
     res.status(500).json({ error: "Internal error" });
   }
 });

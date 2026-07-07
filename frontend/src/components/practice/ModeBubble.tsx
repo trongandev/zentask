@@ -2,12 +2,16 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw } from "lucide-react";
+import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { useSM2 } from "../../hooks/useSM2";
 
 interface ModeBubbleProps {
   cards: Flashcard[];
+  setId: string;
 }
 
-export function ModeBubble({ cards }: ModeBubbleProps) {
+
+export function ModeBubble({ cards, setId }: ModeBubbleProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [bubbles, setBubbles] = useState<any[]>([]);
@@ -15,7 +19,11 @@ export function ModeBubble({ cards }: ModeBubbleProps) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bubblesData = useRef<any[]>([]);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number>(0);
+
+  const { playAudio, playSoundEffect } = useTTSAudio();
+  const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
+
 
   const currentCard = cards[currentIndex];
 
@@ -120,20 +128,26 @@ export function ModeBubble({ cards }: ModeBubbleProps) {
 
     if (cardId === currentCard.id) {
       setAnimatingSuccess(true);
+      reportCorrect(currentCard.id, "bubble");
+      playAudio(currentCard.term, undefined, "correct");
       setTimeout(() => {
         if (currentIndex < cards.length - 1) {
           setCurrentIndex((curr) => curr + 1);
         } else {
+          flushProgress();
           setCompleted(true);
         }
-      }, 1000);
+      }, 1500);
     } else {
+      reportWrong(currentCard.id, "bubble");
+      playSoundEffect("wrong");
       setBubbles((prev) => prev.map((b) => (b.cardId === cardId ? { ...b, error: true } : b)));
       setTimeout(() => {
         setBubbles((prev) => prev.map((b) => (b.cardId === cardId ? { ...b, error: false } : b)));
       }, 500);
     }
   };
+
 
   if (cards.length < 5) {
     return <div className="text-gray-500">Bộ thẻ cần ít nhất 5 từ vựng để chơi Bắn bong bóng.</div>;
@@ -206,31 +220,35 @@ export function ModeBubble({ cards }: ModeBubbleProps) {
         {bubbles.map((bubble) => {
           const isError = bubbles.find((b) => b.id === bubble.id)?.error;
           return (
-            <button
+            <div
               id={bubble.id}
               key={bubble.id}
-              onClick={() => handleBubbleClick(bubble.cardId)}
               style={{
                 width: `${bubble.size}px`,
                 height: `${bubble.size}px`,
-                transform: `translate(${bubble.x}px, ${bubble.y}px)`, // Initial position
+                transform: `translate(${bubble.x}px, ${bubble.y}px)`,
                 position: "absolute",
                 top: 0,
                 left: 0,
               }}
-              disabled={animatingSuccess}
-              className={cn(
-                "rounded-full flex items-center justify-center font-bold text-center p-4 cursor-pointer pointer-events-auto shadow-[inset_0_-10px_20px_rgba(0,0,0,0.1),0_5px_15px_rgba(0,0,0,0.1)] transition-colors active:scale-95 will-change-transform",
-                "bg-gradient-to-br from-blue-100 to-blue-300 border-2 border-blue-400 text-blue-900 text-lg",
-                isError ? "bubble-error" : "",
-                animatingSuccess && bubble.cardId === currentCard.id ? "bubble-pop" : "",
-                animatingSuccess && bubble.cardId !== currentCard.id ? "opacity-20" : "",
-              )}
+              className="will-change-transform pointer-events-none"
             >
-              {/* Glossy reflection effect */}
-              <div className="absolute top-[15%] left-[15%] w-[30%] h-[30%] bg-white rounded-full opacity-60"></div>
-              <span className="relative z-10 leading-tight break-words pointer-events-none drop-shadow-sm">{bubble.term}</span>
-            </button>
+              <button
+                onClick={() => handleBubbleClick(bubble.cardId)}
+                disabled={animatingSuccess}
+                className={cn(
+                  "w-full h-full rounded-full flex items-center justify-center font-bold text-center p-4 cursor-pointer pointer-events-auto shadow-[inset_0_-10px_20px_rgba(0,0,0,0.1),0_5px_15px_rgba(0,0,0,0.1)] transition-colors active:scale-95 origin-center",
+                  "bg-gradient-to-br from-blue-100 to-blue-300 border-2 border-blue-400 text-blue-900 text-lg",
+                  isError ? "bubble-error" : "",
+                  animatingSuccess && bubble.cardId === currentCard.id ? "bubble-pop" : "",
+                  animatingSuccess && bubble.cardId !== currentCard.id ? "opacity-20" : "",
+                )}
+              >
+                {/* Glossy reflection effect */}
+                <div className="absolute top-[15%] left-[15%] w-[30%] h-[30%] bg-white rounded-full opacity-60"></div>
+                <span className="relative z-10 leading-tight break-words pointer-events-none drop-shadow-sm">{bubble.term}</span>
+              </button>
+            </div>
           );
         })}
       </div>

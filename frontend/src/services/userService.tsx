@@ -25,6 +25,8 @@ interface UserState {
   initTodayMinutes: () => Promise<void>;
   incrementLocalMinutes: (mins: number) => void;
   syncStudyTime: () => void;
+  toggleFollow: (uid: string) => Promise<boolean | null>;
+  checkFollow: (uid: string) => Promise<boolean | null>;
 }
 
 export const useUserStore = create<UserState>((set, get) => ({
@@ -146,6 +148,35 @@ export const useUserStore = create<UserState>((set, get) => ({
       }
       
       return data; // { xp, level, levelUp }
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  },
+
+  toggleFollow: async (uid: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/user/follow/${uid}`, {
+        method: "POST",
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Error toggling follow");
+      const data = await res.json();
+      return data.isFollowing;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  },
+
+  checkFollow: async (uid: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/user/follow/${uid}`, {
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Error checking follow");
+      const data = await res.json();
+      return data.isFollowing;
     } catch (err) {
       console.error(err);
       return null;

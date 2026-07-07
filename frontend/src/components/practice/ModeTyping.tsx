@@ -2,10 +2,14 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw, Keyboard, Settings as SettingsIcon } from "lucide-react";
+import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { useSM2 } from "../../hooks/useSM2";
 
 interface ModeTypingProps {
   cards: Flashcard[];
+  setId: string;
 }
+
 
 interface Meteorite {
   id: string;
@@ -17,7 +21,7 @@ interface Meteorite {
   isExploding: boolean;
 }
 
-export function ModeTyping({ cards }: ModeTypingProps) {
+export function ModeTyping({ cards, setId }: ModeTypingProps) {
   const [queue, setQueue] = useState<Flashcard[]>([]);
   const [completed, setCompleted] = useState(false);
   const [meteorites, setMeteorites] = useState<Meteorite[]>([]);
@@ -40,7 +44,7 @@ export function ModeTyping({ cards }: ModeTypingProps) {
   }, [config]);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number>(0);
   const lastSpawnTime = useRef<number>(0);
 
   // Game refs to avoid dependency cycle in requestAnimationFrame
@@ -49,6 +53,17 @@ export function ModeTyping({ cards }: ModeTypingProps) {
   const meteoritesRef = useRef<Meteorite[]>([]);
   const typedTextRef = useRef<string>("");
   const lockedTargetRef = useRef<string | null>(null);
+
+  const { playAudio, playSoundEffect } = useTTSAudio();
+  const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
+  // Store SM-2 functions in refs so animation loop can access them
+  const reportCorrectRef = useRef(reportCorrect);
+  const reportWrongRef = useRef(reportWrong);
+  const flushProgressRef = useRef(flushProgress);
+  useEffect(() => { reportCorrectRef.current = reportCorrect; }, [reportCorrect]);
+  useEffect(() => { reportWrongRef.current = reportWrong; }, [reportWrong]);
+  useEffect(() => { flushProgressRef.current = flushProgress; }, [flushProgress]);
+
 
   useEffect(() => {
     // Initialize game
@@ -138,6 +153,8 @@ export function ModeTyping({ cards }: ModeTypingProps) {
               if (!m.isDecoy) {
                 // Push real card back to queue
                 unlearnedRef.current = [...unlearnedRef.current, m.card];
+                reportWrongRef.current(m.card.id, "typing");
+                playSoundEffect("wrong");
               }
 
               // Remove meteorite
@@ -162,6 +179,7 @@ export function ModeTyping({ cards }: ModeTypingProps) {
 
       // Check win condition
       if (unlearnedRef.current.length === 0 && !meteoritesRef.current.some((m: any) => !m.isDecoy)) {
+        flushProgressRef.current();
         setCompleted(true);
         return;
       }
@@ -226,13 +244,14 @@ export function ModeTyping({ cards }: ModeTypingProps) {
         typedTextRef.current = newTypedText;
         setTypedText(newTypedText);
 
-        console.log("Typing check:", { newTypedText, targetWord, match: newTypedText === targetWord });
-
         // Check if fully typed
         if (newTypedText === targetWord) {
           // Boom!
+          playAudio(targetMeteor.card.term, undefined, "correct");
+          if (!targetMeteor.isDecoy) {
+            reportCorrectRef.current(targetMeteor.card.id, "typing");
+          }
           targetMeteor.isExploding = true;
-          console.log("Exploding!", targetMeteor);
           setMeteorites([...meteoritesRef.current]);
 
           if (!targetMeteor.isDecoy) {
@@ -393,7 +412,9 @@ export function ModeTyping({ cards }: ModeTypingProps) {
             </div>
 
             {/* Translation tooltip-like */}
-            <div className={cn("mt-2 text-xs font-medium text-orange-200/80 bg-black/40 px-2 py-1 rounded transition-opacity duration-300", meteor.isExploding ? "opacity-0" : "")}>{meteor.card.translation}</div>
+            <div className={cn("mt-2 text-xs font-medium text-orange-200/80 bg-black/40 px-2 py-1 rounded transition-opacity duration-300", meteor.isExploding ? "opacity-0" : "")}>
+              {meteor.card.translation}
+            </div>
           </div>
         ))}
 

@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal, Trash2, Folder as FolderIcon, Edit2, Target } from "lucide-react";
-import { cn } from "../lib/utils";
-import { useFlashcardStore } from "../services/flashcardService";
+import { cn } from "../../lib/utils";
+import { useStudyProgressStore } from "../../services/studyProgressService";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { format, subDays } from "date-fns";
+import { RankCard } from "../../components/shared/RankCard";
+import { useFlashcardStore } from "../../services/flashcardService";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
 
 import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay, useDroppable } from "@dnd-kit/core";
@@ -494,51 +498,7 @@ export function Flashcards() {
                 <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Background" className="w-40 h-40 object-contain drop-shadow-2xl" />
               </div>
 
-              <div className="relative z-10">
-                <h2 className="text-xs font-bold text-blue-200 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <Medal className="w-4 h-4" />
-                  Rank Hiện Tại
-                </h2>
-
-                <div className="flex items-center gap-4 mb-4">
-                  <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Icon" className="w-14 h-14 object-contain drop-shadow-md" />
-                  <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-100 to-white">
-                    {currentRank.name} {currentRank.tier}
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs font-bold text-blue-200">
-                    <span>Số sao</span>
-                    <span>
-                      {currentRank.stars} / {currentRank.maxStars === 99 ? "∞" : currentRank.maxStars}
-                    </span>
-                  </div>
-                  <div className="flex gap-1">
-                    {currentRank.maxStars === 99 ? (
-                      <div className="flex-1 h-2.5 rounded-full bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
-                    ) : (
-                      Array.from({ length: currentRank.maxStars }).map((_, i) => (
-                        <div key={i} className={cn("flex-1 h-2.5 rounded-full transition-all", i < currentRank.stars ? "bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]" : "bg-slate-700")} />
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-blue-800/50">
-                  <div className="flex justify-between items-center text-xs font-medium mb-4">
-                    <span className="text-blue-300">Thứ hạng hiện tại</span>
-                    <span className="text-white font-bold bg-white/10 px-2.5 py-1 rounded-lg">#{currentRank.position}</span>
-                  </div>
-
-                  <button
-                    onClick={() => navigate("/arena")}
-                    className="w-full bg-yellow-500 hover:bg-yellow-400 text-yellow-950 font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg"
-                  >
-                    <Target className="w-5 h-5" /> Tham gia Rank
-                  </button>
-                </div>
-              </div>
+              <RankCard showButton={true} buttonText="Tham gia Rank" />
             </div>
           </div>
         </div>

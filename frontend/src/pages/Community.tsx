@@ -1,286 +1,503 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserLevelBadge } from "../components/UserLevelBadge";
-import { Heart, MessageSquare, Share2, MoreHorizontal, Send, Image as ImageIcon, Smile, Hash } from "lucide-react";
+import { Heart, MessageSquare, Share2, MoreHorizontal, Send, Image as ImageIcon, Smile, Hash, Edit2, Trash2, X, CornerDownRight } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
+import { useCommunityStore, Post as ApiPost, Comment as ApiComment } from "../services/communityService";
+import DOMPurify from "dompurify";
+import { RichTextEditor } from "../components/RichTextEditor";
+import toast from "react-hot-toast";
 
-// Mock data
-const INITIAL_POSTS = [
-  {
-    id: 1,
-    user: {
-      name: "Minh Anh",
-      username: "@minhanh_study",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
-      level: 15,
-    },
-    time: "2 giờ trước",
-    content: "Chào mọi người, mình đang gặp chút khó khăn với việc phân biệt thì Hiện tại hoàn thành và Quá khứ đơn. Có ai có mẹo nào dễ nhớ không ạ? Cảm ơn nhiều! 😭😭",
-    tags: ["#grammar", "#english", "#help"],
-    likes: 24,
-    comments: [
-      {
-        id: 1,
-        user: { name: "Bảo Trâm", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200&auto=format&fit=crop", level: 13 },
-        content: "Quá khứ đơn là hành động đã chấm dứt hoàn toàn trong quá khứ (có thời gian rõ ràng như yesterday, last year). Hiện tại hoàn thành là hành động xảy ra trong quá khứ nhưng kết quả còn lưu tới hiện tại nha bạn ơi!",
-        time: "1 giờ trước"
-      }
-    ],
-    isLiked: false
-  },
-  {
-    id: 2,
-    user: {
-      name: "Trần Tuấn",
-      username: "@tuantran_99",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
-      level: 8,
-    },
-    time: "5 giờ trước",
-    content: "Cuối cùng cũng hoàn thành mục tiêu 100 ngày học liên tiếp trên Zentask! Cảm giác thật tuyệt vời. Mọi người cùng cố gắng nhé! 🔥🔥🚀",
-    tags: ["#achievement", "#motivation"],
-    likes: 156,
-    comments: [],
-    isLiked: true
-  }
-];
+function timeAgo(dateInput: any) {
+  if (!dateInput) return "Vừa xong";
+  const date = dateInput._seconds ? new Date(dateInput._seconds * 1000) : new Date(dateInput);
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+
+  let interval = Math.floor(seconds / 31536000);
+  if (interval >= 1) return interval + " năm trước";
+  interval = Math.floor(seconds / 2592000);
+  if (interval >= 1) return interval + " tháng trước";
+  interval = Math.floor(seconds / 86400);
+  if (interval >= 1) return interval + " ngày trước";
+  interval = Math.floor(seconds / 3600);
+  if (interval >= 1) return interval + " giờ trước";
+  interval = Math.floor(seconds / 60);
+  if (interval >= 1) return interval + " phút trước";
+  return "Vừa xong";
+}
+
+const extractTags = (html: string) => {
+  const text = html.replace(/<[^>]+>/g, ' ');
+  const matches = text.match(/#[\wÀ-ỹ]+/g);
+  return matches ? matches.map((tag) => tag.toLowerCase()) : [];
+};
 
 export function Community() {
   const { user } = useAuth();
-  const [posts, setPosts] = useState(INITIAL_POSTS);
-  const [newPostContent, setNewPostContent] = useState("");
-  const [activeCommentPost, setActiveCommentPost] = useState<number | null>(null);
+  const { posts, loading, getPosts, createPost, togglePostLike, deletePost, updatePost, getComments, createComment, toggleCommentLike, updateComment } = useCommunityStore();
+  
+  const [newPostContent, setNewPostContent] = useState(() => localStorage.getItem("community_draft") || "");
+  const [showEditor, setShowEditor] = useState(false);
+  const [activeCommentPost, setActiveCommentPost] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
+  const [commentsMap, setCommentsMap] = useState<Record<string, ApiComment[]>>({});
+  
+  const [replyingToCommentId, setReplyingToCommentId] = useState<string | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editCommentContent, setEditCommentContent] = useState("");
 
-  const handleLike = (postId: number) => {
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-          isLiked: !post.isLiked
-        };
-      }
-      return post;
-    }));
+  const [filterTag, setFilterTag] = useState<string | null>(null);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("community_draft", newPostContent);
+  }, [newPostContent]);
+
+  const fetchPosts = async () => {
+    await getPosts(filterTag || undefined);
   };
 
-  const handlePostSubmit = () => {
+  useEffect(() => {
+    fetchPosts();
+  }, [filterTag, getPosts]);
+
+  const handleLike = async (postId: string) => {
+    if (!user) return toast.error("Vui lòng đăng nhập");
+    // The optimistic update would require us to manipulate store's state,
+    // For simplicity, we just toggle and re-fetch if needed.
+    const res = await togglePostLike(postId);
+    if (res) {
+       getPosts(filterTag || undefined);
+    }
+  };
+
+  const handlePostSubmit = async () => {
     if (!newPostContent.trim()) return;
-
-    const newPost = {
-      id: Date.now(),
-      user: {
-        name: user?.displayName || "Bạn",
-        username: "@" + (user?.email?.split('@')[0] || "user"),
-        avatar: user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop",
-        level: user?.level || 1,
-      },
-      time: "Vừa xong",
-      content: newPostContent,
-      tags: [],
-      likes: 0,
-      comments: [],
-      isLiked: false
-    };
-
-    setPosts([newPost, ...posts]);
-    setNewPostContent("");
+    const tags = extractTags(newPostContent);
+    const res = await createPost(newPostContent, tags);
+    if (res) {
+      setNewPostContent("");
+      setShowEditor(false);
+      localStorage.removeItem("community_draft");
+    }
   };
 
-  const handleCommentSubmit = (postId: number) => {
-    if (!commentText.trim()) return;
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa bài đăng này?")) return;
+    await deletePost(postId);
+    setActiveMenuId(null);
+  };
 
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          comments: [
-            ...post.comments,
-            {
-              id: Date.now(),
-              user: { name: user?.displayName || "Bạn", avatar: user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop", level: user?.level || 1 },
-              content: commentText,
-              time: "Vừa xong"
-            }
-          ]
-        };
+  const startEditPost = (post: ApiPost) => {
+    setEditingPostId(post.id);
+    setEditContent(post.content);
+    setActiveMenuId(null);
+  };
+
+  const submitEditPost = async () => {
+    if (!editingPostId || !editContent.trim()) return;
+    const tags = extractTags(editContent);
+    const res = await updatePost(editingPostId, editContent, tags);
+    if (res) {
+      setEditingPostId(null);
+      setEditContent("");
+    }
+  };
+
+  const fetchCommentsForPost = async (postId: string) => {
+    const comments = await getComments(postId);
+    setCommentsMap((prev) => ({ ...prev, [postId]: comments }));
+  };
+
+  const toggleCommentSection = async (postId: string) => {
+    if (activeCommentPost === postId) {
+      setActiveCommentPost(null);
+    } else {
+      setActiveCommentPost(postId);
+      if (!commentsMap[postId]) {
+        await fetchCommentsForPost(postId);
       }
-      return post;
-    }));
-    setCommentText("");
+    }
   };
+
+  const handleCommentSubmit = async (postId: string) => {
+    if (!commentText.trim() || !user) return;
+    const res = await createComment(postId, commentText, replyingToCommentId || undefined);
+    if (res) {
+      setCommentText("");
+      setReplyingToCommentId(null);
+      await fetchCommentsForPost(postId);
+      getPosts(filterTag || undefined);
+    }
+  };
+
+  const handleCommentLike = async (postId: string, commentId: string) => {
+    if (!user) return toast.error("Vui lòng đăng nhập");
+    const res = await toggleCommentLike(commentId);
+    if (res) {
+      await fetchCommentsForPost(postId);
+    }
+  };
+
+  const handleCommentEditSubmit = async (postId: string) => {
+    if (!editingCommentId || !editCommentContent.trim()) return;
+    const res = await updateComment(editingCommentId, editCommentContent);
+    if (res) {
+      setEditingCommentId(null);
+      setEditCommentContent("");
+      await fetchCommentsForPost(postId);
+    }
+  };
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setActiveMenuId(null);
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Cộng đồng</h1>
-          <p className="text-gray-500 font-medium">Kết nối, chia sẻ và học hỏi cùng hàng ngàn học viên khác.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm">
-            {posts.length} Bài viết
+    <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
+      {/* Main Feed */}
+      <div className="flex-1 space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Cộng đồng</h1>
+            <p className="text-gray-500 font-medium">Kết nối, chia sẻ và học hỏi cùng hàng ngàn học viên khác.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm">{posts.length} Bài viết</div>
           </div>
         </div>
-      </div>
 
-      {/* Create Post */}
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-        <div className="flex gap-4">
-          <UserAvatar src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"} level={user?.level || 1} className="w-12 h-12 flex-shrink-0" />
-          <div className="flex-1 space-y-4">
-            <textarea
-              placeholder="Bạn đang nghĩ gì? Cần giúp đỡ về ngữ pháp hay từ vựng?"
-              className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all min-h-[100px]"
-              value={newPostContent}
-              onChange={(e) => setNewPostContent(e.target.value)}
+        {filterTag && (
+          <div className="flex items-center justify-between bg-blue-50 text-blue-800 p-4 rounded-xl">
+            <div className="font-bold flex items-center gap-2">
+              <Hash className="w-5 h-5" />
+              Đang lọc theo: <span className="text-blue-600">{filterTag}</span>
+            </div>
+            <button onClick={() => setFilterTag(null)} className="p-1 hover:bg-blue-100 rounded-full transition">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
+        {/* Create Post */}
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+          <div className="flex gap-4">
+            <UserAvatar
+              src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
+              level={user?.level || 1}
+              className="w-12 h-12 flex-shrink-0"
             />
-            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-              <div className="flex items-center gap-2">
-                <button className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-colors">
-                  <ImageIcon className="w-5 h-5" />
-                </button>
-                <button className="p-2 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-xl transition-colors">
-                  <Smile className="w-5 h-5" />
-                </button>
-                <button className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-xl transition-colors">
-                  <Hash className="w-5 h-5" />
+            <div className="flex-1 space-y-4">
+              {!showEditor && !newPostContent.trim() ? (
+                <textarea
+                  placeholder="Bạn đang nghĩ gì? Cần giúp đỡ về ngữ pháp hay từ vựng? Thêm hashtag với ký tự # (VD: #grammar)"
+                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all min-h-[50px] cursor-text"
+                  onFocus={() => setShowEditor(true)}
+                  readOnly
+                  rows={2}
+                  value=""
+                />
+              ) : (
+                <div 
+                  onBlur={(e) => {
+                    if (!e.currentTarget.contains(e.relatedTarget as Node) && !newPostContent.trim()) {
+                      setShowEditor(false);
+                    }
+                  }}
+                  tabIndex={-1}
+                >
+                  <RichTextEditor
+                    content={newPostContent}
+                    onChange={setNewPostContent}
+                    placeholder="Bạn đang nghĩ gì? Cần giúp đỡ về ngữ pháp hay từ vựng? Thêm hashtag với ký tự # (VD: #grammar)"
+                    minHeight="100px"
+                  />
+                </div>
+              )}
+              <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                <div className="flex items-center gap-2">
+                  <button className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-colors cursor-not-allowed opacity-50" title="Chưa hỗ trợ ảnh">
+                    <ImageIcon className="w-5 h-5" />
+                  </button>
+                  <button className="p-2 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-xl transition-colors">
+                    <Smile className="w-5 h-5" />
+                  </button>
+                </div>
+                <button
+                  onClick={handlePostSubmit}
+                  disabled={!newPostContent.trim()}
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 text-white font-bold rounded-xl transition-all flex items-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  Đăng bài
                 </button>
               </div>
-              <button 
-                onClick={handlePostSubmit}
-                disabled={!newPostContent.trim()}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 text-white font-bold rounded-xl transition-all flex items-center gap-2"
-              >
-                <Send className="w-4 h-4" />
-                Đăng bài
-              </button>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Posts Feed */}
-      <div className="space-y-6">
-        {posts.map((post) => (
-          <div key={post.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-4">
-            {/* Post Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <UserAvatar src={post.user.avatar} level={post.user.level} className="w-12 h-12" />
-                <div>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <h3 className="font-bold text-gray-900">{post.user.name}</h3>
-                    <UserLevelBadge level={post.user.level} size="sm" showText={false} />
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
-                    <span>{post.user.username}</span>
-                    <span>•</span>
-                    <span>{post.time}</span>
-                  </div>
-                </div>
-              </div>
-              <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors">
-                <MoreHorizontal className="w-5 h-5" />
-              </button>
-            </div>
+        {/* Posts Feed */}
+        <div className="space-y-6">
+          {loading ? (
+            <div className="text-center text-gray-500 py-8">Đang tải...</div>
+          ) : posts.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">Không có bài đăng nào.</div>
+          ) : (
+            posts.map((post) => {
+              const isLiked = user ? post.likes.includes(user.uid) : false;
+              const isOwnPost = user?.uid === post.user.uid;
 
-            {/* Post Content */}
-            <p className="text-gray-700 leading-relaxed mb-4 whitespace-pre-wrap">
-              {post.content}
-            </p>
-
-            {/* Tags */}
-            {post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {post.tags.map(tag => (
-                  <span key={tag} className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex items-center justify-between py-3 border-y border-gray-100 mb-4">
-              <div className="flex items-center gap-6">
-                <button 
-                  onClick={() => handleLike(post.id)}
-                  className={cn(
-                    "flex items-center gap-2 font-bold text-sm transition-colors",
-                    post.isLiked ? "text-red-500" : "text-gray-500 hover:text-red-500"
-                  )}
-                >
-                  <Heart className={cn("w-5 h-5", post.isLiked && "fill-current")} />
-                  {post.likes} <span className="hidden sm:inline">Thích</span>
-                </button>
-                <button 
-                  onClick={() => setActiveCommentPost(activeCommentPost === post.id ? null : post.id)}
-                  className="flex items-center gap-2 text-gray-500 hover:text-blue-500 font-bold text-sm transition-colors"
-                >
-                  <MessageSquare className="w-5 h-5" />
-                  {post.comments.length} <span className="hidden sm:inline">Bình luận</span>
-                </button>
-              </div>
-              <button className="flex items-center gap-2 text-gray-500 hover:text-green-500 font-bold text-sm transition-colors">
-                <Share2 className="w-5 h-5" />
-                <span className="hidden sm:inline">Chia sẻ</span>
-              </button>
-            </div>
-
-            {/* Comments Section */}
-            {activeCommentPost === post.id && (
-              <div className="space-y-4 animate-in slide-in-from-top-2">
-                {/* Existing Comments */}
-                <div className="space-y-4 max-h-60 overflow-y-auto pr-2 no-scrollbar">
-                  {post.comments.map(comment => (
-                    <div key={comment.id} className="flex gap-3">
-                      <UserAvatar src={comment.user.avatar} level={comment.user.level} className="w-8 h-8 flex-shrink-0 mt-1" />
-                      <div className="flex-1 bg-gray-50 rounded-2xl p-3 border border-gray-100">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-bold text-sm text-gray-900">{comment.user.name}</span>
-                          <UserLevelBadge level={comment.user.level} size="sm" showText={false} />
-                          <span className="text-[10px] font-medium text-gray-400 ml-auto">{comment.time}</span>
+              return (
+                <div key={post.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-4">
+                  {/* Post Header */}
+                  <div className="flex items-center justify-between mb-4 relative">
+                    <div className="flex items-center gap-3">
+                      <UserAvatar src={post.user.avatar} level={post.user.level} className="w-12 h-12" />
+                      <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h3 className="font-bold text-gray-900">{post.user.name}</h3>
+                          <UserLevelBadge level={post.user.level} size="sm" showText={false} />
                         </div>
-                        <p className="text-sm text-gray-700">{comment.content}</p>
+                        <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
+                          <span>{post.user.username}</span>
+                          <span>•</span>
+                          <span>{timeAgo(post.createdAt)}</span>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                  {post.comments.length === 0 && (
-                    <p className="text-sm text-center text-gray-500 py-4">Chưa có bình luận nào. Hãy là người đầu tiên!</p>
-                  )}
-                </div>
+                    {isOwnPost && (
+                      <div className="relative">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveMenuId(activeMenuId === post.id ? null : post.id);
+                          }}
+                          className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors"
+                        >
+                          <MoreHorizontal className="w-5 h-5" />
+                        </button>
+                        {activeMenuId === post.id && (
+                          <div className="absolute right-0 top-10 bg-white border border-gray-100 shadow-xl rounded-xl w-40 py-2 z-50">
+                            <button onClick={() => startEditPost(post)} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-gray-700 font-medium">
+                              <Edit2 className="w-4 h-4" /> Sửa
+                            </button>
+                            <button onClick={() => handleDeletePost(post.id)} className="w-full text-left px-4 py-2 hover:bg-red-50 flex items-center gap-2 text-red-600 font-medium">
+                              <Trash2 className="w-4 h-4" /> Xóa
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
-                {/* Add Comment */}
-                <div className="flex gap-3 pt-2">
-                  <UserAvatar src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"} level={user?.level || 1} className="w-8 h-8 flex-shrink-0" />
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      placeholder="Viết bình luận..."
-                      className="w-full bg-gray-50 border border-gray-100 rounded-full py-2 pl-4 pr-10 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleCommentSubmit(post.id);
-                      }}
+                  {/* Post Content */}
+                  {editingPostId === post.id ? (
+                    <div className="mb-4 space-y-3">
+                      <RichTextEditor
+                        content={editContent}
+                        onChange={setEditContent}
+                        minHeight="100px"
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <button onClick={() => setEditingPostId(null)} className="px-4 py-2 text-gray-500 font-medium hover:bg-gray-50 rounded-lg">
+                          Hủy
+                        </button>
+                        <button onClick={submitEditPost} className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg">
+                          Lưu
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      className="prose prose-sm max-w-none text-gray-700 leading-relaxed mb-4 break-words" 
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} 
                     />
-                    <button 
-                      onClick={() => handleCommentSubmit(post.id)}
-                      disabled={!commentText.trim()}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-blue-600 disabled:text-gray-300 transition-colors"
-                    >
-                      <Send className="w-4 h-4" />
+                  )}
+
+                  {/* Tags */}
+                  {post.tags.length > 0 && !editingPostId && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {post.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          onClick={() => setFilterTag(tag)}
+                          className="cursor-pointer text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-md transition-colors"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-between py-3 border-y border-gray-100 mb-4">
+                    <div className="flex items-center gap-6">
+                      <button
+                        onClick={() => handleLike(post.id)}
+                        className={cn("flex items-center gap-2 font-bold text-sm transition-colors", isLiked ? "text-red-500" : "text-gray-500 hover:text-red-500")}
+                      >
+                        <Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
+                        {post.likes.length} <span className="hidden sm:inline">Thích</span>
+                      </button>
+                      <button onClick={() => toggleCommentSection(post.id)} className="flex items-center gap-2 text-gray-500 hover:text-blue-500 font-bold text-sm transition-colors">
+                        <MessageSquare className="w-5 h-5" />
+                        {post.commentsCount} <span className="hidden sm:inline">Bình luận</span>
+                      </button>
+                    </div>
+                    <button className="flex items-center gap-2 text-gray-500 hover:text-green-500 font-bold text-sm transition-colors">
+                      <Share2 className="w-5 h-5" />
+                      <span className="hidden sm:inline">Chia sẻ</span>
                     </button>
                   </div>
+
+                  {/* Comments Section */}
+                  {activeCommentPost === post.id && (
+                    <div className="space-y-4 animate-in slide-in-from-top-2">
+                      <div className="space-y-4 max-h-60 overflow-y-auto pr-2 no-scrollbar">
+                        {(commentsMap[post.id] || []).map((comment) => {
+                          const isCommentLiked = comment.likes.includes(user?.uid || "");
+                          const isOwnComment = comment.user.uid === user?.uid;
+                          
+                          return (
+                            <div key={comment.id} className="flex gap-3">
+                              <UserAvatar src={comment.user.avatar} level={comment.user.level} className="w-8 h-8 flex-shrink-0 mt-1" />
+                              <div className="flex-1">
+                                <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-bold text-sm text-gray-900">{comment.user.name}</span>
+                                    {comment.parentId && (
+                                      <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded flex items-center gap-0.5 font-bold">
+                                        <CornerDownRight className="w-3 h-3" /> Reply
+                                      </span>
+                                    )}
+                                    <UserLevelBadge level={comment.user.level} size="sm" showText={false} />
+                                    <span className="text-[10px] font-medium text-gray-400 ml-auto">{timeAgo(comment.createdAt)}</span>
+                                  </div>
+                                  
+                                  {editingCommentId === comment.id ? (
+                                    <div className="mt-2 space-y-2">
+                                      <input 
+                                        type="text" 
+                                        value={editCommentContent}
+                                        onChange={e => setEditCommentContent(e.target.value)}
+                                        className="w-full bg-white border border-gray-200 rounded-lg py-1.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                      />
+                                      <div className="flex gap-2 justify-end">
+                                        <button onClick={() => setEditingCommentId(null)} className="text-xs font-bold text-gray-500 hover:text-gray-700">Hủy</button>
+                                        <button onClick={() => handleCommentEditSubmit(post.id)} className="text-xs font-bold text-blue-600 hover:text-blue-700">Lưu</button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm text-gray-700">{comment.content}</p>
+                                  )}
+                                </div>
+
+                                {/* Comment Actions */}
+                                {!editingCommentId && (
+                                  <div className="flex items-center gap-4 mt-1 ml-2">
+                                    <button 
+                                      onClick={() => handleCommentLike(post.id, comment.id)}
+                                      className={cn("text-[11px] font-bold transition-colors flex items-center gap-1", isCommentLiked ? "text-red-500" : "text-gray-500 hover:text-gray-700")}
+                                    >
+                                      Thích {comment.likes.length > 0 && `(${comment.likes.length})`}
+                                    </button>
+                                    <button 
+                                      onClick={() => setReplyingToCommentId(comment.id)}
+                                      className="text-[11px] font-bold text-gray-500 hover:text-gray-700 transition-colors"
+                                    >
+                                      Trả lời
+                                    </button>
+                                    {isOwnComment && (
+                                      <button 
+                                        onClick={() => {
+                                          setEditingCommentId(comment.id);
+                                          setEditCommentContent(comment.content);
+                                        }}
+                                        className="text-[11px] font-bold text-gray-500 hover:text-blue-500 transition-colors"
+                                      >
+                                        Sửa
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {commentsMap[post.id]?.length === 0 && <p className="text-sm text-center text-gray-500 py-4">Chưa có bình luận nào. Hãy là người đầu tiên!</p>}
+                      </div>
+
+                      {/* Add Comment */}
+                      <div className="flex gap-3 pt-2">
+                        <UserAvatar
+                          src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
+                          level={user?.level || 1}
+                          className="w-8 h-8 flex-shrink-0"
+                        />
+                        <div className="flex-1 relative flex flex-col gap-2">
+                          {replyingToCommentId && (
+                            <div className="flex items-center justify-between bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg w-fit">
+                              <span className="flex items-center gap-1"><CornerDownRight className="w-3 h-3"/> Đang trả lời bình luận</span>
+                              <button onClick={() => setReplyingToCommentId(null)} className="ml-2 hover:text-blue-900"><X className="w-3 h-3" /></button>
+                            </div>
+                          )}
+                          <div className="relative">
+                            <input
+                              type="text"
+                              placeholder="Viết bình luận..."
+                              className="w-full bg-gray-50 border border-gray-100 rounded-full py-2 pl-4 pr-10 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                              value={commentText}
+                              onChange={(e) => setCommentText(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") handleCommentSubmit(post.id);
+                              }}
+                            />
+                            <button
+                              onClick={() => handleCommentSubmit(post.id)}
+                              disabled={!commentText.trim()}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-blue-600 disabled:text-gray-300 transition-colors"
+                            >
+                              <Send className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Sidebar for Tags */}
+      <div className="w-full md:w-64 space-y-6">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+          <h3 className="font-extrabold text-gray-900 mb-4 flex items-center gap-2">
+            <Hash className="w-5 h-5 text-blue-500" />
+            Chủ đề nổi bật
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {["#grammar", "#english", "#help", "#achievement", "#motivation"].map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setFilterTag(tag)}
+                className={cn("px-3 py-1.5 rounded-lg text-sm font-bold transition-all", filterTag === tag ? "bg-blue-600 text-white shadow-md" : "bg-gray-50 text-gray-600 hover:bg-gray-100")}
+              >
+                {tag}
+              </button>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );

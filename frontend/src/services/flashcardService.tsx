@@ -42,12 +42,40 @@ export interface Flashcard {
   updatedAt: any;
 }
 
+export interface CardProgress {
+  cardId: string;
+  easeFactor: number;
+  interval: number;
+  repetitions: number;
+  dueDate: string | null;
+  quality: number;
+  lastReviewedAt: string | null;
+}
+
+export type MemoryLevel = "known" | "almost" | "unknown";
+
+export function getMemoryLevel(progress: CardProgress | undefined): MemoryLevel {
+  if (!progress) return "unknown";
+  if (progress.easeFactor >= 2.5 && progress.repetitions >= 2) return "known";
+  if (progress.repetitions >= 1 || progress.easeFactor >= 1.8) return "almost";
+  return "unknown";
+}
+
+interface PendingUpdate {
+  cardId: string;
+  setId: string;
+  quality: number;
+  mode: string;
+}
+
 interface FlashcardState {
   loading: boolean;
   folders: FlashcardFolder[];
   sets: FlashcardSet[];
   currentSet: FlashcardSet | null;
   cards: Flashcard[];
+  cardProgress: Record<string, CardProgress>;
+  pendingUpdates: PendingUpdate[];
 
   fetchFolders: () => Promise<void>;
   createFolder: (name: string, color?: string) => Promise<FlashcardFolder | null>;
@@ -63,6 +91,12 @@ interface FlashcardState {
   createCard: (setId: string, data: Partial<Flashcard>) => Promise<Flashcard | null>;
   deleteCard: (cardId: string) => Promise<void>;
 
+  // SM-2 methods
+  fetchProgress: (setId: string) => Promise<void>;
+  recordAnswer: (cardId: string, setId: string, quality: number, mode: string) => void;
+  flushProgress: () => Promise<void>;
+  setManualProgress: (cardId: string, setId: string, level: MemoryLevel) => Promise<void>;
+
   generateAI: (term: string) => Promise<any>;
   cloneSet: (setId: string) => Promise<FlashcardSet | null>;
   updateSetPrivacy: (setId: string, isPublic: boolean) => Promise<void>;
@@ -74,6 +108,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   sets: [],
   currentSet: null,
   cards: [],
+  cardProgress: {},
+  pendingUpdates: [],
 
   fetchFolders: async () => {
     try {
@@ -341,6 +377,112 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       return null;
     } finally {
       set({ loading: false });
+    }
+  },
+
+  // ==================== SM-2 METHODS ====================
+
+  fetchProgress: async (setId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/set/${setId}/progress`, {
+        credentials: "include",
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      set({ cardProgress: data });
+    } catch (err) {
+      console.error("fetchProgress error:", err);
+    }
+  },
+
+  recordAnswer: (cardId, setId, quality, mode) => {
+    const newUpdate: PendingUpdate = { cardId, setId, quality, mode };
+    set((state) => {
+      const newPending = [...state.pendingUpdates, newUpdate];
+      // Auto-flush when 5 updates accumulated
+      if (newPending.length >= 5) {
+        // Trigger flush asynchronously
+        setTimeout(() => {
+          useFlashcardStore.getState().flushProgress();
+        }, 0);
+      }
+      return { pendingUpdates: newPending };
+    });
+  },
+
+  flushProgress: async () => {
+    const { pendingUpdates } = get();
+    if (pendingUpdates.length === 0) return;
+
+    // Optimistically clear pending list
+    set({ pendingUpdates: [] });
+
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/progress/batch`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ updates: pendingUpdates }),
+      });
+      if (!res.ok) throw new Error("Failed to flush progress");
+      const data = await res.json();
+
+      // Update local cardProgress state
+      if (data.results) {
+        set((state) => {
+          const updated = { ...state.cardProgress };
+          data.results.forEach((r: any) => {
+            updated[r.cardId] = {
+              cardId: r.cardId,
+              easeFactor: r.easeFactor,
+              interval: r.interval,
+              repetitions: r.repetitions,
+              dueDate: r.dueDate ?? null,
+              quality: r.quality,
+              lastReviewedAt: new Date().toISOString(),
+            };
+          });
+          return { cardProgress: updated };
+        });
+      }
+    } catch (err) {
+      console.error("flushProgress error:", err);
+      // Restore pending updates on failure
+      set((state) => ({ pendingUpdates: [...state.pendingUpdates, ...pendingUpdates] }));
+    }
+  },
+
+  setManualProgress: async (cardId, setId, level) => {
+    // Optimistic update
+    const qualityMap: Record<string, number> = { known: 5, almost: 3, unknown: 1 };
+    const quality = qualityMap[level];
+
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/progress/manual`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ cardId, setId, level }),
+      });
+      if (!res.ok) throw new Error("Failed to set manual progress");
+      const data = await res.json();
+
+      set((state) => ({
+        cardProgress: {
+          ...state.cardProgress,
+          [cardId]: {
+            cardId,
+            easeFactor: data.easeFactor,
+            interval: data.interval,
+            repetitions: data.repetitions,
+            dueDate: data.dueDate ?? null,
+            quality: data.quality,
+            lastReviewedAt: new Date().toISOString(),
+          },
+        },
+      }));
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi cập nhật tiến trình");
     }
   },
 

@@ -8,10 +8,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation, 
 import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
 import { Dashboard } from "./pages/Dashboard";
-import { Flashcards } from "./pages/Flashcards";
-import { FlashcardDetail } from "./pages/FlashcardDetail";
-import { FlashcardPractice } from "./pages/FlashcardPractice";
-import { Quiz } from "./pages/Quiz";
+import { Flashcards } from "./pages/Flashcard/Flashcards";
+import { FlashcardDetail } from "./pages/Flashcard/FlashcardDetail";
+import { FlashcardPractice } from "./pages/Flashcard/FlashcardPractice";
+import { Quiz } from "./pages/Quiz/Quiz";
+import { QuizDetail } from "./pages/Quiz/QuizDetail";
 import { Grammar } from "./pages/Grammar";
 import { Tenses } from "./pages/Tenses";
 import { Profile } from "./pages/Profile";
@@ -22,16 +23,27 @@ import { Notifications } from "./pages/Notifications";
 import { Auth } from "./pages/Auth";
 import { Arena } from "./pages/Arena";
 import { AdminLayout } from "./components/AdminLayout";
-import { AdminTasks } from "./pages/AdminTasks";
-import { AdminUsers } from "./pages/AdminUsers";
+import { AdminTasks } from "./pages/Admin/AdminTasks";
+import { AdminUsers } from "./pages/Admin/AdminUsers";
+import { AdminVocabSets } from "./pages/Admin/AdminVocabSets";
+import { AdminVocab } from "./pages/Admin/AdminVocab";
+import { AdminQuizzes } from "./pages/Admin/AdminQuizzes";
+import { AdminQuizHistory } from "./pages/Admin/AdminQuizHistory";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { TermsOfService } from "./pages/TermsOfService";
 import { useAuth } from "./contexts/AuthContext";
+import { SocketProvider } from "./contexts/SocketContext";
 
 import { Posts } from "./pages/Posts";
 import { RightSidebar } from "./components/RightSidebar";
 import { LevelUpModal } from "./components/LevelUpModal";
 import { useUserStore } from "./services/userService";
+import { Beginner } from "./pages/Beginner";
+import { BeginnerFlashcardDetail } from "./pages/Flashcard/BeginnerFlashcardDetail";
+import { QuizCreate } from "./pages/Quiz/QuizCreate";
+import { QuizRoom } from "./pages/Quiz/QuizRoom";
+import { QuizPlay } from "./pages/Quiz/QuizPlay";
+import { QuizResult } from "./pages/Quiz/QuizResult";
 
 function MainLayout() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(() => {
@@ -148,13 +160,25 @@ function AppContent() {
           <Route index element={<Navigate to="/admin/daily-task" replace />} />
           <Route path="daily-task" element={<AdminTasks />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="vocab-sets" element={<AdminVocabSets />} />
+          <Route path="vocab" element={<AdminVocab />} />
+          <Route path="quizzes" element={<AdminQuizzes />} />
+          <Route path="quiz-history" element={<AdminQuizHistory />} />
         </Route>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Dashboard />} />
+          <Route path="beginner" element={<Beginner />} />
+          <Route path="beginner/flashcard/:id" element={<BeginnerFlashcardDetail />} />
+          <Route path="beginner/flashcard/:id/practice" element={<FlashcardPractice />} />
           <Route path="flashcards" element={<Flashcards />} />
           <Route path="flashcard/:id" element={<FlashcardDetail />} />
           <Route path="flashcard/:id/practice" element={<FlashcardPractice />} />
           <Route path="quiz" element={<Quiz />} />
+          <Route path="quiz/create" element={<QuizCreate />} />
+          <Route path="quiz/:id" element={<QuizDetail />} />
+          <Route path="quiz/room/:code" element={<QuizRoom />} />
+          <Route path="quiz/play/:id" element={<QuizPlay />} />
+          <Route path="quiz/result/:resultId" element={<QuizResult />} />
           <Route path="grammar" element={<Grammar />} />
           <Route path="tenses" element={<Tenses />} />
           <Route path="profile" element={<Profile />} />
@@ -180,7 +204,9 @@ function AppContent() {
 export default function App() {
   return (
     <Router>
-      <AppContent />
+      <SocketProvider>
+        <AppContent />
+      </SocketProvider>
     </Router>
   );
 }

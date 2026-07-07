@@ -1,7 +1,7 @@
 import React from "react";
 import { Layers, HelpCircle, FormInput, Headphones, Shuffle, Target, Lock, Keyboard } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { PracticeMode } from "../../pages/FlashcardPractice";
+import { PracticeMode } from "../../pages/Flashcard/FlashcardPractice";
 
 interface PracticeSidebarProps {
   activeMode: PracticeMode;
@@ -27,7 +27,7 @@ export function PracticeSidebar({ activeMode, onChangeMode, cardCount }: Practic
         <h2 className="text-lg font-bold text-gray-900 font-heading">Chế độ luyện tập</h2>
         <p className="text-sm text-gray-500 mt-1">Chọn một chế độ để bắt đầu học</p>
       </div>
-      
+
       <div className="p-4 flex-1 overflow-y-auto space-y-3">
         {MODES.map((mode) => {
           const isLocked = cardCount < mode.minCards;
@@ -41,35 +41,37 @@ export function PracticeSidebar({ activeMode, onChangeMode, cardCount }: Practic
                 onClick={() => onChangeMode(mode.id as PracticeMode)}
                 className={cn(
                   "w-full text-left p-4 rounded-2xl transition-all border-2 relative overflow-hidden group",
-                  isActive 
-                    ? "bg-blue-50 border-blue-500 shadow-sm" 
+                  isActive
+                    ? "bg-blue-50 border-blue-500 shadow-sm"
                     : isLocked
                       ? "bg-gray-50 border-transparent opacity-60 cursor-not-allowed"
-                      : "bg-white border-transparent hover:border-blue-200 hover:bg-gray-50 hover:shadow-sm"
+                      : "bg-white border-transparent hover:border-blue-200 hover:bg-gray-50 hover:shadow-sm",
                 )}
               >
-              <div className="flex items-center gap-4">
-                <div className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0 transition-colors",
-                  isActive ? "bg-blue-600 text-white" : isLocked ? "bg-gray-200 text-gray-400" : "bg-white text-gray-600 border border-gray-200 group-hover:border-blue-300 group-hover:text-blue-600"
-                )}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className={cn("font-bold text-sm", isActive ? "text-blue-900" : isLocked ? "text-gray-500" : "text-gray-900")}>
-                    {mode.title}
-                  </h3>
-                  <p className={cn("text-xs mt-0.5 truncate", isActive ? "text-blue-600" : "text-gray-500")}>
-                    {mode.desc}
-                  </p>
-                </div>
-                
-                {isLocked && (
-                  <div className="shrink-0 text-gray-400">
-                    <Lock className="w-4 h-4" />
+                <div className="flex items-center gap-4">
+                  <div
+                    className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0 transition-colors",
+                      isActive
+                        ? "bg-blue-600 text-white"
+                        : isLocked
+                          ? "bg-gray-200 text-gray-400"
+                          : "bg-white text-gray-600 border border-gray-200 group-hover:border-blue-300 group-hover:text-blue-600",
+                    )}
+                  >
+                    <Icon className="w-5 h-5" />
                   </div>
-                )}
-              </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className={cn("font-bold text-sm", isActive ? "text-blue-900" : isLocked ? "text-gray-500" : "text-gray-900")}>{mode.title}</h3>
+                    <p className={cn("text-xs mt-0.5 truncate", isActive ? "text-blue-600" : "text-gray-500")}>{mode.desc}</p>
+                  </div>
+
+                  {isLocked && (
+                    <div className="shrink-0 text-gray-400">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                  )}
+                </div>
               </button>
             </div>
           );

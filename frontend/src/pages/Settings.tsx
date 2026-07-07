@@ -3,6 +3,7 @@ import { UserAvatar } from "../components/UserAvatar";
 import { User, Bell, Shield, Key, Moon, Volume2, Globe, HelpCircle, LogOut, Settings as SettingsIconLucide, ChevronRight } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
+import { useFlashcardStore } from "../services/flashcardService";
 import toast from "react-hot-toast";
 
 export function Settings() {
@@ -20,6 +21,10 @@ export function Settings() {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [tempPhotoURL, setTempPhotoURL] = useState("");
 
+  // App Settings State
+  const { sets, fetchSets } = useFlashcardStore();
+  const [defaultSetId, setDefaultSetId] = useState("");
+
   useEffect(() => {
     if (user) {
       setDisplayName(user.displayName || "");
@@ -27,7 +32,12 @@ export function Settings() {
       setBio(user.bio || "");
       setPhotoURL(user.photoURL || "");
     }
-  }, [user]);
+    fetchSets();
+    const savedDefault = localStorage.getItem("defaultFlashcardSetId");
+    if (savedDefault) {
+      setDefaultSetId(savedDefault);
+    }
+  }, [user, fetchSets]);
 
   const handleChangeAvatar = () => {
     setTempPhotoURL(photoURL);
@@ -169,6 +179,32 @@ export function Settings() {
                   <label className="text-sm font-bold text-gray-700">Email</label>
                   <input type="email" defaultValue={user?.email || ""} disabled className="w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-500 cursor-not-allowed" />
                   <p className="text-xs text-gray-500">Email được liên kết với tài khoản đăng nhập của bạn.</p>
+                </div>
+              </div>
+
+              <div className="pt-8 border-t border-gray-100">
+                <h3 className="font-bold text-gray-900 mb-4">Cài đặt Ứng dụng</h3>
+                <div className="space-y-1.5 max-w-md">
+                  <label className="text-sm font-bold text-gray-700">Bộ thẻ mặc định</label>
+                  <select
+                    value={defaultSetId}
+                    onChange={(e) => {
+                      setDefaultSetId(e.target.value);
+                      if (e.target.value) {
+                        localStorage.setItem("defaultFlashcardSetId", e.target.value);
+                        toast.success("Đã cập nhật bộ thẻ mặc định!");
+                      } else {
+                        localStorage.removeItem("defaultFlashcardSetId");
+                      }
+                    }}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                  >
+                    <option value="">-- Không có --</option>
+                    {sets.map(s => (
+                      <option key={s.id} value={s.id}>{s.title}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Được sử dụng khi lưu từ vựng nhanh từ danh sách Người mới bắt đầu.</p>
                 </div>
               </div>
 

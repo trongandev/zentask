@@ -6,6 +6,7 @@ import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserStore } from "../services/userService";
 import { useConfigStore } from "../services/configService";
+import { useEtcStore } from "../services/etcService";
 import { useEffect, useState } from "react";
 
 const getTimeUntilReset = () => {
@@ -31,15 +32,29 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
   const { user, updateUser } = useAuth();
   const { checkIn, loading: checkingIn } = useUserStore();
   const { dailyTasks, fetchConfigs, taskProgress } = useConfigStore();
+  const { getLeaderboard } = useEtcStore();
   const [timeLeft, setTimeLeft] = useState(getTimeUntilReset());
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
   useEffect(() => {
     fetchConfigs();
     const timer = setInterval(() => {
       setTimeLeft(getTimeUntilReset());
     }, 1000);
+
+    const fetchLeaderboard = async () => {
+      const data = await getLeaderboard('week');
+      const enrichedData = data.map((item: any) => ({
+        ...item,
+        isUser: user ? item.id === user.uid : false,
+        xp: item.xp.toLocaleString()
+      }));
+      setLeaderboard(enrichedData);
+    };
+    fetchLeaderboard();
+
     return () => clearInterval(timer);
-  }, [fetchConfigs]);
+  }, [fetchConfigs, user, getLeaderboard]);
 
   // For now, mock 'current' progress for tasks as 0 since we haven't implemented progress tracking yet.
   const tasks = dailyTasks.map(t => {
@@ -93,21 +108,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
     4: "Kim Cương",
     5: "Cao Thủ",
   };
-
-  const leaderboard = [
-    { rank: 1, name: "Minh Anh", level: 15, xp: "12.540", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop", isUser: false, rankId: 5 },
-    { rank: 2, name: "Quang Huy", level: 14, xp: "11.230", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop", isUser: false, rankId: 5 },
-    { rank: 3, name: "Bảo Trâm", level: 13, xp: "9.870", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100&auto=format&fit=crop", isUser: false, rankId: 4 },
-    {
-      rank: 12,
-      name: `${user?.displayName || "Bạn"} (Bạn)`,
-      level: user?.level || 1,
-      xp: user?.xp?.toLocaleString() || "0",
-      avatar: user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop",
-      isUser: true,
-      rankId: user?.rankId || 1,
-    },
-  ];
+  const TIER_NAMES: Record<number, string> = { 1: "I", 2: "II", 3: "III", 4: "IV", 5: "V" };
 
   return (
     <aside className={cn("w-full bg-white border-l border-gray-100 h-full space-y-6 relative flex flex-col", isOpen ? "p-6 overflow-y-auto" : "p-3 items-center py-6 overflow-visible")}>
@@ -368,31 +369,31 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
           </div>
 
           <div className="space-y-4">
-            {leaderboard.slice(0, 3).map((user, idx) => (
+            {leaderboard.slice(0, 3).map((lUser, idx) => (
               <Link
-                to={`/profile/${user.rank}`}
+                to={lUser.isUser ? "/profile" : `/profile/${lUser.id}`}
                 key={`top-${idx}`}
                 className={cn("flex items-center gap-3 p-2.5 rounded-xl transition-colors cursor-pointer", user.isUser ? "bg-blue-50 border border-blue-100" : "hover:bg-gray-50")}
               >
-                {user.rank <= 3 ? (
+                {lUser.rank <= 3 ? (
                   <div className="w-6 flex-shrink-0 flex items-center justify-center">
-                    <img src={`/top/top${user.rank}.png`} alt={`Top ${user.rank}`} className="w-full h-full object-contain" />
+                    <img src={`/top/top${lUser.rank}.png`} alt={`Top ${lUser.rank}`} className="w-full h-full object-contain" />
                   </div>
                 ) : (
-                  <div className="w-8 font-bold text-gray-400 text-sm flex justify-center flex-shrink-0">{user.rank}</div>
+                  <div className="w-8 font-bold text-gray-400 text-sm flex justify-center flex-shrink-0">{lUser.rank}</div>
                 )}
-                <UserAvatar src={user.avatar} level={user.level} className="w-10 h-10 flex-shrink-0" />
+                <UserAvatar src={lUser.avatar} level={lUser.level} className="w-10 h-10 flex-shrink-0" />
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <p className={cn("text-sm font-bold truncate mb-0.5", user.isUser ? "text-blue-900" : "text-gray-900")}>{user.name}</p>
-                  <UserLevelBadge level={user.level} size="sm" />
-                  <div className={cn("text-xs font-bold mt-0.5 flex items-center gap-2", user.isUser ? "text-blue-600" : "text-gray-500")}>
+                  <p className={cn("text-sm font-bold truncate mb-0.5", lUser.isUser ? "text-blue-900" : "text-gray-900")}>{lUser.name}</p>
+                  <UserLevelBadge level={lUser.level} size="sm" />
+                  <div className={cn("text-xs font-bold mt-0.5 flex items-center gap-2", lUser.isUser ? "text-blue-600" : "text-gray-500")}>
                     <span>
-                      {user.xp} <span className="text-gray-400 font-medium">XP</span>
+                      {lUser.xp} <span className="text-gray-400 font-medium">XP</span>
                     </span>
                   </div>
-                  <span className="text-[10px] uppercase font-bold text-gray-500">{RANK_NAMES[user.rankId]}</span>
+                  <span className="text-[10px] uppercase font-bold text-gray-500">{RANK_NAMES[lUser.rankId]} {TIER_NAMES[lUser.tier || 3]}</span>
                 </div>
-                <img src={`/rank/${user.rankId}.png`} alt="Rank" className="w-6 object-contain" />
+                <img src={`/rank/${lUser.rankId}.png`} alt="Rank" className="w-6 object-contain" />
               </Link>
             ))}
 
@@ -414,7 +415,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                       {leaderboard.find((u) => u.isUser)?.xp} <span className="text-gray-400 font-medium">XP</span>
                     </span>
                   </div>
-                  <span className="text-[10px] uppercase font-bold text-blue-500">{RANK_NAMES[user?.rankId || 1]}</span>
+                  <span className="text-[10px] uppercase font-bold text-blue-500">{RANK_NAMES[user?.rankId || 1]} {TIER_NAMES[user?.tier || 3]}</span>
                 </div>
                 <img src={`/rank/${user?.rankId || 1}.png`} alt="Rank" className="w-6 object-contain drop-shadow-sm" />
               </Link>
@@ -431,22 +432,22 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
             </div>
           </div>
           <div className="flex flex-col gap-3 pb-6">
-            {leaderboard.slice(0, 3).map((user, idx) => (
-              <Link to={`/profile/${user.rank}`} key={idx} className="relative group cursor-pointer block">
-                <UserAvatar src={user.avatar} level={user.level} className="w-10 h-10" />
+            {leaderboard.slice(0, 3).map((lUser, idx) => (
+              <Link to={lUser.isUser ? "/profile" : `/profile/${lUser.id}`} key={idx} className="relative group cursor-pointer block">
+                <UserAvatar src={lUser.avatar} level={lUser.level} className="w-10 h-10" />
                 <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-sm border border-gray-100">
-                  <span className="text-[8px] font-bold text-gray-700">{user.rank}</span>
+                  <span className="text-[8px] font-bold text-gray-700">{lUser.rank}</span>
                 </div>
                 <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 p-3 bg-gray-900 text-white text-xs font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-xl flex flex-col min-w-[140px] text-center">
                   <span className="text-gray-100">
-                    Top {user.rank}: {user.name}
+                    Top {lUser.rank}: {lUser.name}
                   </span>
                   <div className="flex items-center flex-col">
-                    <img src={`/rank/${user.rankId}.png`} alt="Rank" className="w-10 object-contain my-2" />
+                    <img src={`/rank/${lUser.rankId}.png`} alt="Rank" className="w-10 object-contain my-2" />
                     <div className="">
-                      <span className="text-yellow-400 font-medium text-[10px]">{user.xp} XP</span>
+                      <span className="text-yellow-400 font-medium text-[10px]">{lUser.xp} XP</span>
                       <div className="flex items-center gap-1">
-                        <span className="text-[10px] text-gray-300 font-bold uppercase">{RANK_NAMES[user.rankId]}</span>
+                        <span className="text-[10px] text-gray-300 font-bold uppercase">{RANK_NAMES[lUser.rankId]} {TIER_NAMES[lUser.tier || 3]}</span>
                       </div>
                     </div>
                   </div>
@@ -470,7 +471,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                     <img src={`/rank/${user?.rankId || 1}.png`} alt="Rank" className="w-10 object-contain" />
                     <div className="flex flex-col">
                       <span className="text-yellow-400 font-medium text-[10px]">{leaderboard.find((u) => u.isUser)?.xp} XP</span>
-                      <span className="text-[10px] text-gray-300 font-bold uppercase">{RANK_NAMES[user?.rankId || 1]}</span>
+                      <span className="text-[10px] text-gray-300 font-bold uppercase">{RANK_NAMES[user?.rankId || 1]} {TIER_NAMES[user?.tier || 3]}</span>
                     </div>
                   </div>
                   <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-[6px] border-transparent border-l-gray-900"></div>
