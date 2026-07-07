@@ -1,0 +1,88 @@
+@import url("https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400..900&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.quizzet-translator-root {
+  font-family: "Maven Pro", sans-serif;
+}
+
+/* Custom scrollbar for modern simple look */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #e5e7eb;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #d1d5db;
+}
+
+.loader {
+  height: 30px;
+  aspect-ratio: 2.5;
+  --_g: no-repeat
+    radial-gradient(
+      farthest-side,
+      oklch(51.1% 0.096 186.391) 90%,
+      oklch(51.1% 0.096 186.391)
+    );
+  background: var(--_g), var(--_g), var(--_g), var(--_g);
+  background-size: 20% 50%;
+  animation: l43 1s infinite linear;
+}
+@keyframes l43 {
+  0% {
+    background-position:
+      calc(0 * 100% / 3) 50%,
+      calc(1 * 100% / 3) 50%,
+      calc(2 * 100% / 3) 50%,
+      calc(3 * 100% / 3) 50%;
+  }
+  16.67% {
+    background-position:
+      calc(0 * 100% / 3) 0,
+      calc(1 * 100% / 3) 50%,
+      calc(2 * 100% / 3) 50%,
+      calc(3 * 100% / 3) 50%;
+  }
+  33.33% {
+    background-position:
+      calc(0 * 100% / 3) 100%,
+      calc(1 * 100% / 3) 0,
+      calc(2 * 100% / 3) 50%,
+      calc(3 * 100% / 3) 50%;
+  }
+  50% {
+    background-position:
+      calc(0 * 100% / 3) 50%,
+      calc(1 * 100% / 3) 100%,
+      calc(2 * 100% / 3) 0,
+      calc(3 * 100% / 3) 50%;
+  }
+  66.67% {
+    background-position:
+      calc(0 * 100% / 3) 50%,
+      calc(1 * 100% / 3) 50%,
+      calc(2 * 100% / 3) 100%,
+      calc(3 * 100% / 3) 0;
+  }
+  83.33% {
+    background-position:
+      calc(0 * 100% / 3) 50%,
+      calc(1 * 100% / 3) 50%,
+      calc(2 * 100% / 3) 50%,
+      calc(3 * 100% / 3) 100%;
+  }
+  100% {
+    background-position:
+      calc(0 * 100% / 3) 50%,
+      calc(1 * 100% / 3) 50%,
+      calc(2 * 100% / 3) 50%,
+      calc(3 * 100% / 3) 50%;
+  }
+}

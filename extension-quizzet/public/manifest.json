@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Quizzet Translation Extension",
+  "version": "3.0.1",
+  "description": "Một công cụ giúp dịch thuật cũng như lưu lại từ vựng nhanh chóng trên trang quizzet.id.vn",
+  "permissions": ["cookies", "storage"],
+  "background": {
+    "service_worker": "src/background.ts"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "icon64.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.tsx"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["src/youtube.tsx"],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "icons": {
+    "16": "icon64.png",
+    "32": "icon64.png",
+    "48": "icon64.png",
+    "128": "icon64.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "host_permissions": ["*://*/*"],
+  "web_accessible_resources": [
+    {
+      "resources": ["icon64.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
