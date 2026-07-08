@@ -87,9 +87,9 @@ export const addXpToUser = async (uid, xpToAdd) => {
 // Helper: Increment daily task progress
 export const incrementDailyTask = async (uid, taskId, amount = 1) => {
   // Fetch taskConfig from Firestore
-  const taskDoc = await db.collection("daily_tasks").doc(taskId).get();
-  if (!taskDoc.exists) return { success: false, reason: "Task not found" };
-  const taskConfig = taskDoc.data();
+  const taskQuery = await db.collection("daily_tasks").where("id", "==", taskId).limit(1).get();
+  if (taskQuery.empty) return { success: false, reason: "Task not found" };
+  const taskConfig = taskQuery.docs[0].data();
 
   const today = getLocalDateString();
   const statsQuery = await db.collection("user_daily_stats").where("userId", "==", uid).where("date", "==", today).limit(1).get();

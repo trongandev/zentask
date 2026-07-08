@@ -307,8 +307,11 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       if (data.taskProgress) {
         useConfigStore.getState().setTaskProgress(data.taskProgress);
       }
-      if (data.xpResult && data.xpResult.levelUp) {
-        useUserStore.getState().triggerLevelUp(data.xpResult.level);
+      if (data.xpResult) {
+        window.dispatchEvent(new CustomEvent("xp_updated", { detail: data.xpResult }));
+        if (data.xpResult.levelUp) {
+          useUserStore.getState().triggerLevelUp(data.xpResult.level);
+        }
       }
 
       toast.success("Đã thêm từ mới");
@@ -445,6 +448,16 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
           return { cardProgress: updated };
         });
       }
+
+      if (data.taskProgress) {
+        useConfigStore.getState().setTaskProgress(data.taskProgress);
+      }
+      if (data.xpResult) {
+        window.dispatchEvent(new CustomEvent("xp_updated", { detail: data.xpResult }));
+        if (data.xpResult.levelUp) {
+          useUserStore.getState().triggerLevelUp(data.xpResult.level);
+        }
+      }
     } catch (err) {
       console.error("flushProgress error:", err);
       // Restore pending updates on failure
@@ -481,6 +494,16 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
           },
         },
       }));
+
+      if (data.taskProgress) {
+        useConfigStore.getState().setTaskProgress(data.taskProgress);
+      }
+      if (data.xpResult) {
+        window.dispatchEvent(new CustomEvent("xp_updated", { detail: data.xpResult }));
+        if (data.xpResult.levelUp) {
+          useUserStore.getState().triggerLevelUp(data.xpResult.level);
+        }
+      }
     } catch (err: any) {
       toast.error(err.message || "Lỗi khi cập nhật tiến trình");
     }

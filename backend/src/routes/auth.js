@@ -297,9 +297,9 @@ router.get("/me", async (req, res) => {
     const dailyTasks = dailyTasksSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
     // Fetch Task Progress
-    const progressRef = userDocRef.collection("daily_tasks").doc("progress");
-    const progressDoc = await progressRef.get();
-    const taskProgress = progressDoc.exists ? progressDoc.data() : {};
+    const today = new Date().toISOString().split("T")[0];
+    const statsQuery = await db.collection("user_daily_stats").where("userId", "==", userProfile.uid).where("date", "==", today).limit(1).get();
+    const taskProgress = statsQuery.empty ? {} : statsQuery.docs[0].data().tasks || {};
 
     // Fetch Notifications
     const notifSnap = await db.collection("notifications").where("receiverId", "==", userProfile.uid).orderBy("createdAt", "desc").limit(50).get();

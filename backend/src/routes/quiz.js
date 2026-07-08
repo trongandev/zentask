@@ -4,6 +4,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { GoogleGenAI, Type } from "@google/genai";
 import crypto from "crypto";
 import { checkAchievements } from "../utils/achievements.js";
+import { addXpToUser, incrementDailyTask } from "./user.js";
 
 const router = Router();
 
@@ -108,7 +109,20 @@ router.post("/", async (req, res) => {
     };
 
     const docRef = await db.collection("quizzes").add(newQuiz);
-    res.json({ id: docRef.id, status: "success" });
+
+    // Add XP for creating quiz via Daily Task
+    const taskResult = await incrementDailyTask(req.uid, "quiz_master", 1);
+    let xpResult = null;
+    if (taskResult.success && taskResult.xpToAdd > 0) {
+      xpResult = await addXpToUser(req.uid, taskResult.xpToAdd);
+    }
+
+    res.json({ 
+      id: docRef.id, 
+      status: "success",
+      xpResult,
+      taskProgress: taskResult.success ? { quiz_master: taskResult.progress } : {}
+    });
   } catch (error) {
     console.error("Error creating quiz:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -219,7 +233,20 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
     };
 
     const docRef = await db.collection("quizzes").add(newQuiz);
-    res.json({ id: docRef.id, ...newQuiz });
+
+    // Add XP for creating quiz via Daily Task
+    const taskResult = await incrementDailyTask(req.uid, "quiz_master", 1);
+    let xpResult = null;
+    if (taskResult.success && taskResult.xpToAdd > 0) {
+      xpResult = await addXpToUser(req.uid, taskResult.xpToAdd);
+    }
+
+    res.json({ 
+      id: docRef.id, 
+      ...newQuiz,
+      xpResult,
+      taskProgress: taskResult.success ? { quiz_master: taskResult.progress } : {}
+    });
   } catch (error) {
     console.error("Error generating quiz:", error);
     res.status(500).json({ error: "Failed to generate quiz" });
@@ -347,17 +374,12 @@ router.post("/:id/submit", async (req, res) => {
 
     // Update user exp based on score
     const expGain = score; // 1 exp per 1% score
-    await db
-      .collection("users")
-      .doc(req.uid)
-      .update({
-        exp: FieldValue.increment(expGain),
-      });
+    const { xp, level, levelUp } = await addXpToUser(req.uid, expGain);
 
     // Trigger achievements for QUIZ_SUBMIT
     checkAchievements(req.uid, "QUIZ_SUBMIT", {}, req.app);
 
-    res.json({ id: resultRef.id, ...resultData, expGain });
+    res.json({ id: resultRef.id, ...resultData, expGain, xpResult: { xp, level, levelUp } });
   } catch (error) {
     console.error("Error submitting quiz:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -397,12 +419,7 @@ router.post("/rebirth/:resultId", async (req, res) => {
 
       // Add more exp
       const expGain = Math.round(100 / result.totalQuestions);
-      await db
-        .collection("users")
-        .doc(req.uid)
-        .update({
-          exp: FieldValue.increment(expGain),
-        });
+      await addXpToUser(req.uid, expGain);
     }
 
     result.usedRebirth = true;

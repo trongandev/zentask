@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bot, FileText, ArrowLeft, Loader2, Sparkles, Plus, Trash2 } from "lucide-react";
 import { useQuizStore, QuizQuestion } from "../../services/quizService";
+import { useConfigStore } from "../../services/configService";
+import { useUserStore } from "../../services/userService";
 import toast from "react-hot-toast";
 
 export function QuizCreate() {
@@ -31,6 +33,15 @@ export function QuizCreate() {
       setLoading(true);
       const quiz = await generateQuizByAI(aiPrompt, aiNumQuestions, aiDifficulty);
       if (quiz) {
+        if (quiz.taskProgress) {
+          useConfigStore.getState().setTaskProgress(quiz.taskProgress);
+        }
+        if (quiz.xpResult) {
+          window.dispatchEvent(new CustomEvent("xp_updated", { detail: quiz.xpResult }));
+          if (quiz.xpResult.levelUp) {
+            useUserStore.getState().triggerLevelUp(quiz.xpResult.level);
+          }
+        }
         toast.success("Tạo quiz thành công!");
         navigate(`/quiz/${quiz.id}`);
       }
@@ -60,6 +71,15 @@ export function QuizCreate() {
         questions,
       });
       if (res) {
+        if (res.taskProgress) {
+          useConfigStore.getState().setTaskProgress(res.taskProgress);
+        }
+        if (res.xpResult) {
+          window.dispatchEvent(new CustomEvent("xp_updated", { detail: res.xpResult }));
+          if (res.xpResult.levelUp) {
+            useUserStore.getState().triggerLevelUp(res.xpResult.level);
+          }
+        }
         navigate(`/quiz/${res.id}`);
       }
     } finally {

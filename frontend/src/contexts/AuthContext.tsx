@@ -92,6 +92,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    const handleXpUpdate = (e: any) => {
+      const xpResult = e.detail;
+      if (xpResult && typeof xpResult.xp === 'number') {
+        setUser((prevUser) => {
+          if (prevUser) {
+            return { ...prevUser, xp: xpResult.xp, level: xpResult.level };
+          }
+          return prevUser;
+        });
+      }
+    };
+    window.addEventListener("xp_updated", handleXpUpdate);
+    return () => window.removeEventListener("xp_updated", handleXpUpdate);
+  }, []);
+
   const logout = async () => {
     try {
       await fetch(`${API_URL}/api/auth/logout`, {

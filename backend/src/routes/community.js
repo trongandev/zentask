@@ -2,6 +2,7 @@ import { Router } from "express";
 import { auth, db } from "../firebase.js";
 import { FieldValue } from "firebase-admin/firestore";
 import { createNotification } from "../utils/notifications.js";
+import { addXpToUser, incrementDailyTask } from "./user.js";
 
 const router = Router();
 
@@ -94,7 +95,20 @@ router.post("/posts", async (req, res) => {
     };
 
     const docRef = await db.collection("community_posts").add(newPost);
-    res.json({ id: docRef.id, status: "success" });
+
+    // Add XP for community_share Daily Task
+    const taskResult = await incrementDailyTask(req.uid, "community_share", 1);
+    let xpResult = null;
+    if (taskResult.success && taskResult.xpToAdd > 0) {
+      xpResult = await addXpToUser(req.uid, taskResult.xpToAdd);
+    }
+
+    res.json({ 
+      id: docRef.id, 
+      status: "success",
+      xpResult,
+      taskProgress: taskResult.success ? { community_share: taskResult.progress } : {}
+    });
   } catch (error) {
     console.error("Create post error:", error);
     res.status(500).json({ error: "Internal error" });

@@ -647,7 +647,19 @@ router.post("/progress/batch", async (req, res) => {
     // Trigger achievements for FLASHCARD_LEARNED
     checkAchievements(req.uid, "FLASHCARD_LEARNED", {}, req.app);
 
-    res.json({ success: true, results });
+    // Add XP for learn_past Daily Task
+    const taskResult = await incrementDailyTask(req.uid, "learn_past", updates.length);
+    let xpResult = null;
+    if (taskResult.success && taskResult.xpToAdd > 0) {
+      xpResult = await addXpToUser(req.uid, taskResult.xpToAdd);
+    }
+
+    res.json({ 
+      success: true, 
+      results,
+      xpResult,
+      taskProgress: taskResult.success ? { learn_past: taskResult.progress } : {}
+    });
   } catch (error) {
     console.error("Progress batch error:", error);
     res.status(500).json({ error: "Failed to update progress" });
@@ -746,6 +758,13 @@ router.post("/progress/manual", async (req, res) => {
     // Trigger achievements for FLASHCARD_LEARNED
     checkAchievements(req.uid, "FLASHCARD_LEARNED", {}, req.app);
 
+    // Add XP for learn_past Daily Task
+    const taskResult = await incrementDailyTask(req.uid, "learn_past", 1);
+    let xpResult = null;
+    if (taskResult.success && taskResult.xpToAdd > 0) {
+      xpResult = await addXpToUser(req.uid, taskResult.xpToAdd);
+    }
+
     res.json({
       success: true,
       cardId,
@@ -754,6 +773,8 @@ router.post("/progress/manual", async (req, res) => {
       repetitions: sm2.repetitions,
       dueDate: sm2.dueDate,
       quality: sm2.quality,
+      xpResult,
+      taskProgress: taskResult.success ? { learn_past: taskResult.progress } : {}
     });
   } catch (error) {
     console.error("Manual progress error:", error);

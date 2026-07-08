@@ -120,11 +120,6 @@ export function FlashcardDetail() {
     if (id) {
       const res = await createCard(id, { term, phonetic, translation, notes, examples: filteredExamples });
       if (res) {
-        if (res.xpResult) {
-          updateUser({ xp: res.xpResult.xp, level: res.xpResult.level });
-          if (res.xpResult.levelUp) triggerLevelUp(res.xpResult.level);
-        }
-        incrementTaskProgress("create_material", 1);
         setIsModalOpen(false);
         resetForm();
       }
@@ -154,11 +149,6 @@ export function FlashcardDetail() {
         examples: examplesToSave,
       });
       if (cardRes) {
-        if (cardRes.xpResult) {
-          updateUser({ xp: cardRes.xpResult.xp, level: cardRes.xpResult.level });
-          if (cardRes.xpResult.levelUp) triggerLevelUp(cardRes.xpResult.level);
-        }
-        incrementTaskProgress("create_material", 1);
         setIsModalOpen(false);
         resetForm();
       }
