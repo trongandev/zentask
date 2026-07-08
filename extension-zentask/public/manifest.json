@@ -1,9 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Quizzet Translation Extension",
+  "name": "Zentask Translation Extension",
   "version": "3.0.1",
-  "description": "Một công cụ giúp dịch thuật cũng như lưu lại từ vựng nhanh chóng trên trang quizzet.id.vn",
-  "permissions": ["cookies", "storage"],
+  "description": "Một công cụ giúp dịch thuật cũng như lưu lại từ vựng nhanh chóng trên trang lrm.io.vn",
+  "permissions": ["storage"],
+  "externally_connectable": {
+    "matches": ["*://*.lrm.io.vn/*", "*://localhost/*"]
+  },
   "background": {
     "service_worker": "src/background.ts"
   },

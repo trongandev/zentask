@@ -1,12 +1,24 @@
-@import url("https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-.quizzet-translator-root {
-  font-family: "Maven Pro", sans-serif;
+@theme {
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
+.quizzet-translator-root {
+  font-family: "Be Vietnam Pro", sans-serif;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
 /* Custom scrollbar for modern simple look */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
@@ -25,12 +37,7 @@
 .loader {
   height: 30px;
   aspect-ratio: 2.5;
-  --_g: no-repeat
-    radial-gradient(
-      farthest-side,
-      oklch(51.1% 0.096 186.391) 90%,
-      oklch(51.1% 0.096 186.391)
-    );
+  --_g: no-repeat radial-gradient(farthest-side, oklch(70.7% 0.165 254.624), oklch(48.8% 0.243 264.376));
   background: var(--_g), var(--_g), var(--_g), var(--_g);
   background-size: 20% 50%;
   animation: l43 1s infinite linear;

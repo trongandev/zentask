@@ -284,6 +284,15 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 
+// Support Bearer token from Extension (map to req.cookies.session)
+app.use((req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    req.cookies.session = authHeader.split(" ")[1];
+  }
+  next();
+});
+
 import leaderboardRoutes from "./routes/leaderboard.js";
 import communityRoutes from "./routes/community.js";
 import notificationRoutes from "./routes/notifications.js";

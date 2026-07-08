@@ -75,6 +75,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       setUser(data.user as UserProfile);
       setInitialNotifications(data.notifications || []);
+
+      // Đồng bộ sang Extension qua externally_connectable
+      if (data.extensionToken && window.chrome && window.chrome.runtime) {
+        const extensionId = import.meta.env.VITE_EXTENSION_ID;
+        if (extensionId) {
+          try {
+            window.chrome.runtime.sendMessage(extensionId, {
+              action: "SYNC_FIREBASE_AUTH",
+              token: data.extensionToken,
+              user: data.user
+            });
+          } catch (e) {
+            console.error("Extension sync error", e);
+          }
+        }
+      }
       
       useConfigStore.getState().setConfigs({
         levels: data.config?.levels || [],

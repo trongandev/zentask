@@ -79,38 +79,43 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     return true;
   }
 });
-const urls = ["https://www.quizzet.id.vn", "https://quizzet.id.vn"];
 const fetchTokens = async () => {
   try {
-    const [cookieWww, cookieRoot] = await Promise.all(urls.map((url) => chrome.cookies.get({ url, name: "token" })));
-    const cookie = cookieWww || cookieRoot;
-    console.log(cookie);
-    if (!cookie) {
-      await chrome.storage.local.clear();
+    const { token, user } = await chrome.storage.local.get(["token", "user"]);
+    if (!token) {
       return false;
     }
-    const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/list-flashcards/exten`, {
+
+    // Gọi API lấy danh sách flashcard từ backend Zentask mới
+    const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/flashcard/list`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${cookie.value}`,
+        Authorization: `Bearer ${token}`,
       },
     });
+
     if (response.ok) {
-      const profile = await response.json();
+      const listFlashCards = await response.json();
       let list_flashcard_id = null;
-      if (profile.listFlashCards && profile.listFlashCards.length > 0) {
-        list_flashcard_id = profile.listFlashCards[0];
+      if (listFlashCards && listFlashCards.length > 0) {
+        list_flashcard_id = listFlashCards[0].id;
       }
+
       const newStorage = {
-        token: cookie.value,
-        user: profile.user,
-        list_flashcard: profile.listFlashCards,
+        token,
+        user: user || null,
+        list_flashcard: listFlashCards,
         list_flashcard_id,
       };
 
       await chrome.storage.local.set(newStorage);
       return newStorage;
+    } else {
+      // Token có thể đã hết hạn
+      if (response.status === 401) {
+        await chrome.storage.local.remove(["token", "user"]);
+      }
     }
     return false;
   } catch (error) {
@@ -119,11 +124,20 @@ const fetchTokens = async () => {
   }
 };
 
-chrome.runtime.onInstalled.addListener(fetchTokens);
-chrome.runtime.onStartup.addListener(fetchTokens);
-// Kiểm tra khi có thay đổi cookie
-chrome.cookies.onChanged.addListener((changeInfo) => {
-  if (changeInfo.cookie.name === "token" && changeInfo.cookie.domain.includes(import.meta.env.VITE_API_FRONTEND)) {
-    fetchTokens();
+chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => {
+  if (request.action === "SYNC_FIREBASE_AUTH") {
+    console.log(sender);
+    const { token, user } = request;
+    if (token) {
+      chrome.storage.local.set({ token, user }).then(() => {
+        fetchTokens().then((result) => {
+          sendResponse({ success: true, result });
+        });
+      });
+      return true; // Báo hiệu async response
+    }
   }
 });
+
+chrome.runtime.onInstalled.addListener(fetchTokens);
+chrome.runtime.onStartup.addListener(fetchTokens);

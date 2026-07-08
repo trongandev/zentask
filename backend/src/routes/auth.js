@@ -398,6 +398,7 @@ router.get("/me", async (req, res) => {
 
     res.status(200).json({
       user: userProfile,
+      extensionToken: sessionCookie,
       config: {
         levels: SYSTEM_LEVELS,
         dailyTasks: dailyTasks,

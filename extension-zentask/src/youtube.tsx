@@ -881,7 +881,7 @@ const YoutubeDualSub = () => {
   );
 };
 
-// Inject nút Quizzet vào .ytp-right-controls của YouTube
+// Inject nút Zentask vào .ytp-right-controls của YouTube
 const injectControlButton = () => {
   if (document.getElementById("quizzet-ctrl-btn")) return;
 
@@ -894,7 +894,7 @@ const injectControlButton = () => {
   const btn = document.createElement("button");
   btn.id = "quizzet-ctrl-btn";
   btn.className = "ytp-button";
-  btn.title = "Quizzet - Phụ đề Song ngữ";
+  btn.title = "Zentask - Phụ đề Song ngữ";
   btn.style.cssText = `
     display: flex;
     align-items: center;
