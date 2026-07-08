@@ -2,6 +2,7 @@ import { Router } from "express";
 import { auth, db } from "../firebase.js";
 import { getWeekString, getMonthString, getLastWeekString, getLastMonthString } from "../utils/dateUtils.js";
 import { addXpToUser } from "./user.js";
+import { checkAchievements } from "../utils/achievements.js";
 
 const router = Router();
 
@@ -91,6 +92,14 @@ router.get("/", async (req, res) => {
         trend: "same"
       });
     });
+
+    // Trigger LEADERBOARD achievements for the current user if they are in top 3
+    if (type === "week" && req.uid) {
+      const userEntry = leaderboard.find(entry => entry.id === req.uid);
+      if (userEntry && userEntry.rank <= 3) {
+        checkAchievements(req.uid, "LEADERBOARD", { rank: userEntry.rank }, req.app);
+      }
+    }
 
     res.json(leaderboard);
   } catch (error) {

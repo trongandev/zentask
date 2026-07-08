@@ -1,4 +1,18 @@
+import { tierDiamondI } from "./tierDiamondI";
+import { tierDiamondII } from "./tierDiamondII";
+import { tierDiamondIII } from "./tierDiamondIII";
+import { tierDiamondIV } from "./tierDiamondIV";
+import { tierDiamondV } from "./tierDiamondV";
+import { tierEliteI } from "./tierEliteI";
+import { tierEliteII } from "./tierEliteII";
+import { tierEliteIII } from "./tierEliteIII";
+import { tierEliteIV } from "./tierEliteIV";
+import { tierEliteV } from "./tierEliteV";
+import { tierEmeraldI } from "./tierEmeraldI";
+import { tierEmeraldII } from "./tierEmeraldII";
+import { tierEmeraldIII } from "./tierEmeraldIII";
 import { tierEmeraldIV } from "./tierEmeraldIV";
+import { tierMasterI } from "./tierMasterI";
 import { tierSilverI } from "./tierSilverI";
 import { tierSilverII } from "./tierSilverII";
 import { tierSilverIII } from "./tierSilverIII";
@@ -40,17 +54,17 @@ export const RANK_TOPIC_CONFIG = {
       3: {
         cefr: "A2-B1",
         topics: ["Mua sắm & Giá cả", "Mô tả ngoại hình & Tính cách", "Thể thao"],
-        data: [],
+        data: tierEmeraldIII,
       },
       2: {
         cefr: "B1",
         topics: ["Du lịch & Khách sạn", "Sức khỏe & Lối sống", "Cảm xúc & Tâm trạng"],
-        data: [],
+        data: tierEmeraldII,
       },
       1: {
         cefr: "B1",
         topics: ["Lễ hội & Văn hóa", "Công việc cơ bản", "Phương tiện truyền thông"],
-        data: [],
+        data: tierEmeraldI,
       },
     },
   },
@@ -62,27 +76,27 @@ export const RANK_TOPIC_CONFIG = {
       5: {
         cefr: "B1+",
         topics: ["Giáo dục & Trường học", "Môi trường & Thiên nhiên", "Công nghệ thông tin"],
-        data: [],
+        data: tierEliteV,
       },
       4: {
         cefr: "B2",
         topics: ["Việc làm & Tuyển dụng", "Đời sống đô thị & Nông thôn", "Khoa học thường thức"],
-        data: [],
+        data: tierEliteIV,
       },
       3: {
         cefr: "B2",
         topics: ["Nghệ thuật & Điện ảnh", "Lịch sử & Sự kiện quốc tế", "Ẩm thực thế giới"],
-        data: [],
+        data: tierEliteIII,
       },
       2: {
         cefr: "B2",
         topics: ["Luật pháp cơ bản", "Kinh doanh & Khởi nghiệp", "Y học phổ thông"],
-        data: [],
+        data: tierEliteII,
       },
       1: {
         cefr: "B2+",
         topics: ["Tài chính cá nhân", "Giao tiếp công sở", "Truyền thông & Quảng cáo"],
-        data: [],
+        data: tierEliteI,
       },
     },
   },
@@ -94,27 +108,27 @@ export const RANK_TOPIC_CONFIG = {
       5: {
         cefr: "B2-C1",
         topics: ["Chính trị & Xã hội", "Toàn cầu hóa", "Công nghệ cao (AI, Big Data)"],
-        data: [],
+        data: tierDiamondV,
       },
       4: {
         cefr: "C1",
         topics: ["Kinh tế vĩ mô", "Văn học & Triết học cơ bản", "Biến đổi khí hậu"],
-        data: [],
+        data: tierDiamondIV,
       },
       3: {
         cefr: "C1",
         topics: ["Tâm lý học hành vi", "Luật pháp quốc tế", "Nghiên cứu khoa học"],
-        data: [],
+        data: tierDiamondIII,
       },
       2: {
         cefr: "C1",
         topics: ["Tài chính doanh nghiệp", "Năng lượng & Tài nguyên", "Y học chuyên sâu"],
-        data: [],
+        data: tierDiamondII,
       },
       1: {
         cefr: "C1+",
         topics: ["Cụm động từ (Phrasal Verbs)", "Thành ngữ (Idioms)", "Từ ghép cố định (Collocations)"],
-        data: [],
+        data: tierDiamondI,
       },
     },
   },
@@ -132,7 +146,7 @@ export const RANK_TOPIC_CONFIG = {
           "Từ đồng nghĩa phân biệt sắc thái (Synonyms with nuances)",
           "Thuật ngữ chuyên ngành chuyên sâu (Y sinh, Cơ điện tử, Luật thương mại quốc tế)",
         ],
-        data: [],
+        data: tierMasterI,
       },
     },
   },
@@ -171,7 +185,7 @@ export const getBeginnerSetById = (id: string): FLASHCARD_STRUCTURE | null => {
   return null;
 };
 
-export const generateArenaDeck = (rankId: number, tierNum: number): { cards: Word[], mode: string, x2Indices: number[] } => {
+export const generateArenaDeck = (rankId: number, tierNum: number): { cards: Word[]; modes: string[]; x2Indices: number[] } => {
   let currentTierWords: Word[] = [];
   let lowerTierWords: Word[] = [];
 
@@ -181,7 +195,7 @@ export const generateArenaDeck = (rankId: number, tierNum: number): { cards: Wor
     for (const [tNum, tier] of Object.entries(rank.tiers)) {
       const currentTNum = parseInt(tNum);
       const tierWords = tier.data.flatMap((set: FLASHCARD_STRUCTURE) => set.words);
-      
+
       // Since tierNum in rank is backwards (3,2,1), lower tier means higher number in current rank, or lower rankId
       // Actually, rankId 1 is lowest. So rId < rankId is lower rank.
       // If same rank, tNum > tierNum is lower tier (e.g. tier 3 is lower than tier 1).
@@ -196,7 +210,7 @@ export const generateArenaDeck = (rankId: number, tierNum: number): { cards: Wor
   // Fallback if not enough words
   if (currentTierWords.length === 0) {
     // If somehow empty, fallback to any available word
-    const all = Object.values(RANK_TOPIC_CONFIG).flatMap(r => Object.values(r.tiers).flatMap(t => t.data.flatMap(s => s.words)));
+    const all = Object.values(RANK_TOPIC_CONFIG).flatMap((r) => Object.values(r.tiers).flatMap((t) => t.data.flatMap((s) => s.words)));
     currentTierWords = all;
   }
 
@@ -205,7 +219,7 @@ export const generateArenaDeck = (rankId: number, tierNum: number): { cards: Wor
   lowerTierWords = lowerTierWords.sort(() => 0.5 - Math.random());
 
   let selectedCards: Word[] = [];
-  
+
   if (lowerTierWords.length >= 2 && currentTierWords.length >= 8) {
     selectedCards = [...currentTierWords.slice(0, 8), ...lowerTierWords.slice(0, 2)];
   } else {
@@ -216,17 +230,17 @@ export const generateArenaDeck = (rankId: number, tierNum: number): { cards: Wor
 
   selectedCards = selectedCards.sort(() => 0.5 - Math.random()); // Final shuffle
 
-  // Select 1 random mode that works well with 10s timeout
+  // Select random modes for 10 questions that work well with 10s timeout
   const validModes = ["quiz", "fill_blank", "listening", "guess", "typing"];
-  const randomMode = validModes[Math.floor(Math.random() * validModes.length)];
+  const randomModes = Array.from({ length: 10 }, () => validModes[Math.floor(Math.random() * validModes.length)]);
 
   // Random 1 or 2 indices for x2 points
   const numX2 = Math.random() > 0.5 ? 2 : 1;
   const x2Indices: number[] = [];
-  while(x2Indices.length < numX2) {
+  while (x2Indices.length < numX2) {
     const r = Math.floor(Math.random() * 10);
     if (!x2Indices.includes(r)) x2Indices.push(r);
   }
 
-  return { cards: selectedCards, mode: randomMode, x2Indices };
+  return { cards: selectedCards, modes: randomModes, x2Indices };
 };

@@ -21,9 +21,10 @@ export interface DailyTaskConfig {
 interface ConfigState {
   levels: SystemLevel[];
   dailyTasks: DailyTaskConfig[];
+  badges: any[];
   taskProgress: Record<string, number>;
   loading: boolean;
-  fetchConfigs: () => Promise<void>;
+  setConfigs: (configs: Partial<ConfigState>) => void;
   incrementTaskProgress: (taskId: string, amount?: number) => void;
   setTaskProgress: (progress: Record<string, number>) => void;
 }
@@ -31,28 +32,11 @@ interface ConfigState {
 export const useConfigStore = create<ConfigState>((set, get) => ({
   levels: [],
   dailyTasks: [],
+  badges: [],
   taskProgress: {},
   loading: false,
-  fetchConfigs: async () => {
-    if (get().levels.length > 0 && get().dailyTasks.length > 0) return; // Already fetched
-
-    set({ loading: true });
-    try {
-      const [levelsRes, tasksRes, progressRes] = await Promise.all([
-        fetch(`${API_URL}/api/config/levels`), 
-        fetch(`${API_URL}/api/config/daily-tasks`),
-        fetch(`${API_URL}/api/user/daily-tasks/progress`, {credentials: 'include'})
-      ]);
-
-      const levels = await levelsRes.json();
-      const dailyTasks = await tasksRes.json();
-      const taskProgress = progressRes.ok ? await progressRes.json() : {};
-
-      set({ levels, dailyTasks, taskProgress, loading: false });
-    } catch (error) {
-      console.error("Error fetching configs:", error);
-      set({ loading: false });
-    }
+  setConfigs: (configs: Partial<ConfigState>) => {
+    set({ ...configs, loading: false });
   },
   incrementTaskProgress: (taskId: string, amount = 1) => {
     // Only update local state optimistic UI

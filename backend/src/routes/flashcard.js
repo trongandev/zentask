@@ -3,6 +3,7 @@ import { auth, db } from "../firebase.js";
 import { FieldValue } from "firebase-admin/firestore";
 import { addXpToUser, incrementDailyTask } from "./user.js";
 import { GoogleGenAI, Type } from "@google/genai";
+import { checkAchievements } from "../utils/achievements.js";
 
 const router = Router();
 
@@ -643,6 +644,9 @@ router.post("/progress/batch", async (req, res) => {
 
     await batch.commit();
 
+    // Trigger achievements for FLASHCARD_LEARNED
+    checkAchievements(req.uid, "FLASHCARD_LEARNED", {}, req.app);
+
     res.json({ success: true, results });
   } catch (error) {
     console.error("Progress batch error:", error);
@@ -738,6 +742,9 @@ router.post("/progress/manual", async (req, res) => {
     } else {
       await progressQuery.docs[0].ref.update(progressData);
     }
+
+    // Trigger achievements for FLASHCARD_LEARNED
+    checkAchievements(req.uid, "FLASHCARD_LEARNED", {}, req.app);
 
     res.json({
       success: true,

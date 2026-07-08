@@ -31,13 +31,12 @@ interface RightSidebarProps {
 export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarProps) {
   const { user, updateUser } = useAuth();
   const { checkIn, loading: checkingIn } = useUserStore();
-  const { dailyTasks, fetchConfigs, taskProgress } = useConfigStore();
+  const { dailyTasks, taskProgress } = useConfigStore();
   const { getLeaderboard } = useEtcStore();
   const [timeLeft, setTimeLeft] = useState(getTimeUntilReset());
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchConfigs();
     const timer = setInterval(() => {
       setTimeLeft(getTimeUntilReset());
     }, 1000);
@@ -54,7 +53,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
     fetchLeaderboard();
 
     return () => clearInterval(timer);
-  }, [fetchConfigs, user, getLeaderboard]);
+  }, [user, getLeaderboard]);
 
   // For now, mock 'current' progress for tasks as 0 since we haven't implemented progress tracking yet.
   const tasks = dailyTasks.map(t => {
@@ -166,7 +165,12 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                    if (isCheckedInToday || checkingIn) return;
                    const res = await checkIn();
                    if (res) {
-                     updateUser({ streak: res.streak, lastCheckInDate: res.lastCheckInDate });
+                     const updates: any = { streak: res.streak, lastCheckInDate: res.lastCheckInDate };
+                     if (res.xpResult) {
+                       updates.xp = res.xpResult.xp;
+                       updates.level = res.xpResult.level;
+                     }
+                     updateUser(updates);
                    }
                  }}
                  disabled={isCheckedInToday || checkingIn}

@@ -23,7 +23,7 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const { notifications, markAsRead } = useSocket();
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   useEffect(() => {
     initTodayMinutes();
@@ -132,11 +132,14 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
 
       <div className="flex items-center gap-4 lg:gap-6">
         <button className="text-gray-400 hover:text-gray-600 transition-colors">
-          <Search className="w-5 h-5" />
+          <Search className="w-5" />
         </button>
         <div className="relative" ref={notificationsRef}>
-          <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="relative text-gray-400 hover:text-gray-600 transition-colors focus:outline-none">
-            <Bell className="w-5 h-5" />
+          <button
+            onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+            className="relative text-gray-400 hover:text-gray-600 transition-colors focus:outline-none h-full  flex items-center justify-center flex-col"
+          >
+            <Bell className="w-5" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full flex items-center justify-center text-[9px] font-bold text-white">
                 {unreadCount > 9 ? "9+" : unreadCount}
@@ -145,18 +148,16 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
           </button>
 
           {isNotificationsOpen && (
-            <div className="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in slide-in-from-top-2">
+            <div className="fixed left-4 right-4 top-20 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-4 sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3 z-[999999] animate-in fade-in slide-in-from-top-2">
               <div className="px-4 pb-2 border-b border-gray-100 flex items-center justify-between">
                 <h3 className="font-bold text-gray-900">Thông báo</h3>
-                {unreadCount > 0 && (
-                  <span className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded-full">{unreadCount} mới</span>
-                )}
+                {unreadCount > 0 && <span className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded-full">{unreadCount} mới</span>}
               </div>
               <div className="max-h-[300px] overflow-y-auto">
                 {notifications.length === 0 ? (
                   <div className="text-center text-sm text-gray-500 py-6">Không có thông báo mới</div>
                 ) : (
-                  notifications.slice(0, 5).map(n => {
+                  notifications.slice(0, 5).map((n) => {
                     let Icon = Bell;
                     let color = "text-blue-600";
                     let bg = "bg-blue-100";
@@ -185,8 +186,8 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
                     }
 
                     return (
-                      <div 
-                        key={n.id} 
+                      <div
+                        key={n.id}
                         onClick={() => {
                           if (!n.isRead) markAsRead(n.id);
                           setIsNotificationsOpen(false);
@@ -210,17 +211,10 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
                 )}
               </div>
               <div className="px-4 pt-2 border-t border-gray-100 flex items-center justify-between">
-                <button 
-                  onClick={() => markAsRead()} 
-                  className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
-                >
+                <button onClick={() => markAsRead()} className="text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
                   Đánh dấu đã đọc
                 </button>
-                <Link 
-                  to="/notifications" 
-                  onClick={() => setIsNotificationsOpen(false)} 
-                  className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
-                >
+                <Link to="/notifications" onClick={() => setIsNotificationsOpen(false)} className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">
                   Xem tất cả
                 </Link>
               </div>

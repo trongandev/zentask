@@ -63,3 +63,15 @@ export const DAILY_TASKS = [
     desc: "Tạo và đăng tải bài viết chia sẻ trong phần Cộng đồng (+30XP/bài)." 
   }
 ];
+
+export const SYSTEM_BADGES = [
+  { id: 1, name: "Chăm chỉ", description: "Học 7 ngày liên tiếp", icon: "/achievement/hard-work.png" },
+  { id: 2, name: "Cú đêm", description: "Học sau 10h tối", icon: "/achievement/owl-night.png" },
+  { id: 3, name: "Thần đồng từ vựng", description: "Học 1000 từ vựng", icon: "/achievement/vocabulary-prodigy.png" },
+  { id: 4, name: "Hoàn hảo", description: "Đạt 100% điểm 5 bài Quiz", icon: "/achievement/perfect.png" },
+  { id: 5, name: "Thợ săn thành tích", description: "Vào top 3 bảng xếp hạng tuần", icon: "/achievement/achievements-hunter.png" },
+  { id: 6, name: "Dậy sớm", description: "Học trước 6h sáng", icon: "/achievement/wakeup-early.png" },
+  { id: 7, name: "Sọt rác", description: "Học liên tục 2 tiếng", icon: "/achievement/trash.png" },
+  { id: 8, name: "Kẻ huỷ diệt", description: "Vượt qua 100 bài Quiz", icon: "/achievement/destroyer.png" },
+  { id: 9, name: "Ngôi sao hy vọng", description: "Học bù sau khi mất chuỗi", icon: "/achievement/star-of-hope.png" },
+];

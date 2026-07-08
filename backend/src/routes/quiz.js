@@ -3,6 +3,7 @@ import { auth, db } from "../firebase.js";
 import { FieldValue } from "firebase-admin/firestore";
 import { GoogleGenAI, Type } from "@google/genai";
 import crypto from "crypto";
+import { checkAchievements } from "../utils/achievements.js";
 
 const router = Router();
 
@@ -30,7 +31,7 @@ const generateRoomCode = () => {
 router.get("/", async (req, res) => {
   try {
     const snapshot = await db.collection("quizzes").orderBy("createdAt", "desc").limit(20).get();
-    const quizzes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const quizzes = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     res.json(quizzes);
   } catch (error) {
     console.error("Error getting quizzes:", error);
@@ -41,12 +42,8 @@ router.get("/", async (req, res) => {
 // GET /api/quiz/history
 router.get("/history", async (req, res) => {
   try {
-    const snapshot = await db.collection("quiz_results")
-      .where("uid", "==", req.uid)
-      .orderBy("createdAt", "desc")
-      .limit(20)
-      .get();
-    
+    const snapshot = await db.collection("quiz_results").where("uid", "==", req.uid).orderBy("createdAt", "desc").limit(20).get();
+
     const history = [];
     for (const doc of snapshot.docs) {
       const data = doc.data();
@@ -56,7 +53,7 @@ router.get("/history", async (req, res) => {
           id: doc.id,
           ...data,
           quizTitle: quizDoc.data().title,
-          quizDifficulty: quizDoc.data().difficulty
+          quizDifficulty: quizDoc.data().difficulty,
         });
       }
     }
@@ -76,7 +73,7 @@ router.get("/:id", async (req, res) => {
     }
     const data = doc.data();
     // In a real strict environment, we might hide correct answers here,
-    // but since we need client-side evaluation for Phoenix Rebirth quickly, 
+    // but since we need client-side evaluation for Phoenix Rebirth quickly,
     // we'll send it down.
     res.json({ id: doc.id, ...data });
   } catch (error) {
@@ -89,7 +86,7 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { title, description, difficulty, duration, questions } = req.body;
-    
+
     if (!title || !questions || questions.length === 0) {
       return res.status(400).json({ error: "Invalid quiz data" });
     }
@@ -97,7 +94,7 @@ router.post("/", async (req, res) => {
     // Ensure questions have IDs
     const formattedQuestions = questions.map((q, idx) => ({
       ...q,
-      id: q.id || `q_${Date.now()}_${idx}`
+      id: q.id || `q_${Date.now()}_${idx}`,
     }));
 
     const newQuiz = {
@@ -122,7 +119,7 @@ router.post("/", async (req, res) => {
 router.post("/generate", async (req, res) => {
   try {
     const { prompt, numQuestions = 5, difficulty = "Medium" } = req.body;
-    
+
     if (!prompt) {
       return res.status(400).json({ error: "Prompt is required" });
     }
@@ -136,7 +133,7 @@ router.post("/generate", async (req, res) => {
     if (availableKeys.length === 0) {
       return res.status(500).json({ error: "No AI keys configured" });
     }
-    
+
     // Shuffle keys
     const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
 
@@ -151,7 +148,7 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
       try {
         const ai = new GoogleGenAI({ apiKey: key });
         const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: "gemini-3.1-flash-lite",
           contents: promptText,
           config: {
             responseMimeType: "application/json",
@@ -166,27 +163,27 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
                     type: Type.OBJECT,
                     properties: {
                       text: { type: Type.STRING, description: "Nội dung câu hỏi" },
-                      options: { 
-                        type: Type.ARRAY, 
+                      options: {
+                        type: Type.ARRAY,
                         items: { type: Type.STRING },
-                        description: "Mảng chứa đúng 4 đáp án (VD: ['A', 'B', 'C', 'D'])"
+                        description: "Mảng chứa đúng 4 đáp án (VD: ['A', 'B', 'C', 'D'])",
                       },
                       correctAnswer: { type: Type.STRING, description: "Đáp án đúng chính xác (phải khớp 100% với 1 trong 4 lựa chọn)" },
-                      explanation: { type: Type.STRING, description: "Giải thích ngắn gọn tại sao đúng" }
+                      explanation: { type: Type.STRING, description: "Giải thích ngắn gọn tại sao đúng" },
                     },
-                    required: ["text", "options", "correctAnswer", "explanation"]
-                  }
-                }
+                    required: ["text", "options", "correctAnswer", "explanation"],
+                  },
+                },
               },
-              required: ["title", "description", "questions"]
-            }
-          }
+              required: ["title", "description", "questions"],
+            },
+          },
         });
 
         quizData = JSON.parse(response.text);
-        
+
         // Ensure options always has 4 items
-        quizData.questions = quizData.questions.map(q => {
+        quizData.questions = quizData.questions.map((q) => {
           if (!q.options || q.options.length < 4) {
             // pad with empty strings if AI missed it somehow
             const newOpts = [...(q.options || [])];
@@ -195,7 +192,7 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
           }
           return q;
         });
-        
+
         break; // Success!
       } catch (err) {
         console.warn(`[Quiz AI] Key API_KEY_AI_${index} failed:`, err.message);
@@ -208,7 +205,7 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
 
     const formattedQuestions = quizData.questions.map((q, idx) => ({
       id: `q_${Date.now()}_${idx}`,
-      ...q
+      ...q,
     }));
 
     const newQuiz = {
@@ -223,7 +220,6 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
 
     const docRef = await db.collection("quizzes").add(newQuiz);
     res.json({ id: docRef.id, ...newQuiz });
-
   } catch (error) {
     console.error("Error generating quiz:", error);
     res.status(500).json({ error: "Failed to generate quiz" });
@@ -235,7 +231,7 @@ router.post("/:id/rooms", async (req, res) => {
   try {
     const quizId = req.params.id;
     const { settings } = req.body; // e.g. { allowRetry, showAnswers, phoenixRebirth, shuffleQuestions }
-    
+
     const quizDoc = await db.collection("quizzes").doc(quizId).get();
     if (!quizDoc.exists) return res.status(404).json({ error: "Quiz not found" });
 
@@ -249,7 +245,7 @@ router.post("/:id/rooms", async (req, res) => {
         allowRetry: false,
         showAnswers: true,
         phoenixRebirth: false,
-        shuffleQuestions: false
+        shuffleQuestions: false,
       },
       createdAt: FieldValue.serverTimestamp(),
     };
@@ -268,7 +264,7 @@ router.get("/rooms/id/:id", async (req, res) => {
     const roomId = req.params.id;
     const doc = await db.collection("quiz_rooms").doc(roomId).get();
     if (!doc.exists) return res.status(404).json({ error: "Room not found" });
-    
+
     const room = { id: doc.id, ...doc.data() };
     res.json(room);
   } catch (error) {
@@ -283,7 +279,7 @@ router.get("/rooms/:code", async (req, res) => {
     const code = req.params.code;
     const snapshot = await db.collection("quiz_rooms").where("roomCode", "==", code).limit(1).get();
     if (snapshot.empty) return res.status(404).json({ error: "Room not found" });
-    
+
     const room = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
     res.json(room);
   } catch (error) {
@@ -303,19 +299,19 @@ router.post("/:id/submit", async (req, res) => {
 
     const quiz = quizDoc.data();
     let correctCount = 0;
-    
+
     // Evaluate answers
     const evaluation = {};
     for (const q of quiz.questions) {
       const userAnswer = answers[q.id] || "";
       const isCorrect = userAnswer === q.correctAnswer;
       if (isCorrect) correctCount++;
-      
+
       evaluation[q.id] = {
         userAnswer,
         correctAnswer: q.correctAnswer,
         isCorrect,
-        explanation: q.explanation || ""
+        explanation: q.explanation || "",
       };
     }
 
@@ -344,16 +340,22 @@ router.post("/:id/submit", async (req, res) => {
       usedRebirth: !!usedRebirth,
       roomId: roomId || null,
       roomSettings,
-      createdAt: FieldValue.serverTimestamp()
+      createdAt: FieldValue.serverTimestamp(),
     };
 
     const resultRef = await db.collection("quiz_results").add(resultData);
-    
+
     // Update user exp based on score
     const expGain = score; // 1 exp per 1% score
-    await db.collection("users").doc(req.uid).update({
-      exp: FieldValue.increment(expGain)
-    });
+    await db
+      .collection("users")
+      .doc(req.uid)
+      .update({
+        exp: FieldValue.increment(expGain),
+      });
+
+    // Trigger achievements for QUIZ_SUBMIT
+    checkAchievements(req.uid, "QUIZ_SUBMIT", {}, req.app);
 
     res.json({ id: resultRef.id, ...resultData, expGain });
   } catch (error) {
@@ -372,32 +374,35 @@ router.post("/rebirth/:resultId", async (req, res) => {
     if (!resultDoc.exists) return res.status(404).json({ error: "Result not found" });
 
     const result = resultDoc.data();
-    
+
     if (result.uid !== req.uid) return res.status(403).json({ error: "Unauthorized" });
     if (result.usedRebirth) return res.status(400).json({ error: "Rebirth already used" });
 
     const quizDoc = await db.collection("quizzes").doc(result.quizId).get();
     const quiz = quizDoc.data();
-    
-    const targetQuestion = quiz.questions.find(q => q.id === questionId);
+
+    const targetQuestion = quiz.questions.find((q) => q.id === questionId);
     if (!targetQuestion) return res.status(404).json({ error: "Question not found" });
 
     const isCorrect = newAnswer === targetQuestion.correctAnswer;
-    
+
     // Update evaluation
     result.evaluation[questionId].userAnswer = newAnswer;
     result.evaluation[questionId].isCorrect = isCorrect;
     result.answers[questionId] = newAnswer;
-    
+
     if (isCorrect) {
       result.totalCorrect++;
       result.score = Math.round((result.totalCorrect / result.totalQuestions) * 100);
-      
+
       // Add more exp
       const expGain = Math.round(100 / result.totalQuestions);
-      await db.collection("users").doc(req.uid).update({
-        exp: FieldValue.increment(expGain)
-      });
+      await db
+        .collection("users")
+        .doc(req.uid)
+        .update({
+          exp: FieldValue.increment(expGain),
+        });
     }
 
     result.usedRebirth = true;
@@ -407,7 +412,7 @@ router.post("/rebirth/:resultId", async (req, res) => {
       totalCorrect: result.totalCorrect,
       answers: result.answers,
       evaluation: result.evaluation,
-      usedRebirth: true
+      usedRebirth: true,
     });
 
     res.json({ success: true, isCorrect, newScore: result.score, correctAnswer: targetQuestion.correctAnswer });

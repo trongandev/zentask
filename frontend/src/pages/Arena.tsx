@@ -24,7 +24,7 @@ export function Arena() {
 
   // Game state
   const [matchState, setMatchState] = useState<"selecting" | "searching" | "found" | "playing" | "finished">("selecting");
-  const [matchData, setMatchData] = useState<{ mode: string; cards: Word[]; x2Indices: number[] } | null>(null);
+  const [matchData, setMatchData] = useState<{ modes?: string[]; mode?: string; cards: Word[]; x2Indices: number[] } | null>(null);
   const [opponent, setOpponent] = useState<any>(null);
 
   const [roomCode, setRoomCode] = useState<string>("");
@@ -546,7 +546,7 @@ export function Arena() {
             </div>
           </div>
 
-          <ArenaGameRenderer mode={matchData.mode} card={currentCard} allCards={matchData.cards} isX2={isX2} disabled={hasAnswered} onAnswer={handleAnswer} />
+          <ArenaGameRenderer mode={matchData.modes ? matchData.modes[currentQuestionIndex] : (matchData.mode || "quiz")} card={currentCard} allCards={matchData.cards} isX2={isX2} disabled={hasAnswered} onAnswer={handleAnswer} />
         </div>
       )}
 
@@ -557,9 +557,9 @@ export function Arena() {
             {userScore > opponentScore ? (
               <img src="/mascot/Lopy (1).png" className="w-full h-full object-contain animate-bounce drop-shadow-[0_0_20px_rgba(250,204,21,0.5)]" />
             ) : userScore < opponentScore ? (
-              <img src="/mascot/Lopy (19).png" className="w-full h-full object-contain opacity-80" />
+              <img src="/mascot/Lopy (15).png" className="w-full h-full object-contain opacity-80" />
             ) : (
-              <img src="/mascot/Lopy (5).png" className="w-full h-full object-contain" />
+              <img src="/mascot/Lopy (14).png" className="w-full h-full object-contain" />
             )}
           </div>
           <h2 className={cn("text-4xl md:text-5xl font-black mb-2 text-center", userScore > opponentScore ? "text-yellow-400" : userScore < opponentScore ? "text-gray-400" : "text-blue-400")}>

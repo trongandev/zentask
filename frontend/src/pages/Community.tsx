@@ -71,7 +71,7 @@ export function Community() {
     // For simplicity, we just toggle and re-fetch if needed.
     const res = await togglePostLike(postId);
     if (res) {
-       getPosts(filterTag || undefined);
+       getPosts(filterTag || undefined, true);
     }
   };
 
@@ -131,7 +131,7 @@ export function Community() {
       setCommentText("");
       setReplyingToCommentId(null);
       await fetchCommentsForPost(postId);
-      getPosts(filterTag || undefined);
+      getPosts(filterTag || undefined, true);
     }
   };
 
@@ -194,6 +194,7 @@ export function Community() {
               src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
               level={user?.level || 1}
               className="w-12 h-12 flex-shrink-0"
+              uid={user?.uid}
             />
             <div className="flex-1 space-y-4">
               {!showEditor && !newPostContent.trim() ? (
@@ -246,7 +247,7 @@ export function Community() {
 
         {/* Posts Feed */}
         <div className="space-y-6">
-          {loading ? (
+          {loading && posts.length === 0 ? (
             <div className="text-center text-gray-500 py-8">Đang tải...</div>
           ) : posts.length === 0 ? (
             <div className="text-center text-gray-500 py-8">Không có bài đăng nào.</div>
@@ -260,7 +261,7 @@ export function Community() {
                   {/* Post Header */}
                   <div className="flex items-center justify-between mb-4 relative">
                     <div className="flex items-center gap-3">
-                      <UserAvatar src={post.user.avatar} level={post.user.level} className="w-12 h-12" />
+                      <UserAvatar src={post.user.avatar} level={post.user.level} uid={post.user.uid} className="w-12 h-12" />
                       <div>
                         <div className="flex items-center gap-2 mb-0.5">
                           <h3 className="font-bold text-gray-900">{post.user.name}</h3>
@@ -368,7 +369,7 @@ export function Community() {
                           
                           return (
                             <div key={comment.id} className="flex gap-3">
-                              <UserAvatar src={comment.user.avatar} level={comment.user.level} className="w-8 h-8 flex-shrink-0 mt-1" />
+                              <UserAvatar src={comment.user.avatar} level={comment.user.level} uid={comment.user.uid} className="w-8 h-8 flex-shrink-0 mt-1" />
                               <div className="flex-1">
                                 <div className="bg-gray-50 rounded-2xl p-3 border border-gray-100">
                                   <div className="flex items-center gap-2 mb-1">
@@ -441,6 +442,7 @@ export function Community() {
                           src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
                           level={user?.level || 1}
                           className="w-8 h-8 flex-shrink-0"
+                          uid={user?.uid}
                         />
                         <div className="flex-1 relative flex flex-col gap-2">
                           {replyingToCommentId && (

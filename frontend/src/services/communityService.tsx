@@ -52,7 +52,7 @@ interface CommunityState {
   loading: boolean;
   posts: Post[];
   
-  getPosts: (tags?: string) => Promise<Post[]>;
+  getPosts: (tags?: string, background?: boolean) => Promise<Post[]>;
   createPost: (content: string, tags: string[]) => Promise<any | null>;
   updatePost: (id: string, content: string, tags: string[]) => Promise<any | null>;
   deletePost: (id: string) => Promise<any | null>;
@@ -68,8 +68,8 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   loading: false,
   posts: [],
 
-  getPosts: async (tags?: string) => {
-    set({ loading: true });
+  getPosts: async (tags?: string, background = false) => {
+    if (!background) set({ loading: true });
     try {
       const url = tags ? `/community/posts?tags=${tags}` : `/community/posts`;
       const data = await fetchApi(url);
@@ -83,54 +83,45 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   },
 
   createPost: async (content: string, tags: string[]) => {
-    set({ loading: true });
     try {
       const result = await fetchApi("/community/posts", {
         method: "POST",
         body: JSON.stringify({ content, tags }),
       });
-      // Optionally re-fetch posts
-      get().getPosts();
+      get().getPosts(undefined, true);
       toast.success("Đăng bài thành công");
-      set({ loading: false });
       return result;
     } catch (error: any) {
       toast.error(error.message);
-      set({ loading: false });
       return null;
     }
   },
 
   updatePost: async (id: string, content: string, tags: string[]) => {
-    set({ loading: true });
     try {
       const result = await fetchApi(`/community/posts/${id}`, {
         method: "PUT",
         body: JSON.stringify({ content, tags }),
       });
-      get().getPosts();
+      get().getPosts(undefined, true);
       toast.success("Cập nhật bài viết thành công");
-      set({ loading: false });
       return result;
     } catch (error: any) {
       toast.error(error.message);
-      set({ loading: false });
       return null;
     }
   },
 
   deletePost: async (id: string) => {
-    set({ loading: true });
     try {
       const result = await fetchApi(`/community/posts/${id}`, {
         method: "DELETE",
       });
-      set((state) => ({ posts: state.posts.filter((p) => p.id !== id), loading: false }));
+      set((state) => ({ posts: state.posts.filter((p) => p.id !== id) }));
       toast.success("Xóa bài viết thành công");
       return result;
     } catch (error: any) {
       toast.error(error.message);
-      set({ loading: false });
       return null;
     }
   },
@@ -148,30 +139,24 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   },
 
   getComments: async (postId: string) => {
-    set({ loading: true });
     try {
       const data = await fetchApi(`/community/posts/${postId}/comments`);
-      set({ loading: false });
       return data;
     } catch (error: any) {
       toast.error(error.message);
-      set({ loading: false });
       return [];
     }
   },
 
   createComment: async (postId: string, content: string, parentId?: string) => {
-    set({ loading: true });
     try {
       const result = await fetchApi(`/community/posts/${postId}/comments`, {
         method: "POST",
         body: JSON.stringify({ content, parentId }),
       });
-      set({ loading: false });
       return result;
     } catch (error: any) {
       toast.error(error.message);
-      set({ loading: false });
       return null;
     }
   },
@@ -189,17 +174,14 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   },
 
   updateComment: async (commentId: string, content: string) => {
-    set({ loading: true });
     try {
       const result = await fetchApi(`/community/comments/${commentId}`, {
         method: "PUT",
         body: JSON.stringify({ content }),
       });
-      set({ loading: false });
       return result;
     } catch (error: any) {
       toast.error(error.message);
-      set({ loading: false });
       return null;
     }
   }

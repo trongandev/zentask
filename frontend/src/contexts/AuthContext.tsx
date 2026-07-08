@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-
+import { useConfigStore } from '../services/configService';
 interface UserProfile {
   uid: string;
   email: string;
@@ -16,16 +16,34 @@ interface UserProfile {
   stars?: number;
   bio?: string;
   username?: string;
+  achievedBadges?: number[];
+  grammarProgress?: {
+    maxStage: number;
+    totalCorrect: number;
+    totalWrong: number;
+    totalTimeSpent: number;
+    completedStages: number[];
+  };
+  customGrammarTests?: any[]; // Array of GrammarStage
+  tensesProgress?: {
+    maxStage: number;
+    totalCorrect: number;
+    totalWrong: number;
+    totalTimeSpent: number;
+    completedStages: number[];
+  };
+  customTensesTests?: any[]; // Array of TensesStage
 }
 
 interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
+  initialNotifications: any[];
   logout: () => Promise<void>;
   updateUser: (updates: Partial<UserProfile>) => void;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true, logout: async () => {}, updateUser: () => {} });
+const AuthContext = createContext<AuthContextType>({ user: null, loading: true, initialNotifications: [], logout: async () => {}, updateUser: () => {} });
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -33,12 +51,13 @@ const API_URL = import.meta.env.VITE_API_BACKEND;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [initialNotifications, setInitialNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const checkAuth = async () => {
     try {
       setLoading(true);
-      // Fetch session and user profile from backend
+      // Fetch session and unified payload from backend
       const res = await fetch(`${API_URL}/api/auth/me`, {
         method: 'GET',
         credentials: 'include'
@@ -50,8 +69,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const backendUser = await res.json();
-      setUser(backendUser as UserProfile);
+      const data = await res.json();
+      setUser(data.user as UserProfile);
+      setInitialNotifications(data.notifications || []);
+      
+      useConfigStore.getState().setConfigs({
+        levels: data.config?.levels || [],
+        dailyTasks: data.config?.dailyTasks || [],
+        badges: data.config?.badges || [],
+        taskProgress: data.userProgress?.taskProgress || {}
+      });
 
     } catch (error) {
       console.error("Error setting up auth:", error);
@@ -79,13 +106,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateUser = (updates: Partial<UserProfile>) => {
-    if (user) {
-      setUser({ ...user, ...updates });
-    }
+    setUser((prevUser) => {
+      if (prevUser) {
+        return { ...prevUser, ...updates };
+      }
+      return prevUser;
+    });
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, initialNotifications, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

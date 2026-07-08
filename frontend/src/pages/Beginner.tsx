@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MountainSnow, Swords, Headphones, Mic, Edit3, BookOpen, ChevronRight, Play, Check, X, Save, Layers, Plus, Medal, Target } from "lucide-react";
 import { cn } from "../lib/utils";
@@ -28,6 +28,8 @@ export function Beginner() {
   const [rememberSet, setRememberSet] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const rankContainerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
   const { sets, fetchSets, createCard } = useFlashcardStore();
 
   useEffect(() => {
@@ -48,6 +50,18 @@ export function Beginner() {
     maxStars: RANK_CONFIG[user?.rankId || 1]?.starsPerTier || 3,
     position: 142,
   };
+
+  useEffect(() => {
+    if (activeTab === "difficulty" && currentRankInfo.rankId) {
+      // Small timeout to allow DOM to render before scrolling
+      setTimeout(() => {
+        const el = rankContainerRefs.current[currentRankInfo.rankId];
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        }
+      }, 100);
+    }
+  }, [activeTab, currentRankInfo.rankId]);
 
   const handleSaveWord = async () => {
     if (!wordToSave || !selectedUserSetId) {
@@ -95,53 +109,55 @@ export function Beginner() {
               <div className="">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Thư viện Flashcard</h2>
 
-                <div className="flex bg-gray-100 p-1 rounded-xl w-fit mb-6">
+                <div className="flex flex-wrap md:flex-nowrap bg-gray-100 p-1 rounded-xl w-full md:w-fit mb-6 gap-1 md:gap-0">
                   <button
                     onClick={() => setActiveTab("now")}
-                    className={cn("px-6 py-2 rounded-lg font-bold text-sm transition-all", activeTab === "now" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+                    className={cn("flex-1 md:flex-none px-3 md:px-6 py-2 rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap", activeTab === "now" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}
                   >
-                    Theo rank hiện tại
+                    Theo rank
                   </button>
                   <button
                     onClick={() => setActiveTab("topic")}
-                    className={cn("px-6 py-2 rounded-lg font-bold text-sm transition-all", activeTab === "topic" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+                    className={cn("flex-1 md:flex-none px-3 md:px-6 py-2 rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap", activeTab === "topic" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}
                   >
                     Theo chủ đề
                   </button>
                   <button
                     onClick={() => setActiveTab("difficulty")}
-                    className={cn("px-6 py-2 rounded-lg font-bold text-sm transition-all", activeTab === "difficulty" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+                    className={cn("flex-1 md:flex-none px-3 md:px-6 py-2 rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap", activeTab === "difficulty" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}
                   >
-                    Theo trình độ
+                    Trình độ
                   </button>
                 </div>
               </div>
               {/* Right Column: Arena CTA & Rank */}
               {activeTab === "now" && (
-                <div className="flex gap-6 ">
+                <div className="flex flex-col lg:flex-row gap-6 ">
                   <div className="flex-1">
-                    <div className="bg-blue-50/50 border border-blue-100 rounded-3xl p-6 relative overflow-hidden h-full flex flex-col justify-center">
+                    <div className="bg-blue-50/50 border border-blue-100 rounded-3xl p-5 md:p-6 relative overflow-hidden h-full flex flex-col justify-center">
                       <div className="absolute -right-4 -bottom-4 opacity-10 pointer-events-none">
-                        <Swords className="w-40 h-40 text-blue-600" />
+                        <Swords className="w-32 h-32 md:w-40 md:h-40 text-blue-600" />
                       </div>
-                      <div className="flex items-start gap-5 relative z-10">
-                        <div className="w-14 h-14 bg-white shadow-sm border border-blue-100 rounded-2xl flex items-center justify-center shrink-0 text-blue-600">
-                          <BookOpen className="w-7 h-7" />
+                      <div className="flex flex-col md:flex-row items-start gap-4 md:gap-5 relative z-10">
+                        <div className="w-12 h-12 md:w-14 md:h-14 bg-white shadow-sm border border-blue-100 rounded-2xl flex items-center justify-center shrink-0 text-blue-600">
+                          <BookOpen className="w-6 h-6 md:w-7 md:h-7" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-blue-950 mb-3">Cơ chế thăng hạng</h3>
-                          <p className="text-[15px] text-blue-900/80 leading-relaxed font-medium">
-                            Để tham gia đấu hạng, bạn cần học các chủ đề bên dưới. Mỗi Rank sẽ có những bộ chủ đề riêng biệt. Nhiệm vụ của bạn là phải học thuộc từ vựng, thi đấu và cố gắng đánh bại những người chơi khác để thăng hạng. 
-                            <br/><br/>
+                          <h3 className="text-lg md:text-xl font-bold text-blue-950 mb-2 md:mb-3">Cơ chế thăng hạng</h3>
+                          <p className="text-sm md:text-[15px] text-blue-900/80 leading-relaxed font-medium">
+                            Để tham gia đấu hạng, bạn cần học các chủ đề bên dưới. Mỗi Rank sẽ có những bộ chủ đề riêng biệt. Nhiệm vụ của bạn là phải học thuộc từ vựng, thi đấu và cố gắng đánh bại
+                            những người chơi khác để thăng hạng.
+                            <br />
+                            <br />
                             Lưu ý: Rank càng cao thì chủ đề sẽ càng khó và lượng từ vựng cũng tăng lên.
-                            <br/>
+                            <br />
                             <span className="font-bold text-blue-700 mt-2 inline-block">Chúc bạn may mắn và đạt thứ hạng cao! 🏆</span>
                           </p>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="space-y-6 w-1/4">
+                  <div className="w-full lg:w-1/4">
                     <RankCard showButton={true} buttonText="Bắt đầu đấu hạng" />
                   </div>
                 </div>
@@ -187,38 +203,53 @@ export function Beginner() {
             )}
 
             {activeTab === "difficulty" && (
-              <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent">
+              <div className="flex overflow-x-auto gap-6 pb-6 snap-x snap-mandatory custom-scrollbar">
                 {Object.entries(RANK_TOPIC_CONFIG).map(([rankId, rankData]: [string, any]) => {
-                  const rankSets = Object.values(rankData.tiers).flatMap((t: any) => t.data);
-                  if (rankSets.length === 0) return null;
+                  const hasAnyData = Object.values(rankData.tiers).some((t: any) => t.data.length > 0);
+                  if (!hasAnyData) return null;
                   return (
-                    <div key={rankId} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-blue-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-                        <span className="font-bold text-sm">{rankId}</span>
+                    <div
+                      key={rankId}
+                      ref={(el) => (rankContainerRefs.current[rankId] = el)}
+                      className="w-[85vw] max-w-[320px] shrink-0 snap-center bg-gray-50 rounded-3xl p-4 md:p-5 border border-gray-100 flex flex-col h-[450px] md:h-[500px]"
+                    >
+                      {/* header */}
+                      <div className="flex items-center gap-3 mb-5 sticky top-0 bg-gray-50 z-10 pb-2">
+                        <img src={`/rank/${rankId}.png`} alt={rankData.name} className="w-12 object-contain" />
+                        <h3 className="font-extrabold text-gray-900 text-lg">Rank {rankData.name}</h3>
                       </div>
 
-                      <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-gray-100 bg-white shadow-sm transition-all">
-                        <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                          <img src={`/rank/${rankId}.png`} alt={rankData.name} className="w-6 h-6 object-contain" />
-                          Rank {rankData.name}
-                        </h4>
-                        <div className="space-y-3">
-                          {rankSets.map((set: any) => (
-                            <div
-                              key={set.id}
-                              onClick={() => navigate(`/beginner/flashcard/${set.id}`)}
-                              className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors"
-                            >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0", set.color)}>
-                                  <Layers className="w-4 h-4" />
+                      {/* content with its own scroll if needed */}
+                      <div className="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
+                        {Object.entries(rankData.tiers)
+                          .sort(([a], [b]) => Number(b) - Number(a))
+                          .map(([tierNum, tierData]: [string, any]) => {
+                            if (tierData.data.length === 0) return null;
+                            return (
+                              <div key={tierNum} className="space-y-3">
+                                <div className="font-bold text-sm text-blue-800 bg-blue-100/50 px-3 py-1.5 rounded-lg inline-block">
+                                  {rankData.name} {TIER_NAMES[Number(tierNum)]}
                                 </div>
-                                <p className="font-semibold text-gray-800 text-sm truncate">{set.title}</p>
+                                <div className="space-y-2">
+                                  {tierData.data.map((set: any) => (
+                                    <div
+                                      key={set.id}
+                                      onClick={() => navigate(`/beginner/flashcard/${set.id}`)}
+                                      className="flex items-center justify-between p-3.5 rounded-xl bg-white hover:bg-gray-100 cursor-pointer transition-all shadow-sm border border-gray-100 group"
+                                    >
+                                      <div className="flex items-center gap-3 min-w-0">
+                                        <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center text-white shrink-0", set.color)}>
+                                          <Layers className="w-4.5 h-4.5" />
+                                        </div>
+                                        <p className="font-semibold text-gray-800 text-sm truncate group-hover:text-blue-600 transition-colors">{set.title}</p>
+                                      </div>
+                                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors shrink-0" />
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
-                              <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
-                            </div>
-                          ))}
-                        </div>
+                            );
+                          })}
                       </div>
                     </div>
                   );

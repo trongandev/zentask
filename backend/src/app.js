@@ -290,18 +290,22 @@ import notificationRoutes from "./routes/notifications.js";
 import quizRoutes from "./routes/quiz.js";
 import adminRoutes from "./routes/admin.js";
 import arenaRoutes from "./routes/arena.js";
+import grammarRoutes from "./routes/grammar.js";
+import tensesRoutes from "./routes/tenses.js";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rank", rankRoutes);
 app.use("/api/flashcard", flashcardRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/config", configRoutes);
+app.use("/api/grammar", grammarRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/arena", arenaRoutes);
+app.use("/api/tenses", tensesRoutes);
 
 app.get("/health", (req, res) => {
   res.send("OK");

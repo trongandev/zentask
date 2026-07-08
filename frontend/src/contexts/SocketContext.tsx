@@ -24,9 +24,9 @@ export const useSocket = () => useContext(SocketContext);
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
 export function SocketProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, initialNotifications } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>(initialNotifications || []);
 
   const fetchNotifications = async () => {
     try {
@@ -83,12 +83,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     });
 
     setSocket(newSocket);
-    fetchNotifications();
+    setNotifications(initialNotifications || []);
 
     return () => {
       newSocket.disconnect();
     };
-  }, [user]);
+  }, [user, initialNotifications]);
 
   return (
     <SocketContext.Provider value={{ socket, notifications, setNotifications, fetchNotifications, markAsRead }}>

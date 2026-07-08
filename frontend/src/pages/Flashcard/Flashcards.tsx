@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal, Trash2, Folder as FolderIcon, Edit2, Target } from "lucide-react";
+import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal, Trash2, Folder as FolderIcon, Edit2 } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { useStudyProgressStore } from "../../services/studyProgressService";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { format, subDays } from "date-fns";
+
 import { RankCard } from "../../components/shared/RankCard";
 import { useFlashcardStore } from "../../services/flashcardService";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +9,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
 
 import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay, useDroppable } from "@dnd-kit/core";
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 const RANK_CONFIG: any = {

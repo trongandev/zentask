@@ -4,6 +4,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { SYSTEM_LEVELS } from "../config/system.js";
 import { getWeekString, getMonthString } from "../utils/dateUtils.js";
 import { createNotification } from "../utils/notifications.js";
+import { checkAchievements } from "../utils/achievements.js";
 
 const router = Router();
 
@@ -113,7 +114,7 @@ export const incrementDailyTask = async (uid, taskId, amount = 1) => {
     const newProgress = Math.min(currentProgress + amount, taskConfig.total);
     const addedAmount = newProgress - currentProgress;
     
-    const xpToAdd = addedAmount * taskConfig.xpPerItem;
+    const xpToAdd = addedAmount * (taskConfig.xpPerItem || taskConfig.point || taskConfig.xpReward || 0);
     
     currentTasks[taskId] = newProgress;
     
@@ -200,6 +201,9 @@ router.post("/checkin", async (req, res) => {
       });
     }
 
+    // Trigger achievements for CHECK_IN
+    checkAchievements(req.uid, "CHECK_IN", {}, req.app);
+
     res.json({ 
       status: "success", 
       streak, 
@@ -245,6 +249,20 @@ router.post("/study-time", async (req, res) => {
         updatedAt: FieldValue.serverTimestamp()
       });
     }
+
+    // Trigger achievements for STUDY_TIME
+    const updatedQuery = await db.collection("user_daily_stats")
+      .where("userId", "==", req.uid)
+      .where("date", "==", today)
+      .limit(1)
+      .get();
+    
+    let totalMins = minutes;
+    if (!updatedQuery.empty) {
+      totalMins = updatedQuery.docs[0].data().studyMinutes || minutes;
+    }
+    
+    checkAchievements(req.uid, "STUDY_TIME", { todayMinutes: totalMins }, req.app);
 
     res.json({ status: "success" });
   } catch (error) {
@@ -375,6 +393,7 @@ router.get("/profile/:uid", async (req, res) => {
       rankId: data.rankId || 1,
       tier: data.tier || 3,
       stars: data.stars || 0,
+      achievedBadges: data.achievedBadges || [],
       followers: data.followers || 0,
       following: data.following || 0,
       joined: data.createdAt ? new Date(data.createdAt._seconds * 1000).toLocaleDateString('vi-VN') : "Gần đây"

@@ -104,20 +104,20 @@ export function QuizCreate() {
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl p-2 flex gap-2 border border-gray-100 shadow-sm w-max">
+      <div className="bg-white rounded-3xl p-2 flex gap-2 border border-gray-100 shadow-sm w-full md:w-max">
         <button
           onClick={() => setMode("ai")}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl font-bold transition-all ${mode === "ai" ? "bg-blue-600 text-white shadow-md" : "text-gray-500 hover:bg-gray-50"}`}
+          className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl font-bold transition-all ${mode === "ai" ? "bg-blue-600 text-white shadow-md" : "text-gray-500 hover:bg-gray-50"}`}
         >
           <Bot className="w-5 h-5" />
-          Tạo bằng AI (Khuyên dùng)
+          AI
         </button>
         <button
           onClick={() => setMode("manual")}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl font-bold transition-all ${mode === "manual" ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-50"}`}
+          className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl font-bold transition-all ${mode === "manual" ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-50"}`}
         >
           <FileText className="w-5 h-5" />
-          Tạo thủ công
+          Thủ công
         </button>
       </div>
 

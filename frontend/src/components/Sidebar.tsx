@@ -73,6 +73,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
                   <li key={itemIdx} className="relative group/nav">
                     <NavLink
                       to={item.to}
+                      onClick={() => {
+                        if (window.innerWidth < 1024) {
+                          onToggle();
+                        }
+                      }}
                       className={({ isActive }) =>
                         cn(
                           "flex items-center rounded-xl font-medium transition-colors",

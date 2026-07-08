@@ -379,7 +379,7 @@ export function FlashcardDetail() {
       </div>
 
       {/* Action bar */}
-      <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+      <div className="flex justify-between items-center flex-wrap gap-3 md:gap-0 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
         <button onClick={() => navigate(`/flashcard/${id}/practice`)} className="bg-blue-50 text-blue-600 px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-100 transition-colors">
           <Play className="w-5 h-5 fill-current" /> Học bộ thẻ này
         </button>

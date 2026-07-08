@@ -44,6 +44,8 @@ import { QuizCreate } from "./pages/Quiz/QuizCreate";
 import { QuizRoom } from "./pages/Quiz/QuizRoom";
 import { QuizPlay } from "./pages/Quiz/QuizPlay";
 import { QuizResult } from "./pages/Quiz/QuizResult";
+import { GrammarPractice } from "./pages/GrammarPractice";
+import { TensesPractice } from "./pages/TensesPractice";
 
 function MainLayout() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(() => {
@@ -57,6 +59,7 @@ function MainLayout() {
   });
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isRightMobileMenuOpen, setIsRightMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isPracticePage = location.pathname.match(/\/flashcard\/[^\/]+\/practice/);
 
@@ -70,8 +73,11 @@ function MainLayout() {
 
   return (
     <div className="flex min-h-screen bg-[#F4F7FE] font-sans text-slate-900 overflow-hidden relative">
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Left Sidebar Overlay */}
       {isMobileMenuOpen && <div className="fixed inset-0 bg-gray-900/50 z-[60] lg:hidden animate-in fade-in" onClick={() => setIsMobileMenuOpen(false)} />}
+
+      {/* Mobile Right Sidebar Overlay */}
+      {isRightMobileMenuOpen && <div className="fixed inset-0 bg-gray-900/50 z-[60] lg:hidden animate-in fade-in" onClick={() => setIsRightMobileMenuOpen(false)} />}
 
       {/* Left Sidebar */}
       <div
@@ -118,13 +124,40 @@ function MainLayout() {
         </main>
       </div>
 
-      {/* Right Sidebar */}
+      {/* Desktop Right Sidebar */}
       {!isPracticePage && (
         <div className={`transition-all duration-300 ease-in-out hidden lg:block flex-shrink-0 relative z-50 bg-white border-l border-gray-100 ${isRightSidebarOpen ? "w-[320px]" : "w-[88px]"}`}>
           <div className={`h-screen sticky top-0 ${isRightSidebarOpen ? "w-[320px]" : "w-[88px]"}`}>
             <RightSidebar isOpen={isRightSidebarOpen} onClose={() => setIsRightSidebarOpen(false)} onOpen={() => setIsRightSidebarOpen(true)} />
           </div>
         </div>
+      )}
+
+      {/* Mobile Right Sidebar */}
+      {!isPracticePage && (
+        <div
+          className={`
+          fixed inset-y-0 right-0 z-[70] lg:hidden
+          transition-all duration-300 ease-in-out flex-shrink-0 bg-white border-l border-gray-100
+          ${isRightMobileMenuOpen ? "translate-x-0 w-[80%] max-w-[320px]" : "translate-x-full w-[80%] max-w-[320px]"}
+        `}
+        >
+          <div className="h-full w-full">
+            <RightSidebar isOpen={true} onClose={() => setIsRightMobileMenuOpen(false)} onOpen={() => {}} />
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Floating Button to open Right Sidebar */}
+      {!isPracticePage && !isRightMobileMenuOpen && (
+        <button
+          onClick={() => setIsRightMobileMenuOpen(true)}
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-[55] lg:hidden bg-white p-2.5 rounded-l-2xl shadow-lg border border-r-0 border-gray-200 text-blue-600 flex flex-col items-center gap-1 opacity-90 hover:opacity-100 transition-opacity"
+        >
+          <div className="w-1 h-8 bg-blue-100 rounded-full flex flex-col justify-center items-center overflow-hidden">
+            <div className="w-full h-1/3 bg-blue-500 rounded-full"></div>
+          </div>
+        </button>
       )}
     </div>
   );
@@ -180,7 +213,11 @@ function AppContent() {
           <Route path="quiz/play/:id" element={<QuizPlay />} />
           <Route path="quiz/result/:resultId" element={<QuizResult />} />
           <Route path="grammar" element={<Grammar />} />
+          <Route path="grammar/practice" element={<GrammarPractice />} />
+          <Route path="grammar/practice/:stageId" element={<GrammarPractice />} />
           <Route path="tenses" element={<Tenses />} />
+          <Route path="tenses/practice" element={<TensesPractice />} />
+          <Route path="tenses/practice/:stageId" element={<TensesPractice />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:id" element={<Profile />} />
           <Route path="arena" element={<Arena />} />

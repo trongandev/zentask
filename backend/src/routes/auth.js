@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { auth, db } from "../firebase.js";
 import { FieldValue } from "firebase-admin/firestore";
+import { SYSTEM_LEVELS, SYSTEM_BADGES } from "../config/system.js";
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
@@ -112,6 +113,7 @@ router.get("/google/callback", async (req, res) => {
                 rankId: 1,
                 tier: 3,
                 stars: 0,
+                achievedBadges: [],
                 createdAt: FieldValue.serverTimestamp(),
                 updatedAt: FieldValue.serverTimestamp(),
             });
@@ -238,6 +240,7 @@ router.get("/me", async (req, res) => {
                 rankId: 1,
                 tier: 3,
                 stars: 0,
+                achievedBadges: [],
             };
 
             await userDocRef.set({
@@ -247,7 +250,82 @@ router.get("/me", async (req, res) => {
             });
         }
 
-        res.status(200).json(userProfile);
+        // Fetch custom grammar tests
+        try {
+            const grammarTestsSnap = await userDocRef.collection("grammar_tests").orderBy("createdAt", "desc").get();
+            const customGrammarTests = grammarTestsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            userProfile.customGrammarTests = customGrammarTests;
+        } catch (e) {
+            console.error("Error fetching grammar tests", e);
+            userProfile.customGrammarTests = [];
+        }
+
+        // Fetch custom tenses tests
+        try {
+            const tensesTestsSnap = await userDocRef.collection("tenses_tests").orderBy("createdAt", "desc").get();
+            const customTensesTests = tensesTestsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            userProfile.customTensesTests = customTensesTests;
+        } catch (e) {
+            console.error("Error fetching tenses tests", e);
+            userProfile.customTensesTests = [];
+        }
+
+        // Initialize grammarProgress if not exists
+        if (!userProfile.grammarProgress) {
+            userProfile.grammarProgress = {
+                maxStage: 1,
+                totalCorrect: 0,
+                totalWrong: 0,
+                totalTimeSpent: 0,
+                completedStages: []
+            };
+        }
+
+        // Initialize tensesProgress if not exists
+        if (!userProfile.tensesProgress) {
+            userProfile.tensesProgress = {
+                maxStage: 1,
+                totalCorrect: 0,
+                totalWrong: 0,
+                totalTimeSpent: 0,
+                completedStages: []
+            };
+        }
+
+        // Fetch Daily Tasks
+        const dailyTasksSnap = await db.collection("daily_tasks").orderBy("createdAt", "asc").get();
+        const dailyTasks = dailyTasksSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Fetch Task Progress
+        const progressRef = userDocRef.collection("daily_tasks").doc("progress");
+        const progressDoc = await progressRef.get();
+        const taskProgress = progressDoc.exists ? progressDoc.data() : {};
+
+        // Fetch Notifications
+        const notifSnap = await db.collection("notifications")
+          .where("receiverId", "==", userProfile.uid)
+          .orderBy("createdAt", "desc")
+          .limit(50)
+          .get();
+          
+        const notifications = notifSnap.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt ? new Date(doc.data().createdAt._seconds * 1000).toISOString() : new Date().toISOString()
+        }));
+
+        res.status(200).json({
+            user: userProfile,
+            config: {
+                levels: SYSTEM_LEVELS,
+                dailyTasks: dailyTasks,
+                badges: SYSTEM_BADGES
+            },
+            userProgress: {
+                taskProgress: taskProgress
+            },
+            notifications: notifications
+        });
     } catch (error) {
         res.clearCookie("session");
         res.status(401).send("Unauthenticated");
