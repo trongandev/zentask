@@ -1,14 +1,14 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { useConfigStore } from '../services/configService';
-import { useUserStore } from '../services/userService';
-import { useFlashcardStore } from '../services/flashcardService';
-import { useEtcStore } from '../services/etcService';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { useConfigStore } from "../services/configService";
+import { useUserStore } from "../services/userService";
+import { useFlashcardStore } from "../services/flashcardService";
+import { useEtcStore } from "../services/etcService";
 interface UserProfile {
   uid: string;
   email: string;
   displayName: string;
   photoURL: string;
-  role: 'user' | 'teacher' | 'collab' | 'admin';
+  role: "user" | "teacher" | "collab" | "admin";
   level: number;
   xp: number;
   streak: number;
@@ -62,8 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       // Fetch session and unified payload from backend
       const res = await fetch(`${API_URL}/api/auth/me`, {
-        method: 'GET',
-        credentials: 'include'
+        method: "GET",
+        credentials: "include",
       });
 
       if (!res.ok) {
@@ -84,19 +84,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             window.chrome.runtime.sendMessage(extensionId, {
               action: "SYNC_FIREBASE_AUTH",
               token: data.extensionToken,
-              user: data.user
+              user: data.user,
             });
           } catch (e) {
             console.error("Extension sync error", e);
           }
         }
       }
-      
+
       useConfigStore.getState().setConfigs({
         levels: data.config?.levels || [],
         dailyTasks: data.config?.dailyTasks || [],
         badges: data.config?.badges || [],
-        taskProgress: data.userProgress?.taskProgress || {}
+        taskProgress: data.userProgress?.taskProgress || {},
       });
 
       if (data.userProgress?.stats) {
@@ -108,7 +108,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.userProgress?.weeklyLeaderboard) {
         useEtcStore.getState().setPreloadedWeeklyLeaderboard(data.userProgress.weeklyLeaderboard);
       }
-
     } catch (error) {
       console.error("Error setting up auth:", error);
       setUser(null);
@@ -124,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handleXpUpdate = (e: any) => {
       const xpResult = e.detail;
-      if (xpResult && typeof xpResult.xp === 'number') {
+      if (xpResult && typeof xpResult.xp === "number") {
         setUser((prevUser) => {
           if (prevUser) {
             return { ...prevUser, xp: xpResult.xp, level: xpResult.level };
@@ -140,11 +139,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await fetch(`${API_URL}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include'
+        method: "POST",
+        credentials: "include",
       });
       setUser(null);
-      window.location.href = '/auth';
+      window.location.href = "/auth";
     } catch (err) {
       console.error("Logout failed", err);
     }
@@ -159,9 +158,5 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, initialNotifications, logout, updateUser }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, initialNotifications, logout, updateUser }}>{children}</AuthContext.Provider>;
 }

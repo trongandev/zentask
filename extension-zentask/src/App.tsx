@@ -25,8 +25,8 @@ export const LANGUAGE_OPTIONS = [
 export default function App() {
   const [inputFrom, setInputFrom] = useState("");
   const [inputTo, setInputTo] = useState("");
-  const [from, setFrom] = useState("vi");
-  const [to, setTo] = useState("en");
+  const [from, setFrom] = useState("auto");
+  const [to, setTo] = useState("vi");
   const [loadingAudio, setLoadingAudio] = useState<string | null>(null);
   const [disableAudio, setDisableAudio] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
@@ -387,12 +387,12 @@ export default function App() {
         {user ? (
           <div className="flex gap-3 items-center">
             <a href={`${import.meta.env.VITE_API_FRONTEND}/profile`} target="_blank" rel="noopener noreferrer">
-              <img src={user.profilePicture || ICON_URL} alt="Avatar" className="w-9 h-9 rounded-full border-2 border-white object-cover" />
+              <img src={user.photoURL || ICON_URL} alt="Avatar" className="w-9 h-9 rounded-full border-2 border-white object-cover" />
             </a>
           </div>
         ) : (
           <a
-            href={`${import.meta.env.VITE_API_FRONTEND}/auth/login`}
+            href={`${import.meta.env.VITE_API_FRONTEND}/auth`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm bg-white text-teal-600 px-3 py-1.5 rounded-full font-bold hover:bg-gray-100 transition-colors"

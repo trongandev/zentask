@@ -1,0 +1,59 @@
+name: Publish Chrome Extension
+
+on:
+  push:
+    tags:
+      - "ext-v*"
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Bump version from tag
+        run: |
+          # Lấy version từ tag: ext-v1.2.3 → 1.2.3
+          VERSION=$(echo "${{ github.ref_name }}" | sed 's/^ext-v//')
+          echo "Publishing version: $VERSION"
+
+          # Cập nhật manifest.json
+          jq ".version = \"$VERSION\"" extension-zentask/manifest.json > tmp.json && mv tmp.json extension-zentask/manifest.json
+
+          # Hiển thị version đã set
+          echo "manifest.json version: $(jq -r '.version' extension-zentask/manifest.json)"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: extension-zentask/package-lock.json
+
+      - name: Install dependencies
+        working-directory: extension-zentask
+        run: npm ci
+
+      - name: Build extension
+        working-directory: extension-zentask
+        run: npm run build
+
+      - name: Zip extension
+        working-directory: extension-zentask
+        run: |
+          cd dist
+          zip -r ../extension.zip .
+
+      - name: Upload to Chrome Web Store
+        uses: trmcnvn/chrome-addon@v2
+        with:
+          extension: ${{ secrets.EXTENSION_ID }}
+          zip: extension-zentask/extension.zip
+          client-id: ${{ secrets.CLIENT_ID }}
+          client-secret: ${{ secrets.CLIENT_SECRET }}
+          refresh-token: ${{ secrets.REFRESH_TOKEN }}

@@ -386,17 +386,55 @@ router.delete("/card/:cardId", async (req, res) => {
 // AI flashcard generation
 router.post("/generate-ai", async (req, res) => {
   try {
-    const { term } = req.body;
+    const { term, setId, list_flashcard_id } = req.body;
+    const targetSetId = setId || list_flashcard_id;
     if (!term) return res.status(400).json({ error: "Term is required" });
 
     const lowercaseTerm = term.trim().toLowerCase();
+
+    // Helper function to save to user's set if targetSetId is provided
+    const saveToUserSet = async (vocabData) => {
+      if (!targetSetId) return;
+      const setRef = db.collection("flashcard_sets").doc(targetSetId);
+      const setDoc = await setRef.get();
+      if (setDoc.exists && setDoc.data().userId === req.uid) {
+        // Kiểm tra xem từ này đã tồn tại trong bộ chưa
+        const existingCard = await db.collection("flashcards")
+          .where("setId", "==", targetSetId)
+          .where("term", "==", vocabData.term)
+          .limit(1)
+          .get();
+          
+        if (existingCard.empty) {
+          const newCard = {
+            setId: targetSetId,
+            userId: req.uid,
+            term: vocabData.term,
+            phonetic: vocabData.phonetic || "",
+            translation: vocabData.translation,
+            examples: vocabData.examples || [],
+            notes: vocabData.notes || "",
+            isLearned: false,
+            createdAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          };
+          await db.collection("flashcards").add(newCard);
+          await setRef.update({
+            cardCount: FieldValue.increment(1),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+        }
+      }
+    };
 
     // Check if it exists in vocabulary
     const vocabRef = db.collection("vocabulary").doc(lowercaseTerm);
     const vocabDoc = await vocabRef.get();
 
     if (vocabDoc.exists) {
-      return res.json({ source: "cache", ...vocabDoc.data() });
+      const vocabData = vocabDoc.data();
+      await saveToUserSet(vocabData);
+      return res.json({ source: "cache", ...vocabData, ok: true, message: "Lưu thành công!" });
     }
 
     // Generate with AI
@@ -482,8 +520,9 @@ Vui lòng trả về kết quả với các thông tin sau:
     };
 
     await vocabRef.set(newVocab);
+    await saveToUserSet(newVocab);
 
-    res.json({ source: "ai", ...newVocab });
+    res.json({ source: "ai", ...newVocab, ok: true, message: "Lưu thành công!" });
   } catch (error) {
     console.error("AI Generation Error:", error);
     res.status(500).json({ error: error.message || "Failed to generate content" });

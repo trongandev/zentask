@@ -295,11 +295,10 @@ const ContentApp = () => {
 
     try {
       const res = await etcService.createFlashcardWithAI(
-        "/flashcards/create-ai",
+        "/api/flashcard/generate-ai",
         {
-          word: selectedText,
-          list_flashcard_id: listFlashcardId._id,
-          language: listFlashcardId.language,
+          term: selectedText,
+          setId: listFlashcardId.id,
         },
         userToken,
       );
@@ -439,7 +438,7 @@ const ContentApp = () => {
                 </div>
               </>
             ) : (
-              <a href={`${import.meta.env.VITE_API_FRONTEND}/auth/login`} target="_blank" rel="noreferrer" className="text-teal-600 text-sm font-medium hover:underline text-center w-full">
+              <a href={`${import.meta.env.VITE_API_FRONTEND}/auth`} target="_blank" rel="noreferrer" className="text-teal-600 text-sm font-medium hover:underline text-center w-full">
                 Đăng nhập để sử dụng tính năng
               </a>
             )}
@@ -540,7 +539,7 @@ const ContentApp = () => {
           <div className="p-3 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
             {userInfo ? (
               <div className="flex items-center gap-2">
-                <img src={userInfo.profilePicture || ICON_URL} alt="Avatar" className="w-8 h-8 rounded-full border border-gray-200 bg-white object-cover" />
+                <img src={userInfo.photoURL || ICON_URL} alt="Avatar" className="w-8 h-8 rounded-full border border-gray-200 bg-white object-cover" />
                 <div>
                   <div className="font-semibold text-gray-700 text-xs">{userInfo.displayName || "User"}</div>
                   <div className="text-xs text-gray-500 flex items-center gap-1 line-clamp-1">
@@ -549,7 +548,7 @@ const ContentApp = () => {
                 </div>
               </div>
             ) : (
-              <a href={`${import.meta.env.VITE_API_FRONTEND}/auth/login`} target="_blank" rel="noreferrer" className="text-teal-600 text-sm font-medium hover:underline text-center w-full">
+              <a href={`${import.meta.env.VITE_API_FRONTEND}/auth`} target="_blank" rel="noreferrer" className="text-teal-600 text-sm font-medium hover:underline text-center w-full">
                 Bấm vào đây để đăng nhập và lưu từ vựng vào tài khoản của bạn
               </a>
             )}

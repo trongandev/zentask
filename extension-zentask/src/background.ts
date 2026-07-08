@@ -99,7 +99,7 @@ const fetchTokens = async () => {
       const listFlashCards = await response.json();
       let list_flashcard_id = null;
       if (listFlashCards && listFlashCards.length > 0) {
-        list_flashcard_id = listFlashCards[0].id;
+        list_flashcard_id = listFlashCards[0];
       }
 
       const newStorage = {
@@ -128,6 +128,7 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
   if (request.action === "SYNC_FIREBASE_AUTH") {
     console.log(sender);
     const { token, user } = request;
+    console.log({ token, user });
     if (token) {
       chrome.storage.local.set({ token, user }).then(() => {
         fetchTokens().then((result) => {
