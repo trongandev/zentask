@@ -58,7 +58,7 @@ const ContentApp = () => {
 
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Load History when activeView changes to history
+  // Load History when activeView changes to history.
   useEffect(() => {
     if (activeView === "history") {
       chrome.storage.local.get(["translationHistory"], (result) => {
