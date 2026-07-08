@@ -410,6 +410,48 @@ router.get("/daily-tasks/progress", async (req, res) => {
   }
 });
 
+// Get learned beginner words
+router.get("/beginner-progress", async (req, res) => {
+  try {
+    const userRef = db.collection("users").doc(req.uid);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const data = doc.data();
+    res.json({ learnedWords: data.learnedBeginnerWords || [] });
+  } catch (error) {
+    console.error("Get beginner progress error:", error);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
+
+// Mark word as learned
+router.post("/beginner-progress", async (req, res) => {
+  try {
+    const { wordId, wordIds } = req.body;
+    if (!wordId && (!wordIds || !Array.isArray(wordIds) || wordIds.length === 0)) {
+      return res.status(400).json({ error: "wordId or valid wordIds array is required" });
+    }
+
+    const userRef = db.collection("users").doc(req.uid);
+    if (wordIds) {
+      await userRef.update({
+        learnedBeginnerWords: FieldValue.arrayUnion(...wordIds)
+      });
+    } else {
+      await userRef.update({
+        learnedBeginnerWords: FieldValue.arrayUnion(wordId)
+      });
+    }
+
+    res.json({ status: "success" });
+  } catch (error) {
+    console.error("Update beginner progress error:", error);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
+
 // Follow / Unfollow User
 router.post("/follow/:uid", async (req, res) => {
   try {

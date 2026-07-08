@@ -2,6 +2,7 @@ import { Router } from "express";
 import { auth, db } from "../firebase.js";
 import { FieldValue } from "firebase-admin/firestore";
 import { SYSTEM_LEVELS, SYSTEM_BADGES } from "../config/system.js";
+import { getWeekString } from "../utils/dateUtils.js";
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
@@ -310,6 +311,91 @@ router.get("/me", async (req, res) => {
       createdAt: doc.data().createdAt ? new Date(doc.data().createdAt._seconds * 1000).toISOString() : new Date().toISOString(),
     }));
 
+    // Fetch last 7 days stats
+    const todayDate = new Date();
+    const last7Days = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date();
+      d.setUTCDate(todayDate.getUTCDate() - (6 - i));
+      return d.toISOString().split("T")[0];
+    });
+    const last7DaysStatsSnap = await db.collection("user_daily_stats")
+      .where("userId", "==", userProfile.uid)
+      .where("date", ">=", last7Days[0])
+      .where("date", "<=", last7Days[6])
+      .get();
+    const statsMap = {};
+    last7DaysStatsSnap.docs.forEach((doc) => {
+      const data = doc.data();
+      statsMap[data.date] = { minutes: data.studyMinutes || 0, isCheckedIn: data.isCheckedIn || false };
+    });
+    const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+    const formattedStats = last7Days.map((dateStr) => {
+      const d = new Date(dateStr);
+      return {
+        date: dateStr,
+        name: dayNames[d.getDay()],
+        minutes: statsMap[dateStr]?.minutes || 0,
+        isCheckedIn: statsMap[dateStr]?.isCheckedIn || false,
+      };
+    });
+
+    // Fetch due flashcards
+    const nowISO = new Date().toISOString();
+    const progressSnapshot = await db.collection("flashcard_progress")
+      .where("userId", "==", userProfile.uid)
+      .where("dueDate", "<=", nowISO)
+      .limit(5)
+      .get();
+    const dueCards = [];
+    if (!progressSnapshot.empty) {
+      for (const doc of progressSnapshot.docs) {
+        const data = doc.data();
+        const cardRef = db.collection("flashcards").doc(data.cardId);
+        const cardDoc = await cardRef.get();
+        if (cardDoc.exists) {
+          dueCards.push({ id: cardDoc.id, ...cardDoc.data(), progress: data });
+        }
+      }
+    }
+
+    // Fetch weekly leaderboard
+    const weekString = getWeekString();
+    const leaderboardSnap = await db.collection("leaderboard_weekly")
+      .where("period", "==", weekString)
+      .orderBy("xp", "desc")
+      .limit(100)
+      .get();
+    
+    const uidsToFetch = leaderboardSnap.docs.map(doc => doc.data().uid);
+    let usersMap = {};
+    if (uidsToFetch.length > 0) {
+      for (let i = 0; i < uidsToFetch.length; i += 30) {
+        const chunk = uidsToFetch.slice(i, i + 30);
+        const usersSnap = await db.collection("users").where("uid", "in", chunk).get();
+        usersSnap.docs.forEach((d) => {
+          usersMap[d.data().uid] = d.data();
+        });
+      }
+    }
+    
+    let currentRank = 1;
+    const weeklyLeaderboard = leaderboardSnap.docs.map(doc => {
+      const data = doc.data();
+      const userData = usersMap[data.uid] || {};
+      return {
+        id: data.uid,
+        rank: currentRank++,
+        name: userData.displayName || "Học viên",
+        username: userData.username || "@" + (userData.email ? userData.email.split("@")[0] : "user"),
+        level: userData.level || 1,
+        xp: data.xp || 0,
+        avatar: userData.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
+        rankId: userData.rankId || 1,
+        tier: userData.tier || 3,
+        trend: "same",
+      };
+    });
+
     res.status(200).json({
       user: userProfile,
       config: {
@@ -319,6 +405,9 @@ router.get("/me", async (req, res) => {
       },
       userProgress: {
         taskProgress: taskProgress,
+        stats: formattedStats,
+        dueCards: dueCards,
+        weeklyLeaderboard: weeklyLeaderboard
       },
       notifications: notifications,
     });

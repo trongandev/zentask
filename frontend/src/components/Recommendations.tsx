@@ -1,10 +1,14 @@
 import { Diamond, ChevronRight, Play } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function Recommendations() {
+  const navigate = useNavigate();
+
   const items = [
     {
-      title: "Thẻ lật",
-      desc: "Ôn tập từ vựng",
+      title: "Đấu trường",
+      desc: "Thi đấu thời gian thực",
+      path: "/arena",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-blue-500 drop-shadow-md">
           <rect x="4" y="4" width="12" height="16" rx="2" fill="currentColor" fillOpacity="0.2" />
@@ -14,8 +18,9 @@ export function Recommendations() {
       )
     },
     {
-      title: "Trắc nghiệm nhanh",
+      title: "Bài thi",
       desc: "Kiểm tra kiến thức",
+      path: "/quiz",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-blue-500 drop-shadow-md">
           <path d="M9 11l3 3L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -30,7 +35,8 @@ export function Recommendations() {
     },
     {
       title: "Ngữ pháp",
-      desc: "Nắm vững ngữ pháp",
+      desc: "Nắm vững lý thuyết",
+      path: "/grammar",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-blue-500 drop-shadow-md">
            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" stroke="currentColor" fill="currentColor" fillOpacity="0.2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -40,13 +46,15 @@ export function Recommendations() {
       )
     },
     {
-      title: "Thì (Tenses)",
-      desc: "Hiểu rõ các thì",
+      title: "Cộng đồng",
+      desc: "Học hỏi và chia sẻ",
+      path: "/community",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-blue-500 drop-shadow-md">
-          <circle cx="12" cy="12" r="9" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="2" />
-          <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <circle cx="12" cy="12" r="1" fill="white" />
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="9" cy="7" r="4" fill="currentColor" fillOpacity="0.2" stroke="currentColor" strokeWidth="2" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       )
     }
@@ -65,9 +73,9 @@ export function Recommendations() {
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {items.map((item, idx) => (
-          <div key={idx} className="bg-white rounded-2xl p-5 border border-gray-100 hover:border-blue-200 transition-colors shadow-sm hover:shadow-md flex flex-col group cursor-pointer">
+          <div key={idx} onClick={() => navigate(item.path)} className="bg-white rounded-2xl p-5 border border-gray-100 hover:border-blue-200 transition-colors shadow-sm hover:shadow-md flex flex-col group cursor-pointer">
             <h4 className="font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">{item.title}</h4>
             <p className="text-xs text-gray-500 mb-6">{item.desc}</p>
             

@@ -22,6 +22,40 @@ const authenticate = async (req, res, next) => {
 
 router.use(authenticate);
 
+// ==================== DUE CARDS ROUTES ====================
+
+// Get due cards for Dashboard
+router.get("/due", async (req, res) => {
+  try {
+    const now = new Date().toISOString();
+    // Query progress for due cards
+    const progressSnapshot = await db.collection("flashcard_progress")
+      .where("userId", "==", req.uid)
+      .where("dueDate", "<=", now)
+      .limit(5)
+      .get();
+
+    if (progressSnapshot.empty) {
+      return res.json([]);
+    }
+
+    const cards = [];
+    for (const doc of progressSnapshot.docs) {
+      const data = doc.data();
+      const cardRef = db.collection("flashcards").doc(data.cardId);
+      const cardDoc = await cardRef.get();
+      if (cardDoc.exists) {
+        cards.push({ id: cardDoc.id, ...cardDoc.data(), progress: data });
+      }
+    }
+
+    res.json(cards);
+  } catch (error) {
+    console.error("Error fetching due cards:", error);
+    res.status(500).json({ error: "Failed to fetch due cards" });
+  }
+});
+
 // ==================== FOLDER ROUTES ====================
 
 // List folders for user

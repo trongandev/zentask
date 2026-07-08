@@ -22,6 +22,8 @@ interface UserState {
   triggerLevelUp: (newLevel: number) => void;
   todayMinutes: number;
   unsyncedMinutes: number;
+  preloadedStatsSet: boolean;
+  setPreloadedStats: (stats: StudyStat[]) => void;
   initTodayMinutes: () => Promise<void>;
   incrementLocalMinutes: (mins: number) => void;
   syncStudyTime: () => void;
@@ -34,10 +36,22 @@ export const useUserStore = create<UserState>((set, get) => ({
   levelUpData: null,
   todayMinutes: 0,
   unsyncedMinutes: 0,
+  preloadedStatsSet: false,
   clearLevelUp: () => set({ levelUpData: null }),
   triggerLevelUp: (newLevel: number) => set({ levelUpData: { newLevel } }),
 
+  setPreloadedStats: (stats: StudyStat[]) => {
+    if (stats && stats.length > 0) {
+      const todayStats = stats[stats.length - 1];
+      set({ todayMinutes: todayStats?.minutes || 0, preloadedStatsSet: true });
+    }
+  },
+
   initTodayMinutes: async () => {
+    if (get().preloadedStatsSet) {
+      set({ preloadedStatsSet: false });
+      return;
+    }
     try {
       const res = await fetch(`${API_URL}/api/user/stats`, { credentials: "include" });
       if (res.ok) {

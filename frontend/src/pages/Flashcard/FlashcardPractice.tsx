@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Menu, X } from "lucide-react";
+import { ArrowLeft, Menu, X, Check } from "lucide-react";
 import { useFlashcardStore } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
 import { PracticeSidebar } from "../../components/practice/PracticeSidebar";
@@ -12,9 +12,12 @@ import { getBeginnerSetById } from "../../config/rankTopicConfig";
 import { ModeMatch } from "../../components/practice/ModeMatch";
 import { ModeBubble } from "../../components/practice/ModeBubble";
 import { ModeGuess } from "../../components/practice/ModeGuess";
-import { ModeTyping } from "../../components/practice/ModeTyping";
-import { VoiceSelectorModal } from "../../components/practice/VoiceSelectorModal";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { useAuth } from "../../contexts/AuthContext";
+import { ModeTyping } from "@/src/components/practice/ModeTyping";
+import { VoiceSelectorModal } from "@/src/components/practice/VoiceSelectorModal";
+
+const API_URL = import.meta.env.VITE_API_BACKEND;
 
 export type PracticeMode = "flashcard" | "quiz" | "fill_blank" | "listening" | "match" | "bubble" | "guess" | "typing";
 
@@ -23,6 +26,7 @@ export function FlashcardPractice() {
   const navigate = useNavigate();
   const location = useLocation();
   const isBeginner = location.pathname.includes("/beginner/");
+  const { user } = useAuth();
 
   const { fetchCards, fetchProgress, currentSet: storeSet, cards: storeCards, loading: storeLoading } = useFlashcardStore();
 
@@ -54,14 +58,30 @@ export function FlashcardPractice() {
         const set = getBeginnerSetById(id);
         if (set) {
           setBeginnerSet(set);
-          setBeginnerCards(set.words || []);
+
+          // Fetch learned words and filter them out
+          if (user) {
+            fetch(`${API_URL}/api/user/beginner-progress`, { credentials: "include" })
+              .then((res) => (res.ok ? res.json() : { learnedWords: [] }))
+              .then((data) => {
+                const learnedWords = data.learnedWords || [];
+                const unlearnedCards = (set.words || []).filter((w: any) => !learnedWords.includes(w.id));
+                setBeginnerCards(unlearnedCards);
+              })
+              .catch((err) => {
+                console.error("Failed to fetch beginner progress", err);
+                setBeginnerCards(set.words || []);
+              });
+          } else {
+            setBeginnerCards(set.words || []);
+          }
         }
       } else {
         fetchCards(id);
         fetchProgress(id);
       }
     }
-  }, [id, isBeginner, fetchCards, fetchProgress]);
+  }, [id, isBeginner, fetchCards, fetchProgress, user]);
   if (loading && !currentSet) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#F4F7FE]">
@@ -76,6 +96,21 @@ export function FlashcardPractice() {
         <p className="text-gray-500">Không tìm thấy bộ thẻ</p>
         <button onClick={() => navigate(-1)} className="mt-4 text-blue-600 font-semibold">
           Quay lại danh sách
+        </button>
+      </div>
+    );
+  }
+
+  if (isBeginner && beginnerCards.length === 0 && beginnerSet) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-[#F4F7FE] px-4">
+        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+          <Check className="w-12 h-12 text-green-500" />
+        </div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Xin chúc mừng!</h2>
+        <p className="text-gray-500 mb-8 text-center max-w-md">Bạn đã học xong toàn bộ từ vựng trong chủ đề này.</p>
+        <button onClick={() => navigate(-1)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all">
+          Quay lại
         </button>
       </div>
     );

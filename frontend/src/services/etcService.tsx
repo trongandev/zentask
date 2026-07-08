@@ -23,16 +23,29 @@ interface EtcState {
   loading: boolean;
   
   getLeaderboard: (type: "week" | "month" | "all") => Promise<any[]>;
+  preloadedWeeklyLeaderboard: any[] | null;
+  setPreloadedWeeklyLeaderboard: (leaderboard: any[]) => void;
   checkLeaderboardRewards: () => Promise<any[]>;
   claimLeaderboardReward: (type: "week" | "month", period: string) => Promise<any>;
   getUserProfile: (uid: string) => Promise<any>;
   textToSpeech: (text: string, voice: string) => Promise<string>;
 }
 
-export const useEtcStore = create<EtcState>((set) => ({
+export const useEtcStore = create<EtcState>((set, get) => ({
   loading: false,
+  preloadedWeeklyLeaderboard: null,
+
+  setPreloadedWeeklyLeaderboard: (leaderboard) => set({ preloadedWeeklyLeaderboard: leaderboard }),
 
   getLeaderboard: async (type = "all") => {
+    if (type === "week") {
+      const { preloadedWeeklyLeaderboard } = get();
+      if (preloadedWeeklyLeaderboard) {
+        set({ preloadedWeeklyLeaderboard: null });
+        return preloadedWeeklyLeaderboard;
+      }
+    }
+
     set({ loading: true });
     try {
       const data = await fetchApi(`/leaderboard?type=${type}`);

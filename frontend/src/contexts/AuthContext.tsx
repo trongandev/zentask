@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useConfigStore } from '../services/configService';
+import { useUserStore } from '../services/userService';
+import { useFlashcardStore } from '../services/flashcardService';
+import { useEtcStore } from '../services/etcService';
 interface UserProfile {
   uid: string;
   email: string;
@@ -79,6 +82,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         badges: data.config?.badges || [],
         taskProgress: data.userProgress?.taskProgress || {}
       });
+
+      if (data.userProgress?.stats) {
+        useUserStore.getState().setPreloadedStats(data.userProgress.stats);
+      }
+      if (data.userProgress?.dueCards) {
+        useFlashcardStore.getState().setPreloadedDueCards(data.userProgress.dueCards);
+      }
+      if (data.userProgress?.weeklyLeaderboard) {
+        useEtcStore.getState().setPreloadedWeeklyLeaderboard(data.userProgress.weeklyLeaderboard);
+      }
 
     } catch (error) {
       console.error("Error setting up auth:", error);

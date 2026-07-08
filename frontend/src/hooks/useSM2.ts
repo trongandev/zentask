@@ -1,4 +1,6 @@
 import { useFlashcardStore } from "../services/flashcardService";
+import { getBeginnerSetById } from "../config/rankTopicConfig";
+import { useAuth } from "../contexts/AuthContext";
 import type { PracticeMode } from "../pages/Flashcard/FlashcardPractice";
 
 /**
@@ -75,7 +77,9 @@ function getSelectionQuality(isCorrect: boolean, responseMs?: number): number {
  * reportWrong(cardId, mode) — mặc định sai ở mọi trường hợp.
  */
 export function useSM2(setId: string) {
-  const { recordAnswer, flushProgress } = useFlashcardStore();
+  const { recordAnswer, flushProgress, recordBeginnerAnswer } = useFlashcardStore();
+  const { user } = useAuth();
+  const isBeginnerSet = !!getBeginnerSetById(setId);
 
   /**
    * @param cardId   - ID của thẻ
@@ -115,7 +119,12 @@ export function useSM2(setId: string) {
         quality = 3;
     }
 
-    recordAnswer(cardId, setId, quality, mode);
+    if (isBeginnerSet) {
+      // Beginner mode: if answered correctly, mark as learned (batched 5 items)
+      recordBeginnerAnswer(cardId);
+    } else {
+      recordAnswer(cardId, setId, quality, mode);
+    }
   };
 
   /**
@@ -123,9 +132,18 @@ export function useSM2(setId: string) {
    * ngoại trừ flashcard "Chưa thuộc" = 2.
    */
   const reportWrong = (cardId: string, mode: PracticeMode) => {
+    if (isBeginnerSet) return; // Beginner mode doesn't track wrong answers for progress
     const quality = mode === "flashcard" ? 2 : 1;
     recordAnswer(cardId, setId, quality, mode);
   };
 
-  return { reportCorrect, reportWrong, flushProgress, getTypingTargetTime };
+  const flushProgressCombined = async () => {
+    if (isBeginnerSet) {
+      await useFlashcardStore.getState().flushBeginnerProgress();
+    } else {
+      await flushProgress();
+    }
+  };
+
+  return { reportCorrect, reportWrong, flushProgress: flushProgressCombined, getTypingTargetTime };
 }

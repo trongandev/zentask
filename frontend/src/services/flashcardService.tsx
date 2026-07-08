@@ -76,6 +76,7 @@ interface FlashcardState {
   cards: Flashcard[];
   cardProgress: Record<string, CardProgress>;
   pendingUpdates: PendingUpdate[];
+  pendingBeginnerUpdates: string[];
 
   fetchFolders: () => Promise<void>;
   createFolder: (name: string, color?: string) => Promise<FlashcardFolder | null>;
@@ -95,11 +96,18 @@ interface FlashcardState {
   fetchProgress: (setId: string) => Promise<void>;
   recordAnswer: (cardId: string, setId: string, quality: number, mode: string) => void;
   flushProgress: () => Promise<void>;
+  
+  recordBeginnerAnswer: (wordId: string) => void;
+  flushBeginnerProgress: () => Promise<void>;
+  
   setManualProgress: (cardId: string, setId: string, level: MemoryLevel) => Promise<void>;
 
   generateAI: (term: string) => Promise<any>;
   cloneSet: (setId: string) => Promise<FlashcardSet | null>;
   updateSetPrivacy: (setId: string, isPublic: boolean) => Promise<void>;
+  getDueCards: () => Promise<any[]>;
+  preloadedDueCards: any[] | null;
+  setPreloadedDueCards: (cards: any[]) => void;
 }
 
 export const useFlashcardStore = create<FlashcardState>((set, get) => ({
@@ -110,6 +118,10 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   cards: [],
   cardProgress: {},
   pendingUpdates: [],
+  pendingBeginnerUpdates: [],
+  preloadedDueCards: null,
+
+  setPreloadedDueCards: (cards) => set({ preloadedDueCards: cards }),
 
   fetchFolders: async () => {
     try {
@@ -465,6 +477,39 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     }
   },
 
+  recordBeginnerAnswer: (wordId: string) => {
+    set((state) => {
+      const newPending = [...state.pendingBeginnerUpdates, wordId];
+      if (newPending.length >= 5) {
+        setTimeout(() => {
+          useFlashcardStore.getState().flushBeginnerProgress();
+        }, 0);
+      }
+      return { pendingBeginnerUpdates: newPending };
+    });
+  },
+
+  flushBeginnerProgress: async () => {
+    const { pendingBeginnerUpdates } = get();
+    if (pendingBeginnerUpdates.length === 0) return;
+
+    set({ pendingBeginnerUpdates: [] });
+
+    try {
+      const res = await fetch(`${API_URL}/api/user/beginner-progress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ wordIds: pendingBeginnerUpdates }),
+      });
+      if (!res.ok) throw new Error("Failed to flush beginner progress");
+    } catch (err) {
+      console.error("flushBeginnerProgress error:", err);
+      // Restore on failure
+      set((state) => ({ pendingBeginnerUpdates: [...state.pendingBeginnerUpdates, ...pendingBeginnerUpdates] }));
+    }
+  },
+
   setManualProgress: async (cardId, setId, level) => {
     // Optimistic update
     const qualityMap: Record<string, number> = { known: 5, almost: 3, unknown: 1 };
@@ -532,4 +577,22 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       set({ loading: false });
     }
   },
+
+  getDueCards: async () => {
+    const { preloadedDueCards } = get();
+    if (preloadedDueCards) {
+      set({ preloadedDueCards: null });
+      return preloadedDueCards;
+    }
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/due`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch due cards");
+      return await res.json();
+    } catch (err: any) {
+      console.error("Lỗi khi tải từ vựng cần học:", err);
+      return [];
+    }
+  }
 }));

@@ -8,6 +8,8 @@ import { RANK_TOPIC_CONFIG } from "../config/rankTopicConfig";
 import { RankCard } from "../components/shared/RankCard";
 import toast from "react-hot-toast";
 
+const API_URL = import.meta.env.VITE_API_BACKEND;
+
 const RANK_CONFIG: any = {
   1: { name: "Bạc", maxTiers: 3, starsPerTier: 3 },
   2: { name: "Lục bảo", maxTiers: 4, starsPerTier: 4 },
@@ -21,6 +23,8 @@ export function Beginner() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"now" | "topic" | "difficulty">("now");
+  const [learnedWords, setLearnedWords] = useState<string[]>([]);
+  const [showPreviousRanks, setShowPreviousRanks] = useState(false);
 
   // Save Word Modal state
   const [wordToSave, setWordToSave] = useState<any | null>(null);
@@ -39,7 +43,22 @@ export function Beginner() {
       setSelectedUserSetId(savedDefault);
       setRememberSet(true);
     }
-  }, [fetchSets]);
+    
+    const fetchLearnedWords = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/user/beginner-progress`, { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setLearnedWords(data.learnedWords || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch beginner progress", err);
+      }
+    };
+    if (user) {
+      fetchLearnedWords();
+    }
+  }, [fetchSets, user]);
 
   const currentRankInfo = {
     rankId: user?.rankId || 1,
@@ -165,21 +184,49 @@ export function Beginner() {
             </div>
 
             {activeTab !== "difficulty" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="w-full">
                 {(() => {
                   let renderedSets: any[] = [];
                   if (activeTab === "now") {
-                    const rankData = RANK_TOPIC_CONFIG[currentRankInfo.rankId as keyof typeof RANK_TOPIC_CONFIG];
-                    if (rankData && rankData.tiers[currentRankInfo.tierNum]) {
-                      renderedSets = rankData.tiers[currentRankInfo.tierNum].data || [];
+                    for (let r = 1; r <= currentRankInfo.rankId; r++) {
+                      const rankData = RANK_TOPIC_CONFIG[r as keyof typeof RANK_TOPIC_CONFIG];
+                      if (rankData) {
+                        for (const tierData of Object.values(rankData.tiers) as any[]) {
+                          if (tierData.data) {
+                            renderedSets.push(...tierData.data.map((set: any) => ({ ...set, _rankId: r })));
+                          }
+                        }
+                      }
                     }
                   } else if (activeTab === "topic") {
-                    renderedSets = Object.values(RANK_TOPIC_CONFIG)
-                      .flatMap((rank) => Object.values(rank.tiers).flatMap((t: any) => t.data))
+                    renderedSets = Object.entries(RANK_TOPIC_CONFIG)
+                      .flatMap(([rId, rank]) => Object.values(rank.tiers).flatMap((t: any) => t.data.map((set: any) => ({ ...set, _rankId: Number(rId) }))))
                       .filter((s) => s.category === "topic");
                   }
 
-                  return renderedSets.map((set) => (
+                  const uncompletedSets: any[] = [];
+                  const completedSets: any[] = [];
+
+                  renderedSets.forEach(set => {
+                    const total = set.words?.length || 0;
+                    const learned = set.words?.filter((w: any) => learnedWords.includes(w.id)).length || 0;
+                    const progress = total === 0 ? 0 : Math.round((learned / total) * 100);
+                    
+                    const setWithProgress = { ...set, progress, learned, total };
+                    
+                    if (progress >= 100 && total > 0) {
+                      completedSets.push(setWithProgress);
+                    } else {
+                      uncompletedSets.push(setWithProgress);
+                    }
+                  });
+
+                  let finalCompletedSets = completedSets;
+                  if (activeTab === "now" && !showPreviousRanks) {
+                    finalCompletedSets = completedSets.filter(s => s._rankId === currentRankInfo.rankId);
+                  }
+
+                  const renderSetCard = (set: any) => (
                     <div
                       key={set.id}
                       onClick={() => navigate(`/beginner/flashcard/${set.id}`)}
@@ -192,12 +239,77 @@ export function Beginner() {
                         <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{set.title}</h3>
                       </div>
                       <p className="text-sm text-gray-500 font-medium">{set.description}</p>
+                      
+                      {set.progress < 100 && (
+                        <div className="mt-4">
+                          <div className="flex justify-between text-xs font-bold text-gray-500 mb-1">
+                            <span>Đã học: {set.learned}/{set.total}</span>
+                            <span>{set.progress}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div className="bg-blue-600 h-full transition-all duration-300" style={{ width: `${set.progress}%` }}></div>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="mt-4 flex items-center justify-between">
-                        <span className="text-xs font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded-md">{set.words.length} từ vựng</span>
+                        {set.progress === 100 ? (
+                          <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-md flex items-center gap-1">
+                            <Check className="w-3.5 h-3.5" /> Hoàn thành
+                          </span>
+                        ) : (
+                          <span className="text-xs font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded-md">{set.total - set.learned} từ chưa học</span>
+                        )}
                         <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                       </div>
                     </div>
-                  ));
+                  );
+
+                  return (
+                    <div className="space-y-8 w-full">
+                      {activeTab === "now" && (
+                        <div className="flex justify-end mb-2">
+                          <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border border-gray-100 shadow-sm hover:bg-gray-50 transition-colors">
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                              checked={showPreviousRanks} 
+                              onChange={(e) => setShowPreviousRanks(e.target.checked)} 
+                            />
+                            <span className="text-sm font-semibold text-gray-700">Hiện bộ đã học ở rank trước</span>
+                          </label>
+                        </div>
+                      )}
+
+                      {uncompletedSets.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <Target className="w-5 h-5 text-blue-600" /> Chủ đề chưa học
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {uncompletedSets.map(renderSetCard)}
+                          </div>
+                        </div>
+                      )}
+
+                      {finalCompletedSets.length > 0 && (
+                        <div className="pt-4 border-t border-gray-100">
+                          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <Medal className="w-5 h-5 text-yellow-500" /> Chủ đề đã hoàn thành
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-80 hover:opacity-100 transition-opacity">
+                            {finalCompletedSets.map(renderSetCard)}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {uncompletedSets.length === 0 && finalCompletedSets.length === 0 && (
+                        <div className="text-center py-12 text-gray-500">
+                          Không có chủ đề nào.
+                        </div>
+                      )}
+                    </div>
+                  );
                 })()}
               </div>
             )}
