@@ -7,6 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { RANK_TOPIC_CONFIG } from "../config/rankTopicConfig";
 import { RankCard } from "../components/shared/RankCard";
 import toast from "react-hot-toast";
+import { SEO } from "../components/SEO";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
@@ -110,6 +111,7 @@ export function Beginner() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 pb-12">
+      <SEO title="Lộ trình học tập" description="Lộ trình học tiếng Anh từ cơ bản đến nâng cao." />
       {/* Header */}
       <div>
         <h1 className="text-3xl font-extrabold text-gray-900 flex items-center gap-3">

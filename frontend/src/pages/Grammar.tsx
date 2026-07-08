@@ -8,6 +8,7 @@ import { PassiveVoice } from "../components/grammar/PassiveVoice";
 import { GRAMMAR_STAGES } from "../data/grammarExercises";
 import { useAuth } from "../contexts/AuthContext";
 import { cn } from "../lib/utils";
+import { SEO } from "../components/SEO";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
@@ -91,6 +92,7 @@ export function Grammar() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-12">
+      <SEO title="Ngữ pháp" description="Học ngữ pháp tiếng Anh từ cơ bản đến nâng cao với lộ trình Gamified." />
       {/* Loading Modal */}
       {isGenerating && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">

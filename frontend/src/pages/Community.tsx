@@ -8,6 +8,7 @@ import { useCommunityStore, Post as ApiPost, Comment as ApiComment } from "../se
 import DOMPurify from "dompurify";
 import { RichTextEditor } from "../components/RichTextEditor";
 import toast from "react-hot-toast";
+import { SEO } from "../components/SEO";
 
 function timeAgo(dateInput: any) {
   if (!dateInput) return "Vừa xong";
@@ -162,6 +163,7 @@ export function Community() {
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
+      <SEO title="Cộng đồng học tập" description="Tham gia cộng đồng học viên Zentask để thảo luận, chia sẻ kinh nghiệm học tiếng Anh." />
       {/* Main Feed */}
       <div className="flex-1 space-y-6">
         {/* Header */}

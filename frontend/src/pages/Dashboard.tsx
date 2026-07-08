@@ -4,10 +4,12 @@ import { StatsChart } from "../components/StatsChart";
 import { Recommendations } from "../components/Recommendations";
 import { RankCard } from "../components/shared/RankCard";
 import { DueFlashcards } from "../components/dashboard/DueFlashcards";
+import { SEO } from "../components/SEO";
 
 export function Dashboard() {
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-12">
+      <SEO title="Bảng điều khiển" />
       <Hero />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

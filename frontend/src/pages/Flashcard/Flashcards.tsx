@@ -7,6 +7,7 @@ import { useFlashcardStore } from "../../services/flashcardService";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
+import { SEO } from "../../components/SEO";
 
 import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay, useDroppable } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
@@ -390,6 +391,7 @@ export function Flashcards() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 min-h-screen" onContextMenu={(e) => handleContextMenu(e, "root")}>
+      <SEO title="Quản lý thẻ ghi nhớ" description="Tạo và quản lý các bộ thẻ Flashcards cá nhân để học từ vựng hiệu quả." />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <img src="/mascot/Lopy (11).png" className="w-16 h-16 object-contain drop-shadow-md" alt="Mascot" />
