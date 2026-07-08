@@ -130,7 +130,7 @@ export function Leaderboard() {
           <div className="flex-1">
             <p className="text-xs text-yellow-100 font-medium mb-1">Hạng hiện tại</p>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold">{loading ? "-" : (leaderboard.find(u => u.isUser)?.rank || "-")}</span>
+              <span className="text-3xl font-bold">{loading ? "-" : leaderboard.find((u) => u.isUser)?.rank || "-"}</span>
               <span className="text-sm font-medium text-yellow-100">/ {loading ? "-" : leaderboard.length}</span>
             </div>
           </div>
@@ -251,7 +251,9 @@ export function Leaderboard() {
                         <span className="text-[10px] md:text-xs font-bold text-yellow-500">XP</span>
                       </div>
                       <span className="text-gray-300">|</span>
-                      <span className="text-[10px] uppercase font-bold text-gray-500">{RANK_NAMES[userItem.rankId]} {TIER_NAMES[userItem.tier || 3]}</span>
+                      <span className="text-[10px] uppercase font-bold text-gray-500">
+                        {RANK_NAMES[userItem.rankId]} {TIER_NAMES[userItem.tier || 3]}
+                      </span>
                     </div>
                   </div>
                   <img src={`/rank/${userItem.rankId}.png`} alt="Rank" className="w-10 object-contain drop-shadow-sm" />
@@ -282,7 +284,7 @@ export function Leaderboard() {
               {/* Avatar & Info */}
               <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
                 <UserAvatar
-                  src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
+                  src={user?.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
                   level={user?.level || 1}
                   className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0"
                 />
@@ -297,7 +299,9 @@ export function Leaderboard() {
                       <span className="text-[10px] md:text-xs font-bold text-yellow-500">XP</span>
                     </div>
                     <span className="text-gray-300">|</span>
-                    <span className="text-[10px] uppercase font-bold text-gray-500">{RANK_NAMES[user?.rankId || 1]} {TIER_NAMES[user?.tier || 3]}</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-500">
+                      {RANK_NAMES[user?.rankId || 1]} {TIER_NAMES[user?.tier || 3]}
+                    </span>
                   </div>
                 </div>
                 <img src={`/rank/${user?.rankId || 1}.png`} alt="Rank" className="w-10 object-contain drop-shadow-sm" />

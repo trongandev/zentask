@@ -35,41 +35,30 @@ router.get("/", async (req, res) => {
 
     if (type === "week") {
       const weekString = getWeekString();
-      snapshot = await db.collection("leaderboard_weekly")
-        .where("period", "==", weekString)
-        .orderBy("xp", "desc")
-        .limit(100)
-        .get();
+      snapshot = await db.collection("leaderboard_weekly").where("period", "==", weekString).orderBy("xp", "desc").limit(100).get();
     } else if (type === "month") {
       const monthString = getMonthString();
-      snapshot = await db.collection("leaderboard_monthly")
-        .where("period", "==", monthString)
-        .orderBy("xp", "desc")
-        .limit(100)
-        .get();
+      snapshot = await db.collection("leaderboard_monthly").where("period", "==", monthString).orderBy("xp", "desc").limit(100).get();
     } else {
-      snapshot = await db.collection("users")
-        .orderBy("xp", "desc")
-        .limit(100)
-        .get();
+      snapshot = await db.collection("users").orderBy("xp", "desc").limit(100).get();
     }
 
     const leaderboard = [];
     let currentRank = 1;
-    
+
     // We need user details for weekly/monthly, so we fetch them if needed
     const uidsToFetch = [];
     if (type !== "all") {
-      snapshot.docs.forEach(doc => uidsToFetch.push(doc.data().uid));
+      snapshot.docs.forEach((doc) => uidsToFetch.push(doc.data().uid));
     }
-    
+
     let usersMap = {};
     if (uidsToFetch.length > 0) {
       // Chunk array by 30 to fetch from users collection
       for (let i = 0; i < uidsToFetch.length; i += 30) {
         const chunk = uidsToFetch.slice(i, i + 30);
         const usersSnap = await db.collection("users").where("uid", "in", chunk).get();
-        usersSnap.docs.forEach(d => {
+        usersSnap.docs.forEach((d) => {
           usersMap[d.data().uid] = d.data();
         });
       }
@@ -78,24 +67,24 @@ router.get("/", async (req, res) => {
     snapshot.docs.forEach((doc) => {
       const data = doc.data();
       const userData = type === "all" ? data : usersMap[data.uid] || {};
-      
+
       leaderboard.push({
         id: type === "all" ? doc.id : data.uid,
         rank: currentRank++,
         name: userData.displayName || "Học viên",
-        username: userData.username || "@" + (userData.email ? userData.email.split('@')[0] : "user"),
+        username: userData.username || "@" + (userData.email ? userData.email.split("@")[0] : "user"),
         level: userData.level || 1,
         xp: data.xp || 0,
-        avatar: userData.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop",
+        avatar: userData.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
         rankId: userData.rankId || 1,
         tier: userData.tier || 3,
-        trend: "same"
+        trend: "same",
       });
     });
 
     // Trigger LEADERBOARD achievements for the current user if they are in top 3
     if (type === "week" && req.uid) {
-      const userEntry = leaderboard.find(entry => entry.id === req.uid);
+      const userEntry = leaderboard.find((entry) => entry.id === req.uid);
       if (userEntry && userEntry.rank <= 3) {
         checkAchievements(req.uid, "LEADERBOARD", { rank: userEntry.rank }, req.app);
       }
@@ -121,7 +110,7 @@ router.get("/rewards", requireAuth, async (req, res) => {
     if (lwQuery.exists && lwQuery.data().xp > 0) {
       const claimQuery = await db.collection("user_rewards").doc(`${lastWeek}_${req.uid}`).get();
       if (!claimQuery.exists) {
-        rewards.push({ type: 'week', period: lastWeek, xp: 200 });
+        rewards.push({ type: "week", period: lastWeek, xp: 200 });
       }
     }
 
@@ -130,7 +119,7 @@ router.get("/rewards", requireAuth, async (req, res) => {
     if (lmQuery.exists && lmQuery.data().xp > 0) {
       const claimQuery = await db.collection("user_rewards").doc(`${lastMonth}_${req.uid}`).get();
       if (!claimQuery.exists) {
-        rewards.push({ type: 'month', period: lastMonth, xp: 1000 });
+        rewards.push({ type: "month", period: lastMonth, xp: 1000 });
       }
     }
 
@@ -145,22 +134,22 @@ router.post("/claim", requireAuth, async (req, res) => {
   try {
     const { type, period } = req.body;
     if (!type || !period) return res.status(400).json({ error: "Missing parameters" });
-    
+
     // Verify it's a valid period
-    if (type === 'week' && period !== getLastWeekString()) return res.status(400).json({ error: "Invalid week period" });
-    if (type === 'month' && period !== getLastMonthString()) return res.status(400).json({ error: "Invalid month period" });
-    
-    const xpReward = type === 'week' ? 200 : 1000;
+    if (type === "week" && period !== getLastWeekString()) return res.status(400).json({ error: "Invalid week period" });
+    if (type === "month" && period !== getLastMonthString()) return res.status(400).json({ error: "Invalid month period" });
+
+    const xpReward = type === "week" ? 200 : 1000;
     const rewardRef = db.collection("user_rewards").doc(`${period}_${req.uid}`);
-    
+
     const result = await db.runTransaction(async (t) => {
       const doc = await t.get(rewardRef);
       if (doc.exists) {
         throw new Error("Already claimed");
       }
-      
+
       // Verify user actually participated
-      const coll = type === 'week' ? "leaderboard_weekly" : "leaderboard_monthly";
+      const coll = type === "week" ? "leaderboard_weekly" : "leaderboard_monthly";
       const participation = await t.get(db.collection(coll).doc(`${period}_${req.uid}`));
       if (!participation.exists || participation.data().xp <= 0) {
         throw new Error("Not eligible");
@@ -171,7 +160,7 @@ router.post("/claim", requireAuth, async (req, res) => {
         type,
         period,
         xpReward,
-        claimedAt: new Date()
+        claimedAt: new Date(),
       });
       return true;
     });

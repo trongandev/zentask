@@ -29,29 +29,26 @@ router.get("/posts", async (req, res) => {
     let postsQuery = db.collection("community_posts").orderBy("createdAt", "desc").limit(50);
 
     if (tags) {
-      const tagArray = tags.split(',').map(t => t.trim());
-      postsQuery = db.collection("community_posts")
-        .where("tags", "array-contains-any", tagArray)
-        .orderBy("createdAt", "desc")
-        .limit(50);
+      const tagArray = tags.split(",").map((t) => t.trim());
+      postsQuery = db.collection("community_posts").where("tags", "array-contains-any", tagArray).orderBy("createdAt", "desc").limit(50);
     }
 
     const snapshot = await postsQuery.get();
-    
+
     // Fetch users for posts
-    const uids = [...new Set(snapshot.docs.map(doc => doc.data().uid))];
+    const uids = [...new Set(snapshot.docs.map((doc) => doc.data().uid))];
     const usersMap = {};
     if (uids.length > 0) {
       for (let i = 0; i < uids.length; i += 30) {
         const chunk = uids.slice(i, i + 30);
         const usersSnap = await db.collection("users").where("uid", "in", chunk).get();
-        usersSnap.docs.forEach(d => {
+        usersSnap.docs.forEach((d) => {
           usersMap[d.data().uid] = d.data();
         });
       }
     }
 
-    const posts = snapshot.docs.map(doc => {
+    const posts = snapshot.docs.map((doc) => {
       const data = doc.data();
       const user = usersMap[data.uid] || {};
       return {
@@ -64,10 +61,10 @@ router.get("/posts", async (req, res) => {
         user: {
           uid: data.uid,
           name: user.displayName || "Người dùng",
-          username: user.username || "@" + (user.email ? user.email.split('@')[0] : "user"),
-          avatar: user.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop",
+          username: user.username || "@" + (user.email ? user.email.split("@")[0] : "user"),
+          avatar: user.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
           level: user.level || 1,
-        }
+        },
       };
     });
 
@@ -93,7 +90,7 @@ router.post("/posts", async (req, res) => {
       likes: [],
       commentsCount: 0,
       createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp(),
     };
 
     const docRef = await db.collection("community_posts").add(newPost);
@@ -110,7 +107,7 @@ router.put("/posts/:id", async (req, res) => {
     const { content, tags } = req.body;
     const postRef = db.collection("community_posts").doc(req.params.id);
     const doc = await postRef.get();
-    
+
     if (!doc.exists) return res.status(404).json({ error: "Post not found" });
     if (doc.data().uid !== req.uid) return res.status(403).json({ error: "Forbidden" });
 
@@ -119,7 +116,7 @@ router.put("/posts/:id", async (req, res) => {
     await postRef.update({
       content: cleanContent,
       tags: tags || [],
-      updatedAt: FieldValue.serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     res.json({ status: "success" });
@@ -134,7 +131,7 @@ router.delete("/posts/:id", async (req, res) => {
   try {
     const postRef = db.collection("community_posts").doc(req.params.id);
     const doc = await postRef.get();
-    
+
     if (!doc.exists) return res.status(404).json({ error: "Post not found" });
     if (doc.data().uid !== req.uid) return res.status(403).json({ error: "Forbidden" });
 
@@ -158,10 +155,10 @@ router.post("/posts/:id/like", async (req, res) => {
     await db.runTransaction(async (t) => {
       const doc = await t.get(postRef);
       if (!doc.exists) throw new Error("Post not found");
-      
+
       postOwnerId = doc.data().uid;
       const likes = doc.data().likes || [];
-      
+
       if (likes.includes(req.uid)) {
         t.update(postRef, { likes: FieldValue.arrayRemove(req.uid) });
         isLiking = false;
@@ -174,14 +171,7 @@ router.post("/posts/:id/like", async (req, res) => {
     if (isLiking && postOwnerId && postOwnerId !== req.uid) {
       const userDoc = await db.collection("users").doc(req.uid).get();
       const name = userDoc.data()?.displayName || "Một người dùng";
-      await createNotification(
-        req.app,
-        postOwnerId,
-        "community_like",
-        "Có người thích bài viết của bạn",
-        `${name} đã thích bài viết của bạn.`,
-        req.params.id
-      );
+      await createNotification(req.app, postOwnerId, "community_like", "Có người thích bài viết của bạn", `${name} đã thích bài viết của bạn.`, req.params.id);
     }
 
     res.json({ status: "success" });
@@ -196,24 +186,21 @@ router.post("/posts/:id/like", async (req, res) => {
 // GET /posts/:id/comments
 router.get("/posts/:id/comments", async (req, res) => {
   try {
-    const snapshot = await db.collection("community_comments")
-      .where("postId", "==", req.params.id)
-      .orderBy("createdAt", "asc")
-      .get();
-      
-    const uids = [...new Set(snapshot.docs.map(doc => doc.data().uid))];
+    const snapshot = await db.collection("community_comments").where("postId", "==", req.params.id).orderBy("createdAt", "asc").get();
+
+    const uids = [...new Set(snapshot.docs.map((doc) => doc.data().uid))];
     const usersMap = {};
     if (uids.length > 0) {
       for (let i = 0; i < uids.length; i += 30) {
         const chunk = uids.slice(i, i + 30);
         const usersSnap = await db.collection("users").where("uid", "in", chunk).get();
-        usersSnap.docs.forEach(d => {
+        usersSnap.docs.forEach((d) => {
           usersMap[d.data().uid] = d.data();
         });
       }
     }
 
-    const comments = snapshot.docs.map(doc => {
+    const comments = snapshot.docs.map((doc) => {
       const data = doc.data();
       const user = usersMap[data.uid] || {};
       return {
@@ -226,9 +213,9 @@ router.get("/posts/:id/comments", async (req, res) => {
         user: {
           uid: data.uid,
           name: user.displayName || "Người dùng",
-          avatar: user.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop",
+          avatar: user.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
           level: user.level || 1,
-        }
+        },
       };
     });
 
@@ -252,15 +239,15 @@ router.post("/posts/:id/comments", async (req, res) => {
       parentId: parentId || null,
       likes: [],
       createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp(),
     };
 
     const docRef = await db.collection("community_comments").add(newComment);
-    
+
     // Increment commentsCount on post
     const postRef = db.collection("community_posts").doc(req.params.id);
     await postRef.update({
-      commentsCount: FieldValue.increment(1)
+      commentsCount: FieldValue.increment(1),
     });
 
     const postDoc = await postRef.get();
@@ -269,14 +256,7 @@ router.post("/posts/:id/comments", async (req, res) => {
     if (postOwnerId && postOwnerId !== req.uid) {
       const userDoc = await db.collection("users").doc(req.uid).get();
       const name = userDoc.data()?.displayName || "Một người dùng";
-      await createNotification(
-        req.app,
-        postOwnerId,
-        "community_comment",
-        "Có bình luận mới",
-        `${name} đã bình luận bài viết của bạn.`,
-        req.params.id
-      );
+      await createNotification(req.app, postOwnerId, "community_comment", "Có bình luận mới", `${name} đã bình luận bài viết của bạn.`, req.params.id);
     }
 
     // Notify parent comment owner if it's a reply
@@ -287,14 +267,7 @@ router.post("/posts/:id/comments", async (req, res) => {
         if (parentOwnerId && parentOwnerId !== req.uid) {
           const userDoc = await db.collection("users").doc(req.uid).get();
           const name = userDoc.data()?.displayName || "Một người dùng";
-          await createNotification(
-            req.app,
-            parentOwnerId,
-            "community_reply",
-            "Có phản hồi mới",
-            `${name} đã trả lời bình luận của bạn.`,
-            req.params.id
-          );
+          await createNotification(req.app, parentOwnerId, "community_reply", "Có phản hồi mới", `${name} đã trả lời bình luận của bạn.`, req.params.id);
         }
       }
     }
@@ -317,7 +290,7 @@ router.post("/comments/:id/like", async (req, res) => {
     await db.runTransaction(async (t) => {
       const doc = await t.get(commentRef);
       if (!doc.exists) throw new Error("Comment not found");
-      
+
       commentOwnerId = doc.data().uid;
       postId = doc.data().postId;
       const likes = doc.data().likes || [];
@@ -334,14 +307,7 @@ router.post("/comments/:id/like", async (req, res) => {
     if (isLiking && commentOwnerId && commentOwnerId !== req.uid) {
       const userDoc = await db.collection("users").doc(req.uid).get();
       const name = userDoc.data()?.displayName || "Một người dùng";
-      await createNotification(
-        req.app,
-        commentOwnerId,
-        "community_like",
-        "Có người thích bình luận của bạn",
-        `${name} đã thích bình luận của bạn.`,
-        postId
-      );
+      await createNotification(req.app, commentOwnerId, "community_like", "Có người thích bình luận của bạn", `${name} đã thích bình luận của bạn.`, postId);
     }
 
     res.json({ status: "success" });
@@ -359,13 +325,13 @@ router.put("/comments/:id", async (req, res) => {
 
     const commentRef = db.collection("community_comments").doc(req.params.id);
     const doc = await commentRef.get();
-    
+
     if (!doc.exists) return res.status(404).json({ error: "Comment not found" });
     if (doc.data().uid !== req.uid) return res.status(403).json({ error: "Unauthorized" });
 
     await commentRef.update({
       content,
-      updatedAt: FieldValue.serverTimestamp()
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     res.json({ status: "success" });

@@ -23,11 +23,7 @@ export function AdminUsers() {
       header: "Người dùng",
       render: (u: any) => (
         <div className="flex items-center gap-3">
-          <img
-            src={u.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
-            alt={u.displayName || "User"}
-            className="w-10 h-10 rounded-xl object-cover"
-          />
+          <img src={u.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"} alt={u.displayName || "User"} className="w-10 h-10 rounded-xl object-cover" />
           <div>
             <p className="font-bold text-gray-900">{u.displayName || "Người dùng"}</p>
             <p className="text-xs text-gray-500">{u.email}</p>
@@ -78,14 +74,7 @@ export function AdminUsers() {
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
-        <DataTable 
-          columns={columns} 
-          data={pageData.items} 
-          loading={users.loading} 
-          currentPage={page} 
-          totalPages={pageData.totalPages} 
-          onPageChange={(p) => fetchUsers(p)} 
-        />
+        <DataTable columns={columns} data={pageData.items} loading={users.loading} currentPage={page} totalPages={pageData.totalPages} onPageChange={(p) => fetchUsers(p)} />
       </div>
     </div>
   );

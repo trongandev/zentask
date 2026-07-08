@@ -122,7 +122,7 @@ export function Settings() {
                 <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
                   <div className="relative cursor-pointer group" onClick={handleChangeAvatar}>
                     <UserAvatar
-                      src={photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
+                      src={photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
                       level={user?.level || 1}
                       className="w-24 h-24 transition-opacity group-hover:opacity-80"
                     />
@@ -200,8 +200,10 @@ export function Settings() {
                     className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-gray-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                   >
                     <option value="">-- Không có --</option>
-                    {sets.map(s => (
-                      <option key={s.id} value={s.id}>{s.title}</option>
+                    {sets.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.title}
+                      </option>
                     ))}
                   </select>
                   <p className="text-xs text-gray-500 mt-1">Được sử dụng khi lưu từ vựng nhanh từ danh sách Người mới bắt đầu.</p>
@@ -492,7 +494,7 @@ export function Settings() {
                       alt="Preview"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop";
+                        (e.target as HTMLImageElement).src = "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg";
                       }}
                     />
                   </div>

@@ -454,11 +454,7 @@ export function Arena() {
           <div className="flex items-center justify-between w-full relative">
             <div className="flex flex-col items-center animate-in slide-in-from-left-20 duration-700">
               <div className="w-20 h-20 md:w-32 md:h-32 rounded-full border-4 border-blue-500 p-1 mb-2 md:mb-4 shadow-[0_0_30px_rgba(59,130,246,0.5)] bg-black">
-                <img
-                  src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
-                  alt="You"
-                  className="w-full h-full rounded-full object-cover"
-                />
+                <img src={user?.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"} alt="You" className="w-full h-full rounded-full object-cover" />
               </div>
               <h3 className="text-sm md:text-xl font-bold text-white text-center line-clamp-1 max-w-[100px] md:max-w-none">{user?.displayName || "Bạn"}</h3>
               <p className="text-blue-400 font-medium text-xs md:text-base text-center line-clamp-1">{user?.rankInfo || "Rank Bạc III"}</p>
@@ -480,7 +476,7 @@ export function Arena() {
                 />
               </div>
               <h3 className="text-sm md:text-xl font-bold text-white text-center line-clamp-1 max-w-[100px] md:max-w-none">{opponent.name}</h3>
-              <p className="text-red-400 font-medium text-xs md:text-base text-center line-clamp-1">{opponent.rankInfo || "Rank Bạc III"}</p>
+              <p className="text-red-400 font-medium text-xs md:text-base text-center line-clamp-1">{opponent.rankInfo || "Bạc III"}</p>
             </div>
           </div>
         </div>
@@ -506,7 +502,7 @@ export function Arena() {
                 )}
               >
                 <img
-                  src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
+                  src={user?.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
                   className="w-8 h-8 md:w-12 md:h-12 rounded-full border-2 border-blue-400 object-cover"
                 />
                 <div>
@@ -546,7 +542,14 @@ export function Arena() {
             </div>
           </div>
 
-          <ArenaGameRenderer mode={matchData.modes ? matchData.modes[currentQuestionIndex] : (matchData.mode || "quiz")} card={currentCard} allCards={matchData.cards} isX2={isX2} disabled={hasAnswered} onAnswer={handleAnswer} />
+          <ArenaGameRenderer
+            mode={matchData.modes ? matchData.modes[currentQuestionIndex] : matchData.mode || "quiz"}
+            card={currentCard}
+            allCards={matchData.cards}
+            isX2={isX2}
+            disabled={hasAnswered}
+            onAnswer={handleAnswer}
+          />
         </div>
       )}
 
@@ -576,10 +579,10 @@ export function Arena() {
           <div className="flex flex-row items-center gap-6 md:gap-12 bg-white/5 p-4 md:p-6 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
             <div className="flex flex-col items-center">
               <img
-                src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
+                src={user?.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
                 className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-blue-500 mb-2"
               />
-              <div className="text-3xl md:text-5xl font-black">{userScore}</div>
+              <div className="text-3xl md:text-5xl font-black text-white/80">{userScore}</div>
               <div className="text-xs md:text-sm text-blue-300 mt-1">Điểm của bạn</div>
             </div>
             <div className="text-xl md:text-3xl font-black text-white/30 italic">VS</div>
@@ -588,7 +591,7 @@ export function Arena() {
                 src={opponent.avatar || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"}
                 className="w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-red-500 mb-2"
               />
-              <div className="text-3xl md:text-5xl font-black">{opponentScore}</div>
+              <div className="text-3xl md:text-5xl font-black text-white/80">{opponentScore}</div>
               <div className="text-xs md:text-sm text-red-300 mt-1">Điểm đối thủ</div>
             </div>
           </div>

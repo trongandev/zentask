@@ -28,7 +28,7 @@ function timeAgo(dateInput: any) {
 }
 
 const extractTags = (html: string) => {
-  const text = html.replace(/<[^>]+>/g, ' ');
+  const text = html.replace(/<[^>]+>/g, " ");
   const matches = text.match(/#[\wÀ-ỹ]+/g);
   return matches ? matches.map((tag) => tag.toLowerCase()) : [];
 };
@@ -36,13 +36,13 @@ const extractTags = (html: string) => {
 export function Community() {
   const { user } = useAuth();
   const { posts, loading, getPosts, createPost, togglePostLike, deletePost, updatePost, getComments, createComment, toggleCommentLike, updateComment } = useCommunityStore();
-  
+
   const [newPostContent, setNewPostContent] = useState(() => localStorage.getItem("community_draft") || "");
   const [showEditor, setShowEditor] = useState(false);
   const [activeCommentPost, setActiveCommentPost] = useState<string | null>(null);
   const [commentText, setCommentText] = useState("");
   const [commentsMap, setCommentsMap] = useState<Record<string, ApiComment[]>>({});
-  
+
   const [replyingToCommentId, setReplyingToCommentId] = useState<string | null>(null);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editCommentContent, setEditCommentContent] = useState("");
@@ -71,7 +71,7 @@ export function Community() {
     // For simplicity, we just toggle and re-fetch if needed.
     const res = await togglePostLike(postId);
     if (res) {
-       getPosts(filterTag || undefined, true);
+      getPosts(filterTag || undefined, true);
     }
   };
 
@@ -191,7 +191,7 @@ export function Community() {
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
           <div className="flex gap-4">
             <UserAvatar
-              src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
+              src={user?.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
               level={user?.level || 1}
               className="w-12 h-12 flex-shrink-0"
               uid={user?.uid}
@@ -207,7 +207,7 @@ export function Community() {
                   value=""
                 />
               ) : (
-                <div 
+                <div
                   onBlur={(e) => {
                     if (!e.currentTarget.contains(e.relatedTarget as Node) && !newPostContent.trim()) {
                       setShowEditor(false);
@@ -302,11 +302,7 @@ export function Community() {
                   {/* Post Content */}
                   {editingPostId === post.id ? (
                     <div className="mb-4 space-y-3">
-                      <RichTextEditor
-                        content={editContent}
-                        onChange={setEditContent}
-                        minHeight="100px"
-                      />
+                      <RichTextEditor content={editContent} onChange={setEditContent} minHeight="100px" />
                       <div className="flex gap-2 justify-end">
                         <button onClick={() => setEditingPostId(null)} className="px-4 py-2 text-gray-500 font-medium hover:bg-gray-50 rounded-lg">
                           Hủy
@@ -317,10 +313,7 @@ export function Community() {
                       </div>
                     </div>
                   ) : (
-                    <div 
-                      className="prose prose-sm max-w-none text-gray-700 leading-relaxed mb-4 break-words" 
-                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} 
-                    />
+                    <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed mb-4 break-words" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
                   )}
 
                   {/* Tags */}
@@ -366,7 +359,7 @@ export function Community() {
                         {(commentsMap[post.id] || []).map((comment) => {
                           const isCommentLiked = comment.likes.includes(user?.uid || "");
                           const isOwnComment = comment.user.uid === user?.uid;
-                          
+
                           return (
                             <div key={comment.id} className="flex gap-3">
                               <UserAvatar src={comment.user.avatar} level={comment.user.level} uid={comment.user.uid} className="w-8 h-8 flex-shrink-0 mt-1" />
@@ -382,18 +375,22 @@ export function Community() {
                                     <UserLevelBadge level={comment.user.level} size="sm" showText={false} />
                                     <span className="text-[10px] font-medium text-gray-400 ml-auto">{timeAgo(comment.createdAt)}</span>
                                   </div>
-                                  
+
                                   {editingCommentId === comment.id ? (
                                     <div className="mt-2 space-y-2">
-                                      <input 
-                                        type="text" 
+                                      <input
+                                        type="text"
                                         value={editCommentContent}
-                                        onChange={e => setEditCommentContent(e.target.value)}
+                                        onChange={(e) => setEditCommentContent(e.target.value)}
                                         className="w-full bg-white border border-gray-200 rounded-lg py-1.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                       />
                                       <div className="flex gap-2 justify-end">
-                                        <button onClick={() => setEditingCommentId(null)} className="text-xs font-bold text-gray-500 hover:text-gray-700">Hủy</button>
-                                        <button onClick={() => handleCommentEditSubmit(post.id)} className="text-xs font-bold text-blue-600 hover:text-blue-700">Lưu</button>
+                                        <button onClick={() => setEditingCommentId(null)} className="text-xs font-bold text-gray-500 hover:text-gray-700">
+                                          Hủy
+                                        </button>
+                                        <button onClick={() => handleCommentEditSubmit(post.id)} className="text-xs font-bold text-blue-600 hover:text-blue-700">
+                                          Lưu
+                                        </button>
                                       </div>
                                     </div>
                                   ) : (
@@ -404,20 +401,17 @@ export function Community() {
                                 {/* Comment Actions */}
                                 {!editingCommentId && (
                                   <div className="flex items-center gap-4 mt-1 ml-2">
-                                    <button 
+                                    <button
                                       onClick={() => handleCommentLike(post.id, comment.id)}
                                       className={cn("text-[11px] font-bold transition-colors flex items-center gap-1", isCommentLiked ? "text-red-500" : "text-gray-500 hover:text-gray-700")}
                                     >
                                       Thích {comment.likes.length > 0 && `(${comment.likes.length})`}
                                     </button>
-                                    <button 
-                                      onClick={() => setReplyingToCommentId(comment.id)}
-                                      className="text-[11px] font-bold text-gray-500 hover:text-gray-700 transition-colors"
-                                    >
+                                    <button onClick={() => setReplyingToCommentId(comment.id)} className="text-[11px] font-bold text-gray-500 hover:text-gray-700 transition-colors">
                                       Trả lời
                                     </button>
                                     {isOwnComment && (
-                                      <button 
+                                      <button
                                         onClick={() => {
                                           setEditingCommentId(comment.id);
                                           setEditCommentContent(comment.content);
@@ -439,7 +433,7 @@ export function Community() {
                       {/* Add Comment */}
                       <div className="flex gap-3 pt-2">
                         <UserAvatar
-                          src={user?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop"}
+                          src={user?.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
                           level={user?.level || 1}
                           className="w-8 h-8 flex-shrink-0"
                           uid={user?.uid}
@@ -447,8 +441,12 @@ export function Community() {
                         <div className="flex-1 relative flex flex-col gap-2">
                           {replyingToCommentId && (
                             <div className="flex items-center justify-between bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg w-fit">
-                              <span className="flex items-center gap-1"><CornerDownRight className="w-3 h-3"/> Đang trả lời bình luận</span>
-                              <button onClick={() => setReplyingToCommentId(null)} className="ml-2 hover:text-blue-900"><X className="w-3 h-3" /></button>
+                              <span className="flex items-center gap-1">
+                                <CornerDownRight className="w-3 h-3" /> Đang trả lời bình luận
+                              </span>
+                              <button onClick={() => setReplyingToCommentId(null)} className="ml-2 hover:text-blue-900">
+                                <X className="w-3 h-3" />
+                              </button>
                             </div>
                           )}
                           <div className="relative">

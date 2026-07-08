@@ -11,7 +11,6 @@ import { useEtcStore } from "../services/etcService";
 import { useUserStore } from "../services/userService";
 import toast from "react-hot-toast";
 
-
 const RECENT_ACTIVITIES = [
   { id: 1, action: "Đã hoàn thành bài Quiz", target: "Ngữ pháp cơ bản - Thì Hiện Tại", time: "2 giờ trước", icon: Target, color: "text-green-500" },
   { id: 2, action: "Đã học bộ Flashcard", target: "50 Động từ bất quy tắc", time: "Hôm qua", icon: BookOpen, color: "text-blue-500" },
@@ -31,7 +30,7 @@ export function Profile() {
   const [activeTab, setActiveTab] = useState("overview"); // overview, badges, activities, levels
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(!isCurrentUser);
-  
+
   const { toggleFollow, checkFollow } = useUserStore();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
@@ -42,12 +41,12 @@ export function Profile() {
         setLoading(true);
         const data = await getUserProfile(id);
         setProfileData(data);
-        
+
         if (authUser && authUser.uid !== id) {
           const followStatus = await checkFollow(id);
           setIsFollowing(!!followStatus);
         }
-        
+
         setLoading(false);
       }
     };
@@ -64,7 +63,7 @@ export function Profile() {
       // Optimistically update follower count
       setProfileData((prev: any) => ({
         ...prev,
-        followers: prev.followers + (newStatus ? 1 : -1)
+        followers: prev.followers + (newStatus ? 1 : -1),
       }));
     }
     setIsFollowLoading(false);
@@ -74,7 +73,7 @@ export function Profile() {
     ? {
         name: authUser?.displayName || "Người dùng",
         username: "@" + (authUser?.email?.split("@")[0] || "user"),
-        avatar: authUser?.photoURL || "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=200&auto=format&fit=crop",
+        avatar: authUser?.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
         cover: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1200&auto=format&fit=crop",
         bio: (authUser as any)?.bio || "Học tập không ngừng nghỉ. Đam mê ngôn ngữ và lập trình.",
         location: "Hồ Chí Minh, Việt Nam",
@@ -90,25 +89,27 @@ export function Profile() {
         stars: authUser?.stars || 0,
         streak: (authUser as any)?.streak || 0,
       }
-    : profileData ? {
-        name: profileData.name,
-        username: profileData.username,
-        avatar: profileData.avatar,
-        cover: profileData.cover,
-        bio: profileData.bio,
-        location: "Việt Nam",
-        joined: profileData.joined,
-        website: "",
-        level: profileData.level,
-        xp: profileData.xp,
-        following: profileData.following || 0,
-        followers: profileData.followers || 0,
-        achievedBadges: profileData.achievedBadges || [],
-        rankId: profileData.rankId,
-        tier: profileData.tier,
-        stars: profileData.stars,
-        streak: profileData.streak,
-      } : null;
+    : profileData
+      ? {
+          name: profileData.name,
+          username: profileData.username,
+          avatar: profileData.avatar,
+          cover: profileData.cover,
+          bio: profileData.bio,
+          location: "Việt Nam",
+          joined: profileData.joined,
+          website: "",
+          level: profileData.level,
+          xp: profileData.xp,
+          following: profileData.following || 0,
+          followers: profileData.followers || 0,
+          achievedBadges: profileData.achievedBadges || [],
+          rankId: profileData.rankId,
+          tier: profileData.tier,
+          stars: profileData.stars,
+          streak: profileData.streak,
+        }
+      : null;
 
   if (loading) {
     return (
@@ -136,7 +137,7 @@ export function Profile() {
     tier: TIER_NAMES[user.tier] || "III",
     stars: user.stars,
     maxStars: RANK_CONFIG[user.rankId]?.starsPerTier || 3,
-    position: isCurrentUser ? 142 : 1
+    position: isCurrentUser ? 142 : 1,
   };
 
   const stats = [
@@ -185,22 +186,17 @@ export function Profile() {
 
             <div className="flex items-center justify-center gap-3 md:mb-4">
               {isCurrentUser ? (
-                <button 
-                  onClick={() => navigate("/settings")}
-                  className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl flex items-center gap-2 transition-colors"
-                >
+                <button onClick={() => navigate("/settings")} className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl flex items-center gap-2 transition-colors">
                   <Edit3 className="w-4 h-4" />
                   Chỉnh sửa hồ sơ
                 </button>
               ) : (
-                <button 
+                <button
                   onClick={handleToggleFollow}
                   disabled={isFollowLoading}
                   className={cn(
                     "px-6 py-2.5 font-semibold rounded-xl flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50",
-                    isFollowing 
-                      ? "bg-gray-100 hover:bg-gray-200 text-gray-700" 
-                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                    isFollowing ? "bg-gray-100 hover:bg-gray-200 text-gray-700" : "bg-blue-600 hover:bg-blue-700 text-white",
                   )}
                 >
                   {isFollowing ? (
@@ -332,7 +328,7 @@ export function Profile() {
                 <div className="absolute top-1/2 -translate-y-1/2 right-0 opacity-20 pointer-events-none scale-150">
                   <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Background" className="w-40 h-40 object-contain drop-shadow-2xl" />
                 </div>
-                
+
                 <RankCard />
               </div>
 
@@ -344,21 +340,19 @@ export function Profile() {
                 <div className="absolute top-1/2 -translate-y-1/2 right-0 opacity-20 pointer-events-none scale-150">
                   <div className="w-40 h-40 bg-purple-500/30 rounded-full blur-3xl"></div>
                 </div>
-                
+
                 <div className="relative z-10">
                   <h2 className="text-xs font-bold text-purple-200 uppercase tracking-wider mb-3 flex items-center gap-2">
                     <Award className="w-4 h-4" />
                     Cấp Độ (Level)
                   </h2>
-                  
+
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-14 h-14 bg-white/10 rounded-2xl p-2 border border-white/20 shadow-inner flex items-center justify-center drop-shadow-md">
                       <UserLevelBadge level={user.level} size="lg" showText={false} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-100 to-white leading-tight">
-                        Level {user.level}
-                      </span>
+                      <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-100 to-white leading-tight">Level {user.level}</span>
                       <span className="text-xs font-bold text-purple-200 mt-0.5">{currentLevelInfo.title}</span>
                     </div>
                   </div>
@@ -380,7 +374,7 @@ export function Profile() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4 pt-4 border-t border-purple-800/50">
                     <div className="flex justify-between items-center text-xs font-medium">
                       <span className="text-purple-300">Tiến trình</span>
