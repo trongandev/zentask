@@ -187,10 +187,10 @@ function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClick, popo
   const theme = FOLDER_THEMES[baseColor] || FOLDER_THEMES.blue;
 
   return (
-    <div 
+    <div
       ref={setNodeRef}
       data-flashcard-dropzone={`folder-${folder.id}`}
-      onContextMenu={(e) => onContextMenu(e, "folder", folder)} 
+      onContextMenu={(e) => onContextMenu(e, "folder", folder)}
       className={`${theme.bg} p-6 rounded-3xl border transition-all duration-200 ${activeOver ? "border-blue-500 shadow-lg ring-4 ring-blue-500/20 scale-[1.02]" : "border-gray-200"}`}
     >
       <h2 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}>
@@ -252,7 +252,7 @@ export function Flashcards() {
     user?.role === "admin" ||
     (user as any)?.role === "vip" ||
     ["vip", "pro", "premium"].includes(String((user as any)?.plan || (user as any)?.subscriptionPlan || "").toLowerCase()) ||
-    String((user as any)?.subscriptionStatus || "").toLowerCase() === "active"
+    String((user as any)?.subscriptionStatus || "").toLowerCase() === "active",
   );
 
   const [newFolderName, setNewFolderName] = useState("");
@@ -488,20 +488,15 @@ export function Flashcards() {
     setFolderToDelete(null);
   };
 
-  const matchesSearch = React.useCallback((set: any) => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return true;
-    const haystack = [
-      set.title,
-      set.description,
-      set.creator?.displayName,
-      String(set.cardCount || ""),
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    return haystack.includes(query);
-  }, [searchQuery]);
+  const matchesSearch = React.useCallback(
+    (set: any) => {
+      const query = searchQuery.trim().toLowerCase();
+      if (!query) return true;
+      const haystack = [set.title, set.description, set.creator?.displayName, String(set.cardCount || "")].filter(Boolean).join(" ").toLowerCase();
+      return haystack.includes(query);
+    },
+    [searchQuery],
+  );
 
   // Helper arrays
   const searchedSets = sets.filter(matchesSearch);
@@ -535,7 +530,7 @@ export function Flashcards() {
               e.stopPropagation();
               setEditingFolder(null);
               setNewFolderName("");
-              setNewFolderColor("bg-blue-500");
+              setNewFolderColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
               setIsFolderModalOpen(true);
             }}
             className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"
@@ -607,7 +602,9 @@ export function Flashcards() {
                   <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{set.title}</h3>
                   <p className="text-sm text-gray-500 line-clamp-2 mb-4">{set.description || "Không có mô tả"}</p>
                   <div className="flex flex-wrap items-center gap-2 text-xs font-bold mb-5">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-600"><Globe2 className="w-3 h-3" /> Công khai</span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-600">
+                      <Globe2 className="w-3 h-3" /> Công khai
+                    </span>
                     <span className="rounded-full bg-gray-50 px-2.5 py-1 text-gray-600">{set.cardCount || 0} thẻ</span>
                   </div>
                   {set.creator?.displayName && <p className="mb-5 text-xs font-semibold text-gray-400">Tác giả: {set.creator.displayName}</p>}
@@ -615,7 +612,10 @@ export function Flashcards() {
                     <button onClick={() => navigate(`/flashcard/${set.id}`)} className="rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-100 transition-colors">
                       Xem trước
                     </button>
-                    <button onClick={() => handleClonePublicSet(set.id)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition-colors">
+                    <button
+                      onClick={() => handleClonePublicSet(set.id)}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition-colors"
+                    >
                       <Copy className="w-4 h-4" /> Lưu
                     </button>
                   </div>
@@ -625,116 +625,125 @@ export function Flashcards() {
           )}
         </div>
       ) : (
+        <DndContext sensors={sensors} collisionDetection={collisionDetectionStrategy} onDragStart={handleDragStart} onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
+          {/* Floating Remove Dropzone */}
+          <div
+            ref={removeZoneRef}
+            data-flashcard-dropzone="remove-zone"
+            className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-full shadow-2xl transition-all duration-300 border-2 flex items-center gap-3 ${
+              activeId && activeSetForOverlay?.folderId ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20 pointer-events-none"
+            } ${isRemoveZoneOver || coordinateOverId === "remove-zone" ? "bg-red-50 border-red-500 text-red-600 scale-110 shadow-red-200" : "bg-white border-dashed border-gray-400 text-gray-600"}`}
+          >
+            <FolderIcon className="w-6 h-6" />
+            <span className="font-bold text-lg">Kéo thả vào đây để đưa ra ngoài thư mục</span>
+          </div>
 
-      <DndContext sensors={sensors} collisionDetection={collisionDetectionStrategy} onDragStart={handleDragStart} onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
-        {/* Floating Remove Dropzone */}
-        <div 
-          ref={removeZoneRef}
-          data-flashcard-dropzone="remove-zone"
-          className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-full shadow-2xl transition-all duration-300 border-2 flex items-center gap-3 ${
-            activeId && activeSetForOverlay?.folderId 
-              ? "opacity-100 translate-y-0" 
-              : "opacity-0 translate-y-20 pointer-events-none"
-          } ${
-            isRemoveZoneOver || coordinateOverId === "remove-zone" ? "bg-red-50 border-red-500 text-red-600 scale-110 shadow-red-200" : "bg-white border-dashed border-gray-400 text-gray-600"
-          }`}
-        >
-          <FolderIcon className="w-6 h-6" />
-          <span className="font-bold text-lg">Kéo thả vào đây để đưa ra ngoài thư mục</span>
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="lg:col-span-3 space-y-8">
+              {/* Folders */}
+              {folders.map((folder) => (
+                <FolderDroppable
+                  key={folder.id}
+                  folder={folder}
+                  setsInFolder={searchedSets.filter((s) => s.folderId === folder.id)}
+                  onContextMenu={handleContextMenu}
+                  onSetClick={(s: any) => navigate(`/flashcard/${s.id}`)}
+                  popoverId={popoverId}
+                  setPopoverId={setPopoverId}
+                  onEditSet={(s: any) => {
+                    setEditingSet(s);
+                    setNewTitle(s.title);
+                    setNewDesc(s.description || "");
+                    setSelectedColor(s.color || "bg-blue-500");
+                    setSetIsPublic(s.isPublic !== false);
+                    setIsModalOpen(true);
+                  }}
+                  onDeleteSet={(s: any) => setSetToDelete(s)}
+                  forceOver={coordinateOverId === `folder-${folder.id}`}
+                />
+              ))}
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3 space-y-8">
-            {/* Folders */}
-            {folders.map((folder) => (
-              <FolderDroppable
-                key={folder.id}
-                folder={folder}
-                setsInFolder={searchedSets.filter((s) => s.folderId === folder.id)}
-                onContextMenu={handleContextMenu}
-                onSetClick={(s: any) => navigate(`/flashcard/${s.id}`)}
-                popoverId={popoverId}
-                setPopoverId={setPopoverId}
-                onEditSet={(s: any) => {
-                  setEditingSet(s);
-                  setNewTitle(s.title);
-                  setNewDesc(s.description || "");
-                  setSelectedColor(s.color || "bg-blue-500");
-                  setSetIsPublic(s.isPublic !== false);
-                  setIsModalOpen(true);
-                }}
-                onDeleteSet={(s: any) => setSetToDelete(s)}
-                forceOver={coordinateOverId === `folder-${folder.id}`}
-              />
-            ))}
+              {/* Unassigned Sets (Root) */}
+              <div
+                ref={rootDropRef}
+                data-flashcard-dropzone="root"
+                className={`space-y-4 min-h-[240px] p-4 rounded-3xl transition-all duration-200 border ${isRootDropActive ? "border-blue-500 shadow-md ring-4 ring-blue-500/20 bg-blue-50/50" : "border-transparent"}`}
+              >
+                <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Bộ thẻ chưa phân loại</h2>
 
-            {/* Unassigned Sets (Root) */}
-            <div
-              ref={rootDropRef}
-              data-flashcard-dropzone="root"
-              className={`space-y-4 min-h-[240px] p-4 rounded-3xl transition-all duration-200 border ${isRootDropActive ? "border-blue-500 shadow-md ring-4 ring-blue-500/20 bg-blue-50/50" : "border-transparent"}`}
-            >
-              <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Bộ thẻ chưa phân loại</h2>
-
-              {loading && sets.length === 0 ? (
-                <div className="flex justify-center p-12">
-                  <div className="w-8 h-8 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
-                </div>
-              ) : (
-                <SortableContext items={unassignedSets.map((s) => s.id)} strategy={rectSortingStrategy}>
-                  <div data-flashcard-dropzone="root" className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[200px] p-4 rounded-3xl border transition-all ${isRootDropActive ? "bg-blue-50 border-blue-300 ring-4 ring-blue-500/10" : "bg-gray-50/50 border-gray-100"}`}>
-                    {unassignedSets.length === 0 && (
-                      <div data-flashcard-dropzone="root" className={`col-span-full flex min-h-[150px] flex-col items-center justify-center p-12 text-center border-2 border-dashed rounded-2xl transition-all ${isRootDropActive ? "border-blue-400 bg-white text-blue-700" : "border-gray-300 text-gray-500"}`}>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">{searchQuery.trim() ? "Không tìm thấy bộ thẻ phù hợp" : folders.length === 0 ? "Chưa có bộ thẻ nào" : "Chưa có bộ thẻ chưa phân loại"}</h3>
-                        <p className="text-gray-500 mb-6">{searchQuery.trim() ? "Thử đổi từ khóa hoặc chuyển sang tab Công khai." : folders.length === 0 ? "Hãy tạo bộ thẻ đầu tiên hoặc thư mục để bắt đầu." : "Kéo bộ thẻ từ thư mục vào vùng này để đưa ra ngoài."}</p>
-                      </div>
-                    )}
-                    {unassignedSets.map((set) => (
-                      <SortableSetItem
-                        key={set.id}
-                        set={set}
-                        onClick={() => navigate(`/flashcard/${set.id}`)}
-                        onContextMenu={handleContextMenu}
-                        popoverId={popoverId}
-                        setPopoverId={setPopoverId}
-                        onEdit={(s: any) => {
-                          setEditingSet(s);
-                          setNewTitle(s.title);
-                          setNewDesc(s.description || "");
-                          setSelectedColor(s.color || "bg-blue-500");
-                          setSetIsPublic(s.isPublic !== false);
-                          setIsModalOpen(true);
-                        }}
-                        onDelete={(s: any) => setSetToDelete(s)}
-                      />
-                    ))}
+                {loading && sets.length === 0 ? (
+                  <div className="flex justify-center p-12">
+                    <div className="w-8 h-8 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
                   </div>
-                </SortableContext>
-              )}
-            </div>
-          </div>
-
-          {/* Rank Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Current Rank Card */}
-            <div className="bg-gradient-to-b from-blue-900 to-indigo-950 rounded-2xl p-5 text-white shadow-sm relative overflow-hidden transition-all">
-              <div className="absolute top-1/2 -translate-y-1/2 right-0 opacity-20 pointer-events-none scale-150">
-                <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Background" className="w-40 h-40 object-contain drop-shadow-2xl" />
+                ) : (
+                  <SortableContext items={unassignedSets.map((s) => s.id)} strategy={rectSortingStrategy}>
+                    <div
+                      data-flashcard-dropzone="root"
+                      className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[200px] p-4 rounded-3xl border transition-all ${isRootDropActive ? "bg-blue-50 border-blue-300 ring-4 ring-blue-500/10" : "bg-gray-50/50 border-gray-100"}`}
+                    >
+                      {unassignedSets.length === 0 && (
+                        <div
+                          data-flashcard-dropzone="root"
+                          className={`col-span-full flex min-h-[150px] flex-col items-center justify-center p-12 text-center border-2 border-dashed rounded-2xl transition-all ${isRootDropActive ? "border-blue-400 bg-white text-blue-700" : "border-gray-300 text-gray-500"}`}
+                        >
+                          <h3 className="text-lg font-bold text-gray-900 mb-2">
+                            {searchQuery.trim() ? "Không tìm thấy bộ thẻ phù hợp" : folders.length === 0 ? "Chưa có bộ thẻ nào" : "Chưa có bộ thẻ chưa phân loại"}
+                          </h3>
+                          <p className="text-gray-500 mb-6">
+                            {searchQuery.trim()
+                              ? "Thử đổi từ khóa hoặc chuyển sang tab Công khai."
+                              : folders.length === 0
+                                ? "Hãy tạo bộ thẻ đầu tiên hoặc thư mục để bắt đầu."
+                                : "Kéo bộ thẻ từ thư mục vào vùng này để đưa ra ngoài."}
+                          </p>
+                        </div>
+                      )}
+                      {unassignedSets.map((set) => (
+                        <SortableSetItem
+                          key={set.id}
+                          set={set}
+                          onClick={() => navigate(`/flashcard/${set.id}`)}
+                          onContextMenu={handleContextMenu}
+                          popoverId={popoverId}
+                          setPopoverId={setPopoverId}
+                          onEdit={(s: any) => {
+                            setEditingSet(s);
+                            setNewTitle(s.title);
+                            setNewDesc(s.description || "");
+                            setSelectedColor(s.color || "bg-blue-500");
+                            setSetIsPublic(s.isPublic !== false);
+                            setIsModalOpen(true);
+                          }}
+                          onDelete={(s: any) => setSetToDelete(s)}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                )}
               </div>
+            </div>
 
-              <RankCard showButton={true} buttonText="Tham gia Rank" />
+            {/* Rank Sidebar */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Current Rank Card */}
+              <div className="bg-gradient-to-b from-blue-900 to-indigo-950 rounded-2xl p-5 text-white shadow-sm relative overflow-hidden transition-all">
+                <div className="absolute top-1/2 -translate-y-1/2 right-0 opacity-20 pointer-events-none scale-150">
+                  <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Background" className="w-40 h-40 object-contain drop-shadow-2xl" />
+                </div>
+
+                <RankCard showButton={true} buttonText="Tham gia Rank" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <DragOverlay>
-          {activeSetForOverlay ? (
-            <div className="w-[300px] pointer-events-none">
-              <SortableSetItem set={activeSetForOverlay} onClick={() => {}} onContextMenu={() => {}} popoverId={null} setPopoverId={() => {}} onEdit={() => {}} onDelete={() => {}} />
-            </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+          <DragOverlay>
+            {activeSetForOverlay ? (
+              <div className="w-[300px] pointer-events-none">
+                <SortableSetItem set={activeSetForOverlay} onClick={() => {}} onContextMenu={() => {}} popoverId={null} setPopoverId={() => {}} onEdit={() => {}} onDelete={() => {}} />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {/* --- Context Menu Portal --- */}
@@ -757,6 +766,9 @@ export function Flashcards() {
               </button>
               <button
                 onClick={() => {
+                  setEditingFolder(null);
+                  setNewFolderName("");
+                  setNewFolderColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
                   setIsFolderModalOpen(true);
                   setContextMenu(null);
                 }}
@@ -849,6 +861,7 @@ export function Flashcards() {
                 <label className="block text-sm font-bold text-gray-700 mb-1">Tên thư mục</label>
                 <input
                   type="text"
+                  autoFocus
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
                   placeholder="VD: Tiếng Anh giao tiếp"
@@ -962,7 +975,9 @@ export function Flashcards() {
                     onClick={() => setSetIsPublic(true)}
                     className={`rounded-2xl border p-4 text-left transition-all ${setIsPublic ? "border-emerald-400 bg-emerald-50 ring-4 ring-emerald-100" : "border-gray-200 bg-gray-50 hover:bg-white"}`}
                   >
-                    <div className="flex items-center gap-2 font-extrabold text-gray-900"><Globe2 className="w-5 h-5 text-emerald-600" /> Công khai</div>
+                    <div className="flex items-center gap-2 font-extrabold text-gray-900">
+                      <Globe2 className="w-5 h-5 text-emerald-600" /> Công khai
+                    </div>
                     <p className="mt-1 text-xs font-medium text-gray-500">Mặc định. Mọi người có thể xem và lưu bộ thẻ này.</p>
                   </button>
                   <button
@@ -976,7 +991,9 @@ export function Flashcards() {
                     }}
                     className={`rounded-2xl border p-4 text-left transition-all ${!setIsPublic ? "border-slate-400 bg-slate-100 ring-4 ring-slate-100" : "border-gray-200 bg-gray-50 hover:bg-white"} ${!isVip ? "opacity-75" : ""}`}
                   >
-                    <div className="flex items-center gap-2 font-extrabold text-gray-900"><Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}</div>
+                    <div className="flex items-center gap-2 font-extrabold text-gray-900">
+                      <Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}
+                    </div>
                     <p className="mt-1 text-xs font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo bộ thẻ riêng tư.</p>
                   </button>
                 </div>
