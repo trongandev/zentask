@@ -1,82 +1,49 @@
 import { Router } from "express";
-import { auth, db } from "../firebase.js";
+import { Notification } from "../models/Schemas.js";
+import { verifyToken } from "../middleware/auth.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
 
-const authenticate = async (req, res, next) => {
-  const sessionCookie = req.cookies.session || "";
-  if (!sessionCookie) return res.status(401).json({ error: "Unauthenticated" });
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    req.uid = decodedClaims.uid;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: "Unauthenticated" });
-  }
-};
-
-router.use(authenticate);
+router.use(verifyToken);
 
 // Get notifications
-router.get("/", async (req, res) => {
-  try {
-    const snapshot = await db.collection("notifications")
-      .where("receiverId", "==", req.uid)
-      .orderBy("createdAt", "desc")
-      .limit(50)
-      .get();
-      
-    const notifications = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt ? new Date(doc.data().createdAt._seconds * 1000).toISOString() : new Date().toISOString()
-    }));
+router.get("/", asyncHandler(async (req, res) => {
+  const notificationsDocs = await Notification.find({ receiverId: req.user.uid })
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .lean();
+    
+  const notifications = notificationsDocs.map(doc => ({
+    id: doc._id,
+    ...doc,
+    createdAt: doc.createdAt ? doc.createdAt.toISOString() : new Date().toISOString()
+  }));
 
-    res.json(notifications);
-  } catch (error) {
-    console.error("Get notifications error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+  res.json(notifications);
+}));
 
 // Mark all as read
-router.put("/read-all", async (req, res) => {
-  try {
-    const snapshot = await db.collection("notifications")
-      .where("receiverId", "==", req.uid)
-      .where("isRead", "==", false)
-      .get();
-      
-    if (snapshot.empty) return res.json({ status: "success" });
+router.put("/read-all", asyncHandler(async (req, res) => {
+  await Notification.updateMany(
+    { receiverId: req.user.uid, isRead: false },
+    { $set: { isRead: true } }
+  );
 
-    const batch = db.batch();
-    snapshot.docs.forEach((doc) => {
-      batch.update(doc.ref, { isRead: true });
-    });
-
-    await batch.commit();
-    res.json({ status: "success" });
-  } catch (error) {
-    console.error("Mark read error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+  res.json({ status: "success" });
+}));
 
 // Mark specific as read
-router.put("/:id/read", async (req, res) => {
-  try {
-    const notifRef = db.collection("notifications").doc(req.params.id);
-    const doc = await notifRef.get();
-    
-    if (!doc.exists) return res.status(404).json({ error: "Not found" });
-    if (doc.data().receiverId !== req.uid) return res.status(403).json({ error: "Forbidden" });
+router.put("/:id/read", asyncHandler(async (req, res) => {
+  const notif = await Notification.findById(req.params.id);
+  
+  if (!notif) return res.status(404).json({ error: "Not found" });
+  if (notif.receiverId.toString() !== req.user.uid) return res.status(403).json({ error: "Forbidden" });
 
-    await notifRef.update({ isRead: true });
-    res.json({ status: "success" });
-  } catch (error) {
-    console.error("Mark single read error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+  notif.isRead = true;
+  await notif.save();
+  
+  res.json({ status: "success" });
+}));
 
 export default router;

@@ -1,26 +1,23 @@
 import express from "express";
-import { db } from "../firebase.js";
+import { ArenaMatchmakingStat } from "../models/Schemas.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
+import { verifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
+router.use(verifyToken);
 
-router.post("/stats/matchmaking", async (req, res) => {
-  try {
-    const { uid, durationMs, rankId, tier } = req.body;
-    if (!uid) return res.status(400).json({ error: "Missing uid" });
+router.post("/stats/matchmaking", asyncHandler(async (req, res) => {
+  const { uid, durationMs, rankId, tier } = req.body;
+  if (!uid) return res.status(400).json({ error: "Missing uid" });
 
-    await db.collection("arena_matchmaking_stats").add({
-      uid,
-      durationMs,
-      rankId: rankId || 1,
-      tier: tier || 1,
-      createdAt: new Date().toISOString()
-    });
+  await ArenaMatchmakingStat.create({
+    uid: req.user.uid, // use authenticated user's id instead of from body
+    durationMs,
+    rankId: rankId || 1,
+    tier: tier || 1,
+  });
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Lỗi lưu stats matchmaking:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
+  res.json({ success: true });
+}));
 
 export default router;

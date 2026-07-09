@@ -22,6 +22,7 @@ interface UserState {
   triggerLevelUp: (newLevel: number) => void;
   todayMinutes: number;
   unsyncedMinutes: number;
+  stats: StudyStat[];
   preloadedStatsSet: boolean;
   setPreloadedStats: (stats: StudyStat[]) => void;
   initTodayMinutes: () => Promise<void>;
@@ -36,6 +37,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   levelUpData: null,
   todayMinutes: 0,
   unsyncedMinutes: 0,
+  stats: [],
   preloadedStatsSet: false,
   clearLevelUp: () => set({ levelUpData: null }),
   triggerLevelUp: (newLevel: number) => set({ levelUpData: { newLevel } }),
@@ -43,7 +45,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   setPreloadedStats: (stats: StudyStat[]) => {
     if (stats && stats.length > 0) {
       const todayStats = stats[stats.length - 1];
-      set({ todayMinutes: todayStats?.minutes || 0, preloadedStatsSet: true });
+      set({ stats, todayMinutes: todayStats?.minutes || 0, preloadedStatsSet: true });
     }
   },
 
@@ -103,6 +105,18 @@ export const useUserStore = create<UserState>((set, get) => ({
       
       if (data.taskProgress) {
         useConfigStore.getState().setTaskProgress(data.taskProgress);
+      }
+      
+      // Update the local stats array to instantly turn today's check-in dot green
+      if (data.lastCheckInDate) {
+        set((state) => {
+          const newStats = [...state.stats];
+          const todayIndex = newStats.findIndex(s => s.date === data.lastCheckInDate);
+          if (todayIndex !== -1) {
+            newStats[todayIndex].isCheckedIn = true;
+          }
+          return { stats: newStats };
+        });
       }
       
       return data;

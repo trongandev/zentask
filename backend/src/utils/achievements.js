@@ -1,17 +1,15 @@
-import { db } from "../firebase.js";
-import { FieldValue } from "firebase-admin/firestore";
+import User from "../models/User.js";
+import { QuizResult, FlashcardProgress } from "../models/Schemas.js";
 import { SYSTEM_BADGES } from "../config/system.js";
 import { createNotification } from "./notifications.js";
 
 // eventType: "CHECK_IN" | "STUDY_TIME" | "FLASHCARD_LEARNED" | "QUIZ_SUBMIT" | "LEADERBOARD"
 export const checkAchievements = async (uid, eventType, data = {}, app) => {
   try {
-    const userRef = db.collection("users").doc(uid);
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) return;
+    const user = await User.findById(uid);
+    if (!user) return;
     
-    const userData = userDoc.data();
-    const achievedBadges = userData.achievedBadges || [];
+    const achievedBadges = user.achievedBadges || [];
     let newBadges = [];
 
     // Helper to evaluate badge
@@ -23,10 +21,10 @@ export const checkAchievements = async (uid, eventType, data = {}, app) => {
 
     if (eventType === "CHECK_IN") {
       // 1: Chăm chỉ - Học 7 ngày liên tiếp
-      if (userData.streak >= 7) awardBadge(1);
+      if (user.streak >= 7) awardBadge(1);
       
       // 9: Ngôi sao hy vọng - Học bù sau khi mất chuỗi
-      if (userData.streak === 1 && userData.maxStreak >= 3) awardBadge(9);
+      if (user.streak === 1 && user.maxStreak >= 3) awardBadge(9);
     }
     else if (eventType === "STUDY_TIME") {
       // Server is in UTC, so we convert to VN time (UTC+7)
@@ -45,11 +43,12 @@ export const checkAchievements = async (uid, eventType, data = {}, app) => {
       // 4: Hoàn hảo - Đạt 100% điểm 5 bài Quiz
       // 8: Kẻ huỷ diệt - Vượt qua 100 bài Quiz
       if (!achievedBadges.includes(4) || !achievedBadges.includes(8)) {
-        const quizResultsSnap = await db.collection("quiz_results").where("uid", "==", uid).get();
-        const totalQuizzes = quizResultsSnap.size;
+        const quizResults = await QuizResult.find({ uid }).lean();
+        const totalQuizzes = quizResults.length;
         let perfectCount = 0;
-        quizResultsSnap.forEach(doc => {
-          if (doc.data().score === 100) perfectCount++;
+        
+        quizResults.forEach(doc => {
+          if (doc.score === 100) perfectCount++;
         });
 
         if (perfectCount >= 5) awardBadge(4);
@@ -59,8 +58,8 @@ export const checkAchievements = async (uid, eventType, data = {}, app) => {
     else if (eventType === "FLASHCARD_LEARNED") {
       // 3: Thần đồng từ vựng - Học 1000 từ vựng
       if (!achievedBadges.includes(3)) {
-        const countQuery = await db.collection("flashcard_progress").where("userId", "==", uid).count().get();
-        if (countQuery.data().count >= 1000) awardBadge(3);
+        const count = await FlashcardProgress.countDocuments({ userId: uid });
+        if (count >= 1000) awardBadge(3);
       }
     }
     else if (eventType === "LEADERBOARD") {
@@ -70,8 +69,8 @@ export const checkAchievements = async (uid, eventType, data = {}, app) => {
 
     // Save and Notify
     if (newBadges.length > 0) {
-      await userRef.update({
-        achievedBadges: FieldValue.arrayUnion(...newBadges)
+      await User.findByIdAndUpdate(uid, {
+        $push: { achievedBadges: { $each: newBadges } }
       });
 
       for (const badgeId of newBadges) {

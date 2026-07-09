@@ -1,39 +1,21 @@
 import { Router } from "express";
-import { auth, db } from "../firebase.js";
-import { FieldValue } from "firebase-admin/firestore";
+import { CalculatorHistory, TranslationHistory, StudyMethod } from "../models/Schemas.js";
+import { verifyToken } from "../middleware/auth.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
-
-const authenticate = async (req, res, next) => {
-  const sessionCookie = req.cookies.session || "";
-  if (!sessionCookie) return res.status(401).json({ error: "Unauthenticated" });
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    req.uid = decodedClaims.uid;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: "Unauthenticated" });
-  }
-};
-
-router.use(authenticate);
-
-const userRef = (uid) => db.collection("users").doc(uid);
-const calcRef = (uid) => userRef(uid).collection("calculatorHistory");
-const transRef = (uid) => userRef(uid).collection("translationHistory");
-const methodsRef = (uid) => userRef(uid).collection("studyMethods");
+router.use(verifyToken);
 
 function cleanText(value, max = 5000) {
   return String(value || "").trim().slice(0, max);
 }
 
 function serializeDoc(doc) {
-  const data = doc.data() || {};
   return {
-    id: doc.id,
-    ...data,
-    createdAt: data.createdAt?.toDate?.()?.toISOString?.() || data.createdAt || null,
-    updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() || data.updatedAt || null,
+    id: doc._id,
+    ...doc,
+    createdAt: doc.createdAt ? doc.createdAt.toISOString() : null,
+    updatedAt: doc.updatedAt ? doc.updatedAt.toISOString() : null,
   };
 }
 
@@ -53,44 +35,46 @@ async function translateWithGoogle({ text, source = "auto", target = "en" }) {
   return translated || text;
 }
 
-router.get("/calculator-history", async (req, res) => {
-  const snap = await calcRef(req.uid).orderBy("createdAt", "desc").limit(60).get();
-  res.json({ items: snap.docs.map(serializeDoc) });
-});
+router.get("/calculator-history", asyncHandler(async (req, res) => {
+  const items = await CalculatorHistory.find({ uid: req.user.uid })
+    .sort({ createdAt: -1 })
+    .limit(60)
+    .lean();
+  res.json({ items: items.map(serializeDoc) });
+}));
 
-router.post("/calculator-history", async (req, res) => {
+router.post("/calculator-history", asyncHandler(async (req, res) => {
   const expression = cleanText(req.body?.expression, 1000);
   const result = cleanText(req.body?.result, 2000);
   const mode = cleanText(req.body?.mode || "basic", 30);
   const type = cleanText(req.body?.type || "calculation", 30);
   if (!expression || !result) return res.status(400).json({ error: "Thiếu phép tính hoặc kết quả." });
 
-  const docRef = await calcRef(req.uid).add({
+  const newItem = await CalculatorHistory.create({
+    uid: req.user.uid,
     expression,
     result,
     mode,
     type,
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
   });
-  const doc = await docRef.get();
-  res.json({ item: serializeDoc(doc) });
-});
+  res.json({ item: serializeDoc(newItem.toObject()) });
+}));
 
-router.delete("/calculator-history/:id", async (req, res) => {
-  await calcRef(req.uid).doc(req.params.id).delete();
+router.delete("/calculator-history/:id", asyncHandler(async (req, res) => {
+  const item = await CalculatorHistory.findById(req.params.id);
+  if (!item) return res.status(404).json({ error: "Not found" });
+  if (item.uid.toString() !== req.user.uid) return res.status(403).json({ error: "Forbidden" });
+
+  await CalculatorHistory.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
-});
+}));
 
-router.delete("/calculator-history", async (req, res) => {
-  const snap = await calcRef(req.uid).limit(200).get();
-  const batch = db.batch();
-  snap.docs.forEach((doc) => batch.delete(doc.ref));
-  await batch.commit();
+router.delete("/calculator-history", asyncHandler(async (req, res) => {
+  await CalculatorHistory.deleteMany({ uid: req.user.uid });
   res.json({ ok: true });
-});
+}));
 
-router.post("/translate", async (req, res) => {
+router.post("/translate", asyncHandler(async (req, res) => {
   const text = cleanText(req.body?.text, 8000);
   const source = cleanText(req.body?.source || "auto", 20);
   const target = cleanText(req.body?.target || "en", 20);
@@ -101,79 +85,89 @@ router.post("/translate", async (req, res) => {
     const translatedText = await translateWithGoogle({ text, source, target });
     let item = null;
     if (save) {
-      const docRef = await transRef(req.uid).add({
+      const newItem = await TranslationHistory.create({
+        uid: req.user.uid,
         sourceText: text,
         translatedText,
         source,
         target,
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
       });
-      item = serializeDoc(await docRef.get());
+      item = serializeDoc(newItem.toObject());
     }
     res.json({ translatedText, item });
   } catch (error) {
     res.status(500).json({ error: error?.message || "Dịch thuật thất bại." });
   }
-});
+}));
 
-router.get("/translation-history", async (req, res) => {
-  const snap = await transRef(req.uid).orderBy("createdAt", "desc").limit(80).get();
-  res.json({ items: snap.docs.map(serializeDoc) });
-});
+router.get("/translation-history", asyncHandler(async (req, res) => {
+  const items = await TranslationHistory.find({ uid: req.user.uid })
+    .sort({ createdAt: -1 })
+    .limit(80)
+    .lean();
+  res.json({ items: items.map(serializeDoc) });
+}));
 
-router.delete("/translation-history/:id", async (req, res) => {
-  await transRef(req.uid).doc(req.params.id).delete();
+router.delete("/translation-history/:id", asyncHandler(async (req, res) => {
+  const item = await TranslationHistory.findById(req.params.id);
+  if (!item) return res.status(404).json({ error: "Not found" });
+  if (item.uid.toString() !== req.user.uid) return res.status(403).json({ error: "Forbidden" });
+
+  await TranslationHistory.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
-});
+}));
 
-router.delete("/translation-history", async (req, res) => {
-  const snap = await transRef(req.uid).limit(200).get();
-  const batch = db.batch();
-  snap.docs.forEach((doc) => batch.delete(doc.ref));
-  await batch.commit();
+router.delete("/translation-history", asyncHandler(async (req, res) => {
+  await TranslationHistory.deleteMany({ uid: req.user.uid });
   res.json({ ok: true });
-});
+}));
 
-router.get("/study-methods", async (req, res) => {
-  const snap = await methodsRef(req.uid).orderBy("createdAt", "desc").limit(50).get();
-  res.json({ items: snap.docs.map(serializeDoc) });
-});
+router.get("/study-methods", asyncHandler(async (req, res) => {
+  const items = await StudyMethod.find({ uid: req.user.uid })
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .lean();
+  res.json({ items: items.map(serializeDoc) });
+}));
 
-router.post("/study-methods", async (req, res) => {
+router.post("/study-methods", asyncHandler(async (req, res) => {
   const name = cleanText(req.body?.name, 80) || "Phương pháp học mới";
   const studyMinutes = Math.max(1, Math.min(600, Number(req.body?.studyMinutes || 25)));
   const breakMinutes = Math.max(1, Math.min(180, Number(req.body?.breakMinutes || 5)));
   const breakCount = Math.max(0, Math.min(24, Number(req.body?.breakCount || 0)));
 
-  const docRef = await methodsRef(req.uid).add({
+  const newItem = await StudyMethod.create({
+    uid: req.user.uid,
     name,
     studyMinutes,
     breakMinutes,
     breakCount,
     isCustom: true,
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
   });
-  res.json({ item: serializeDoc(await docRef.get()) });
-});
+  res.json({ item: serializeDoc(newItem.toObject()) });
+}));
 
-router.put("/study-methods/:id", async (req, res) => {
-  const payload = {
-    updatedAt: FieldValue.serverTimestamp(),
-  };
-  if (req.body?.name !== undefined) payload.name = cleanText(req.body.name, 80) || "Phương pháp học";
-  if (req.body?.studyMinutes !== undefined) payload.studyMinutes = Math.max(1, Math.min(600, Number(req.body.studyMinutes)));
-  if (req.body?.breakMinutes !== undefined) payload.breakMinutes = Math.max(1, Math.min(180, Number(req.body.breakMinutes)));
-  if (req.body?.breakCount !== undefined) payload.breakCount = Math.max(0, Math.min(24, Number(req.body.breakCount)));
+router.put("/study-methods/:id", asyncHandler(async (req, res) => {
+  const item = await StudyMethod.findById(req.params.id);
+  if (!item) return res.status(404).json({ error: "Not found" });
+  if (item.uid.toString() !== req.user.uid) return res.status(403).json({ error: "Forbidden" });
 
-  await methodsRef(req.uid).doc(req.params.id).set(payload, { merge: true });
-  res.json({ item: serializeDoc(await methodsRef(req.uid).doc(req.params.id).get()) });
-});
+  if (req.body?.name !== undefined) item.name = cleanText(req.body.name, 80) || "Phương pháp học";
+  if (req.body?.studyMinutes !== undefined) item.studyMinutes = Math.max(1, Math.min(600, Number(req.body.studyMinutes)));
+  if (req.body?.breakMinutes !== undefined) item.breakMinutes = Math.max(1, Math.min(180, Number(req.body.breakMinutes)));
+  if (req.body?.breakCount !== undefined) item.breakCount = Math.max(0, Math.min(24, Number(req.body.breakCount)));
 
-router.delete("/study-methods/:id", async (req, res) => {
-  await methodsRef(req.uid).doc(req.params.id).delete();
+  await item.save();
+  res.json({ item: serializeDoc(item.toObject()) });
+}));
+
+router.delete("/study-methods/:id", asyncHandler(async (req, res) => {
+  const item = await StudyMethod.findById(req.params.id);
+  if (!item) return res.status(404).json({ error: "Not found" });
+  if (item.uid.toString() !== req.user.uid) return res.status(403).json({ error: "Forbidden" });
+
+  await StudyMethod.findByIdAndDelete(req.params.id);
   res.json({ ok: true });
-});
+}));
 
 export default router;

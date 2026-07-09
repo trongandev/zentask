@@ -1,330 +1,241 @@
 import { Router } from "express";
-import { auth, db } from "../firebase.js";
-import { FieldValue } from "firebase-admin/firestore";
+import User from "../models/User.js";
+import { 
+  DailyTask, 
+  FlashcardSet, 
+  Flashcard, 
+  Quiz, 
+  QuizResult 
+} from "../models/Schemas.js";
+import { verifyToken } from "../middleware/auth.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
 
-// Middleware to authenticate and check for admin role
-const authenticateAdmin = async (req, res, next) => {
-  const sessionCookie = req.cookies.session || "";
-  if (!sessionCookie) return res.status(401).json({ error: "Unauthenticated" });
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    const uid = decodedClaims.uid;
-    const userDoc = await db.collection("users").doc(uid).get();
-    if (!userDoc.exists || userDoc.data().role !== "admin") {
-      return res.status(403).json({ error: "Forbidden: Admin access required" });
-    }
-    req.uid = uid;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: "Unauthenticated" });
+const authenticateAdmin = asyncHandler(async (req, res, next) => {
+  const token = req.cookies.session;
+  if (!token) return res.status(401).json({ error: "Unauthenticated" });
+  
+  // verifyToken will run first, so we assume req.user is set if we use it, 
+  // but let's just implement the logic using req.user since we'll put verifyToken before this middleware.
+  const user = await User.findById(req.user.uid).lean();
+  if (!user || user.role !== "admin") {
+    return res.status(403).json({ error: "Forbidden: Admin access required" });
   }
-};
+  next();
+});
 
+router.use(verifyToken);
 router.use(authenticateAdmin);
 
 // USERS CRUD
-router.get("/users", async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    
-    // In a real production app with a large number of users, 
-    // you would use pagination with startAfter. 
-    // For simplicity, we fetch all and slice, or implement basic query.
-    // Fetch all for now to implement manual pagination.
-    const snapshot = await db.collection("users").orderBy("createdAt", "desc").get();
-    
-    const allUsers = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : null,
-      };
-    });
+router.get("/users", asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  
+  const total = await User.countDocuments();
+  const totalPages = Math.ceil(total / limit);
+  
+  const users = await User.find()
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
 
-    const total = allUsers.length;
-    const totalPages = Math.ceil(total / limit);
-    const paginatedUsers = allUsers.slice((page - 1) * limit, page * limit);
+  const formattedUsers = users.map(user => ({
+    id: user._id,
+    ...user,
+    createdAt: user.createdAt ? user.createdAt.toISOString() : null,
+  }));
 
-    res.json({
-      users: paginatedUsers,
-      total,
-      page,
-      totalPages,
-    });
-  } catch (error) {
-    console.error("Get admin users error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+  res.json({
+    users: formattedUsers,
+    total,
+    page,
+    totalPages,
+  });
+}));
 
-router.put("/users/:uid/role", async (req, res) => {
-  try {
-    const { uid } = req.params;
-    const { role } = req.body; // 'admin' or 'user'
-    
-    await db.collection("users").doc(uid).update({ role });
-    res.json({ status: "success" });
-  } catch (error) {
-    console.error("Update role error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+router.put("/users/:uid/role", asyncHandler(async (req, res) => {
+  const { uid } = req.params;
+  const { role } = req.body;
+  
+  await User.findByIdAndUpdate(uid, { role });
+  res.json({ status: "success" });
+}));
 
 // TASKS CRUD
-router.get("/tasks", async (req, res) => {
-  try {
-    const snapshot = await db.collection("daily_tasks").orderBy("createdAt", "asc").get();
-    const tasks = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    res.json({ tasks });
-  } catch (error) {
-    console.error("Get admin tasks error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+router.get("/tasks", asyncHandler(async (req, res) => {
+  const tasks = await DailyTask.find().sort({ createdAt: 1 }).lean();
+  res.json({ tasks: tasks.map(t => ({ id: t._id, ...t })) });
+}));
 
-router.post("/tasks", async (req, res) => {
-  try {
-    const taskData = req.body;
-    const docRef = await db.collection("daily_tasks").add({
-      ...taskData,
-      createdAt: FieldValue.serverTimestamp(),
-    });
-    res.json({ status: "success", id: docRef.id });
-  } catch (error) {
-    console.error("Add task error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+router.post("/tasks", asyncHandler(async (req, res) => {
+  const taskData = req.body;
+  const newTask = await DailyTask.create(taskData);
+  res.json({ status: "success", id: newTask._id });
+}));
 
-router.put("/tasks/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const taskData = req.body;
-    await db.collection("daily_tasks").doc(id).update({
-      ...taskData,
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-    res.json({ status: "success" });
-  } catch (error) {
-    console.error("Update task error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+router.put("/tasks/:id", asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const taskData = req.body;
+  
+  await DailyTask.findByIdAndUpdate(id, taskData);
+  res.json({ status: "success" });
+}));
 
-router.delete("/tasks/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    await db.collection("daily_tasks").doc(id).delete();
-    res.json({ status: "success" });
-  } catch (error) {
-    console.error("Delete task error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+router.delete("/tasks/:id", asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  await DailyTask.findByIdAndDelete(id);
+  res.json({ status: "success" });
+}));
 
 // VOCAB SETS CRUD
-router.get("/vocab-sets", async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    
-    const snapshot = await db.collection("flashcard_sets").orderBy("createdAt", "desc").get();
-    const allSets = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : null,
-      };
-    });
+router.get("/vocab-sets", asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  
+  const total = await FlashcardSet.countDocuments();
+  const totalPages = Math.ceil(total / limit);
+  
+  const sets = await FlashcardSet.find()
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
 
-    const total = allSets.length;
-    const totalPages = Math.ceil(total / limit);
-    const paginatedSets = allSets.slice((page - 1) * limit, page * limit);
+  const formattedSets = sets.map(set => ({
+    id: set._id,
+    ...set,
+    createdAt: set.createdAt ? set.createdAt.toISOString() : null,
+  }));
 
-    res.json({
-      items: paginatedSets,
-      total,
-      page,
-      totalPages,
-    });
-  } catch (error) {
-    console.error("Get admin vocab-sets error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+  res.json({
+    items: formattedSets,
+    total,
+    page,
+    totalPages,
+  });
+}));
 
-router.delete("/vocab-sets/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    // Delete all cards in the set
-    const cardsSnapshot = await db.collection("flashcards").where("setId", "==", id).get();
-    const batch = db.batch();
-    cardsSnapshot.docs.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
+router.delete("/vocab-sets/:id", asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  
+  await Flashcard.deleteMany({ setId: id });
+  await FlashcardSet.findByIdAndDelete(id);
 
-    // Delete the set
-    const setRef = db.collection("flashcard_sets").doc(id);
-    batch.delete(setRef);
-    await batch.commit();
-
-    res.json({ status: "success" });
-  } catch (error) {
-    console.error("Delete admin vocab-set error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+  res.json({ status: "success" });
+}));
 
 // VOCAB CRUD
-router.get("/vocab", async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    
-    const snapshot = await db.collection("flashcards").orderBy("createdAt", "desc").get();
-    const allCards = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : null,
-      };
-    });
+router.get("/vocab", asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  
+  const total = await Flashcard.countDocuments();
+  const totalPages = Math.ceil(total / limit);
+  
+  const cards = await Flashcard.find()
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
 
-    const total = allCards.length;
-    const totalPages = Math.ceil(total / limit);
-    const paginatedCards = allCards.slice((page - 1) * limit, page * limit);
+  const formattedCards = cards.map(card => ({
+    id: card._id,
+    ...card,
+    createdAt: card.createdAt ? card.createdAt.toISOString() : null,
+  }));
 
-    res.json({
-      items: paginatedCards,
-      total,
-      page,
-      totalPages,
-    });
-  } catch (error) {
-    console.error("Get admin vocab error:", error);
-    res.status(500).json({ error: "Internal error" });
+  res.json({
+    items: formattedCards,
+    total,
+    page,
+    totalPages,
+  });
+}));
+
+router.delete("/vocab/:id", asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  
+  const card = await Flashcard.findById(id);
+  if (card) {
+    const setId = card.setId;
+    await Flashcard.findByIdAndDelete(id);
+    await FlashcardSet.findByIdAndUpdate(setId, { $inc: { cardCount: -1 } });
   }
-});
-
-router.delete("/vocab/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const cardRef = db.collection("flashcards").doc(id);
-    const cardDoc = await cardRef.get();
-
-    if (cardDoc.exists) {
-      const setId = cardDoc.data().setId;
-      const setRef = db.collection("flashcard_sets").doc(setId);
-
-      const batch = db.batch();
-      batch.delete(cardRef);
-      batch.update(setRef, {
-        cardCount: FieldValue.increment(-1),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
-      await batch.commit();
-    }
-    
-    res.json({ status: "success" });
-  } catch (error) {
-    console.error("Delete admin vocab error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+  
+  res.json({ status: "success" });
+}));
 
 // QUIZZES CRUD
-router.get("/quizzes", async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    
-    const snapshot = await db.collection("quizzes").orderBy("createdAt", "desc").get();
-    const allQuizzes = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        title: data.title,
-        difficulty: data.difficulty,
-        creatorId: data.creatorId,
-        questionCount: data.questions?.length || 0,
-        createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : null,
-      };
-    });
+router.get("/quizzes", asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  
+  const total = await Quiz.countDocuments();
+  const totalPages = Math.ceil(total / limit);
+  
+  const quizzes = await Quiz.find()
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
 
-    const total = allQuizzes.length;
-    const totalPages = Math.ceil(total / limit);
-    const paginatedQuizzes = allQuizzes.slice((page - 1) * limit, page * limit);
+  const formattedQuizzes = quizzes.map(q => ({
+    id: q._id,
+    title: q.title,
+    difficulty: q.difficulty,
+    creatorId: q.creatorId,
+    questionCount: q.questions?.length || 0,
+    createdAt: q.createdAt ? q.createdAt.toISOString() : null,
+  }));
 
-    res.json({
-      items: paginatedQuizzes,
-      total,
-      page,
-      totalPages,
-    });
-  } catch (error) {
-    console.error("Get admin quizzes error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+  res.json({
+    items: formattedQuizzes,
+    total,
+    page,
+    totalPages,
+  });
+}));
 
-router.delete("/quizzes/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    await db.collection("quizzes").doc(id).delete();
-    res.json({ status: "success" });
-  } catch (error) {
-    console.error("Delete admin quiz error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+router.delete("/quizzes/:id", asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  await Quiz.findByIdAndDelete(id);
+  res.json({ status: "success" });
+}));
 
 // QUIZ HISTORY CRUD
-router.get("/quiz-history", async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    
-    const snapshot = await db.collection("quiz_results").orderBy("createdAt", "desc").get();
-    const allHistory = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        uid: data.uid,
-        quizId: data.quizId,
-        score: data.score,
-        totalCorrect: data.totalCorrect,
-        totalQuestions: data.totalQuestions,
-        usedRebirth: data.usedRebirth,
-        createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : null,
-      };
-    });
+router.get("/quiz-history", asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  
+  const total = await QuizResult.countDocuments();
+  const totalPages = Math.ceil(total / limit);
+  
+  const historyDocs = await QuizResult.find()
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .lean();
 
-    const total = allHistory.length;
-    const totalPages = Math.ceil(total / limit);
-    const paginatedHistory = allHistory.slice((page - 1) * limit, page * limit);
+  const formattedHistory = historyDocs.map(doc => ({
+    id: doc._id,
+    uid: doc.uid,
+    quizId: doc.quizId,
+    score: doc.score,
+    totalCorrect: doc.totalCorrect,
+    totalQuestions: doc.totalQuestions,
+    usedRebirth: doc.usedRebirth,
+    createdAt: doc.createdAt ? doc.createdAt.toISOString() : null,
+  }));
 
-    res.json({
-      items: paginatedHistory,
-      total,
-      page,
-      totalPages,
-    });
-  } catch (error) {
-    console.error("Get admin quiz history error:", error);
-    res.status(500).json({ error: "Internal error" });
-  }
-});
+  res.json({
+    items: formattedHistory,
+    total,
+    page,
+    totalPages,
+  });
+}));
 
 export default router;

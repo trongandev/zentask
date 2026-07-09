@@ -11,12 +11,17 @@ import compression from "compression";
 import morgan from "morgan";
 import http from "http";
 import { Server } from "socket.io";
-import { db } from "./firebase.js";
+import connectDB from "./config/db.js";
+import { QuizRoom } from "./models/Schemas.js";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+// Connect to MongoDB
+connectDB();
+
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -150,9 +155,8 @@ io.on("connection", (socket) => {
     activeQuizRooms.delete(roomCode);
 
     try {
-      const snapshot = await db.collection("quiz_rooms").where("roomCode", "==", roomCode).get();
-      snapshot.forEach(doc => doc.ref.delete());
-      console.log(`Deleted room ${roomCode} from Firestore`);
+      await QuizRoom.deleteMany({ roomCode });
+      console.log(`Deleted room ${roomCode} from MongoDB`);
     } catch (e) {
       console.error(`Error deleting room ${roomCode}:`, e);
     }
@@ -360,6 +364,9 @@ app.use("/api/pronunciation", pronunciationRoutes);
 app.get("/health", (req, res) => {
   res.send("OK");
 });
+
+import { errorHandler } from "./middleware/errorHandler.js";
+app.use(errorHandler);
 
 server.listen(port, () => {
   console.log(`Server listening on port ${port}`);

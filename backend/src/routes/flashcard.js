@@ -1,32 +1,21 @@
 import { Router } from "express";
-import { auth, db } from "../firebase.js";
-import { FieldValue } from "firebase-admin/firestore";
+import User from "../models/User.js";
+import { 
+  FlashcardProgress, 
+  FlashcardFolder, 
+  FlashcardSet, 
+  Flashcard, 
+  Vocabulary 
+} from "../models/Schemas.js";
 import { addXpToUser, incrementDailyTask } from "./user.js";
 import { GoogleGenAI, Type } from "@google/genai";
 import { checkAchievements } from "../utils/achievements.js";
+import { verifyToken, requireRole } from "../middleware/auth.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
 
-// Middleware to authenticate
-const authenticate = async (req, res, next) => {
-  const sessionCookie = req.cookies.session || "";
-  if (!sessionCookie) return res.status(401).json({ error: "Unauthenticated" });
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    req.uid = decodedClaims.uid;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: "Unauthenticated" });
-  }
-};
-
-router.use(authenticate);
-
-
-const getUserProfile = async (uid) => {
-  const userDoc = await db.collection("users").doc(uid).get();
-  return userDoc.exists ? userDoc.data() : {};
-};
+router.use(verifyToken);
 
 const isVipUser = (profile = {}) => {
   const role = String(profile.role || "").toLowerCase();
@@ -48,7 +37,7 @@ const normalizePublicFlag = async (uid, requestedValue = true) => {
   const wantsPublic = requestedValue !== false;
   if (wantsPublic) return true;
 
-  const profile = await getUserProfile(uid);
+  const profile = await User.findById(uid).lean();
   if (!isVipUser(profile)) {
     const err = new Error("Tính năng tạo bộ thẻ riêng tư chỉ dành cho tài khoản VIP.");
     err.statusCode = 402;
@@ -58,500 +47,305 @@ const normalizePublicFlag = async (uid, requestedValue = true) => {
 };
 
 
-const toMillis = (value) => {
-  if (!value) return 0;
-  if (typeof value.toMillis === "function") return value.toMillis();
-  if (typeof value.toDate === "function") return value.toDate().getTime();
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return Date.parse(value) || 0;
-  if (typeof value.seconds === "number") return value.seconds * 1000;
-  if (typeof value._seconds === "number") return value._seconds * 1000;
-  return 0;
-};
-
-const sortByCreatedAtDesc = (items) =>
-  items.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
-
 // ==================== DUE CARDS ROUTES ====================
 
 // Get due cards for Dashboard
-router.get("/due", async (req, res) => {
-  try {
-    const now = new Date().toISOString();
-    // Query progress for due cards
-    const progressSnapshot = await db.collection("flashcard_progress")
-      .where("userId", "==", req.uid)
-      .where("dueDate", "<=", now)
-      .limit(5)
-      .get();
+router.get("/due", asyncHandler(async (req, res) => {
+  const now = new Date();
+  const progressDocs = await FlashcardProgress.find({
+    userId: req.user.uid,
+    dueDate: { $lte: now }
+  }).limit(5).lean();
 
-    if (progressSnapshot.empty) {
-      return res.json([]);
-    }
-
-    const cards = [];
-    for (const doc of progressSnapshot.docs) {
-      const data = doc.data();
-      const cardRef = db.collection("flashcards").doc(data.cardId);
-      const cardDoc = await cardRef.get();
-      if (cardDoc.exists) {
-        cards.push({ id: cardDoc.id, ...cardDoc.data(), progress: data });
-      }
-    }
-
-    res.json(cards);
-  } catch (error) {
-    console.error("Error fetching due cards:", error);
-    res.status(500).json({ error: "Failed to fetch due cards" });
+  if (progressDocs.length === 0) {
+    return res.json([]);
   }
-});
+
+  const cards = [];
+  for (const data of progressDocs) {
+    const cardDoc = await Flashcard.findById(data.cardId).lean();
+    if (cardDoc) {
+      cards.push({ id: cardDoc._id, ...cardDoc, progress: data });
+    }
+  }
+
+  res.json(cards);
+}));
 
 // ==================== FOLDER ROUTES ====================
 
 // List folders for user
-router.get("/folders", async (req, res) => {
-  try {
-    const snapshot = await db.collection("flashcard_folders").where("userId", "==", req.uid).get();
-    const folders = sortByCreatedAtDesc(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    res.json(folders);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch folders" });
-  }
-});
+router.get("/folders", asyncHandler(async (req, res) => {
+  const folders = await FlashcardFolder.find({ userId: req.user.uid }).sort({ createdAt: -1 }).lean();
+  res.json(folders.map(f => ({ id: f._id, ...f })));
+}));
 
 // Create a new folder
-router.post("/folder", async (req, res) => {
-  try {
-    const { name, color } = req.body;
-    if (!name) return res.status(400).json({ error: "Folder name is required" });
+router.post("/folder", asyncHandler(async (req, res) => {
+  const { name, color } = req.body;
+  if (!name) return res.status(400).json({ error: "Folder name is required" });
 
-    const newFolder = {
-      userId: req.uid,
-      name,
-      color: color || "bg-blue-500",
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
+  const newFolder = await FlashcardFolder.create({
+    userId: req.user.uid,
+    name,
+    color: color || "bg-blue-500",
+  });
 
-    const docRef = await db.collection("flashcard_folders").add(newFolder);
-    res.json({ id: docRef.id, ...newFolder });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to create folder" });
-  }
-});
+  const folderObj = newFolder.toObject();
+  res.json({ id: folderObj._id, ...folderObj });
+}));
 
 // Update a folder
-router.patch("/folder/:folderId", async (req, res) => {
-  try {
-    const { folderId } = req.params;
-    const { name, color } = req.body;
-    
-    const folderRef = db.collection("flashcard_folders").doc(folderId);
-    const folderDoc = await folderRef.get();
-    
-    if (!folderDoc.exists || folderDoc.data().userId !== req.uid) {
-      return res.status(404).json({ error: "Folder not found" });
-    }
-    
-    const updates = { updatedAt: FieldValue.serverTimestamp() };
-    if (name) updates.name = name;
-    if (color) updates.color = color;
-    
-    await folderRef.update(updates);
-    
-    res.json({ success: true, updates });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to update folder" });
+router.patch("/folder/:folderId", asyncHandler(async (req, res) => {
+  const { folderId } = req.params;
+  const { name, color } = req.body;
+  
+  const folder = await FlashcardFolder.findById(folderId);
+  if (!folder || folder.userId.toString() !== req.user.uid) {
+    return res.status(404).json({ error: "Folder not found" });
   }
-});
+  
+  if (name) folder.name = name;
+  if (color) folder.color = color;
+  await folder.save();
+  
+  res.json({ success: true, updates: { name, color } });
+}));
 
 // Delete a folder
-router.delete("/folder/:folderId", async (req, res) => {
-  try {
-    const { folderId } = req.params;
-    const { deleteSets } = req.query; // ?deleteSets=true
+router.delete("/folder/:folderId", asyncHandler(async (req, res) => {
+  const { folderId } = req.params;
+  const { deleteSets } = req.query;
 
-    const folderRef = db.collection("flashcard_folders").doc(folderId);
-    const folderDoc = await folderRef.get();
-    
-    if (!folderDoc.exists || folderDoc.data().userId !== req.uid) {
-      return res.status(404).json({ error: "Folder not found" });
-    }
-
-    const batch = db.batch();
-
-    // Handle sets in this folder
-    const setsSnapshot = await db.collection("flashcard_sets").where("folderId", "==", folderId).get();
-    
-    if (deleteSets === "true") {
-      // Delete all sets and their flashcards
-      for (const setDoc of setsSnapshot.docs) {
-        // Delete flashcards in this set
-        const cardsSnapshot = await db.collection("flashcards").where("setId", "==", setDoc.id).get();
-        cardsSnapshot.docs.forEach((card) => {
-          batch.delete(card.ref);
-        });
-        // Delete the set
-        batch.delete(setDoc.ref);
-      }
-    } else {
-      // Unassign sets (move to root)
-      setsSnapshot.docs.forEach((setDoc) => {
-        batch.update(setDoc.ref, { folderId: null, updatedAt: FieldValue.serverTimestamp() });
-      });
-    }
-
-    // Delete the folder itself
-    batch.delete(folderRef);
-    await batch.commit();
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to delete folder" });
+  const folder = await FlashcardFolder.findById(folderId);
+  if (!folder || folder.userId.toString() !== req.user.uid) {
+    return res.status(404).json({ error: "Folder not found" });
   }
-});
+
+  if (deleteSets === "true") {
+    const sets = await FlashcardSet.find({ folderId }).lean();
+    for (const set of sets) {
+      await Flashcard.deleteMany({ setId: set._id });
+      await FlashcardSet.findByIdAndDelete(set._id);
+    }
+  } else {
+    await FlashcardSet.updateMany({ folderId }, { $set: { folderId: null } });
+  }
+
+  await FlashcardFolder.findByIdAndDelete(folderId);
+  res.json({ success: true });
+}));
 
 // ==================== SET ROUTES ====================
 
 // List flashcard sets for the user
-router.get("/list", async (req, res) => {
-  try {
-    const snapshot = await db.collection("flashcard_sets").where("userId", "==", req.uid).get();
-
-    const sets = sortByCreatedAtDesc(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    res.json(sets);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch flashcard sets" });
-  }
-});
-
+router.get("/list", asyncHandler(async (req, res) => {
+  const sets = await FlashcardSet.find({ userId: req.user.uid }).sort({ createdAt: -1 }).lean();
+  res.json(sets.map(s => ({ id: s._id, ...s })));
+}));
 
 // List public flashcard sets across the system
-router.get("/public", async (req, res) => {
-  try {
-    const snapshot = await db.collection("flashcard_sets")
-      .where("isPublic", "==", true)
-      .get();
+router.get("/public", asyncHandler(async (req, res) => {
+  const sets = await FlashcardSet.find({ isPublic: true })
+    .sort({ createdAt: -1 })
+    .populate('userId', 'displayName email photoURL')
+    .lean();
 
-    const creatorIds = [...new Set(snapshot.docs.map((doc) => doc.data().userId).filter(Boolean))];
-    const creatorMap = {};
-    await Promise.all(creatorIds.map(async (uid) => {
-      try {
-        const userDoc = await db.collection("users").doc(uid).get();
-        if (userDoc.exists) {
-          const data = userDoc.data();
-          creatorMap[uid] = {
-            uid,
-            displayName: data.displayName || data.email || "Người dùng ZenTask",
-            photoURL: data.photoURL || "",
-          };
-        }
-      } catch (e) {
-        console.warn("Cannot load public flashcard creator", uid, e.message);
-      }
-    }));
+  const formattedSets = sets.map(set => {
+    const creator = set.userId ? {
+      uid: set.userId._id,
+      displayName: set.userId.displayName || set.userId.email || "Người dùng ZenTask",
+      photoURL: set.userId.photoURL || "",
+    } : null;
+    return { id: set._id, ...set, creator, userId: set.userId?._id };
+  });
 
-    const sets = sortByCreatedAtDesc(snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        creator: creatorMap[data.userId] || null,
-      };
-    }));
-
-    res.json(sets);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch public flashcard sets" });
-  }
-});
+  res.json(formattedSets);
+}));
 
 // Create a new flashcard set
-router.post("/set", async (req, res) => {
-  try {
-    const { title, description = "", color = "bg-blue-500", isPublic = true } = req.body;
+router.post("/set", asyncHandler(async (req, res) => {
+  const { title, description = "", color = "bg-blue-500", isPublic = true } = req.body;
+  if (!title) return res.status(400).json({ error: "Title is required" });
 
-    if (!title) return res.status(400).json({ error: "Title is required" });
+  const publicFlag = await normalizePublicFlag(req.user.uid, isPublic);
 
-    const publicFlag = await normalizePublicFlag(req.uid, isPublic);
+  const newSet = await FlashcardSet.create({
+    userId: req.user.uid,
+    title,
+    description,
+    color,
+    isPublic: publicFlag,
+  });
 
-    const newSet = {
-      userId: req.uid,
-      title,
-      description,
-      cardCount: 0,
-      learnedCount: 0,
-      lastStudied: null,
-      color,
-      isNew: true,
-      isPublic: publicFlag,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    const docRef = await db.collection("flashcard_sets").add(newSet);
-    res.json({ id: docRef.id, ...newSet });
-  } catch (error) {
-    console.error(error);
-    res.status(error.statusCode || 500).json({ error: error.message || "Failed to create flashcard set" });
-  }
-});
+  const setObj = newSet.toObject();
+  res.json({ id: setObj._id, ...setObj });
+}));
 
 // Update a flashcard set
-router.patch("/set/:setId", async (req, res) => {
-  try {
-    const { setId } = req.params;
-    const { title, description, color, folderId, order, isPublic } = req.body;
-    
-    const setRef = db.collection("flashcard_sets").doc(setId);
-    const setDoc = await setRef.get();
-    
-    if (!setDoc.exists || setDoc.data().userId !== req.uid) {
-      return res.status(404).json({ error: "Flashcard set not found" });
-    }
-    
-    const updates = { updatedAt: FieldValue.serverTimestamp() };
-    if (title) updates.title = title;
-    if (description !== undefined) updates.description = description;
-    if (color) updates.color = color;
-    if (folderId !== undefined) updates.folderId = folderId; // allows null for root
-    if (order !== undefined) updates.order = order;
-    if (isPublic !== undefined) updates.isPublic = await normalizePublicFlag(req.uid, isPublic);
-    
-    await setRef.update(updates);
-    
-    res.json({ success: true, updates });
-  } catch (error) {
-    console.error(error);
-    res.status(error.statusCode || 500).json({ error: error.message || "Failed to update flashcard set" });
+router.patch("/set/:setId", asyncHandler(async (req, res) => {
+  const { setId } = req.params;
+  const { title, description, color, folderId, order, isPublic } = req.body;
+  
+  const set = await FlashcardSet.findById(setId);
+  if (!set || set.userId.toString() !== req.user.uid) {
+    return res.status(404).json({ error: "Flashcard set not found" });
   }
-});
+  
+  if (title) set.title = title;
+  if (description !== undefined) set.description = description;
+  if (color) set.color = color;
+  if (folderId !== undefined) set.folderId = folderId;
+  if (order !== undefined) set.order = order;
+  if (isPublic !== undefined) set.isPublic = await normalizePublicFlag(req.user.uid, isPublic);
+  
+  await set.save();
+  res.json({ success: true });
+}));
 
 // Get a flashcard set and its cards
-router.get("/set/:setId/cards", async (req, res) => {
-  try {
-    const { setId } = req.params;
+router.get("/set/:setId/cards", asyncHandler(async (req, res) => {
+  const { setId } = req.params;
+  const set = await FlashcardSet.findById(setId);
+  
+  if (!set) return res.status(404).json({ error: "Flashcard set not found" });
 
-    const setRef = db.collection("flashcard_sets").doc(setId);
-    const setDoc = await setRef.get();
-    
-    if (!setDoc.exists) {
-      return res.status(404).json({ error: "Flashcard set not found" });
-    }
-
-    const setData = setDoc.data();
-    const isOwner = setData.userId === req.uid;
-    if (!isOwner && !setData.isPublic) {
-      return res.status(404).json({ error: "Flashcard set not found" });
-    }
-
-    // Mark as not new only when owner opens their own set
-    if (isOwner && setData.isNew) {
-      await setRef.update({ 
-        isNew: false,
-        updatedAt: FieldValue.serverTimestamp() 
-      });
-      setData.isNew = false;
-    }
-
-    const snapshot = await db.collection("flashcards").where("setId", "==", setId).get();
-
-    const cards = sortByCreatedAtDesc(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    res.json({ set: { id: setDoc.id, ...setData }, cards });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch flashcards" });
+  const isOwner = set.userId.toString() === req.user.uid;
+  if (!isOwner && !set.isPublic) {
+    return res.status(404).json({ error: "Flashcard set not found" });
   }
-});
+
+  if (isOwner && set.isNew) {
+    set.isNew = false;
+    await set.save();
+  }
+
+  const cards = await Flashcard.find({ setId }).sort({ createdAt: -1 }).lean();
+  
+  const setObj = set.toObject();
+  res.json({ 
+    set: { id: setObj._id, ...setObj }, 
+    cards: cards.map(c => ({ id: c._id, ...c }))
+  });
+}));
 
 // Create a flashcard
-router.post("/set/:setId/card", async (req, res) => {
-  try {
-    const { setId } = req.params;
-    const { term, phonetic, translation, examples, notes } = req.body;
+router.post("/set/:setId/card", asyncHandler(async (req, res) => {
+  const { setId } = req.params;
+  const { term, phonetic, translation, examples, notes } = req.body;
 
-    // Verify ownership
-    const setRef = db.collection("flashcard_sets").doc(setId);
-    const setDoc = await setRef.get();
-    if (!setDoc.exists || setDoc.data().userId !== req.uid) {
-      return res.status(404).json({ error: "Flashcard set not found" });
-    }
-
-    const newCard = {
-      setId,
-      userId: req.uid,
-      term,
-      phonetic: phonetic || "",
-      translation,
-      examples: examples || [],
-      notes: notes || "",
-      isLearned: false,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    const docRef = await db.collection("flashcards").add(newCard);
-
-    // Update card count
-    await setRef.update({
-      cardCount: FieldValue.increment(1),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-
-    // Add XP for creating flashcard via Daily Task
-    const taskResult = await incrementDailyTask(req.uid, "create_material", 1);
-
-    let xpResult = null;
-    if (taskResult.success && taskResult.xpToAdd > 0) {
-      xpResult = await addXpToUser(req.uid, taskResult.xpToAdd);
-    }
-
-    res.json({
-      id: docRef.id,
-      ...newCard,
-      xpResult,
-      taskProgress: taskResult.success ? { create_material: taskResult.progress } : {},
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to create flashcard" });
+  const set = await FlashcardSet.findById(setId);
+  if (!set || set.userId.toString() !== req.user.uid) {
+    return res.status(404).json({ error: "Flashcard set not found" });
   }
-});
+
+  const newCard = await Flashcard.create({
+    setId,
+    userId: req.user.uid,
+    term,
+    phonetic: phonetic || "",
+    translation,
+    examples: examples || [],
+    notes: notes || "",
+  });
+
+  set.cardCount += 1;
+  await set.save();
+
+  const taskResult = await incrementDailyTask(req.user.uid, "create_material", 1);
+  let xpResult = null;
+  if (taskResult.success && taskResult.xpToAdd > 0) {
+    xpResult = await addXpToUser(req.user.uid, taskResult.xpToAdd);
+  }
+
+  const cardObj = newCard.toObject();
+  res.json({
+    id: cardObj._id,
+    ...cardObj,
+    xpResult,
+    taskProgress: taskResult.success ? { create_material: taskResult.progress } : {},
+  });
+}));
 
 // Delete a flashcard set
-router.delete("/set/:setId", async (req, res) => {
-  try {
-    const { setId } = req.params;
-    const setRef = db.collection("flashcard_sets").doc(setId);
-    const setDoc = await setRef.get();
+router.delete("/set/:setId", asyncHandler(async (req, res) => {
+  const { setId } = req.params;
+  const set = await FlashcardSet.findById(setId);
 
-    if (!setDoc.exists || setDoc.data().userId !== req.uid) {
-      return res.status(404).json({ error: "Flashcard set not found" });
-    }
-
-    // Delete all cards in the set
-    const cardsSnapshot = await db.collection("flashcards").where("setId", "==", setId).get();
-    const batch = db.batch();
-    cardsSnapshot.docs.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-
-    // Delete the set
-    batch.delete(setRef);
-    await batch.commit();
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to delete flashcard set" });
+  if (!set || set.userId.toString() !== req.user.uid) {
+    return res.status(404).json({ error: "Flashcard set not found" });
   }
-});
+
+  await Flashcard.deleteMany({ setId });
+  await FlashcardSet.findByIdAndDelete(setId);
+
+  res.json({ success: true });
+}));
 
 // Delete a flashcard
-router.delete("/card/:cardId", async (req, res) => {
-  try {
-    const { cardId } = req.params;
-    const cardRef = db.collection("flashcards").doc(cardId);
-    const cardDoc = await cardRef.get();
+router.delete("/card/:cardId", asyncHandler(async (req, res) => {
+  const { cardId } = req.params;
+  const card = await Flashcard.findById(cardId);
 
-    if (!cardDoc.exists || cardDoc.data().userId !== req.uid) {
-      return res.status(404).json({ error: "Flashcard not found" });
-    }
-
-    const setId = cardDoc.data().setId;
-    const setRef = db.collection("flashcard_sets").doc(setId);
-
-    const batch = db.batch();
-    batch.delete(cardRef);
-    batch.update(setRef, {
-      cardCount: FieldValue.increment(-1),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-
-    await batch.commit();
-    res.json({ success: true });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to delete flashcard" });
+  if (!card || card.userId.toString() !== req.user.uid) {
+    return res.status(404).json({ error: "Flashcard not found" });
   }
-});
+
+  const setId = card.setId;
+  await Flashcard.findByIdAndDelete(cardId);
+  await FlashcardSet.findByIdAndUpdate(setId, { $inc: { cardCount: -1 } });
+
+  res.json({ success: true });
+}));
 
 // AI flashcard generation
-router.post("/generate-ai", async (req, res) => {
-  try {
-    const { term, setId, list_flashcard_id } = req.body;
-    const targetSetId = setId || list_flashcard_id;
-    if (!term) return res.status(400).json({ error: "Term is required" });
+router.post("/generate-ai", asyncHandler(async (req, res) => {
+  const { term, setId, list_flashcard_id } = req.body;
+  const targetSetId = setId || list_flashcard_id;
+  if (!term) return res.status(400).json({ error: "Term is required" });
 
-    const lowercaseTerm = term.trim().toLowerCase();
+  const lowercaseTerm = term.trim().toLowerCase();
 
-    // Helper function to save to user's set if targetSetId is provided
-    const saveToUserSet = async (vocabData) => {
-      if (!targetSetId) return;
-      const setRef = db.collection("flashcard_sets").doc(targetSetId);
-      const setDoc = await setRef.get();
-      if (setDoc.exists && setDoc.data().userId === req.uid) {
-        // Kiểm tra xem từ này đã tồn tại trong bộ chưa
-        const existingCard = await db.collection("flashcards")
-          .where("setId", "==", targetSetId)
-          .where("term", "==", vocabData.term)
-          .limit(1)
-          .get();
-          
-        if (existingCard.empty) {
-          const newCard = {
-            setId: targetSetId,
-            userId: req.uid,
-            term: vocabData.term,
-            phonetic: vocabData.phonetic || "",
-            translation: vocabData.translation,
-            examples: vocabData.examples || [],
-            notes: vocabData.notes || "",
-            isLearned: false,
-            createdAt: FieldValue.serverTimestamp(),
-            updatedAt: FieldValue.serverTimestamp(),
-          };
-          await db.collection("flashcards").add(newCard);
-          await setRef.update({
-            cardCount: FieldValue.increment(1),
-            updatedAt: FieldValue.serverTimestamp(),
-          });
-        }
+  const saveToUserSet = async (vocabData) => {
+    if (!targetSetId) return;
+    const set = await FlashcardSet.findById(targetSetId);
+    if (set && set.userId.toString() === req.user.uid) {
+      const existingCard = await Flashcard.findOne({ setId: targetSetId, term: vocabData.term });
+      if (!existingCard) {
+        await Flashcard.create({
+          setId: targetSetId,
+          userId: req.user.uid,
+          term: vocabData.term,
+          phonetic: vocabData.phonetic || "",
+          translation: vocabData.translation,
+          examples: vocabData.examples || [],
+          notes: vocabData.notes || "",
+        });
+        set.cardCount += 1;
+        await set.save();
       }
-    };
-
-    // Check if it exists in vocabulary
-    const vocabRef = db.collection("vocabulary").doc(lowercaseTerm);
-    const vocabDoc = await vocabRef.get();
-
-    if (vocabDoc.exists) {
-      const vocabData = vocabDoc.data();
-      await saveToUserSet(vocabData);
-      return res.json({ source: "cache", ...vocabData, ok: true, message: "Lưu thành công!" });
     }
+  };
 
-    // Generate with AI
-    // Get all available API keys
-    const availableKeys = [];
-    for (let i = 1; i <= 10; i++) {
-      const k = process.env[`API_KEY_AI_${i}`];
-      if (k) availableKeys.push({ index: i, key: k });
-    }
+  const vocabDoc = await Vocabulary.findOne({ term: lowercaseTerm }).lean();
 
-    if (availableKeys.length === 0) {
-      return res.status(500).json({ error: "No AI API Keys configured" });
-    }
+  if (vocabDoc) {
+    await saveToUserSet(vocabDoc);
+    return res.json({ source: "cache", ...vocabDoc, ok: true, message: "Lưu thành công!" });
+  }
 
-    // Shuffle the keys to distribute the load evenly
-    const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
+  const availableKeys = [];
+  for (let i = 1; i <= 10; i++) {
+    const k = process.env[`API_KEY_AI_${i}`];
+    if (k) availableKeys.push({ index: i, key: k });
+  }
 
-    const prompt = `Hãy đóng vai một từ điển Anh-Việt. Từ cần tra cứu là: "${term}".
+  if (availableKeys.length === 0) {
+    return res.status(500).json({ error: "No AI API Keys configured" });
+  }
+
+  const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
+  const prompt = `Hãy đóng vai một từ điển Anh-Việt. Từ cần tra cứu là: "${term}".
 Vui lòng trả về kết quả với các thông tin sau:
 - term: nếu là tiếng việt thì chuyển nó về tiếng anh (viết hoa chữ cái đầu tiên nhé)
 - phonetic: Phiên âm quốc tế (IPA) của từ tiếng Anh này.
@@ -559,182 +353,133 @@ Vui lòng trả về kết quả với các thông tin sau:
 - notes: Ghi chú ngữ pháp hoặc cách dùng từ (viết bằng tiếng Việt).
 - examples: Mảng gồm đúng 3 câu ví dụ. Mỗi ví dụ có "en" (câu tiếng Anh chứa từ đó) và "vi" (câu dịch sang tiếng Việt).`;
 
-    let generatedData = null;
-
-    for (const { index, key } of shuffledKeys) {
-      try {
-        const ai = new GoogleGenAI({ apiKey: key });
-        const response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: prompt,
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                term: { type: Type.STRING },
-                phonetic: { type: Type.STRING },
-                translation: { type: Type.STRING },
-                notes: { type: Type.STRING },
-                examples: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      en: { type: Type.STRING },
-                      vi: { type: Type.STRING },
-                    },
-                    required: ["en", "vi"],
+  let generatedData = null;
+  for (const { index, key } of shuffledKeys) {
+    try {
+      const ai = new GoogleGenAI({ apiKey: key });
+      const response = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              term: { type: Type.STRING },
+              phonetic: { type: Type.STRING },
+              translation: { type: Type.STRING },
+              notes: { type: Type.STRING },
+              examples: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    en: { type: Type.STRING },
+                    vi: { type: Type.STRING },
                   },
+                  required: ["en", "vi"],
                 },
               },
-              required: ["term", "phonetic", "translation", "examples"],
             },
+            required: ["term", "phonetic", "translation", "examples"],
           },
-        });
-        
-        const responseText = response.text;
-        generatedData = JSON.parse(responseText);
-        break; // Success! Exit the loop
-      } catch (err) {
-        console.warn(`[AI Generation] Key API_KEY_AI_${index} failed:`, err.message);
-        // Continue to the next key in the loop
-      }
+        },
+      });
+      
+      const responseText = response.text;
+      generatedData = JSON.parse(responseText);
+      break; 
+    } catch (err) {
+      console.warn(`[AI Generation] Key API_KEY_AI_${index} failed:`, err.message);
     }
-
-    if (!generatedData) {
-      return res.status(500).json({ error: "All AI API keys failed to generate content or parse response." });
-    }
-
-    if (!generatedData.notes) generatedData.notes = "";
-
-    const newVocab = {
-      term: generatedData.term,
-      phonetic: generatedData.phonetic,
-      translation: generatedData.translation,
-      notes: generatedData.notes,
-      examples: generatedData.examples,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    await vocabRef.set(newVocab);
-    await saveToUserSet(newVocab);
-
-    res.json({ source: "ai", ...newVocab, ok: true, message: "Lưu thành công!" });
-  } catch (error) {
-    console.error("AI Generation Error:", error);
-    res.status(500).json({ error: error.message || "Failed to generate content" });
   }
-});
+
+  if (!generatedData) {
+    return res.status(500).json({ error: "All AI API keys failed to generate content or parse response." });
+  }
+
+  if (!generatedData.notes) generatedData.notes = "";
+
+  const newVocab = {
+    term: generatedData.term,
+    phonetic: generatedData.phonetic,
+    translation: generatedData.translation,
+    notes: generatedData.notes,
+    examples: generatedData.examples,
+  };
+
+  await Vocabulary.create(newVocab);
+  await saveToUserSet(newVocab);
+
+  res.json({ source: "ai", ...newVocab, ok: true, message: "Lưu thành công!" });
+}));
 
 // Clone a public set
-router.post("/set/:setId/clone", async (req, res) => {
-  try {
-    const { setId } = req.params;
+router.post("/set/:setId/clone", asyncHandler(async (req, res) => {
+  const { setId } = req.params;
+  const set = await FlashcardSet.findById(setId).lean();
 
-    const setRef = db.collection("flashcard_sets").doc(setId);
-    const setDoc = await setRef.get();
+  if (!set) return res.status(404).json({ error: "Flashcard set not found" });
 
-    if (!setDoc.exists) return res.status(404).json({ error: "Flashcard set not found" });
-
-    const setData = setDoc.data();
-
-    if (!setData.isPublic && setData.userId !== req.uid) {
-      return res.status(403).json({ error: "This set is not public" });
-    }
-
-    const newSet = {
-      userId: req.uid,
-      title: `${setData.title} (Clone)`,
-      description: setData.description || "",
-      cardCount: setData.cardCount || 0,
-      learnedCount: 0,
-      lastStudied: null,
-      color: setData.color || "bg-blue-500",
-      isNew: true,
-      isPublic: false,
-      clonedFrom: setId,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    const newSetRef = await db.collection("flashcard_sets").add(newSet);
-
-    const cardsSnapshot = await db.collection("flashcards").where("setId", "==", setId).get();
-
-    if (!cardsSnapshot.empty) {
-      const batch = db.batch();
-
-      cardsSnapshot.docs.forEach((doc) => {
-        const cardData = doc.data();
-        const newCardRef = db.collection("flashcards").doc();
-        batch.set(newCardRef, {
-          setId: newSetRef.id,
-          userId: req.uid,
-          term: cardData.term,
-          phonetic: cardData.phonetic || "",
-          translation: cardData.translation,
-          examples: cardData.examples || [],
-          notes: cardData.notes || "",
-          isLearned: false,
-          createdAt: FieldValue.serverTimestamp(),
-          updatedAt: FieldValue.serverTimestamp(),
-        });
-      });
-
-      await batch.commit();
-    }
-
-    res.json({ id: newSetRef.id, ...newSet });
-  } catch (error) {
-    console.error("Clone Error:", error);
-    res.status(500).json({ error: "Failed to clone flashcard set" });
+  if (!set.isPublic && set.userId.toString() !== req.user.uid) {
+    return res.status(403).json({ error: "This set is not public" });
   }
-});
+
+  const newSet = await FlashcardSet.create({
+    userId: req.user.uid,
+    title: `${set.title} (Clone)`,
+    description: set.description || "",
+    cardCount: set.cardCount || 0,
+    color: set.color || "bg-blue-500",
+    isNew: true,
+    isPublic: false,
+    clonedFrom: setId,
+  });
+
+  const cards = await Flashcard.find({ setId }).lean();
+  
+  if (cards.length > 0) {
+    const newCards = cards.map(c => ({
+      setId: newSet._id,
+      userId: req.user.uid,
+      term: c.term,
+      phonetic: c.phonetic || "",
+      translation: c.translation,
+      examples: c.examples || [],
+      notes: c.notes || "",
+    }));
+    await Flashcard.insertMany(newCards);
+  }
+
+  const setObj = newSet.toObject();
+  res.json({ id: setObj._id, ...setObj });
+}));
 
 // Update set privacy
-router.patch("/set/:setId/privacy", async (req, res) => {
-  try {
-    const { setId } = req.params;
-    const { isPublic } = req.body;
+router.patch("/set/:setId/privacy", asyncHandler(async (req, res) => {
+  const { setId } = req.params;
+  const { isPublic } = req.body;
 
-    const setRef = db.collection("flashcard_sets").doc(setId);
-    const setDoc = await setRef.get();
-
-    if (!setDoc.exists || setDoc.data().userId !== req.uid) {
-      return res.status(404).json({ error: "Flashcard set not found" });
-    }
-
-    const publicFlag = await normalizePublicFlag(req.uid, isPublic);
-
-    await setRef.update({
-      isPublic: publicFlag,
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-
-    res.json({ success: true, isPublic: publicFlag });
-  } catch (error) {
-    console.error("Privacy Update Error:", error);
-    res.status(error.statusCode || 500).json({ error: error.message || "Failed to update set privacy" });
+  const set = await FlashcardSet.findById(setId);
+  if (!set || set.userId.toString() !== req.user.uid) {
+    return res.status(404).json({ error: "Flashcard set not found" });
   }
-});
 
+  const publicFlag = await normalizePublicFlag(req.user.uid, isPublic);
+  set.isPublic = publicFlag;
+  await set.save();
+
+  res.json({ success: true, isPublic: publicFlag });
+}));
 
 // ==================== SM-2 SPACED REPETITION ROUTES ====================
 
-/**
- * Calculate SM-2 algorithm
- * @param {number} quality - Quality score 0-5
- * @param {object} current - Current progress data
- */
 function calculateSM2(quality, current = {}) {
   const EF_MIN = 1.3;
   const easeFactor = current.easeFactor ?? 2.5;
   const interval = current.interval ?? 1;
   const repetitions = current.repetitions ?? 0;
 
-  // Calculate new EF
   let newEF = easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
   newEF = Math.max(EF_MIN, newEF);
 
@@ -742,7 +487,6 @@ function calculateSM2(quality, current = {}) {
   let newRepetitions;
 
   if (quality < 3) {
-    // Failed: reset
     newRepetitions = 0;
     newInterval = 1;
   } else {
@@ -769,146 +513,23 @@ function calculateSM2(quality, current = {}) {
 }
 
 // Batch update progress (called after every 5 cards or session end)
-router.post("/progress/batch", async (req, res) => {
-  try {
-    const { updates } = req.body;
-    if (!updates || !Array.isArray(updates) || updates.length === 0) {
-      return res.status(400).json({ error: "updates array is required" });
-    }
-
-    const results = [];
-    const batch = db.batch();
-
-    for (const update of updates) {
-      const { cardId, setId, quality, mode } = update;
-      if (!cardId || !setId || quality === undefined) continue;
-
-      // Get existing progress
-      const progressQuery = await db.collection("flashcard_progress")
-        .where("userId", "==", req.uid)
-        .where("cardId", "==", cardId)
-        .limit(1)
-        .get();
-
-      const current = progressQuery.empty ? {} : progressQuery.docs[0].data();
-      const sm2 = calculateSM2(quality, current);
-
-      const progressData = {
-        userId: req.uid,
-        cardId,
-        setId,
-        easeFactor: sm2.easeFactor,
-        interval: sm2.interval,
-        repetitions: sm2.repetitions,
-        dueDate: sm2.dueDate,
-        quality: sm2.quality,
-        lastReviewedAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      };
-
-      if (progressQuery.empty) {
-        const newRef = db.collection("flashcard_progress").doc();
-        batch.set(newRef, { ...progressData, createdAt: FieldValue.serverTimestamp() });
-      } else {
-        batch.update(progressQuery.docs[0].ref, progressData);
-      }
-
-      results.push({ cardId, ...sm2 });
-    }
-
-    await batch.commit();
-
-    // Trigger achievements for FLASHCARD_LEARNED
-    checkAchievements(req.uid, "FLASHCARD_LEARNED", {}, req.app);
-
-    // Add XP for learn_past Daily Task
-    const taskResult = await incrementDailyTask(req.uid, "learn_past", updates.length);
-    let xpResult = null;
-    if (taskResult.success && taskResult.xpToAdd > 0) {
-      xpResult = await addXpToUser(req.uid, taskResult.xpToAdd);
-    }
-
-    res.json({ 
-      success: true, 
-      results,
-      xpResult,
-      taskProgress: taskResult.success ? { learn_past: taskResult.progress } : {}
-    });
-  } catch (error) {
-    console.error("Progress batch error:", error);
-    res.status(500).json({ error: "Failed to update progress" });
+router.post("/progress/batch", asyncHandler(async (req, res) => {
+  const { updates } = req.body;
+  if (!updates || !Array.isArray(updates) || updates.length === 0) {
+    return res.status(400).json({ error: "updates array is required" });
   }
-});
 
-// Get progress for all cards in a set
-router.get("/set/:setId/progress", async (req, res) => {
-  try {
-    const { setId } = req.params;
+  const results = [];
+  
+  for (const update of updates) {
+    const { cardId, setId, quality, mode } = update;
+    if (!cardId || !setId || quality === undefined) continue;
 
-    // Verify set ownership
-    const setRef = db.collection("flashcard_sets").doc(setId);
-    const setDoc = await setRef.get();
-    if (!setDoc.exists || setDoc.data().userId !== req.uid) {
-      return res.status(404).json({ error: "Flashcard set not found" });
-    }
-
-    const snapshot = await db.collection("flashcard_progress")
-      .where("userId", "==", req.uid)
-      .where("setId", "==", setId)
-      .get();
-
-    const progress = {};
-    snapshot.docs.forEach((doc) => {
-      const data = doc.data();
-      progress[data.cardId] = {
-        easeFactor: data.easeFactor,
-        interval: data.interval,
-        repetitions: data.repetitions,
-        dueDate: data.dueDate?.toDate?.()?.toISOString() ?? null,
-        quality: data.quality,
-        lastReviewedAt: data.lastReviewedAt?.toDate?.()?.toISOString() ?? null,
-      };
-    });
-
-    res.json(progress);
-  } catch (error) {
-    console.error("Get progress error:", error);
-    res.status(500).json({ error: "Failed to fetch progress" });
-  }
-});
-
-// Manual progress update (user sets level by hand)
-router.post("/progress/manual", async (req, res) => {
-  try {
-    const { cardId, setId, level } = req.body;
-    if (!cardId || !setId || !level) {
-      return res.status(400).json({ error: "cardId, setId, level are required" });
-    }
-
-    // level → quality mapping
-    const levelQualityMap = {
-      known: 5,    // Đã nhớ — treat as "perfect recall"
-      almost: 3,   // Gần nhớ — treat as "correct with hesitation"
-      unknown: 1,  // Chưa nhớ — treat as "failed"
-    };
-
-    const quality = levelQualityMap[level];
-    if (quality === undefined) {
-      return res.status(400).json({ error: "level must be known | almost | unknown" });
-    }
-
-    // Get existing progress
-    const progressQuery = await db.collection("flashcard_progress")
-      .where("userId", "==", req.uid)
-      .where("cardId", "==", cardId)
-      .limit(1)
-      .get();
-
-    const current = progressQuery.empty ? {} : progressQuery.docs[0].data();
+    const current = await FlashcardProgress.findOne({ userId: req.user.uid, cardId }).lean() || {};
     const sm2 = calculateSM2(quality, current);
 
     const progressData = {
-      userId: req.uid,
+      userId: req.user.uid,
       cardId,
       setId,
       easeFactor: sm2.easeFactor,
@@ -916,45 +537,38 @@ router.post("/progress/manual", async (req, res) => {
       repetitions: sm2.repetitions,
       dueDate: sm2.dueDate,
       quality: sm2.quality,
-      lastReviewedAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
+      lastStudied: new Date(),
     };
 
-    if (progressQuery.empty) {
-      await db.collection("flashcard_progress").add({
-        ...progressData,
-        createdAt: FieldValue.serverTimestamp(),
-      });
-    } else {
-      await progressQuery.docs[0].ref.update(progressData);
-    }
+    await FlashcardProgress.findOneAndUpdate(
+      { userId: req.user.uid, cardId },
+      { $set: progressData },
+      { upsert: true }
+    );
 
-    // Trigger achievements for FLASHCARD_LEARNED
-    checkAchievements(req.uid, "FLASHCARD_LEARNED", {}, req.app);
+    await Flashcard.findByIdAndUpdate(cardId, { isLearned: true });
+    
+    // We can run an update on FlashcardSet learnedCount safely using $inc or a separate script later.
+    // Assuming learnedCount just tracks how many are learned, doing it incrementally is tricky since
+    // isLearned could already be true. For this simplified logic, we omit exact learnedCount tracking here.
 
-    // Add XP for learn_past Daily Task
-    const taskResult = await incrementDailyTask(req.uid, "learn_past", 1);
-    let xpResult = null;
-    if (taskResult.success && taskResult.xpToAdd > 0) {
-      xpResult = await addXpToUser(req.uid, taskResult.xpToAdd);
-    }
-
-    res.json({
-      success: true,
-      cardId,
-      easeFactor: sm2.easeFactor,
-      interval: sm2.interval,
-      repetitions: sm2.repetitions,
-      dueDate: sm2.dueDate,
-      quality: sm2.quality,
-      xpResult,
-      taskProgress: taskResult.success ? { learn_past: taskResult.progress } : {}
-    });
-  } catch (error) {
-    console.error("Manual progress error:", error);
-    res.status(500).json({ error: "Failed to set progress" });
+    results.push({ cardId, ...progressData });
   }
-});
+
+  const taskResult = await incrementDailyTask(req.user.uid, "learn_flashcards", updates.length);
+  let xpResult = null;
+  if (taskResult.success && taskResult.xpToAdd > 0) {
+    xpResult = await addXpToUser(req.user.uid, taskResult.xpToAdd);
+  }
+
+  checkAchievements(req.user.uid, "FLASHCARD_LEARNED", {}, req.app);
+
+  res.json({ 
+    success: true, 
+    results,
+    xpResult,
+    taskProgress: taskResult.success ? { learn_flashcards: taskResult.progress } : {}
+  });
+}));
 
 export default router;
-

@@ -1,50 +1,22 @@
 import { Router } from "express";
-import { auth, db } from "../firebase.js";
-import { FieldValue } from "firebase-admin/firestore";
+import User from "../models/User.js";
+import { Quiz, QuizResult, QuizRoom } from "../models/Schemas.js";
 import { GoogleGenAI, Type } from "@google/genai";
 import crypto from "crypto";
 import { checkAchievements } from "../utils/achievements.js";
 import { addXpToUser, incrementDailyTask } from "./user.js";
+import { verifyToken } from "../middleware/auth.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
-
-// Middleware to authenticate
-const authenticate = async (req, res, next) => {
-  const sessionCookie = req.cookies.session || "";
-  if (!sessionCookie) return res.status(401).json({ error: "Unauthenticated" });
-  try {
-    const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
-    req.uid = decodedClaims.uid;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: "Unauthenticated" });
-  }
-};
-
-router.use(authenticate);
-
-
-const getUserProfile = async (uid) => {
-  const userDoc = await db.collection("users").doc(uid).get();
-  return userDoc.exists ? userDoc.data() : {};
-};
+router.use(verifyToken);
 
 const isVipUser = (profile = {}) => {
   const role = String(profile.role || "").toLowerCase();
   const plan = String(profile.plan || profile.subscriptionPlan || profile.membership || "").toLowerCase();
   const status = String(profile.subscriptionStatus || profile.vipStatus || "").toLowerCase();
-  return Boolean(
-    profile.isVip ||
-    profile.vip ||
-    role === "admin" ||
-    role === "vip" ||
-    plan === "vip" ||
-    plan === "pro" ||
-    plan === "premium" ||
-    status === "active"
-  );
+  return Boolean(profile.isVip || profile.vip || role === "admin" || role === "vip" || plan === "vip" || plan === "pro" || plan === "premium" || status === "active");
 };
-
 
 const isFeaturedQuiz = (quiz = {}) => {
   const type = String(quiz.type || quiz.category || quiz.source || quiz.ownerType || "").toLowerCase();
@@ -60,7 +32,7 @@ const isFeaturedQuiz = (quiz = {}) => {
     creatorId === "system" ||
     creatorId === "default" ||
     creatorId === "admin_seed" ||
-    !creatorId
+    !creatorId,
   );
 };
 
@@ -68,7 +40,7 @@ const normalizePublicFlag = async (uid, requestedValue = true) => {
   const wantsPublic = requestedValue !== false;
   if (wantsPublic) return true;
 
-  const profile = await getUserProfile(uid);
+  const profile = await User.findById(uid).lean();
   if (!isVipUser(profile)) {
     const err = new Error("Tính năng tạo quiz riêng tư chỉ dành cho tài khoản VIP.");
     err.statusCode = 402;
@@ -77,78 +49,47 @@ const normalizePublicFlag = async (uid, requestedValue = true) => {
   return false;
 };
 
+const attachCreators = async (quizzes) => {
+  const creatorIds = [...new Set(quizzes.map((q) => q.creatorId).filter((id) => id && id.length === 24))];
+  const users = await User.find({ _id: { $in: creatorIds } }).lean();
 
-const toMillis = (value) => {
-  if (!value) return 0;
-  if (typeof value.toMillis === "function") return value.toMillis();
-  if (typeof value.toDate === "function") return value.toDate().getTime();
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return Date.parse(value) || 0;
-  if (typeof value.seconds === "number") return value.seconds * 1000;
-  if (typeof value._seconds === "number") return value._seconds * 1000;
-  return 0;
-};
-
-const sortByCreatedAtDesc = (items) =>
-  items.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
-
-const attachCreators = async (docs) => {
-  const creatorIds = [...new Set(docs.map((doc) => doc.data().creatorId).filter(Boolean))];
   const creatorMap = {};
-  await Promise.all(creatorIds.map(async (uid) => {
-    try {
-      const userDoc = await db.collection("users").doc(uid).get();
-      if (userDoc.exists) {
-        const data = userDoc.data();
-        creatorMap[uid] = {
-          uid,
-          displayName: data.displayName || data.email || "Người dùng ZenTask",
-          photoURL: data.photoURL || "",
-        };
-      }
-    } catch (e) {
-      console.warn("Cannot load quiz creator", uid, e.message);
-    }
-  }));
-  return docs.map((doc) => {
-    const data = doc.data();
-    return { id: doc.id, ...data, creator: creatorMap[data.creatorId] || null };
+  users.forEach((user) => {
+    creatorMap[user._id.toString()] = {
+      uid: user._id.toString(),
+      displayName: user.displayName || user.email || "Người dùng ZenTask",
+      photoURL: user.photoURL || "",
+    };
   });
+
+  return quizzes.map((q) => ({
+    ...q,
+    creator: creatorMap[q.creatorId] || null,
+  }));
 };
 
-// Generate room code
 const generateRoomCode = () => {
-  return crypto.randomBytes(3).toString("hex").toUpperCase(); // 6 chars like "A1B2C3"
+  return crypto.randomInt(100000, 1000000).toString();
 };
 
 // GET /api/quiz - featured quizzes first, then quizzes created by current user
-router.get("/", async (req, res) => {
-  try {
-    // The original Quiz page showed system/default quizzes in "Bài thi nổi bật".
-    // After adding public/private filtering, those quizzes could disappear because
-    // they do not always have creatorId === current user. To preserve the old UX,
-    // load quizzes and split them in memory: featured/default first, user's own next.
-    // We intentionally avoid orderBy + where here so Firestore does not require a
-    // composite index during local development.
-    const snapshot = await db.collection("quizzes").get();
-    const allQuizzes = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      const featured = isFeaturedQuiz(data);
+router.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const allQuizzes = await Quiz.find().lean();
+
+    const processed = allQuizzes.map((q) => {
+      const featured = isFeaturedQuiz(q);
       return {
-        id: doc.id,
-        ...data,
+        id: q._id,
+        ...q,
         isFeatured: featured,
-        isMine: data.creatorId === req.uid,
+        isMine: q.creatorId === req.user.uid,
       };
     });
 
-    const featuredQuizzes = sortByCreatedAtDesc(
-      allQuizzes.filter((quiz) => quiz.isFeatured)
-    );
-
-    const myQuizzes = sortByCreatedAtDesc(
-      allQuizzes.filter((quiz) => quiz.creatorId === req.uid && !quiz.isFeatured)
-    );
+    const featuredQuizzes = processed.filter((q) => q.isFeatured).sort((a, b) => b.createdAt - a.createdAt);
+    const myQuizzes = processed.filter((q) => q.creatorId === req.user.uid && !q.isFeatured).sort((a, b) => b.createdAt - a.createdAt);
 
     const seen = new Set();
     const quizzes = [...featuredQuizzes, ...myQuizzes]
@@ -160,135 +101,103 @@ router.get("/", async (req, res) => {
       .slice(0, 80);
 
     res.json(quizzes);
-  } catch (error) {
-    console.error("Error getting quizzes:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+  }),
+);
 
-// GET /api/quiz/public - public quizzes across the system
-router.get("/public", async (req, res) => {
-  try {
-    const snapshot = await db.collection("quizzes")
-      .where("isPublic", "==", true)
-      .get();
-    const quizzes = sortByCreatedAtDesc(await attachCreators(snapshot.docs));
-    res.json(quizzes);
-  } catch (error) {
-    console.error("Error getting public quizzes:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+// GET /api/quiz/public
+router.get(
+  "/public",
+  asyncHandler(async (req, res) => {
+    const quizzes = await Quiz.find({ isPublic: true }).sort({ createdAt: -1 }).lean();
+    const formatted = await attachCreators(quizzes.map((q) => ({ id: q._id, ...q })));
+    res.json(formatted);
+  }),
+);
 
 // GET /api/quiz/history
-router.get("/history", async (req, res) => {
-  try {
-    const snapshot = await db.collection("quiz_results").where("uid", "==", req.uid).get();
+router.get(
+  "/history",
+  asyncHandler(async (req, res) => {
+    const historyDocs = await QuizResult.find({ uid: req.user.uid }).sort({ createdAt: -1 }).limit(20).populate("quizId", "title difficulty").lean();
 
-    const historyDocs = snapshot.docs
-      .slice()
-      .sort((a, b) => toMillis(b.data().createdAt) - toMillis(a.data().createdAt))
-      .slice(0, 20);
+    const history = historyDocs.map((doc) => ({
+      id: doc._id,
+      ...doc,
+      quizTitle: doc.quizId ? doc.quizId.title : "Unknown Quiz",
+      quizDifficulty: doc.quizId ? doc.quizId.difficulty : "Medium",
+      quizId: doc.quizId ? doc.quizId._id : null,
+    }));
 
-    const history = [];
-    for (const doc of historyDocs) {
-      const data = doc.data();
-      const quizDoc = await db.collection("quizzes").doc(data.quizId).get();
-      if (quizDoc.exists) {
-        history.push({
-          id: doc.id,
-          ...data,
-          quizTitle: quizDoc.data().title,
-          quizDifficulty: quizDoc.data().difficulty,
-        });
-      }
-    }
     res.json(history);
-  } catch (error) {
-    console.error("Error getting quiz history:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+  }),
+);
 
 // GET /api/quiz/:id
-router.get("/:id", async (req, res) => {
-  try {
-    const doc = await db.collection("quizzes").doc(req.params.id).get();
-    if (!doc.exists) {
+router.get(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const quiz = await Quiz.findById(req.params.id).lean();
+    if (!quiz) {
       return res.status(404).json({ error: "Quiz not found" });
     }
-    const data = doc.data();
-    if (data.creatorId !== req.uid && !data.isPublic && !isFeaturedQuiz(data)) {
+
+    if (quiz.creatorId !== req.user.uid && !quiz.isPublic && !isFeaturedQuiz(quiz)) {
       return res.status(404).json({ error: "Quiz not found" });
     }
-    // In a real strict environment, we might hide correct answers here,
-    // but since we need client-side evaluation for Phoenix Rebirth quickly,
-    // we'll send it down.
-    res.json({ id: doc.id, ...data });
-  } catch (error) {
-    console.error("Error getting quiz:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+
+    res.json({ id: quiz._id, ...quiz });
+  }),
+);
 
 // POST /api/quiz (Create manual)
-router.post("/", async (req, res) => {
-  try {
+router.post(
+  "/",
+  asyncHandler(async (req, res) => {
     const { title, description, difficulty, duration, questions, isPublic = true } = req.body;
 
     if (!title || !questions || questions.length === 0) {
       return res.status(400).json({ error: "Invalid quiz data" });
     }
 
-    // Ensure questions have IDs
     const formattedQuestions = questions.map((q, idx) => ({
       ...q,
       id: q.id || `q_${Date.now()}_${idx}`,
     }));
 
-    const publicFlag = await normalizePublicFlag(req.uid, isPublic);
+    const publicFlag = await normalizePublicFlag(req.user.uid, isPublic);
 
-    const newQuiz = {
+    const newQuiz = await Quiz.create({
       title,
       description: description || "",
       difficulty: difficulty || "Medium",
       duration: duration || 15,
       questions: formattedQuestions,
-      creatorId: req.uid,
+      creatorId: req.user.uid,
       isPublic: publicFlag,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
+    });
 
-    const docRef = await db.collection("quizzes").add(newQuiz);
-
-    // Add XP for creating quiz via Daily Task
-    const taskResult = await incrementDailyTask(req.uid, "quiz_master", 1);
+    const taskResult = await incrementDailyTask(req.user.uid, "quiz_master", 1);
     let xpResult = null;
     if (taskResult.success && taskResult.xpToAdd > 0) {
-      xpResult = await addXpToUser(req.uid, taskResult.xpToAdd);
+      xpResult = await addXpToUser(req.user.uid, taskResult.xpToAdd);
     }
 
-    res.json({ 
-      id: docRef.id, 
+    res.json({
+      id: newQuiz._id,
       status: "success",
       xpResult,
-      taskProgress: taskResult.success ? { quiz_master: taskResult.progress } : {}
+      taskProgress: taskResult.success ? { quiz_master: taskResult.progress } : {},
     });
-  } catch (error) {
-    console.error("Error creating quiz:", error);
-    res.status(error.statusCode || 500).json({ error: error.message || "Internal server error" });
-  }
-});
+  }),
+);
 
 // POST /api/quiz/generate (AI)
-router.post("/generate", async (req, res) => {
-  try {
+router.post(
+  "/generate",
+  asyncHandler(async (req, res) => {
     const { prompt, numQuestions = 5, difficulty = "Medium", isPublic = true } = req.body;
 
-    if (!prompt) {
-      return res.status(400).json({ error: "Prompt is required" });
-    }
+    if (!prompt) return res.status(400).json({ error: "Prompt is required" });
 
     const availableKeys = [];
     for (let i = 1; i <= 10; i++) {
@@ -300,7 +209,6 @@ router.post("/generate", async (req, res) => {
       return res.status(500).json({ error: "No AI keys configured" });
     }
 
-    // Shuffle keys
     const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
 
     const promptText = `Tạo một bài thi trắc nghiệm dựa trên yêu cầu sau: "${prompt}".
@@ -332,9 +240,9 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
                       options: {
                         type: Type.ARRAY,
                         items: { type: Type.STRING },
-                        description: "Mảng chứa đúng 4 đáp án (VD: ['A', 'B', 'C', 'D'])",
+                        description: "Mảng chứa đúng 4 đáp án",
                       },
-                      correctAnswer: { type: Type.STRING, description: "Đáp án đúng chính xác (phải khớp 100% với 1 trong 4 lựa chọn)" },
+                      correctAnswer: { type: Type.STRING, description: "Đáp án đúng chính xác" },
                       explanation: { type: Type.STRING, description: "Giải thích ngắn gọn tại sao đúng" },
                     },
                     required: ["text", "options", "correctAnswer", "explanation"],
@@ -348,10 +256,8 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
 
         quizData = JSON.parse(response.text);
 
-        // Ensure options always has 4 items
         quizData.questions = quizData.questions.map((q) => {
           if (!q.options || q.options.length < 4) {
-            // pad with empty strings if AI missed it somehow
             const newOpts = [...(q.options || [])];
             while (newOpts.length < 4) newOpts.push("...");
             q.options = newOpts;
@@ -359,7 +265,7 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
           return q;
         });
 
-        break; // Success!
+        break;
       } catch (err) {
         console.warn(`[Quiz AI] Key API_KEY_AI_${index} failed:`, err.message);
       }
@@ -374,119 +280,97 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
       ...q,
     }));
 
-    const publicFlag = await normalizePublicFlag(req.uid, isPublic);
+    const publicFlag = await normalizePublicFlag(req.user.uid, isPublic);
 
-    const newQuiz = {
+    const newQuiz = await Quiz.create({
       title: quizData.title,
       description: quizData.description,
       difficulty,
-      duration: numQuestions * 1.5, // 1.5 mins per question
+      duration: numQuestions * 1.5,
       questions: formattedQuestions,
-      creatorId: req.uid,
+      creatorId: req.user.uid,
       isPublic: publicFlag,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
+    });
 
-    const docRef = await db.collection("quizzes").add(newQuiz);
-
-    // Add XP for creating quiz via Daily Task
-    const taskResult = await incrementDailyTask(req.uid, "quiz_master", 1);
+    const taskResult = await incrementDailyTask(req.user.uid, "quiz_master", 1);
     let xpResult = null;
     if (taskResult.success && taskResult.xpToAdd > 0) {
-      xpResult = await addXpToUser(req.uid, taskResult.xpToAdd);
+      xpResult = await addXpToUser(req.user.uid, taskResult.xpToAdd);
     }
 
-    res.json({ 
-      id: docRef.id, 
-      ...newQuiz,
+    const quizObj = newQuiz.toObject();
+    res.json({
+      id: quizObj._id,
+      ...quizObj,
       xpResult,
-      taskProgress: taskResult.success ? { quiz_master: taskResult.progress } : {}
+      taskProgress: taskResult.success ? { quiz_master: taskResult.progress } : {},
     });
-  } catch (error) {
-    console.error("Error generating quiz:", error);
-    res.status(error.statusCode || 500).json({ error: error.message || "Failed to generate quiz" });
-  }
-});
+  }),
+);
 
 // POST /api/quiz/:id/rooms
-router.post("/:id/rooms", async (req, res) => {
-  try {
+router.post(
+  "/:id/rooms",
+  asyncHandler(async (req, res) => {
     const quizId = req.params.id;
-    const { settings } = req.body; // e.g. { allowRetry, showAnswers, phoenixRebirth, shuffleQuestions }
+    const { settings } = req.body;
 
-    const quizDoc = await db.collection("quizzes").doc(quizId).get();
-    if (!quizDoc.exists) return res.status(404).json({ error: "Quiz not found" });
+    const quiz = await Quiz.findById(quizId);
+    if (!quiz) return res.status(404).json({ error: "Quiz not found" });
 
     const roomCode = generateRoomCode();
-    const newRoom = {
+    const newRoom = await QuizRoom.create({
       roomCode,
       quizId,
-      creatorId: req.uid,
-      status: "waiting", // waiting, playing, finished
+      hostId: req.user.uid,
+      status: "waiting",
       settings: settings || {
         allowRetry: false,
         showAnswers: true,
         phoenixRebirth: false,
         shuffleQuestions: false,
       },
-      createdAt: FieldValue.serverTimestamp(),
-    };
+    });
 
-    const docRef = await db.collection("quiz_rooms").add(newRoom);
-    res.json({ id: docRef.id, roomCode, status: "success" });
-  } catch (error) {
-    console.error("Error creating room:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+    res.json({ id: newRoom._id, roomCode, status: "success" });
+  }),
+);
 
 // GET /api/quiz/rooms/id/:id
-router.get("/rooms/id/:id", async (req, res) => {
-  try {
-    const roomId = req.params.id;
-    const doc = await db.collection("quiz_rooms").doc(roomId).get();
-    if (!doc.exists) return res.status(404).json({ error: "Room not found" });
-
-    const room = { id: doc.id, ...doc.data() };
-    res.json(room);
-  } catch (error) {
-    console.error("Error getting room by ID:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+router.get(
+  "/rooms/id/:id",
+  asyncHandler(async (req, res) => {
+    const room = await QuizRoom.findById(req.params.id).lean();
+    if (!room) return res.status(404).json({ error: "Room not found" });
+    res.json({ id: room._id, ...room });
+  }),
+);
 
 // GET /api/quiz/rooms/:code
-router.get("/rooms/:code", async (req, res) => {
-  try {
-    const code = req.params.code;
-    const snapshot = await db.collection("quiz_rooms").where("roomCode", "==", code).limit(1).get();
-    if (snapshot.empty) return res.status(404).json({ error: "Room not found" });
-
-    const room = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
-    res.json(room);
-  } catch (error) {
-    console.error("Error getting room:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+router.get(
+  "/rooms/:code",
+  asyncHandler(async (req, res) => {
+    const room = await QuizRoom.findOne({ roomCode: req.params.code }).lean();
+    if (!room) return res.status(404).json({ error: "Room not found" });
+    res.json({ id: room._id, ...room });
+  }),
+);
 
 // POST /api/quiz/:id/submit
-router.post("/:id/submit", async (req, res) => {
-  try {
+router.post(
+  "/:id/submit",
+  asyncHandler(async (req, res) => {
     const { answers, usedRebirth, roomId } = req.body;
     const quizId = req.params.id;
 
-    const quizDoc = await db.collection("quizzes").doc(quizId).get();
-    if (!quizDoc.exists) return res.status(404).json({ error: "Quiz not found" });
+    const quiz = await Quiz.findById(quizId).lean();
+    if (!quiz) return res.status(404).json({ error: "Quiz not found" });
 
-    const quiz = quizDoc.data();
-    if (quiz.creatorId !== req.uid && !quiz.isPublic && !isFeaturedQuiz(quiz)) {
+    if (quiz.creatorId !== req.user.uid && !quiz.isPublic && !isFeaturedQuiz(quiz)) {
       return res.status(404).json({ error: "Quiz not found" });
     }
-    let correctCount = 0;
 
-    // Evaluate answers
+    let correctCount = 0;
     const evaluation = {};
     for (const q of quiz.questions) {
       const userAnswer = answers[q.id] || "";
@@ -505,19 +389,13 @@ router.post("/:id/submit", async (req, res) => {
 
     let roomSettings = null;
     if (roomId) {
-      try {
-        const roomDoc = await db.collection("quiz_rooms").doc(roomId).get();
-        if (roomDoc.exists) {
-          roomSettings = roomDoc.data().settings;
-        }
-      } catch (e) {
-        console.error("Error fetching room settings:", e);
-      }
+      const room = await QuizRoom.findById(roomId).lean();
+      if (room) roomSettings = room.settings;
     }
 
-    const resultData = {
+    const resultData = await QuizResult.create({
       quizId,
-      uid: req.uid,
+      uid: req.user.uid,
       score,
       totalCorrect: correctCount,
       totalQuestions: quiz.questions.length,
@@ -526,48 +404,43 @@ router.post("/:id/submit", async (req, res) => {
       usedRebirth: !!usedRebirth,
       roomId: roomId || null,
       roomSettings,
-      createdAt: FieldValue.serverTimestamp(),
-    };
+    });
 
-    const resultRef = await db.collection("quiz_results").add(resultData);
+    const expGain = score;
+    const { xp, level, levelUp } = await addXpToUser(req.user.uid, expGain);
 
-    // Update user exp based on score
-    const expGain = score; // 1 exp per 1% score
-    const { xp, level, levelUp } = await addXpToUser(req.uid, expGain);
+    checkAchievements(req.user.uid, "QUIZ_SUBMIT", {}, req.app);
 
-    // Trigger achievements for QUIZ_SUBMIT
-    checkAchievements(req.uid, "QUIZ_SUBMIT", {}, req.app);
-
-    res.json({ id: resultRef.id, ...resultData, expGain, xpResult: { xp, level, levelUp } });
-  } catch (error) {
-    console.error("Error submitting quiz:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+    res.json({
+      id: resultData._id,
+      ...resultData.toObject(),
+      expGain,
+      xpResult: { xp, level, levelUp },
+    });
+  }),
+);
 
 // POST /api/quiz/rebirth/:resultId
-router.post("/rebirth/:resultId", async (req, res) => {
-  try {
+router.post(
+  "/rebirth/:resultId",
+  asyncHandler(async (req, res) => {
     const { questionId, newAnswer } = req.body;
     const resultId = req.params.resultId;
 
-    const resultDoc = await db.collection("quiz_results").doc(resultId).get();
-    if (!resultDoc.exists) return res.status(404).json({ error: "Result not found" });
+    const result = await QuizResult.findById(resultId);
+    if (!result) return res.status(404).json({ error: "Result not found" });
 
-    const result = resultDoc.data();
-
-    if (result.uid !== req.uid) return res.status(403).json({ error: "Unauthorized" });
+    if (result.uid.toString() !== req.user.uid) return res.status(403).json({ error: "Unauthorized" });
     if (result.usedRebirth) return res.status(400).json({ error: "Rebirth already used" });
 
-    const quizDoc = await db.collection("quizzes").doc(result.quizId).get();
-    const quiz = quizDoc.data();
+    const quiz = await Quiz.findById(result.quizId).lean();
+    if (!quiz) return res.status(404).json({ error: "Quiz not found" });
 
     const targetQuestion = quiz.questions.find((q) => q.id === questionId);
     if (!targetQuestion) return res.status(404).json({ error: "Question not found" });
 
     const isCorrect = newAnswer === targetQuestion.correctAnswer;
 
-    // Update evaluation
     result.evaluation[questionId].userAnswer = newAnswer;
     result.evaluation[questionId].isCorrect = isCorrect;
     result.answers[questionId] = newAnswer;
@@ -575,27 +448,19 @@ router.post("/rebirth/:resultId", async (req, res) => {
     if (isCorrect) {
       result.totalCorrect++;
       result.score = Math.round((result.totalCorrect / result.totalQuestions) * 100);
-
-      // Add more exp
       const expGain = Math.round(100 / result.totalQuestions);
-      await addXpToUser(req.uid, expGain);
+      await addXpToUser(req.user.uid, expGain);
     }
 
     result.usedRebirth = true;
 
-    await db.collection("quiz_results").doc(resultId).update({
-      score: result.score,
-      totalCorrect: result.totalCorrect,
-      answers: result.answers,
-      evaluation: result.evaluation,
-      usedRebirth: true,
-    });
+    // markModified is necessary when saving nested objects/mixed types
+    result.markModified("evaluation");
+    result.markModified("answers");
+    await result.save();
 
     res.json({ success: true, isCorrect, newScore: result.score, correctAnswer: targetQuestion.correctAnswer });
-  } catch (error) {
-    console.error("Error rebirth:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+  }),
+);
 
 export default router;

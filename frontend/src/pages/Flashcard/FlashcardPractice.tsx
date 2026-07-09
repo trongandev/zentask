@@ -93,38 +93,9 @@ export function FlashcardPractice() {
       }
     }
   }, [id, isBeginner, fetchCards, fetchProgress, user]);
-  const awardBeginnerTopicXp = React.useCallback(async () => {
-    if (!isBeginner || !id || !user || awardedTopicRef.current === id) return;
-    awardedTopicRef.current = id;
-    setBeginnerXpStatus("awarding");
-    try {
-      const res = await fetch(`${API_URL}/api/user/beginner-topic-complete`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ topicId: id }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || "Không cộng được XP");
-      if (data.alreadyAwarded) {
-        setBeginnerXpStatus("already");
-        return;
-      }
-      updateUser({ xp: data.xp, level: data.level });
-      setBeginnerXpStatus("awarded");
-      toast.success("Hoàn thành chủ đề! +20 XP");
-      window.dispatchEvent(new CustomEvent("xp_updated", { detail: { xp: data.xp, level: data.level, levelUp: data.levelUp, amount: data.awardedXp || 20 } }));
-    } catch (error: any) {
-      awardedTopicRef.current = null;
-      setBeginnerXpStatus("idle");
-      console.error("Award beginner topic XP error:", error);
-    }
-  }, [id, isBeginner, user, updateUser]);
-
   const handleBeginnerComplete = React.useCallback((wrongIds: string[]) => {
     setBeginnerWrongIds(wrongIds);
-    awardBeginnerTopicXp();
-  }, [awardBeginnerTopicXp]);
+  }, []);
 
   const reviewBeginnerWrong = React.useCallback(() => {
     const wrongCards = beginnerAllCards.filter((card) => beginnerWrongIds.includes(card.id));
@@ -163,13 +134,6 @@ export function FlashcardPractice() {
     </div>
   ) : null;
 
-  React.useEffect(() => {
-    if (isBeginner && beginnerSet && beginnerCards.length === 0 && beginnerAllCards.length > 0) {
-      awardBeginnerTopicXp();
-    }
-  }, [isBeginner, beginnerSet, beginnerCards.length, beginnerAllCards.length, awardBeginnerTopicXp]);
-
-
   if (loading && !currentSet) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#F4F7FE]">
@@ -199,7 +163,7 @@ export function FlashcardPractice() {
         <p className="text-gray-500 mb-3 text-center max-w-md">Bạn đã học xong toàn bộ từ vựng trong chủ đề này.</p>
         <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-yellow-50 px-4 py-2 text-sm font-bold text-yellow-700">
           <Trophy className="h-4 w-4" />
-          {beginnerXpStatus === "awarded" ? "+20 XP" : beginnerXpStatus === "awarding" ? "Đang cộng XP..." : "Chủ đề đã hoàn thành"}
+          Chủ đề đã hoàn thành
         </div>
         <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row">
           <button onClick={reviewBeginnerWrong} disabled={beginnerWrongIds.length === 0} className="flex-1 rounded-xl bg-orange-50 px-6 py-3 font-bold text-orange-600 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50">

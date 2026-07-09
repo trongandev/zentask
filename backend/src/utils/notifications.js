@@ -1,8 +1,7 @@
-import { db } from "../firebase.js";
-import { FieldValue } from "firebase-admin/firestore";
+import { Notification } from "../models/Schemas.js";
 
 /**
- * Helper to create a notification in Firestore and emit via Socket.io
+ * Helper to create a notification in MongoDB and emit via Socket.io
  * @param {object} app - Express app instance to get io
  * @param {string} receiverId - User ID who receives the notification
  * @param {string} type - 'follow', 'community_like', 'community_comment', 'leaderboard', 'learning_reminder'
@@ -12,36 +11,33 @@ import { FieldValue } from "firebase-admin/firestore";
  */
 export const createNotification = async (app, receiverId, type, title, message, referenceId = null) => {
   try {
-    const notification = {
+    const docRef = await Notification.create({
       receiverId,
       type,
       title,
       message,
       referenceId,
-      isRead: false,
-      createdAt: FieldValue.serverTimestamp()
-    };
-
-    const docRef = await db.collection("notifications").add(notification);
+      isRead: false
+    });
 
     // Emit via Socket.io if user is online
     const io = app.get("io");
     const userSockets = app.get("userSockets");
 
-    if (io && userSockets && userSockets.has(receiverId)) {
-      const socketId = userSockets.get(receiverId);
+    if (io && userSockets && userSockets.has(receiverId.toString())) {
+      const socketId = userSockets.get(receiverId.toString());
       io.to(socketId).emit("new_notification", {
-        id: docRef.id,
+        id: docRef._id,
         type,
         title,
         message,
         referenceId,
         isRead: false,
-        createdAt: new Date().toISOString()
+        createdAt: docRef.createdAt.toISOString()
       });
     }
 
-    return docRef.id;
+    return docRef._id;
   } catch (error) {
     console.error("Error creating notification:", error);
   }

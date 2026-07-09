@@ -14,11 +14,11 @@ const getTimeUntilReset = () => {
   const nextReset = new Date();
   nextReset.setUTCHours(24, 0, 0, 0); // Next midnight UTC (7 AM GMT+7)
   const diff = nextReset.getTime() - now.getTime();
-  
+
   const h = Math.floor(diff / (1000 * 60 * 60));
   const m = Math.floor((diff / (1000 * 60)) % 60);
   const s = Math.floor((diff / 1000) % 60);
-  
+
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 };
 
@@ -30,7 +30,7 @@ interface RightSidebarProps {
 
 export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarProps) {
   const { user, updateUser } = useAuth();
-  const { checkIn, loading: checkingIn } = useUserStore();
+  const { checkIn, loading: checkingIn, stats } = useUserStore();
   const { dailyTasks, taskProgress } = useConfigStore();
   const { getLeaderboard } = useEtcStore();
   const [timeLeft, setTimeLeft] = useState(getTimeUntilReset());
@@ -42,11 +42,11 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
     }, 1000);
 
     const fetchLeaderboard = async () => {
-      const data = await getLeaderboard('week');
+      const data = await getLeaderboard("week");
       const enrichedData = data.map((item: any) => ({
         ...item,
         isUser: user ? item.id === user.uid : false,
-        xp: item.xp.toLocaleString()
+        xp: item.xp.toLocaleString(),
       }));
       setLeaderboard(enrichedData);
     };
@@ -55,11 +55,13 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
     return () => clearInterval(timer);
   }, [user, getLeaderboard]);
 
-  // For now, mock 'current' progress for tasks as 0 since we haven't implemented progress tracking yet.
-  const tasks = dailyTasks.map(t => {
-    let current = taskProgress[t.id] || 0;
-    if (t.id === 'daily_checkin') {
-      current = user?.lastCheckInDate === new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0] ? 1 : 0;
+  const tasks = dailyTasks.map((t) => {
+    const taskId = t.type;
+    let current = taskProgress[taskId] || 0;
+    if (taskId === "daily_checkin") {
+      const ts = new Date();
+      ts.setMinutes(ts.getMinutes() - ts.getTimezoneOffset());
+      current = user?.lastCheckInDate === ts.toISOString().split("T")[0] ? 1 : 0;
     }
     return { ...t, current };
   });
@@ -67,7 +69,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
   // Lấy ngày hiện tại (local time)
   const today = new Date();
   today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
-  const todayStr = today.toISOString().split('T')[0];
+  const todayStr = today.toISOString().split("T")[0];
   const isCheckedInToday = user?.lastCheckInDate === todayStr;
 
   // Tính số ngày từ lần điểm danh cuối
@@ -81,24 +83,28 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
 
   const streak = user?.streak || 0;
 
-  // Xác định các ngày trong tuần hiện tại (T2 -> CN)
-  let currentDayOfWeek = today.getDay() - 1; 
-  if (currentDayOfWeek === -1) currentDayOfWeek = 6; // Đổi CN từ 0 thành 6
-
-  const weekDayNames = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
-  const weekDays = weekDayNames.map((name, index) => {
-    const diffDays = currentDayOfWeek - index; // diffDays > 0 là quá khứ, < 0 là tương lai, == 0 là hôm nay
-    const isCurrent = diffDays === 0;
-    
-    let isActive = false;
-    if (diffDays >= 0) { // Chỉ kiểm tra những ngày trong quá khứ và hôm nay
-      if (diffDays >= daysSinceLastCheckIn && diffDays <= daysSinceLastCheckIn + streak - 1) {
+  // Lấy dữ liệu 7 ngày từ backend, nếu chưa có thì dùng logic mặc định
+  let weekDays = [];
+  if (stats && stats.length === 7) {
+    weekDays = stats.map((stat) => ({
+      name: stat.name,
+      active: stat.isCheckedIn,
+      current: stat.date === todayStr,
+    }));
+  } else {
+    let currentDayOfWeek = today.getDay() - 1;
+    if (currentDayOfWeek === -1) currentDayOfWeek = 6;
+    const weekDayNames = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+    weekDays = weekDayNames.map((name, index) => {
+      const diffDays = currentDayOfWeek - index;
+      const isCurrent = diffDays === 0;
+      let isActive = false;
+      if (diffDays >= 0 && diffDays >= daysSinceLastCheckIn && diffDays <= daysSinceLastCheckIn + streak - 1) {
         isActive = true;
       }
-    }
-    
-    return { name, active: isActive, current: isCurrent };
-  });
+      return { name, active: isActive, current: isCurrent };
+    });
+  }
 
   const RANK_NAMES: Record<number, string> = {
     1: "Bạc",
@@ -159,31 +165,29 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
           </div>
 
           {(() => {
-             return (
-               <button 
-                 onClick={async () => {
-                   if (isCheckedInToday || checkingIn) return;
-                   const res = await checkIn();
-                   if (res) {
-                     const updates: any = { streak: res.streak, lastCheckInDate: res.lastCheckInDate };
-                     if (res.xpResult) {
-                       updates.xp = res.xpResult.xp;
-                       updates.level = res.xpResult.level;
-                     }
-                     updateUser(updates);
-                   }
-                 }}
-                 disabled={isCheckedInToday || checkingIn}
-                 className={cn(
-                   "w-full py-2.5 rounded-xl font-bold text-sm mb-4 transition-all flex items-center justify-center gap-2",
-                   isCheckedInToday 
-                     ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-                     : "bg-orange-500 hover:bg-orange-600 text-white shadow-sm active:scale-95"
-                 )}
-               >
-                 {checkingIn ? "Đang điểm danh..." : isCheckedInToday ? "Đã điểm danh hôm nay" : "Điểm danh ngay"}
-               </button>
-             );
+            return (
+              <button
+                onClick={async () => {
+                  if (isCheckedInToday || checkingIn) return;
+                  const res = await checkIn();
+                  if (res) {
+                    const updates: any = { streak: res.streak, lastCheckInDate: res.lastCheckInDate };
+                    if (res.xpResult) {
+                      updates.xp = res.xpResult.xp;
+                      updates.level = res.xpResult.level;
+                    }
+                    updateUser(updates);
+                  }
+                }}
+                disabled={isCheckedInToday || checkingIn}
+                className={cn(
+                  "w-full py-2.5 rounded-xl font-bold text-sm mb-4 transition-all flex items-center justify-center gap-2",
+                  isCheckedInToday ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600 text-white shadow-sm active:scale-95",
+                )}
+              >
+                {checkingIn ? "Đang điểm danh..." : isCheckedInToday ? "Đã điểm danh hôm nay" : "Điểm danh ngay"}
+              </button>
+            );
           })()}
 
           <div className="flex justify-between mb-4">
@@ -315,7 +319,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                         <span className="text-blue-300 font-medium text-[10px]">
                           {task.current} / {task.total} hoàn thành
                         </span>
-                        <span className="text-green-400 font-bold text-[10px]">+{task.point} XP</span>
+                        <span className="text-green-400 font-bold text-[10px]">+{task.xpPerItem} XP</span>
                       </div>
                       <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-[6px] border-transparent border-l-gray-900"></div>
                     </div>
@@ -395,7 +399,9 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                       {lUser.xp} <span className="text-gray-400 font-medium">XP</span>
                     </span>
                   </div>
-                  <span className="text-[10px] uppercase font-bold text-gray-500">{RANK_NAMES[lUser.rankId]} {TIER_NAMES[lUser.tier || 3]}</span>
+                  <span className="text-[10px] uppercase font-bold text-gray-500">
+                    {RANK_NAMES[lUser.rankId]} {TIER_NAMES[lUser.tier || 3]}
+                  </span>
                 </div>
                 <img src={`/rank/${lUser.rankId}.png`} alt="Rank" className="w-6 object-contain" />
               </Link>
@@ -419,7 +425,9 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                       {leaderboard.find((u) => u.isUser)?.xp} <span className="text-gray-400 font-medium">XP</span>
                     </span>
                   </div>
-                  <span className="text-[10px] uppercase font-bold text-blue-500">{RANK_NAMES[user?.rankId || 1]} {TIER_NAMES[user?.tier || 3]}</span>
+                  <span className="text-[10px] uppercase font-bold text-blue-500">
+                    {RANK_NAMES[user?.rankId || 1]} {TIER_NAMES[user?.tier || 3]}
+                  </span>
                 </div>
                 <img src={`/rank/${user?.rankId || 1}.png`} alt="Rank" className="w-6 object-contain drop-shadow-sm" />
               </Link>
@@ -451,7 +459,9 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                     <div className="">
                       <span className="text-yellow-400 font-medium text-[10px]">{lUser.xp} XP</span>
                       <div className="flex items-center gap-1">
-                        <span className="text-[10px] text-gray-300 font-bold uppercase">{RANK_NAMES[lUser.rankId]} {TIER_NAMES[lUser.tier || 3]}</span>
+                        <span className="text-[10px] text-gray-300 font-bold uppercase">
+                          {RANK_NAMES[lUser.rankId]} {TIER_NAMES[lUser.tier || 3]}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -475,7 +485,9 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                     <img src={`/rank/${user?.rankId || 1}.png`} alt="Rank" className="w-10 object-contain" />
                     <div className="flex flex-col">
                       <span className="text-yellow-400 font-medium text-[10px]">{leaderboard.find((u) => u.isUser)?.xp} XP</span>
-                      <span className="text-[10px] text-gray-300 font-bold uppercase">{RANK_NAMES[user?.rankId || 1]} {TIER_NAMES[user?.tier || 3]}</span>
+                      <span className="text-[10px] text-gray-300 font-bold uppercase">
+                        {RANK_NAMES[user?.rankId || 1]} {TIER_NAMES[user?.tier || 3]}
+                      </span>
                     </div>
                   </div>
                   <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-[6px] border-transparent border-l-gray-900"></div>

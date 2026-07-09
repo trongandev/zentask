@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { SYSTEM_LEVELS } from "../config/system.js";
-import { db } from "../firebase.js";
 
 const router = Router();
 
