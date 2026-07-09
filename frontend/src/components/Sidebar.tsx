@@ -43,6 +43,15 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         { icon: Wrench, label: "Tiện ích", to: "/utilities" },
       ],
     },
+    {
+      label: "TIỆN ÍCH",
+      items: [
+        { icon: Diamond, label: "Subtitle AI", to: "/subtitle-ai" },
+        { icon: MessageCircle, label: "Trợ lý AI", to: "/ai-chat" },
+        { icon: NotebookPen, label: "Sổ tay", to: "/notebook" },
+        { icon: Wrench, label: "Tiện ích", to: "/utilities" },
+      ],
+    },
   ];
 
   if (user?.role === "admin") {
