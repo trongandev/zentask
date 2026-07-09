@@ -8,12 +8,16 @@ import { useSM2 } from "../../hooks/useSM2";
 interface ModeListeningProps {
   cards: Flashcard[];
   setId: string;
+  onComplete?: (wrongCardIds: string[]) => void;
+  completionActions?: React.ReactNode;
 }
 
 
-export function ModeListening({ cards, setId }: ModeListeningProps) {
+export function ModeListening({ cards, setId, onComplete, completionActions }: ModeListeningProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [wrongCardIds, setWrongCardIds] = useState<string[]>([]);
+  const wrongCardIdsRef = React.useRef<string[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -58,6 +62,7 @@ export function ModeListening({ cards, setId }: ModeListeningProps) {
       playSoundEffect('correct');
     } else {
       reportWrong(currentCard.id, "listening");
+      setWrongCardIds((prev) => { const next = prev.includes(currentCard.id) ? prev : [...prev, currentCard.id]; wrongCardIdsRef.current = next; return next; });
       playSoundEffect('wrong');
     }
 
@@ -69,6 +74,7 @@ export function ModeListening({ cards, setId }: ModeListeningProps) {
           setStatus("idle");
         } else {
           flushProgress();
+          onComplete?.(wrongCardIdsRef.current);
           setCompleted(true);
         }
       } else {
@@ -87,12 +93,13 @@ export function ModeListening({ cards, setId }: ModeListeningProps) {
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Tuyệt vời!</h2>
         <p className="text-gray-500 mb-8">Bạn đã nghe và viết chính xác toàn bộ thẻ.</p>
         <button 
-          onClick={() => { setCompleted(false); setCurrentIndex(0); setInputValue(""); setStatus("idle"); }}
+          onClick={() => { setCompleted(false); setCurrentIndex(0); setWrongCardIds([]); wrongCardIdsRef.current = []; setInputValue(""); setStatus("idle"); }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Luyện nghe lại
         </button>
+        {completionActions}
       </div>
     );
   }

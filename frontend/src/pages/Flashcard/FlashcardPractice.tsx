@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Menu, X, Check } from "lucide-react";
+import { ArrowLeft, Menu, X, Check, RotateCw, AlertTriangle, Trophy } from "lucide-react";
 import { useFlashcardStore } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
 import { PracticeSidebar } from "../../components/practice/PracticeSidebar";
@@ -8,6 +8,7 @@ import { ModeFlashcard } from "../../components/practice/ModeFlashcard";
 import { ModeQuiz } from "../../components/practice/ModeQuiz";
 import { ModeFillBlank } from "../../components/practice/ModeFillBlank";
 import { ModeListening } from "../../components/practice/ModeListening";
+import { ModePronunciation } from "../../components/practice/ModePronunciation";
 import { getBeginnerSetById } from "../../config/rankTopicConfig";
 import { ModeMatch } from "../../components/practice/ModeMatch";
 import { ModeBubble } from "../../components/practice/ModeBubble";
@@ -16,22 +17,28 @@ import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useAuth } from "../../contexts/AuthContext";
 import { ModeTyping } from "@/src/components/practice/ModeTyping";
 import { VoiceSelectorModal } from "@/src/components/practice/VoiceSelectorModal";
+import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
-export type PracticeMode = "flashcard" | "quiz" | "fill_blank" | "listening" | "match" | "bubble" | "guess" | "typing";
+export type PracticeMode = "flashcard" | "quiz" | "fill_blank" | "listening" | "pronunciation" | "match" | "bubble" | "guess" | "typing";
 
 export function FlashcardPractice() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const isBeginner = location.pathname.includes("/beginner/");
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const { fetchCards, fetchProgress, currentSet: storeSet, cards: storeCards, loading: storeLoading } = useFlashcardStore();
 
   const [beginnerSet, setBeginnerSet] = useState<any>(null);
   const [beginnerCards, setBeginnerCards] = useState<any[]>([]);
+  const [beginnerAllCards, setBeginnerAllCards] = useState<any[]>([]);
+  const [beginnerWrongIds, setBeginnerWrongIds] = useState<string[]>([]);
+  const [practiceSessionKey, setPracticeSessionKey] = useState(0);
+  const [beginnerXpStatus, setBeginnerXpStatus] = useState<"idle" | "awarding" | "awarded" | "already">("idle");
+  const awardedTopicRef = React.useRef<string | null>(null);
 
   const [activeMode, setActiveMode] = useState<PracticeMode>("flashcard");
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
@@ -58,6 +65,7 @@ export function FlashcardPractice() {
         const set = getBeginnerSetById(id);
         if (set) {
           setBeginnerSet(set);
+          setBeginnerAllCards(set.words || []);
 
           // Fetch learned words and filter them out
           if (user) {
@@ -67,13 +75,16 @@ export function FlashcardPractice() {
                 const learnedWords = data.learnedWords || [];
                 const unlearnedCards = (set.words || []).filter((w: any) => !learnedWords.includes(w.id));
                 setBeginnerCards(unlearnedCards);
+                setPracticeSessionKey((key) => key + 1);
               })
               .catch((err) => {
                 console.error("Failed to fetch beginner progress", err);
                 setBeginnerCards(set.words || []);
+                setPracticeSessionKey((key) => key + 1);
               });
           } else {
             setBeginnerCards(set.words || []);
+            setPracticeSessionKey((key) => key + 1);
           }
         }
       } else {
@@ -82,6 +93,83 @@ export function FlashcardPractice() {
       }
     }
   }, [id, isBeginner, fetchCards, fetchProgress, user]);
+  const awardBeginnerTopicXp = React.useCallback(async () => {
+    if (!isBeginner || !id || !user || awardedTopicRef.current === id) return;
+    awardedTopicRef.current = id;
+    setBeginnerXpStatus("awarding");
+    try {
+      const res = await fetch(`${API_URL}/api/user/beginner-topic-complete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ topicId: id }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error || "Không cộng được XP");
+      if (data.alreadyAwarded) {
+        setBeginnerXpStatus("already");
+        return;
+      }
+      updateUser({ xp: data.xp, level: data.level });
+      setBeginnerXpStatus("awarded");
+      toast.success("Hoàn thành chủ đề! +20 XP");
+      window.dispatchEvent(new CustomEvent("xp_updated", { detail: { xp: data.xp, level: data.level, levelUp: data.levelUp, amount: data.awardedXp || 20 } }));
+    } catch (error: any) {
+      awardedTopicRef.current = null;
+      setBeginnerXpStatus("idle");
+      console.error("Award beginner topic XP error:", error);
+    }
+  }, [id, isBeginner, user, updateUser]);
+
+  const handleBeginnerComplete = React.useCallback((wrongIds: string[]) => {
+    setBeginnerWrongIds(wrongIds);
+    awardBeginnerTopicXp();
+  }, [awardBeginnerTopicXp]);
+
+  const reviewBeginnerWrong = React.useCallback(() => {
+    const wrongCards = beginnerAllCards.filter((card) => beginnerWrongIds.includes(card.id));
+    if (wrongCards.length === 0) {
+      toast("Bạn không có câu sai nào để ôn lại.");
+      return;
+    }
+    setBeginnerCards(wrongCards);
+    setBeginnerWrongIds([]);
+    setPracticeSessionKey((key) => key + 1);
+  }, [beginnerAllCards, beginnerWrongIds]);
+
+  const reviewBeginnerAll = React.useCallback(() => {
+    setBeginnerCards(beginnerAllCards);
+    setBeginnerWrongIds([]);
+    setPracticeSessionKey((key) => key + 1);
+  }, [beginnerAllCards]);
+
+  const beginnerCompletionActions = isBeginner ? (
+    <div className="mt-5 flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:justify-center">
+      <button
+        onClick={reviewBeginnerWrong}
+        disabled={beginnerWrongIds.length === 0}
+        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-orange-50 px-5 py-3 font-bold text-orange-600 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <AlertTriangle className="h-5 w-5" />
+        Ôn tập lại câu sai ({beginnerWrongIds.length})
+      </button>
+      <button
+        onClick={reviewBeginnerAll}
+        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-50 px-5 py-3 font-bold text-blue-600 transition-colors hover:bg-blue-100"
+      >
+        <RotateCw className="h-5 w-5" />
+        Ôn tập lại toàn bộ câu
+      </button>
+    </div>
+  ) : null;
+
+  React.useEffect(() => {
+    if (isBeginner && beginnerSet && beginnerCards.length === 0 && beginnerAllCards.length > 0) {
+      awardBeginnerTopicXp();
+    }
+  }, [isBeginner, beginnerSet, beginnerCards.length, beginnerAllCards.length, awardBeginnerTopicXp]);
+
+
   if (loading && !currentSet) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#F4F7FE]">
@@ -108,8 +196,20 @@ export function FlashcardPractice() {
           <Check className="w-12 h-12 text-green-500" />
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Xin chúc mừng!</h2>
-        <p className="text-gray-500 mb-8 text-center max-w-md">Bạn đã học xong toàn bộ từ vựng trong chủ đề này.</p>
-        <button onClick={() => navigate(-1)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition-all">
+        <p className="text-gray-500 mb-3 text-center max-w-md">Bạn đã học xong toàn bộ từ vựng trong chủ đề này.</p>
+        <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-yellow-50 px-4 py-2 text-sm font-bold text-yellow-700">
+          <Trophy className="h-4 w-4" />
+          {beginnerXpStatus === "awarded" ? "+20 XP" : beginnerXpStatus === "awarding" ? "Đang cộng XP..." : "Chủ đề đã hoàn thành"}
+        </div>
+        <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row">
+          <button onClick={reviewBeginnerWrong} disabled={beginnerWrongIds.length === 0} className="flex-1 rounded-xl bg-orange-50 px-6 py-3 font-bold text-orange-600 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50">
+            Ôn tập lại câu sai ({beginnerWrongIds.length})
+          </button>
+          <button onClick={reviewBeginnerAll} className="flex-1 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition-colors hover:bg-blue-700">
+            Ôn tập lại toàn bộ câu
+          </button>
+        </div>
+        <button onClick={() => navigate(-1)} className="mt-4 text-sm font-bold text-gray-500 hover:text-gray-700">
           Quay lại
         </button>
       </div>
@@ -156,14 +256,15 @@ export function FlashcardPractice() {
         {/* Play Area (75%) */}
         <div className="flex-1 bg-gray-50/50 p-4 md:p-6 overflow-y-auto relative h-full flex flex-col">
           <div className={cn("m-auto w-full flex flex-col items-center justify-center", activeMode === "bubble" ? "h-full py-0" : "min-h-full py-4")}>
-            {activeMode === "flashcard" && <ModeFlashcard cards={cards} setId={id!} />}
-            {activeMode === "quiz" && <ModeQuiz cards={cards} setId={id!} />}
-            {activeMode === "fill_blank" && <ModeFillBlank cards={cards} setId={id!} />}
-            {activeMode === "listening" && <ModeListening cards={cards} setId={id!} />}
-            {activeMode === "match" && <ModeMatch cards={cards} setId={id!} />}
-            {activeMode === "bubble" && <ModeBubble cards={cards} setId={id!} />}
-            {activeMode === "guess" && <ModeGuess cards={cards} setId={id!} />}
-            {activeMode === "typing" && <ModeTyping cards={cards} setId={id!} />}
+            {activeMode === "flashcard" && <ModeFlashcard key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
+            {activeMode === "quiz" && <ModeQuiz key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
+            {activeMode === "fill_blank" && <ModeFillBlank key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
+            {activeMode === "listening" && <ModeListening key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
+            {activeMode === "pronunciation" && <ModePronunciation key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
+            {activeMode === "match" && <ModeMatch key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
+            {activeMode === "bubble" && <ModeBubble key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
+            {activeMode === "guess" && <ModeGuess key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
+            {activeMode === "typing" && <ModeTyping key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
           </div>
         </div>
 

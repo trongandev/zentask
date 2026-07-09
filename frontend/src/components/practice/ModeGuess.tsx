@@ -8,6 +8,8 @@ import { useSM2 } from "../../hooks/useSM2";
 interface ModeGuessProps {
   cards: Flashcard[];
   setId: string;
+  onComplete?: (wrongCardIds: string[]) => void;
+  completionActions?: React.ReactNode;
 }
 
 
@@ -24,9 +26,11 @@ interface BlankSlot {
   filledWithId: string | null;
 }
 
-export function ModeGuess({ cards, setId }: ModeGuessProps) {
+export function ModeGuess({ cards, setId, onComplete, completionActions }: ModeGuessProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [wrongCardIds, setWrongCardIds] = useState<string[]>([]);
+  const wrongCardIdsRef = React.useRef<string[]>([]);
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   
   const [slots, setSlots] = useState<BlankSlot[]>([]);
@@ -153,12 +157,14 @@ export function ModeGuess({ cards, setId }: ModeGuessProps) {
           setCurrentIndex(curr => curr + 1);
         } else {
           flushProgress();
+          onComplete?.(wrongCardIdsRef.current);
           setCompleted(true);
         }
       }, 1500);
     } else {
       // Wrong: shake and reset the incorrectly placed tiles
       reportWrong(currentCard.id, "guess");
+      setWrongCardIds((prev) => { const next = prev.includes(currentCard.id) ? prev : [...prev, currentCard.id]; wrongCardIdsRef.current = next; return next; });
       playSoundEffect('wrong');
       setTimeout(() => {
         setStatus("idle");
@@ -191,12 +197,13 @@ export function ModeGuess({ cards, setId }: ModeGuessProps) {
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Thật thông minh!</h2>
         <p className="text-gray-500 mb-8">Bạn đã đoán đúng tất cả các từ.</p>
         <button 
-          onClick={() => { setCompleted(false); setCurrentIndex(0); }}
+          onClick={() => { setCompleted(false); setCurrentIndex(0); setWrongCardIds([]); wrongCardIdsRef.current = []; }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Chơi lại
         </button>
+        {completionActions}
       </div>
     );
   }

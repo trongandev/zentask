@@ -36,6 +36,10 @@ export interface Quiz {
   duration: number; // in minutes
   questions: QuizQuestion[];
   creatorId: string;
+  isPublic?: boolean;
+  isFeatured?: boolean;
+  isMine?: boolean;
+  creator?: { uid: string; displayName: string; photoURL?: string } | null;
   createdAt: any;
 }
 
@@ -76,13 +80,15 @@ export interface QuizResult {
 interface QuizState {
   loading: boolean;
   quizzes: Quiz[];
+  publicQuizzes: Quiz[];
   quizHistory: QuizResult[];
   
   getQuizzes: () => Promise<Quiz[]>;
+  getPublicQuizzes: () => Promise<Quiz[]>;
   getQuizHistory: () => Promise<QuizResult[]>;
   getQuizById: (id: string) => Promise<Quiz | null>;
   createQuiz: (data: Partial<Quiz>) => Promise<{ id: string; status: string } | null>;
-  generateQuizByAI: (prompt: string, numQuestions?: number, difficulty?: string) => Promise<Quiz | null>;
+  generateQuizByAI: (prompt: string, numQuestions?: number, difficulty?: string, isPublic?: boolean) => Promise<Quiz | null>;
   submitQuiz: (quizId: string, answers: Record<string, string>, usedRebirth?: boolean, roomId?: string) => Promise<any | null>;
   createRoom: (quizId: string, settings: QuizRoomSettings) => Promise<{ id: string; roomCode: string; status: string } | null>;
   getRoomByCode: (code: string) => Promise<QuizRoom | null>;
@@ -93,6 +99,7 @@ interface QuizState {
 export const useQuizStore = create<QuizState>((set, get) => ({
   loading: false,
   quizzes: [],
+  publicQuizzes: [],
   quizHistory: [],
 
   getQuizzes: async () => {
@@ -100,6 +107,20 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     try {
       const data = await fetchApi("/quiz");
       set({ quizzes: data, loading: false });
+      return data;
+    } catch (error: any) {
+      toast.error(error.message);
+      set({ loading: false });
+      return [];
+    }
+  },
+
+
+  getPublicQuizzes: async () => {
+    set({ loading: true });
+    try {
+      const data = await fetchApi("/quiz/public");
+      set({ publicQuizzes: data, loading: false });
       return data;
     } catch (error: any) {
       toast.error(error.message);
@@ -153,12 +174,12 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     }
   },
 
-  generateQuizByAI: async (prompt: string, numQuestions: number = 5, difficulty: string = "Trung bình") => {
+  generateQuizByAI: async (prompt: string, numQuestions: number = 5, difficulty: string = "Trung bình", isPublic: boolean = true) => {
     set({ loading: true });
     try {
       const data = await fetchApi("/quiz/generate", {
         method: "POST",
-        body: JSON.stringify({ prompt, numQuestions, difficulty }),
+        body: JSON.stringify({ prompt, numQuestions, difficulty, isPublic }),
       });
       set({ loading: false });
       return data;

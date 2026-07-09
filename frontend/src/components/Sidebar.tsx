@@ -37,16 +37,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         { icon: Globe, label: "Cộng đồng", to: "/community" },
         { icon: UserRoundPlus, label: "Bạn bè", to: "/friends" },
         { icon: FileText, label: "Bài viết", to: "/posts" },
-        { icon: Diamond, label: "Subtitle AI", to: "/subtitle-ai" },
-        { icon: MessageCircle, label: "Trợ lý AI", to: "/ai-chat" },
-        { icon: NotebookPen, label: "Sổ tay", to: "/notebook" },
-        { icon: Wrench, label: "Tiện ích", to: "/utilities" },
       ],
     },
     {
-      label: "TIỆN ÍCH",
+      label: "CÔNG CỤ",
       items: [
-        { icon: Diamond, label: "Subtitle AI", to: "/subtitle-ai" },
         { icon: MessageCircle, label: "Trợ lý AI", to: "/ai-chat" },
         { icon: NotebookPen, label: "Sổ tay", to: "/notebook" },
         { icon: Wrench, label: "Tiện ích", to: "/utilities" },

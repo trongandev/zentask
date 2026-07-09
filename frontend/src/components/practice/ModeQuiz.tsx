@@ -9,12 +9,16 @@ import { useSM2 } from "../../hooks/useSM2";
 interface ModeQuizProps {
   cards: Flashcard[];
   setId: string;
+  onComplete?: (wrongCardIds: string[]) => void;
+  completionActions?: React.ReactNode;
 }
 
 
-export function ModeQuiz({ cards, setId }: ModeQuizProps) {
+export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQuizProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [wrongCardIds, setWrongCardIds] = useState<string[]>([]);
+  const wrongCardIdsRef = React.useRef<string[]>([]);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const cardStartTime = useRef<number>(Date.now());
   
@@ -49,6 +53,7 @@ export function ModeQuiz({ cards, setId }: ModeQuizProps) {
       playAudio(currentCard.term, undefined, 'correct');
     } else {
       reportWrong(currentCard.id, "quiz");
+      setWrongCardIds((prev) => { const next = prev.includes(currentCard.id) ? prev : [...prev, currentCard.id]; wrongCardIdsRef.current = next; return next; });
       playSoundEffect('wrong');
     }
     
@@ -58,6 +63,7 @@ export function ModeQuiz({ cards, setId }: ModeQuizProps) {
         setCurrentIndex(curr => curr + 1);
       } else {
         flushProgress();
+        onComplete?.(wrongCardIdsRef.current);
         setCompleted(true);
       }
     }, 1500); // Wait 1.5s to show result
@@ -82,12 +88,13 @@ export function ModeQuiz({ cards, setId }: ModeQuizProps) {
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Tuyệt vời!</h2>
         <p className="text-gray-500 mb-8">Bạn đã hoàn thành bài Trắc nghiệm.</p>
         <button 
-          onClick={() => { setCompleted(false); setCurrentIndex(0); }}
+          onClick={() => { setCompleted(false); setCurrentIndex(0); setWrongCardIds([]); wrongCardIdsRef.current = []; }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Làm lại
         </button>
+        {completionActions}
       </div>
     );
   }

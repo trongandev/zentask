@@ -22,6 +22,56 @@ const authenticate = async (req, res, next) => {
 
 router.use(authenticate);
 
+
+const getUserProfile = async (uid) => {
+  const userDoc = await db.collection("users").doc(uid).get();
+  return userDoc.exists ? userDoc.data() : {};
+};
+
+const isVipUser = (profile = {}) => {
+  const role = String(profile.role || "").toLowerCase();
+  const plan = String(profile.plan || profile.subscriptionPlan || profile.membership || "").toLowerCase();
+  const status = String(profile.subscriptionStatus || profile.vipStatus || "").toLowerCase();
+  return Boolean(
+    profile.isVip ||
+    profile.vip ||
+    role === "admin" ||
+    role === "vip" ||
+    plan === "vip" ||
+    plan === "pro" ||
+    plan === "premium" ||
+    status === "active"
+  );
+};
+
+const normalizePublicFlag = async (uid, requestedValue = true) => {
+  const wantsPublic = requestedValue !== false;
+  if (wantsPublic) return true;
+
+  const profile = await getUserProfile(uid);
+  if (!isVipUser(profile)) {
+    const err = new Error("Tính năng tạo bộ thẻ riêng tư chỉ dành cho tài khoản VIP.");
+    err.statusCode = 402;
+    throw err;
+  }
+  return false;
+};
+
+
+const toMillis = (value) => {
+  if (!value) return 0;
+  if (typeof value.toMillis === "function") return value.toMillis();
+  if (typeof value.toDate === "function") return value.toDate().getTime();
+  if (typeof value === "number") return value;
+  if (typeof value === "string") return Date.parse(value) || 0;
+  if (typeof value.seconds === "number") return value.seconds * 1000;
+  if (typeof value._seconds === "number") return value._seconds * 1000;
+  return 0;
+};
+
+const sortByCreatedAtDesc = (items) =>
+  items.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+
 // ==================== DUE CARDS ROUTES ====================
 
 // Get due cards for Dashboard
@@ -61,8 +111,8 @@ router.get("/due", async (req, res) => {
 // List folders for user
 router.get("/folders", async (req, res) => {
   try {
-    const snapshot = await db.collection("flashcard_folders").where("userId", "==", req.uid).orderBy("createdAt", "desc").get();
-    const folders = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const snapshot = await db.collection("flashcard_folders").where("userId", "==", req.uid).get();
+    const folders = sortByCreatedAtDesc(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     res.json(folders);
   } catch (error) {
     console.error(error);
@@ -170,9 +220,9 @@ router.delete("/folder/:folderId", async (req, res) => {
 // List flashcard sets for the user
 router.get("/list", async (req, res) => {
   try {
-    const snapshot = await db.collection("flashcard_sets").where("userId", "==", req.uid).orderBy("createdAt", "desc").get();
+    const snapshot = await db.collection("flashcard_sets").where("userId", "==", req.uid).get();
 
-    const sets = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const sets = sortByCreatedAtDesc(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     res.json(sets);
   } catch (error) {
     console.error(error);
@@ -180,12 +230,56 @@ router.get("/list", async (req, res) => {
   }
 });
 
+
+// List public flashcard sets across the system
+router.get("/public", async (req, res) => {
+  try {
+    const snapshot = await db.collection("flashcard_sets")
+      .where("isPublic", "==", true)
+      .get();
+
+    const creatorIds = [...new Set(snapshot.docs.map((doc) => doc.data().userId).filter(Boolean))];
+    const creatorMap = {};
+    await Promise.all(creatorIds.map(async (uid) => {
+      try {
+        const userDoc = await db.collection("users").doc(uid).get();
+        if (userDoc.exists) {
+          const data = userDoc.data();
+          creatorMap[uid] = {
+            uid,
+            displayName: data.displayName || data.email || "Người dùng ZenTask",
+            photoURL: data.photoURL || "",
+          };
+        }
+      } catch (e) {
+        console.warn("Cannot load public flashcard creator", uid, e.message);
+      }
+    }));
+
+    const sets = sortByCreatedAtDesc(snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        creator: creatorMap[data.userId] || null,
+      };
+    }));
+
+    res.json(sets);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch public flashcard sets" });
+  }
+});
+
 // Create a new flashcard set
 router.post("/set", async (req, res) => {
   try {
-    const { title, description = "", color = "bg-blue-500" } = req.body;
+    const { title, description = "", color = "bg-blue-500", isPublic = true } = req.body;
 
     if (!title) return res.status(400).json({ error: "Title is required" });
+
+    const publicFlag = await normalizePublicFlag(req.uid, isPublic);
 
     const newSet = {
       userId: req.uid,
@@ -196,6 +290,7 @@ router.post("/set", async (req, res) => {
       lastStudied: null,
       color,
       isNew: true,
+      isPublic: publicFlag,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     };
@@ -204,7 +299,7 @@ router.post("/set", async (req, res) => {
     res.json({ id: docRef.id, ...newSet });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to create flashcard set" });
+    res.status(error.statusCode || 500).json({ error: error.message || "Failed to create flashcard set" });
   }
 });
 
@@ -212,7 +307,7 @@ router.post("/set", async (req, res) => {
 router.patch("/set/:setId", async (req, res) => {
   try {
     const { setId } = req.params;
-    const { title, description, color, folderId, order } = req.body;
+    const { title, description, color, folderId, order, isPublic } = req.body;
     
     const setRef = db.collection("flashcard_sets").doc(setId);
     const setDoc = await setRef.get();
@@ -227,13 +322,14 @@ router.patch("/set/:setId", async (req, res) => {
     if (color) updates.color = color;
     if (folderId !== undefined) updates.folderId = folderId; // allows null for root
     if (order !== undefined) updates.order = order;
+    if (isPublic !== undefined) updates.isPublic = await normalizePublicFlag(req.uid, isPublic);
     
     await setRef.update(updates);
     
     res.json({ success: true, updates });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to update flashcard set" });
+    res.status(error.statusCode || 500).json({ error: error.message || "Failed to update flashcard set" });
   }
 });
 
@@ -242,18 +338,21 @@ router.get("/set/:setId/cards", async (req, res) => {
   try {
     const { setId } = req.params;
 
-    // Check if set belongs to user
     const setRef = db.collection("flashcard_sets").doc(setId);
     const setDoc = await setRef.get();
     
-    if (!setDoc.exists || setDoc.data().userId !== req.uid) {
+    if (!setDoc.exists) {
       return res.status(404).json({ error: "Flashcard set not found" });
     }
 
     const setData = setDoc.data();
+    const isOwner = setData.userId === req.uid;
+    if (!isOwner && !setData.isPublic) {
+      return res.status(404).json({ error: "Flashcard set not found" });
+    }
 
-    // Mark as not new after being viewed
-    if (setData.isNew) {
+    // Mark as not new only when owner opens their own set
+    if (isOwner && setData.isNew) {
       await setRef.update({ 
         isNew: false,
         updatedAt: FieldValue.serverTimestamp() 
@@ -261,9 +360,9 @@ router.get("/set/:setId/cards", async (req, res) => {
       setData.isNew = false;
     }
 
-    const snapshot = await db.collection("flashcards").where("setId", "==", setId).orderBy("createdAt", "desc").get();
+    const snapshot = await db.collection("flashcards").where("setId", "==", setId).get();
 
-    const cards = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const cards = sortByCreatedAtDesc(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     res.json({ set: { id: setDoc.id, ...setData }, cards });
   } catch (error) {
     console.error(error);
@@ -607,15 +706,17 @@ router.patch("/set/:setId/privacy", async (req, res) => {
       return res.status(404).json({ error: "Flashcard set not found" });
     }
 
+    const publicFlag = await normalizePublicFlag(req.uid, isPublic);
+
     await setRef.update({
-      isPublic: !!isPublic,
+      isPublic: publicFlag,
       updatedAt: FieldValue.serverTimestamp(),
     });
 
-    res.json({ success: true, isPublic: !!isPublic });
+    res.json({ success: true, isPublic: publicFlag });
   } catch (error) {
     console.error("Privacy Update Error:", error);
-    res.status(500).json({ error: "Failed to update set privacy" });
+    res.status(error.statusCode || 500).json({ error: error.message || "Failed to update set privacy" });
   }
 });
 

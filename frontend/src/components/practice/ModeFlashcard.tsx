@@ -8,13 +8,17 @@ import { useSM2 } from "../../hooks/useSM2";
 interface ModeFlashcardProps {
   cards: Flashcard[];
   setId: string;
+  onComplete?: (wrongCardIds: string[]) => void;
+  completionActions?: React.ReactNode;
 }
 
 
-export function ModeFlashcard({ cards, setId }: ModeFlashcardProps) {
+export function ModeFlashcard({ cards, setId, onComplete, completionActions }: ModeFlashcardProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [wrongCardIds, setWrongCardIds] = useState<string[]>([]);
+  const wrongCardIdsRef = React.useRef<string[]>([]);
   
   const { playAudio, playSoundEffect, isLoading, loadingText } = useTTSAudio();
   const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
@@ -31,6 +35,7 @@ export function ModeFlashcard({ cards, setId }: ModeFlashcardProps) {
       reportCorrect(currentCard.id, "flashcard");
     } else {
       reportWrong(currentCard.id, "flashcard");
+      setWrongCardIds((prev) => { const next = prev.includes(currentCard.id) ? prev : [...prev, currentCard.id]; wrongCardIdsRef.current = next; return next; });
     }
     setIsFlipped(false);
     setTimeout(() => {
@@ -38,6 +43,7 @@ export function ModeFlashcard({ cards, setId }: ModeFlashcardProps) {
         setCurrentIndex(curr => curr + 1);
       } else {
         flushProgress();
+        onComplete?.(wrongCardIdsRef.current);
         setCompleted(true);
       }
     }, 150);
@@ -58,12 +64,13 @@ export function ModeFlashcard({ cards, setId }: ModeFlashcardProps) {
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Hoàn thành!</h2>
         <p className="text-gray-500 mb-8">Bạn đã ôn tập xong toàn bộ thẻ.</p>
         <button 
-          onClick={() => { setCompleted(false); setCurrentIndex(0); }}
+          onClick={() => { setCompleted(false); setCurrentIndex(0); setWrongCardIds([]); wrongCardIdsRef.current = []; }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Ôn tập lại
         </button>
+        {completionActions}
       </div>
     );
   }

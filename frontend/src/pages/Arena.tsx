@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Swords, Trophy, X, User, Users, CheckCircle } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -33,6 +33,7 @@ export function Arena() {
   const [userScore, setUserScore] = useState(0);
   const [opponentScore, setOpponentScore] = useState(0);
   const [hasAnswered, setHasAnswered] = useState(false);
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
   const [oppAnswered, setOppAnswered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const hasAnsweredRef = useRef(false);
@@ -45,10 +46,34 @@ export function Arena() {
   const searchStartTimeRef = useRef(0);
   const [prepCountdown, setPrepCountdown] = useState(7);
   const [currentTip, setCurrentTip] = useState("");
+  const matchStateRef = useRef(matchState);
+  const roomCodeRef = useRef(roomCode);
+  const isLeavingArenaRef = useRef(false);
 
   useEffect(() => {
     hasAnsweredRef.current = hasAnswered;
   }, [hasAnswered]);
+
+  useEffect(() => {
+    matchStateRef.current = matchState;
+  }, [matchState]);
+
+  useEffect(() => {
+    roomCodeRef.current = roomCode;
+  }, [roomCode]);
+
+  const cleanupArenaSession = useCallback((reason: "leave" | "cancel" | "surrender" = "leave") => {
+    if (!socket || isLeavingArenaRef.current) return;
+    const state = matchStateRef.current;
+    const currentRoomCode = roomCodeRef.current;
+
+    if (state === "searching") {
+      socket.emit("cancel_arena_search");
+    }
+    if (currentRoomCode) {
+      socket.emit("arena_leave", { roomCode: currentRoomCode, reason });
+    }
+  }, [socket]);
 
   useEffect(() => {
     if (!socket || !user) return;
@@ -99,6 +124,7 @@ export function Arena() {
     socket.on("arena_next_question_sync", (data: { index: number }) => {
       setCurrentQuestionIndex(data.index);
       setHasAnswered(false);
+      setLastAnswerCorrect(null);
       setOppAnswered(false);
       setTimeLeft(10);
       startTimer();
@@ -166,6 +192,52 @@ export function Arena() {
     };
   }, [socket, user, roomCode, opponent]);
 
+  useEffect(() => {
+    const shouldGuard = ["searching", "found", "playing"].includes(matchState);
+    if (!shouldGuard) return;
+
+    window.history.pushState({ arenaGuard: true }, "", window.location.href);
+
+    const handlePopState = () => {
+      const state = matchStateRef.current;
+      if (!["searching", "found", "playing"].includes(state)) return;
+
+      const ok = window.confirm("Bạn có chắc muốn thoát không? Nếu thoát, bạn sẽ rời khỏi phòng đấu hạng.");
+      if (ok) {
+        cleanupArenaSession("leave");
+        isLeavingArenaRef.current = true;
+        stopTimer();
+        if (searchTimerRef.current) clearInterval(searchTimerRef.current);
+        navigate("/flashcards", { replace: true });
+      } else {
+        window.history.pushState({ arenaGuard: true }, "", window.location.href);
+      }
+    };
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      cleanupArenaSession("leave");
+      event.preventDefault();
+      event.returnValue = "Bạn có chắc muốn thoát không?";
+      return event.returnValue;
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [matchState, cleanupArenaSession, navigate]);
+
+  useEffect(() => {
+    return () => {
+      const state = matchStateRef.current;
+      if (["searching", "found", "playing"].includes(state) && !isLeavingArenaRef.current) {
+        cleanupArenaSession("leave");
+      }
+    };
+  }, [cleanupArenaSession]);
+
   const startTimer = () => {
     stopTimer();
     setTimeLeft(10);
@@ -224,13 +296,14 @@ export function Arena() {
   };
 
   const handleReset = () => {
-    if (socket && roomCode) socket.emit("arena_leave", { roomCode });
+    cleanupArenaSession("leave");
     setMatchState("selecting");
     setUserScore(0);
     setOpponentScore(0);
     setRoomCode("");
     setCurrentQuestionIndex(0);
     setHasAnswered(false);
+    setLastAnswerCorrect(null);
     setOppAnswered(false);
     if (searchTimerRef.current) clearInterval(searchTimerRef.current);
     stopTimer();
@@ -256,7 +329,7 @@ export function Arena() {
     setUserScore(0);
     setOpponentScore(100); // Mock win for opp
     setMatchState("finished");
-    if (socket && roomCode) socket.emit("arena_leave", { roomCode });
+    cleanupArenaSession("surrender");
   };
 
   const handleCloseClick = () => {
@@ -273,6 +346,7 @@ export function Arena() {
   const handleAnswer = (isCorrect: boolean, timeRem: number = timeLeft) => {
     if (hasAnswered) return;
     setHasAnswered(true);
+    setLastAnswerCorrect(isCorrect);
     socket?.emit("arena_answer", {
       roomCode,
       uid: user?.uid,
@@ -548,6 +622,7 @@ export function Arena() {
             allCards={matchData.cards}
             isX2={isX2}
             disabled={hasAnswered}
+            answerStatus={hasAnswered ? lastAnswerCorrect : null}
             onAnswer={handleAnswer}
           />
         </div>

@@ -8,6 +8,8 @@ import { useSM2 } from "../../hooks/useSM2";
 interface ModeTypingProps {
   cards: Flashcard[];
   setId: string;
+  onComplete?: (wrongCardIds: string[]) => void;
+  completionActions?: React.ReactNode;
 }
 
 
@@ -21,9 +23,11 @@ interface Meteorite {
   isExploding: boolean;
 }
 
-export function ModeTyping({ cards, setId }: ModeTypingProps) {
+export function ModeTyping({ cards, setId, onComplete, completionActions }: ModeTypingProps) {
   const [queue, setQueue] = useState<Flashcard[]>([]);
   const [completed, setCompleted] = useState(false);
+  const [wrongCardIds, setWrongCardIds] = useState<string[]>([]);
+  const wrongCardIdsRef = useRef<string[]>([]);
   const [meteorites, setMeteorites] = useState<Meteorite[]>([]);
   const [typedText, setTypedText] = useState("");
   const [lockedTargetId, setLockedTargetId] = useState<string | null>(null);
@@ -62,6 +66,7 @@ export function ModeTyping({ cards, setId }: ModeTypingProps) {
   const flushProgressRef = useRef(flushProgress);
   useEffect(() => { reportCorrectRef.current = reportCorrect; }, [reportCorrect]);
   useEffect(() => { reportWrongRef.current = reportWrong; }, [reportWrong]);
+  useEffect(() => { wrongCardIdsRef.current = wrongCardIds; }, [wrongCardIds]);
   useEffect(() => { flushProgressRef.current = flushProgress; }, [flushProgress]);
 
 
@@ -154,6 +159,7 @@ export function ModeTyping({ cards, setId }: ModeTypingProps) {
                 // Push real card back to queue
                 unlearnedRef.current = [...unlearnedRef.current, m.card];
                 reportWrongRef.current(m.card.id, "typing");
+                setWrongCardIds((prev) => { const next = prev.includes(m.card.id) ? prev : [...prev, m.card.id]; wrongCardIdsRef.current = next; return next; });
                 playSoundEffect("wrong");
               }
 
@@ -180,6 +186,7 @@ export function ModeTyping({ cards, setId }: ModeTypingProps) {
       // Check win condition
       if (unlearnedRef.current.length === 0 && !meteoritesRef.current.some((m: any) => !m.isDecoy)) {
         flushProgressRef.current();
+        onComplete?.(wrongCardIdsRef.current);
         setCompleted(true);
         return;
       }
@@ -291,12 +298,14 @@ export function ModeTyping({ cards, setId }: ModeTypingProps) {
             unlearnedRef.current = [...cards];
             learnedRef.current = [];
             setCompleted(false);
+            setWrongCardIds([]); wrongCardIdsRef.current = [];
           }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Chơi lại
         </button>
+        {completionActions}
       </div>
     );
   }

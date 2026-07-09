@@ -1,5 +1,5 @@
 import React from "react";
-import { Layers, HelpCircle, FormInput, Headphones, Shuffle, Target, Lock, Keyboard } from "lucide-react";
+import { Layers, HelpCircle, FormInput, Headphones, Shuffle, Target, Lock, Keyboard, Mic } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { PracticeMode } from "../../pages/Flashcard/FlashcardPractice";
 
@@ -15,6 +15,7 @@ export function PracticeSidebar({ activeMode, onChangeMode, cardCount }: Practic
     { id: "quiz", title: "Trắc nghiệm", icon: HelpCircle, desc: "Chọn 1 đáp án đúng trong 4", minCards: 4 },
     { id: "fill_blank", title: "Điền từ", icon: FormInput, desc: "Gõ lại từ vựng dựa vào ngữ cảnh", minCards: 1 },
     { id: "listening", title: "Luyện nghe", icon: Headphones, desc: "Nghe phát âm và gõ lại", minCards: 1 },
+    { id: "pronunciation", title: "Phát âm", icon: Mic, desc: "Ghi âm và chấm độ chính xác", minCards: 1 },
     { id: "match", title: "Nối từ", icon: Shuffle, desc: "Tìm các cặp từ vựng và nghĩa", minCards: 5 },
     { id: "bubble", title: "Bong bóng", icon: Target, desc: "Bắn bong bóng mang từ đúng", minCards: 5 },
     { id: "guess", title: "Đoán từ", icon: FormInput, desc: "Đoán các kí tự còn thiếu của từ", minCards: 1 },

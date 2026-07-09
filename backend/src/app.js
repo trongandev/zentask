@@ -36,6 +36,31 @@ const activeQuizRooms = new Map();
 const arenaQueue = []; // array of { socket, user, matchData }
 const activeArenaRooms = new Map(); // roomCode -> roomState
 
+const removeArenaSocketFromQueue = (socket) => {
+  const idx = arenaQueue.findIndex((item) => item.socket.id === socket.id);
+  if (idx !== -1) {
+    const [removed] = arenaQueue.splice(idx, 1);
+    console.log(`Socket ${socket.id} removed from arena queue${removed?.user?.uid ? ` (${removed.user.uid})` : ""}`);
+    return true;
+  }
+  return false;
+};
+
+const leaveArenaRoom = (socket, roomCode, reason = "leave") => {
+  const targetRoomCode = roomCode || socket.currentArenaRoom;
+  if (!targetRoomCode) return;
+
+  const room = activeArenaRooms.get(targetRoomCode);
+  socket.leave(targetRoomCode);
+  socket.currentArenaRoom = null;
+
+  if (room) {
+    activeArenaRooms.delete(targetRoomCode);
+    socket.to(targetRoomCode).emit("arena_opponent_left", { reason });
+    console.log(`Socket ${socket.id} left arena room ${targetRoomCode} (${reason})`);
+  }
+};
+
 io.on("connection", (socket) => {
   console.log("New socket connection:", socket.id);
 
@@ -62,12 +87,16 @@ io.on("connection", (socket) => {
       activeQuizRooms.set(socket.currentRoom, updatedUsers);
       io.to(socket.currentRoom).emit("room_participants_update", updatedUsers);
     }
+
+    // Remove stale Arena state so disconnected/back-navigation users are not matched later
+    removeArenaSocketFromQueue(socket);
+    leaveArenaRoom(socket, socket.currentArenaRoom, "disconnect");
   });
 
   // Quiz Room Sockets
   socket.on("join_quiz_room", ({ roomCode, user }) => {
     socket.join(roomCode);
-    
+
     // Store current room and uid on socket for disconnect cleanup
     socket.currentRoom = roomCode;
     socket.currentUid = user.uid;
@@ -76,7 +105,7 @@ io.on("connection", (socket) => {
       activeQuizRooms.set(roomCode, []);
     }
     const roomUsers = activeQuizRooms.get(roomCode);
-    
+
     // Check if already in array to avoid duplicates
     if (!roomUsers.find(u => u.uid === user.uid)) {
       roomUsers.push(user);
@@ -94,7 +123,7 @@ io.on("connection", (socket) => {
     const roomUsers = activeQuizRooms.get(roomCode) || [];
     const updatedUsers = roomUsers.filter(u => u.uid !== uid);
     activeQuizRooms.set(roomCode, updatedUsers);
-    
+
     io.to(roomCode).emit("room_participants_update", updatedUsers);
   });
 
@@ -102,10 +131,10 @@ io.on("connection", (socket) => {
     const roomUsers = activeQuizRooms.get(roomCode) || [];
     const updatedUsers = roomUsers.filter(u => u.uid !== uid);
     activeQuizRooms.set(roomCode, updatedUsers);
-    
+
     // Notify room to update list
     io.to(roomCode).emit("room_participants_update", updatedUsers);
-    
+
     // Notify specific user they were kicked
     io.to(roomCode).emit("room_kicked_student", { uid });
   });
@@ -157,13 +186,21 @@ io.on("connection", (socket) => {
     const existingIdx = arenaQueue.findIndex(item => item.user.uid === user.uid);
     if (existingIdx !== -1) return;
 
+    while (arenaQueue.length > 0 && (!arenaQueue[0].socket.connected || arenaQueue[0].user?.uid === user.uid)) {
+      arenaQueue.shift();
+    }
+
     if (arenaQueue.length > 0) {
       const opponent = arenaQueue.shift();
+      if (!opponent.socket.connected) {
+        arenaQueue.push({ socket, user, matchData });
+        return;
+      }
       const roomCode = `arena_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-      
+
       socket.join(roomCode);
       opponent.socket.join(roomCode);
-      
+
       const roomState = {
         roomCode,
         p1: opponent.user,
@@ -178,7 +215,7 @@ io.on("connection", (socket) => {
         p2Answered: false,
       };
       activeArenaRooms.set(roomCode, roomState);
-      
+
       socket.currentArenaRoom = roomCode;
       opponent.socket.currentArenaRoom = roomCode;
 
@@ -196,24 +233,20 @@ io.on("connection", (socket) => {
   });
 
   socket.on("cancel_arena_search", () => {
-    const idx = arenaQueue.findIndex(item => item.socket.id === socket.id);
-    if (idx !== -1) {
-      arenaQueue.splice(idx, 1);
-      console.log(`Socket ${socket.id} left arena queue`);
-    }
+    removeArenaSocketFromQueue(socket);
   });
 
   socket.on("arena_answer", ({ roomCode, uid, timeRemaining, isCorrect }) => {
     const room = activeArenaRooms.get(roomCode);
     if (!room) return;
-    
+
     const isX2 = room.matchData.x2Indices?.includes(room.currentQuestionIndex);
     let points = 0;
     if (isCorrect) {
       points = 50 + Math.floor(timeRemaining * 5); // Max 100 for 10s
       if (isX2) points *= 2;
     }
-    
+
     if (room.p1.uid === uid && !room.p1Answered) {
       room.p1Score += points;
       room.p1Answered = true;
@@ -221,7 +254,7 @@ io.on("connection", (socket) => {
       room.p2Score += points;
       room.p2Answered = true;
     }
-    
+
     io.to(roomCode).emit("arena_score_update", {
       userScores: {
         [room.p1.uid]: room.p1Score,
@@ -232,7 +265,7 @@ io.on("connection", (socket) => {
         [room.p2.uid]: room.p2Answered
       }
     });
-    
+
     if (room.p1Answered && room.p2Answered) {
       io.to(roomCode).emit("arena_both_answered");
     }
@@ -241,13 +274,13 @@ io.on("connection", (socket) => {
   socket.on("arena_next_question", ({ roomCode }) => {
     const room = activeArenaRooms.get(roomCode);
     if (!room) return;
-    
+
     // Only let P1 trigger to avoid double events
     if (socket.id === room.p1Socket) {
       room.currentQuestionIndex++;
       room.p1Answered = false;
       room.p2Answered = false;
-      
+
       if (room.currentQuestionIndex >= 10) { // 10 questions total
         io.to(roomCode).emit("arena_end_game", {
           userScores: {
@@ -262,11 +295,9 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("arena_leave", ({ roomCode }) => {
-    socket.leave(roomCode);
-    socket.currentArenaRoom = null;
-    activeArenaRooms.delete(roomCode); // If someone leaves, end room
-    socket.to(roomCode).emit("arena_opponent_left");
+  socket.on("arena_leave", ({ roomCode } = {}) => {
+    removeArenaSocketFromQueue(socket);
+    leaveArenaRoom(socket, roomCode, "leave");
   });
 });
 
@@ -301,11 +332,11 @@ import adminRoutes from "./routes/admin.js";
 import arenaRoutes from "./routes/arena.js";
 import grammarRoutes from "./routes/grammar.js";
 import tensesRoutes from "./routes/tenses.js";
-import subtitleRoutes from "./routes/subtitle.js";
 import aiRoutes from "./routes/ai.js";
 import notebookRoutes from "./routes/notebook.js";
 import utilitiesRoutes from "./routes/utilities.js";
 import friendsRoutes from "./routes/friends.js";
+import pronunciationRoutes from "./routes/pronunciation.js";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rank", rankRoutes);
@@ -320,11 +351,11 @@ app.use("/api/quiz", quizRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/arena", arenaRoutes);
 app.use("/api/tenses", tensesRoutes);
-app.use("/api/subtitle", subtitleRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/notebook", notebookRoutes);
 app.use("/api/utilities", utilitiesRoutes);
 app.use("/api/friends", friendsRoutes);
+app.use("/api/pronunciation", pronunciationRoutes);
 
 app.get("/health", (req, res) => {
   res.send("OK");

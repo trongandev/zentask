@@ -33,7 +33,6 @@ import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { TermsOfService } from "./pages/TermsOfService";
 import { useAuth } from "./contexts/AuthContext";
 import { SocketProvider } from "./contexts/SocketContext";
-import SubtitleAI from "./features/subtitle-ai/SubtitleAI";
 import AIChat from "./pages/AIChat";
 import Notebook from "./pages/Notebook";
 import Utilities from "./pages/Utilities";
@@ -230,7 +229,6 @@ function AppContent() {
           <Route path="arena" element={<Arena />} />
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="community" element={<Community />} />
-          <Route path="subtitle-ai" element={<SubtitleAI />} />
           <Route path="ai-chat" element={<AIChat />} />
           <Route path="notebook" element={<Notebook />} />
           <Route path="utilities" element={<Utilities />} />

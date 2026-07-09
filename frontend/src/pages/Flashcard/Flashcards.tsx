@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal, Trash2, Folder as FolderIcon, Edit2 } from "lucide-react";
+import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal, Trash2, Folder as FolderIcon, Edit2, Globe2, Lock, Crown, Copy, Search } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 import { RankCard } from "../../components/shared/RankCard";
@@ -128,6 +128,12 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
       </div>
 
       <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">{set.title}</h3>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${set.isPublic === false ? "bg-slate-100 text-slate-600" : "bg-emerald-50 text-emerald-600"}`}>
+          {set.isPublic === false ? <Lock className="w-3 h-3" /> : <Globe2 className="w-3 h-3" />}
+          {set.isPublic === false ? "Riêng tư" : "Công khai"}
+        </span>
+      </div>
 
       <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 font-medium">
         <span className="flex items-center gap-1.5">
@@ -219,7 +225,7 @@ function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClick, popo
 }
 
 export function Flashcards() {
-  const { sets, folders, fetchSets, fetchFolders, createSet, updateSet, deleteSet, createFolder, updateFolder, deleteFolder, loading } = useFlashcardStore();
+  const { sets, publicSets, folders, fetchSets, fetchPublicSets, fetchFolders, createSet, updateSet, deleteSet, createFolder, updateFolder, deleteFolder, cloneSet, loading } = useFlashcardStore();
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -236,6 +242,18 @@ export function Flashcards() {
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [selectedColor, setSelectedColor] = useState("bg-blue-500");
+  const [setIsPublic, setSetIsPublic] = useState(true);
+  const [activeTab, setActiveTab] = useState<"mine" | "public">("mine");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const isVip = Boolean(
+    (user as any)?.isVip ||
+    (user as any)?.vip ||
+    user?.role === "admin" ||
+    (user as any)?.role === "vip" ||
+    ["vip", "pro", "premium"].includes(String((user as any)?.plan || (user as any)?.subscriptionPlan || "").toLowerCase()) ||
+    String((user as any)?.subscriptionStatus || "").toLowerCase() === "active"
+  );
 
   const [newFolderName, setNewFolderName] = useState("");
   const [newFolderColor, setNewFolderColor] = useState("bg-blue-500");
@@ -261,7 +279,8 @@ export function Flashcards() {
   useEffect(() => {
     fetchSets();
     fetchFolders();
-  }, [fetchSets, fetchFolders]);
+    fetchPublicSets();
+  }, [fetchSets, fetchFolders, fetchPublicSets]);
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -407,6 +426,7 @@ export function Flashcards() {
     setEditingSet(null);
     setNewTitle("");
     setNewDesc("");
+    setSetIsPublic(true);
     setTargetFolderIdForNewSet(folderId);
     setSelectedColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
     setIsModalOpen(true);
@@ -418,14 +438,23 @@ export function Flashcards() {
       return;
     }
 
+    if (!setIsPublic && !isVip) {
+      toast.error("Bộ thẻ riêng tư chỉ dành cho tài khoản VIP. Vui lòng chọn Công khai hoặc nâng cấp VIP.");
+      return;
+    }
+
     let res;
     if (editingSet) {
-      res = await updateSet(editingSet.id, { title: newTitle, description: newDesc, color: selectedColor });
+      res = await updateSet(editingSet.id, { title: newTitle, description: newDesc, color: selectedColor, isPublic: setIsPublic });
     } else {
-      res = await createSet(newTitle, newDesc, selectedColor);
+      res = await createSet(newTitle, newDesc, selectedColor, setIsPublic);
       if (res && targetFolderIdForNewSet) {
         await updateSet(res.id, { folderId: targetFolderIdForNewSet });
       }
+    }
+
+    if (res) {
+      await fetchPublicSets();
     }
 
     if (res) {
@@ -459,10 +488,35 @@ export function Flashcards() {
     setFolderToDelete(null);
   };
 
+  const matchesSearch = React.useCallback((set: any) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    const haystack = [
+      set.title,
+      set.description,
+      set.creator?.displayName,
+      String(set.cardCount || ""),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(query);
+  }, [searchQuery]);
+
   // Helper arrays
-  const unassignedSets = sets.filter((s) => !s.folderId);
+  const searchedSets = sets.filter(matchesSearch);
+  const unassignedSets = searchedSets.filter((s) => !s.folderId);
   const activeSetForOverlay = sets.find((s) => s.id === activeId);
   const isRootDropActive = isRootOver || coordinateOverId === "root" || coordinateOverId === "remove-zone";
+  const displayedPublicSets = publicSets.filter((set: any) => set.isPublic).filter(matchesSearch);
+
+  const handleClonePublicSet = async (setId: string) => {
+    const cloned = await cloneSet(setId);
+    if (cloned) {
+      await fetchSets();
+      setActiveTab("mine");
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 min-h-screen" onContextMenu={(e) => handleContextMenu(e, "root")}>
@@ -500,6 +554,78 @@ export function Flashcards() {
         </div>
       </div>
 
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 flex flex-col sm:flex-row gap-2 w-full sm:w-max">
+          <button
+            onClick={() => setActiveTab("mine")}
+            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "mine" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+          >
+            Của tôi
+          </button>
+          <button
+            onClick={() => setActiveTab("public")}
+            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "public" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+          >
+            Công khai
+          </button>
+        </div>
+        <div className="relative w-full lg:max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={activeTab === "public" ? "Tìm bộ thẻ công khai..." : "Tìm bộ thẻ của tôi..."}
+            className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm font-semibold text-gray-700 shadow-sm outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+          />
+        </div>
+      </div>
+
+      {activeTab === "public" ? (
+        <div className="space-y-5">
+          <div className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-5">
+            <h2 className="flex items-center gap-2 text-xl font-extrabold text-emerald-800">
+              <Globe2 className="w-6 h-6" /> Bộ thẻ công khai
+            </h2>
+            <p className="mt-1 text-sm font-medium text-emerald-700/80">Tất cả bộ thẻ được người dùng đặt công khai sẽ xuất hiện tại đây.</p>
+          </div>
+
+          {loading && displayedPublicSets.length === 0 ? (
+            <div className="flex justify-center p-12">
+              <div className="w-8 h-8 border-4 border-emerald-600/30 border-t-emerald-600 rounded-full animate-spin"></div>
+            </div>
+          ) : displayedPublicSets.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-gray-300 bg-white p-12 text-center text-gray-500 font-medium">
+              {searchQuery.trim() ? "Không tìm thấy bộ thẻ công khai phù hợp." : "Chưa có bộ thẻ công khai nào."}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedPublicSets.map((set: any) => (
+                <div key={set.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col relative overflow-hidden">
+                  <div className={`w-12 h-12 rounded-2xl ${set.color || "bg-blue-500"} flex items-center justify-center text-white shadow-sm mb-4`}>
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{set.title}</h3>
+                  <p className="text-sm text-gray-500 line-clamp-2 mb-4">{set.description || "Không có mô tả"}</p>
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-bold mb-5">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-600"><Globe2 className="w-3 h-3" /> Công khai</span>
+                    <span className="rounded-full bg-gray-50 px-2.5 py-1 text-gray-600">{set.cardCount || 0} thẻ</span>
+                  </div>
+                  {set.creator?.displayName && <p className="mb-5 text-xs font-semibold text-gray-400">Tác giả: {set.creator.displayName}</p>}
+                  <div className="mt-auto grid grid-cols-2 gap-3">
+                    <button onClick={() => navigate(`/flashcard/${set.id}`)} className="rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-100 transition-colors">
+                      Xem trước
+                    </button>
+                    <button onClick={() => handleClonePublicSet(set.id)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition-colors">
+                      <Copy className="w-4 h-4" /> Lưu
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+
       <DndContext sensors={sensors} collisionDetection={collisionDetectionStrategy} onDragStart={handleDragStart} onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
         {/* Floating Remove Dropzone */}
         <div 
@@ -524,7 +650,7 @@ export function Flashcards() {
               <FolderDroppable
                 key={folder.id}
                 folder={folder}
-                setsInFolder={sets.filter((s) => s.folderId === folder.id)}
+                setsInFolder={searchedSets.filter((s) => s.folderId === folder.id)}
                 onContextMenu={handleContextMenu}
                 onSetClick={(s: any) => navigate(`/flashcard/${s.id}`)}
                 popoverId={popoverId}
@@ -534,6 +660,7 @@ export function Flashcards() {
                   setNewTitle(s.title);
                   setNewDesc(s.description || "");
                   setSelectedColor(s.color || "bg-blue-500");
+                  setSetIsPublic(s.isPublic !== false);
                   setIsModalOpen(true);
                 }}
                 onDeleteSet={(s: any) => setSetToDelete(s)}
@@ -558,8 +685,8 @@ export function Flashcards() {
                   <div data-flashcard-dropzone="root" className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[200px] p-4 rounded-3xl border transition-all ${isRootDropActive ? "bg-blue-50 border-blue-300 ring-4 ring-blue-500/10" : "bg-gray-50/50 border-gray-100"}`}>
                     {unassignedSets.length === 0 && (
                       <div data-flashcard-dropzone="root" className={`col-span-full flex min-h-[150px] flex-col items-center justify-center p-12 text-center border-2 border-dashed rounded-2xl transition-all ${isRootDropActive ? "border-blue-400 bg-white text-blue-700" : "border-gray-300 text-gray-500"}`}>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">{folders.length === 0 ? "Chưa có bộ thẻ nào" : "Chưa có bộ thẻ chưa phân loại"}</h3>
-                        <p className="text-gray-500 mb-6">{folders.length === 0 ? "Hãy tạo bộ thẻ đầu tiên hoặc thư mục để bắt đầu." : "Kéo bộ thẻ từ thư mục vào vùng này để đưa ra ngoài."}</p>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">{searchQuery.trim() ? "Không tìm thấy bộ thẻ phù hợp" : folders.length === 0 ? "Chưa có bộ thẻ nào" : "Chưa có bộ thẻ chưa phân loại"}</h3>
+                        <p className="text-gray-500 mb-6">{searchQuery.trim() ? "Thử đổi từ khóa hoặc chuyển sang tab Công khai." : folders.length === 0 ? "Hãy tạo bộ thẻ đầu tiên hoặc thư mục để bắt đầu." : "Kéo bộ thẻ từ thư mục vào vùng này để đưa ra ngoài."}</p>
                       </div>
                     )}
                     {unassignedSets.map((set) => (
@@ -575,6 +702,7 @@ export function Flashcards() {
                           setNewTitle(s.title);
                           setNewDesc(s.description || "");
                           setSelectedColor(s.color || "bg-blue-500");
+                          setSetIsPublic(s.isPublic !== false);
                           setIsModalOpen(true);
                         }}
                         onDelete={(s: any) => setSetToDelete(s)}
@@ -607,6 +735,7 @@ export function Flashcards() {
           ) : null}
         </DragOverlay>
       </DndContext>
+      )}
 
       {/* --- Context Menu Portal --- */}
       {contextMenu && (
@@ -689,6 +818,7 @@ export function Flashcards() {
                   setNewTitle(contextMenu.item.title);
                   setNewDesc(contextMenu.item.description || "");
                   setSelectedColor(contextMenu.item.color || "bg-blue-500");
+                  setSetIsPublic(contextMenu.item.isPublic !== false);
                   setIsModalOpen(true);
                   setContextMenu(null);
                 }}
@@ -823,6 +953,33 @@ export function Flashcards() {
                   rows={3}
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors resize-none"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Quyền riêng tư</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSetIsPublic(true)}
+                    className={`rounded-2xl border p-4 text-left transition-all ${setIsPublic ? "border-emerald-400 bg-emerald-50 ring-4 ring-emerald-100" : "border-gray-200 bg-gray-50 hover:bg-white"}`}
+                  >
+                    <div className="flex items-center gap-2 font-extrabold text-gray-900"><Globe2 className="w-5 h-5 text-emerald-600" /> Công khai</div>
+                    <p className="mt-1 text-xs font-medium text-gray-500">Mặc định. Mọi người có thể xem và lưu bộ thẻ này.</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isVip) {
+                        toast.error("Bộ thẻ riêng tư chỉ dành cho tài khoản VIP.");
+                        return;
+                      }
+                      setSetIsPublic(false);
+                    }}
+                    className={`rounded-2xl border p-4 text-left transition-all ${!setIsPublic ? "border-slate-400 bg-slate-100 ring-4 ring-slate-100" : "border-gray-200 bg-gray-50 hover:bg-white"} ${!isVip ? "opacity-75" : ""}`}
+                  >
+                    <div className="flex items-center gap-2 font-extrabold text-gray-900"><Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}</div>
+                    <p className="mt-1 text-xs font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo bộ thẻ riêng tư.</p>
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Màu sắc</label>

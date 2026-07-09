@@ -8,12 +8,16 @@ import { useSM2 } from "../../hooks/useSM2";
 interface ModeBubbleProps {
   cards: Flashcard[];
   setId: string;
+  onComplete?: (wrongCardIds: string[]) => void;
+  completionActions?: React.ReactNode;
 }
 
 
-export function ModeBubble({ cards, setId }: ModeBubbleProps) {
+export function ModeBubble({ cards, setId, onComplete, completionActions }: ModeBubbleProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [wrongCardIds, setWrongCardIds] = useState<string[]>([]);
+  const wrongCardIdsRef = React.useRef<string[]>([]);
   const [bubbles, setBubbles] = useState<any[]>([]);
   const [animatingSuccess, setAnimatingSuccess] = useState(false);
 
@@ -135,11 +139,13 @@ export function ModeBubble({ cards, setId }: ModeBubbleProps) {
           setCurrentIndex((curr) => curr + 1);
         } else {
           flushProgress();
+          onComplete?.(wrongCardIdsRef.current);
           setCompleted(true);
         }
       }, 1500);
     } else {
       reportWrong(currentCard.id, "bubble");
+      setWrongCardIds((prev) => { const next = prev.includes(currentCard.id) ? prev : [...prev, currentCard.id]; wrongCardIdsRef.current = next; return next; });
       playSoundEffect("wrong");
       setBubbles((prev) => prev.map((b) => (b.cardId === cardId ? { ...b, error: true } : b)));
       setTimeout(() => {
@@ -165,12 +171,15 @@ export function ModeBubble({ cards, setId }: ModeBubbleProps) {
           onClick={() => {
             setCompleted(false);
             setCurrentIndex(0);
+            setWrongCardIds([]);
+            wrongCardIdsRef.current = [];
           }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Chơi lại
         </button>
+        {completionActions}
       </div>
     );
   }

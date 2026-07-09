@@ -1,126 +1,2275 @@
 {
   "project_id": "enduring-vision-vj1d7",
+  "description": "Firestore data blueprint for ZenTask backend routes mounted in app.js.",
+  "generatedAt": "2026-07-09T00:24:55.641790+00:00",
+  "sourceFiles": [
+    "app.js",
+    "firebase-blueprint.json"
+  ],
   "collections": [
     {
       "name": "users",
       "description": "Store user profiles, including their role, level, and XP.",
       "fields": [
-        { "name": "uid", "type": "string", "description": "The user's Firebase Auth UID" },
-        { "name": "email", "type": "string", "description": "The user's email address" },
-        { "name": "displayName", "type": "string", "description": "The user's display name" },
-        { "name": "photoURL", "type": "string", "description": "The user's avatar URL" },
-        { "name": "role", "type": "string", "description": "The user's role: 'user', 'teacher', 'collab', or 'admin'" },
-        { "name": "level", "type": "number", "description": "The user's level" },
-        { "name": "xp", "type": "number", "description": "User's current XP" },
-        { "name": "streak", "type": "number", "description": "Current learning streak in days" },
-        { "name": "maxStreak", "type": "number", "description": "Highest learning streak achieved" },
-        { "name": "lastCheckInDate", "type": "string", "description": "The date (YYYY-MM-DD) of the last check-in" },
-        { "name": "badges", "type": "array", "description": "Array of badge IDs the user has earned" },
-        { "name": "createdAt", "type": "timestamp", "description": "When the user document was created" },
-        { "name": "updatedAt", "type": "timestamp", "description": "When the user document was last updated" }
+        {
+          "name": "uid",
+          "type": "string",
+          "description": "The user's Firebase Auth UID"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "description": "The user's email address"
+        },
+        {
+          "name": "displayName",
+          "type": "string",
+          "description": "The user's display name"
+        },
+        {
+          "name": "photoURL",
+          "type": "string",
+          "description": "The user's avatar URL"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "description": "The user's role: 'user', 'teacher', 'collab', or 'admin'"
+        },
+        {
+          "name": "level",
+          "type": "number",
+          "description": "The user's level"
+        },
+        {
+          "name": "xp",
+          "type": "number",
+          "description": "User's current XP"
+        },
+        {
+          "name": "streak",
+          "type": "number",
+          "description": "Current learning streak in days"
+        },
+        {
+          "name": "maxStreak",
+          "type": "number",
+          "description": "Highest learning streak achieved"
+        },
+        {
+          "name": "lastCheckInDate",
+          "type": "string",
+          "description": "The date (YYYY-MM-DD) of the last check-in"
+        },
+        {
+          "name": "badges",
+          "type": "array",
+          "description": "Array of badge IDs the user has earned"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "When the user document was created"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "When the user document was last updated"
+        },
+        {
+          "name": "username",
+          "type": "string",
+          "description": "Optional unique username/search handle"
+        },
+        {
+          "name": "bio",
+          "type": "string",
+          "description": "Short user biography shown on profile"
+        },
+        {
+          "name": "followers",
+          "type": "number",
+          "description": "Number of followers",
+          "default": 0
+        },
+        {
+          "name": "following",
+          "type": "number",
+          "description": "Number of users this account follows",
+          "default": 0
+        },
+        {
+          "name": "appSettings",
+          "type": "object",
+          "description": "User appearance settings: { theme: light|dark|system, accentColor: blue|purple|green|orange|pink|slate }"
+        },
+        {
+          "name": "grammarProgress",
+          "type": "object",
+          "description": "Grammar learning progress, completed stages and recent logs"
+        },
+        {
+          "name": "tensesProgress",
+          "type": "object",
+          "description": "Tenses learning progress, completed stages and recent logs"
+        },
+        {
+          "name": "beginnerProgress",
+          "type": "object",
+          "description": "Beginner course progress if enabled"
+        },
+        {
+          "name": "lastActiveAt",
+          "type": "timestamp",
+          "description": "Last activity time"
+        }
       ],
       "rules": [
-        { "allow": "read", "condition": "request.auth != null" },
-        { "allow": "create", "condition": "request.auth != null && request.auth.uid == request.resource.data.uid" },
-        { "allow": "update", "condition": "request.auth != null && request.auth.uid == resource.data.uid" },
-        { "allow": "delete", "condition": "false" }
+        {
+          "allow": "read",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.uid"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.uid"
+        },
+        {
+          "allow": "delete",
+          "condition": "false"
+        }
       ]
     },
     {
       "name": "daily_tasks",
-      "description": "Store daily tasks configured by admin.",
+      "description": "Admin-configured daily learning tasks.",
       "fields": [
-        { "name": "title", "type": "string", "description": "Task title" },
-        { "name": "description", "type": "string", "description": "Task description" },
-        { "name": "xpReward", "type": "number", "description": "XP rewarded upon completion" },
-        { "name": "type", "type": "string", "description": "Task type (e.g., grammar, quiz, vocabulary)" },
-        { "name": "icon", "type": "string", "description": "Task icon URL" },
-        { "name": "total", "type": "number", "description": "Total target amount for the task" },
-        { "name": "createdAt", "type": "timestamp", "description": "Creation time" },
-        { "name": "updatedAt", "type": "timestamp", "description": "Update time" }
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Stable task key used by backend helpers, e.g. quiz_master or community_share"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Task title"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Task description"
+        },
+        {
+          "name": "xpReward",
+          "type": "number",
+          "description": "XP rewarded when completed"
+        },
+        {
+          "name": "xpPerItem",
+          "type": "number",
+          "description": "Optional XP rewarded per item of progress"
+        },
+        {
+          "name": "point",
+          "type": "number",
+          "description": "Legacy reward field used by some helpers"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Task type: grammar, quiz, vocabulary, community, checkin, etc."
+        },
+        {
+          "name": "icon",
+          "type": "string",
+          "description": "Task icon URL"
+        },
+        {
+          "name": "total",
+          "type": "number",
+          "description": "Total target amount for the task"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
       ],
       "rules": [
-        { "allow": "read", "condition": "request.auth != null" },
-        { "allow": "write", "condition": "request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'" }
+        {
+          "allow": "read",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "write",
+          "condition": "request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/admin",
+        "/api/user",
+        "/api/quiz",
+        "/api/community"
       ]
     },
     {
       "name": "user_tasks",
       "description": "Store progress of daily tasks per user.",
       "fields": [
-        { "name": "userId", "type": "string", "description": "The user's ID" },
-        { "name": "taskId", "type": "string", "description": "The task's ID" },
-        { "name": "completed", "type": "boolean", "description": "Whether the task is completed" },
-        { "name": "completedAt", "type": "timestamp", "description": "When the task was completed" },
-        { "name": "date", "type": "string", "description": "The date string (YYYY-MM-DD) for the task" }
+        {
+          "name": "userId",
+          "type": "string",
+          "description": "The user's ID"
+        },
+        {
+          "name": "taskId",
+          "type": "string",
+          "description": "The task's ID"
+        },
+        {
+          "name": "completed",
+          "type": "boolean",
+          "description": "Whether the task is completed"
+        },
+        {
+          "name": "completedAt",
+          "type": "timestamp",
+          "description": "When the task was completed"
+        },
+        {
+          "name": "date",
+          "type": "string",
+          "description": "The date string (YYYY-MM-DD) for the task"
+        }
       ],
       "rules": [
-        { "allow": "read", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
-        { "allow": "create", "condition": "request.auth != null && request.auth.uid == request.resource.data.userId" },
-        { "allow": "update", "condition": "request.auth != null && request.auth.uid == resource.data.userId" }
-      ]
-    },
-    {
-      "name": "flashcard_sets",
-      "description": "Store flashcard sets/decks created by users.",
-      "fields": [
-        { "name": "userId", "type": "string", "description": "The creator's user ID" },
-        { "name": "title", "type": "string", "description": "The title of the flashcard set" },
-        { "name": "description", "type": "string", "description": "Description of the set" },
-        { "name": "cardCount", "type": "number", "description": "Total number of cards in the set" },
-        { "name": "learnedCount", "type": "number", "description": "Number of learned cards" },
-        { "name": "lastStudied", "type": "timestamp", "description": "When the set was last studied" },
-        { "name": "color", "type": "string", "description": "The color theme for the set card (e.g., bg-blue-500)" },
-        { "name": "isNew", "type": "boolean", "description": "Is this a newly created set" },
-        { "name": "createdAt", "type": "timestamp", "description": "Creation time" },
-        { "name": "updatedAt", "type": "timestamp", "description": "Update time" }
-      ],
-      "rules": [
-        { "allow": "read", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
-        { "allow": "create", "condition": "request.auth != null && request.auth.uid == request.resource.data.userId" },
-        { "allow": "update", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
-        { "allow": "delete", "condition": "request.auth != null && request.auth.uid == resource.data.userId" }
-      ]
-    },
-    {
-      "name": "flashcards",
-      "description": "Store individual flashcards belonging to a set.",
-      "fields": [
-        { "name": "setId", "type": "string", "description": "The ID of the flashcard set this card belongs to" },
-        { "name": "userId", "type": "string", "description": "The owner's user ID (for security rules)" },
-        { "name": "term", "type": "string", "description": "The term (e.g., English word)" },
-        { "name": "phonetic", "type": "string", "description": "The phonetic transcription" },
-        { "name": "translation", "type": "string", "description": "The translation (e.g., Vietnamese)" },
-        { "name": "examples", "type": "array", "description": "Array of examples {en: string, vi: string}" },
-        { "name": "notes", "type": "string", "description": "User notes about the word" },
-        { "name": "isLearned", "type": "boolean", "description": "Whether the user has learned this card" },
-        { "name": "createdAt", "type": "timestamp", "description": "Creation time" },
-        { "name": "updatedAt", "type": "timestamp", "description": "Update time" }
-      ],
-      "rules": [
-        { "allow": "read", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
-        { "allow": "create", "condition": "request.auth != null && request.auth.uid == request.resource.data.userId" },
-        { "allow": "update", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
-        { "allow": "delete", "condition": "request.auth != null && request.auth.uid == resource.data.userId" }
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.userId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        }
       ]
     },
     {
       "name": "user_daily_stats",
-      "description": "Store daily study stats for each user (study time, checkin status).",
+      "description": "Daily per-user study stats and daily-task progress.",
       "fields": [
-        { "name": "userId", "type": "string", "description": "The user's ID" },
-        { "name": "date", "type": "string", "description": "The date string (YYYY-MM-DD)" },
-        { "name": "studyMinutes", "type": "number", "description": "Total minutes studied on this day" },
-        { "name": "isCheckedIn", "type": "boolean", "description": "Whether the user checked in on this day" },
-        { "name": "tasksCompleted", "type": "number", "description": "Number of tasks completed on this day" },
-        { "name": "createdAt", "type": "timestamp", "description": "Creation time" },
-        { "name": "updatedAt", "type": "timestamp", "description": "Update time" }
+        {
+          "name": "userId",
+          "type": "string",
+          "description": "User ID"
+        },
+        {
+          "name": "date",
+          "type": "string",
+          "description": "Local date in YYYY-MM-DD"
+        },
+        {
+          "name": "studyMinutes",
+          "type": "number",
+          "description": "Total study minutes on this date",
+          "default": 0
+        },
+        {
+          "name": "isCheckedIn",
+          "type": "boolean",
+          "description": "Whether the user checked in on this date",
+          "default": false
+        },
+        {
+          "name": "tasksCompleted",
+          "type": "number",
+          "description": "Number of tasks completed on this date",
+          "default": 0
+        },
+        {
+          "name": "tasks",
+          "type": "object",
+          "description": "Progress map keyed by task id, e.g. { quiz_master: 2 }"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
       ],
       "rules": [
-        { "allow": "read", "condition": "request.auth != null && request.auth.uid == resource.data.userId" },
-        { "allow": "create", "condition": "request.auth != null && request.auth.uid == request.resource.data.userId" },
-        { "allow": "update", "condition": "request.auth != null && request.auth.uid == resource.data.userId" }
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.userId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/auth",
+        "/api/user"
+      ]
+    },
+    {
+      "name": "flashcard_folders",
+      "description": "Folders used to group flashcard sets.",
+      "fields": [
+        {
+          "name": "userId",
+          "type": "string",
+          "description": "Owner user ID"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Folder name"
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "description": "UI color class or color token"
+        },
+        {
+          "name": "order",
+          "type": "number",
+          "description": "Optional sort order"
+        },
+        {
+          "name": "sourceFolderId",
+          "type": "string",
+          "description": "Original folder ID when copied from a friend share"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.userId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/flashcard",
+        "/api/friends"
+      ]
+    },
+    {
+      "name": "flashcard_sets",
+      "description": "Flashcard decks created by users, optionally inside flashcard folders.",
+      "fields": [
+        {
+          "name": "userId",
+          "type": "string",
+          "description": "Owner user ID"
+        },
+        {
+          "name": "folderId",
+          "type": "string|null",
+          "description": "Folder ID or null for uncategorized/root"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Set title"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Set description"
+        },
+        {
+          "name": "cardCount",
+          "type": "number",
+          "description": "Total cards in the set",
+          "default": 0
+        },
+        {
+          "name": "learnedCount",
+          "type": "number",
+          "description": "Learned cards in the set",
+          "default": 0
+        },
+        {
+          "name": "lastStudied",
+          "type": "timestamp|null",
+          "description": "Last study time"
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "description": "UI color token/class"
+        },
+        {
+          "name": "order",
+          "type": "number",
+          "description": "Optional order inside folder/root"
+        },
+        {
+          "name": "isNew",
+          "type": "boolean",
+          "description": "Whether this set is newly created"
+        },
+        {
+          "name": "isPublic",
+          "type": "boolean",
+          "description": "Whether the set is public/shareable"
+        },
+        {
+          "name": "sourceSetId",
+          "type": "string",
+          "description": "Original set ID when copied/duplicated/shared"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.userId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/flashcard",
+        "/api/friends",
+        "/api/admin"
+      ]
+    },
+    {
+      "name": "flashcards",
+      "description": "Individual flashcards belonging to a flashcard set.",
+      "fields": [
+        {
+          "name": "setId",
+          "type": "string",
+          "description": "Flashcard set ID"
+        },
+        {
+          "name": "userId",
+          "type": "string",
+          "description": "Owner user ID"
+        },
+        {
+          "name": "term",
+          "type": "string",
+          "description": "Front-side term or question"
+        },
+        {
+          "name": "phonetic",
+          "type": "string",
+          "description": "Optional phonetic transcription"
+        },
+        {
+          "name": "translation",
+          "type": "string",
+          "description": "Back-side translation/answer"
+        },
+        {
+          "name": "examples",
+          "type": "array",
+          "description": "Examples, commonly [{ en, vi }]"
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "description": "User notes"
+        },
+        {
+          "name": "isLearned",
+          "type": "boolean",
+          "description": "Whether owner marked this card as learned"
+        },
+        {
+          "name": "sourceCardId",
+          "type": "string",
+          "description": "Original card ID when copied from another set/share"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.userId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/flashcard",
+        "/api/friends",
+        "/api/admin"
+      ]
+    },
+    {
+      "name": "flashcard_progress",
+      "description": "Per-user spaced-repetition/progress records for flashcards.",
+      "fields": [
+        {
+          "name": "userId",
+          "type": "string",
+          "description": "User ID"
+        },
+        {
+          "name": "cardId",
+          "type": "string",
+          "description": "Flashcard document ID"
+        },
+        {
+          "name": "setId",
+          "type": "string",
+          "description": "Flashcard set ID"
+        },
+        {
+          "name": "isLearned",
+          "type": "boolean",
+          "description": "Learned status"
+        },
+        {
+          "name": "correctCount",
+          "type": "number",
+          "description": "Number of correct reviews"
+        },
+        {
+          "name": "wrongCount",
+          "type": "number",
+          "description": "Number of wrong reviews"
+        },
+        {
+          "name": "lastReviewedAt",
+          "type": "timestamp",
+          "description": "Last review time"
+        },
+        {
+          "name": "nextReviewAt",
+          "type": "timestamp",
+          "description": "Next review time for SM-2/SRS"
+        },
+        {
+          "name": "easeFactor",
+          "type": "number",
+          "description": "SM-2 ease factor if used"
+        },
+        {
+          "name": "interval",
+          "type": "number",
+          "description": "Review interval in days if used"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.userId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/auth",
+        "/api/flashcard",
+        "src/utils/achievements.js"
+      ]
+    },
+    {
+      "name": "vocabulary",
+      "description": "Cached dictionary/vocabulary lookup records keyed by lowercase term.",
+      "fields": [
+        {
+          "name": "term",
+          "type": "string",
+          "description": "Lowercase term used as document ID"
+        },
+        {
+          "name": "phonetic",
+          "type": "string",
+          "description": "Phonetic transcription"
+        },
+        {
+          "name": "translation",
+          "type": "string",
+          "description": "Vietnamese translation"
+        },
+        {
+          "name": "examples",
+          "type": "array",
+          "description": "Example sentences"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Data source/cache source"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "write",
+          "condition": "request.auth != null"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/flashcard"
+      ]
+    },
+    {
+      "name": "quizzes",
+      "description": "Quiz definitions created manually, generated by AI, or copied from friends.",
+      "fields": [
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Quiz title"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Quiz description"
+        },
+        {
+          "name": "difficulty",
+          "type": "string",
+          "description": "Difficulty label"
+        },
+        {
+          "name": "duration",
+          "type": "number",
+          "description": "Duration in minutes"
+        },
+        {
+          "name": "questions",
+          "type": "array",
+          "description": "Question list with id, question, options, correctAnswer, explanation"
+        },
+        {
+          "name": "creatorId",
+          "type": "string",
+          "description": "Creator/owner user ID"
+        },
+        {
+          "name": "sourceQuizId",
+          "type": "string",
+          "description": "Original quiz ID when copied from a friend share"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.creatorId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.creatorId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && (request.auth.uid == resource.data.creatorId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/quiz",
+        "/api/friends",
+        "/api/admin"
+      ]
+    },
+    {
+      "name": "quiz_rooms",
+      "description": "Live quiz room records used with Socket.IO classroom rooms.",
+      "fields": [
+        {
+          "name": "roomCode",
+          "type": "string",
+          "description": "Unique join code"
+        },
+        {
+          "name": "quizId",
+          "type": "string",
+          "description": "Quiz ID"
+        },
+        {
+          "name": "creatorId",
+          "type": "string",
+          "description": "Teacher/creator user ID"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "waiting | playing | finished"
+        },
+        {
+          "name": "settings",
+          "type": "object",
+          "description": "Room settings: allowRetry, showAnswers, phoenixRebirth, shuffleQuestions"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.creatorId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.creatorId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.creatorId"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/quiz",
+        "Socket.IO quiz room events"
+      ]
+    },
+    {
+      "name": "quiz_results",
+      "description": "Quiz attempt results and evaluated answers.",
+      "fields": [
+        {
+          "name": "quizId",
+          "type": "string",
+          "description": "Quiz ID"
+        },
+        {
+          "name": "uid",
+          "type": "string",
+          "description": "User ID who submitted"
+        },
+        {
+          "name": "score",
+          "type": "number",
+          "description": "Score percentage"
+        },
+        {
+          "name": "totalCorrect",
+          "type": "number",
+          "description": "Correct answer count"
+        },
+        {
+          "name": "totalQuestions",
+          "type": "number",
+          "description": "Total questions"
+        },
+        {
+          "name": "answers",
+          "type": "object",
+          "description": "User answers keyed by question id"
+        },
+        {
+          "name": "evaluation",
+          "type": "object",
+          "description": "Evaluation keyed by question id"
+        },
+        {
+          "name": "usedRebirth",
+          "type": "boolean",
+          "description": "Whether Phoenix Rebirth was used"
+        },
+        {
+          "name": "roomId",
+          "type": "string|null",
+          "description": "Room ID if submitted from a room"
+        },
+        {
+          "name": "roomSettings",
+          "type": "object|null",
+          "description": "Room settings snapshot"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && (request.auth.uid == resource.data.uid || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.uid"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.uid"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/quiz",
+        "/api/admin",
+        "src/utils/achievements.js"
+      ]
+    },
+    {
+      "name": "arena_matchmaking_stats",
+      "description": "Optional Arena matchmaking telemetry/statistics.",
+      "fields": [
+        {
+          "name": "uid",
+          "type": "string",
+          "description": "User ID"
+        },
+        {
+          "name": "matchData",
+          "type": "object",
+          "description": "Deck/match settings snapshot"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "queued | matched | cancelled | completed"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.uid"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.uid"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/arena",
+        "Socket.IO arena events"
+      ]
+    },
+    {
+      "name": "community_posts",
+      "description": "Community/social feed posts.",
+      "fields": [
+        {
+          "name": "uid",
+          "type": "string",
+          "description": "Author user ID"
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "description": "Post content without hashtag tokens"
+        },
+        {
+          "name": "tags",
+          "type": "array",
+          "description": "Hashtags/tags"
+        },
+        {
+          "name": "likes",
+          "type": "array",
+          "description": "UIDs that liked the post"
+        },
+        {
+          "name": "commentsCount",
+          "type": "number",
+          "description": "Comment count"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.uid"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.uid"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.uid"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/community"
+      ]
+    },
+    {
+      "name": "community_comments",
+      "description": "Comments and replies on community posts.",
+      "fields": [
+        {
+          "name": "postId",
+          "type": "string",
+          "description": "Community post ID"
+        },
+        {
+          "name": "uid",
+          "type": "string",
+          "description": "Comment author user ID"
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "description": "Comment content"
+        },
+        {
+          "name": "parentId",
+          "type": "string|null",
+          "description": "Parent comment ID for replies"
+        },
+        {
+          "name": "likes",
+          "type": "array",
+          "description": "UIDs that liked this comment"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.uid"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.uid"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.uid"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/community"
+      ]
+    },
+    {
+      "name": "notifications",
+      "description": "Bell notifications for follows, community actions, friend requests, messages and shares.",
+      "fields": [
+        {
+          "name": "receiverId",
+          "type": "string",
+          "description": "UID receiving the notification"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Notification type: follow, community_like, community_comment, community_reply, friend_request, friend_accept, friend_message, friend_share, leaderboard, learning_reminder"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Notification title"
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "description": "Notification body"
+        },
+        {
+          "name": "referenceId",
+          "type": "string|null",
+          "description": "Related user/post/message/share ID"
+        },
+        {
+          "name": "isRead",
+          "type": "boolean",
+          "description": "Read state"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.receiverId"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.receiverId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.receiverId"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/notifications",
+        "/api/community",
+        "/api/user",
+        "/api/friends"
+      ]
+    },
+    {
+      "name": "user_follows",
+      "description": "Follow relationships between users.",
+      "fields": [
+        {
+          "name": "followerId",
+          "type": "string",
+          "description": "UID following another user"
+        },
+        {
+          "name": "followingId",
+          "type": "string",
+          "description": "UID being followed"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.followerId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.followerId"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/user"
+      ]
+    },
+    {
+      "name": "friend_requests",
+      "description": "Friend request workflow records.",
+      "fields": [
+        {
+          "name": "fromId",
+          "type": "string",
+          "description": "Sender UID"
+        },
+        {
+          "name": "toId",
+          "type": "string",
+          "description": "Receiver UID"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "pending | accepted | declined"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && (request.auth.uid == resource.data.fromId || request.auth.uid == resource.data.toId)"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.fromId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && (request.auth.uid == resource.data.fromId || request.auth.uid == resource.data.toId)"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && (request.auth.uid == resource.data.fromId || request.auth.uid == resource.data.toId)"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/friends"
+      ]
+    },
+    {
+      "name": "friendships",
+      "description": "Accepted friend relationships. Document ID is pairId: smallerUid__largerUid.",
+      "fields": [
+        {
+          "name": "users",
+          "type": "array",
+          "description": "Two UID values sorted alphabetically"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid in resource.data.users"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid in request.resource.data.users"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid in resource.data.users"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/friends"
+      ]
+    },
+    {
+      "name": "friend_messages",
+      "description": "Chat messages between friends, including shared flashcard folders and quizzes.",
+      "fields": [
+        {
+          "name": "chatId",
+          "type": "string",
+          "description": "Pair ID: smallerUid__largerUid"
+        },
+        {
+          "name": "senderId",
+          "type": "string",
+          "description": "Sender UID"
+        },
+        {
+          "name": "receiverId",
+          "type": "string",
+          "description": "Receiver UID"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "text | share"
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "description": "Message text or share note"
+        },
+        {
+          "name": "share",
+          "type": "object",
+          "description": "Share payload when type=share: { type, itemId, ownerId, title, summary }"
+        },
+        {
+          "name": "savedBy",
+          "type": "array",
+          "description": "UIDs that saved this shared content"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.receiverId)"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.senderId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.receiverId)"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.senderId"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/friends"
+      ]
+    },
+    {
+      "name": "notebooks",
+      "description": "User-owned visual notebooks / whiteboards.",
+      "fields": [
+        {
+          "name": "ownerId",
+          "type": "string",
+          "description": "Notebook owner UID"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Notebook title"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Optional description"
+        },
+        {
+          "name": "coverColor",
+          "type": "string",
+          "description": "Cover/accent color"
+        },
+        {
+          "name": "activePageId",
+          "type": "string",
+          "description": "Last active page ID"
+        },
+        {
+          "name": "pages",
+          "type": "array",
+          "description": "Page array. Each page includes id, title, background, strokes, items"
+        },
+        {
+          "name": "settings",
+          "type": "object",
+          "description": "Notebook-level settings such as boardWidth and boardHeight"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.ownerId"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.ownerId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.ownerId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.ownerId"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/notebook"
+      ]
+    },
+    {
+      "name": "users/{uid}/calculatorHistory",
+      "description": "Per-user calculator history subcollection.",
+      "fields": [
+        {
+          "name": "expression",
+          "type": "string",
+          "description": "Expression entered by user"
+        },
+        {
+          "name": "result",
+          "type": "string",
+          "description": "Calculation result"
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "description": "basic | advanced"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "calculation | equation | system | expression"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        }
+      ],
+      "path": "users/{uid}/calculatorHistory",
+      "usedByRoutes": [
+        "/api/utilities"
+      ]
+    },
+    {
+      "name": "users/{uid}/translationHistory",
+      "description": "Per-user translation history subcollection.",
+      "fields": [
+        {
+          "name": "sourceText",
+          "type": "string",
+          "description": "Original text"
+        },
+        {
+          "name": "translatedText",
+          "type": "string",
+          "description": "Translated text"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Source language code or auto"
+        },
+        {
+          "name": "target",
+          "type": "string",
+          "description": "Target language code"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        }
+      ],
+      "path": "users/{uid}/translationHistory",
+      "usedByRoutes": [
+        "/api/utilities"
+      ]
+    },
+    {
+      "name": "users/{uid}/studyMethods",
+      "description": "Per-user custom study timer methods.",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Study method name"
+        },
+        {
+          "name": "studyMinutes",
+          "type": "number",
+          "description": "Total study time in minutes"
+        },
+        {
+          "name": "breakMinutes",
+          "type": "number",
+          "description": "Minutes for each break"
+        },
+        {
+          "name": "breakCount",
+          "type": "number",
+          "description": "Number of breaks"
+        },
+        {
+          "name": "isCustom",
+          "type": "boolean",
+          "description": "True for user-created methods"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        }
+      ],
+      "path": "users/{uid}/studyMethods",
+      "usedByRoutes": [
+        "/api/utilities"
+      ]
+    },
+    {
+      "name": "users/{uid}/grammar_tests",
+      "description": "Generated personalized grammar tests saved under each user.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Test ID"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Test title"
+        },
+        {
+          "name": "questions",
+          "type": "array",
+          "description": "Generated grammar questions"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Generator/source label"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        }
+      ],
+      "path": "users/{uid}/grammar_tests",
+      "usedByRoutes": [
+        "/api/grammar"
+      ]
+    },
+    {
+      "name": "users/{uid}/tenses_tests",
+      "description": "Generated personalized tenses tests saved under each user.",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Test ID"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Test title"
+        },
+        {
+          "name": "questions",
+          "type": "array",
+          "description": "Generated tenses questions"
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Generator/source label"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == uid"
+        }
+      ],
+      "path": "users/{uid}/tenses_tests",
+      "usedByRoutes": [
+        "/api/tenses"
+      ]
+    },
+    {
+      "name": "leaderboard_weekly",
+      "description": "Weekly leaderboard rows, document ID is period_uid.",
+      "fields": [
+        {
+          "name": "uid",
+          "type": "string",
+          "description": "User ID"
+        },
+        {
+          "name": "period",
+          "type": "string",
+          "description": "Week period key"
+        },
+        {
+          "name": "xp",
+          "type": "number",
+          "description": "XP earned in this period"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "write",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.uid"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/leaderboard",
+        "/api/user"
+      ]
+    },
+    {
+      "name": "leaderboard_monthly",
+      "description": "Monthly leaderboard rows, document ID is period_uid.",
+      "fields": [
+        {
+          "name": "uid",
+          "type": "string",
+          "description": "User ID"
+        },
+        {
+          "name": "period",
+          "type": "string",
+          "description": "Month period key"
+        },
+        {
+          "name": "xp",
+          "type": "number",
+          "description": "XP earned in this period"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null"
+        },
+        {
+          "allow": "write",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.uid"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/leaderboard",
+        "/api/user"
+      ]
+    },
+    {
+      "name": "user_rewards",
+      "description": "Reward claim records for leaderboard/periodic rewards.",
+      "fields": [
+        {
+          "name": "uid",
+          "type": "string",
+          "description": "User ID"
+        },
+        {
+          "name": "period",
+          "type": "string",
+          "description": "Reward period key"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "weekly | monthly | other"
+        },
+        {
+          "name": "rank",
+          "type": "number",
+          "description": "Leaderboard rank when claimed"
+        },
+        {
+          "name": "xpReward",
+          "type": "number",
+          "description": "Reward amount"
+        },
+        {
+          "name": "claimedAt",
+          "type": "timestamp",
+          "description": "Claim time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.uid"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.uid"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.uid"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.uid"
+        }
+      ],
+      "usedByRoutes": [
+        "/api/leaderboard"
+      ]
+    },
+    {
+      "name": "ai_generation_logs",
+      "description": "Optional AI chat/image generation logs if persistence is enabled.",
+      "fields": [
+        {
+          "name": "userId",
+          "type": "string",
+          "description": "User ID"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "chat | image | prompt_translation"
+        },
+        {
+          "name": "model",
+          "type": "string",
+          "description": "AI model/provider used"
+        },
+        {
+          "name": "prompt",
+          "type": "string",
+          "description": "Original user prompt or message"
+        },
+        {
+          "name": "translatedPrompt",
+          "type": "string",
+          "description": "English prompt sent to image model"
+        },
+        {
+          "name": "resultSummary",
+          "type": "string",
+          "description": "Short result summary, not full private content unless intentionally stored"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.userId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        }
+      ],
+      "optional": true,
+      "usedByRoutes": [
+        "/api/ai"
+      ]
+    },
+    {
+      "name": "subtitle_jobs",
+      "description": "Optional subtitle processing job metadata if export history is enabled.",
+      "fields": [
+        {
+          "name": "userId",
+          "type": "string",
+          "description": "User ID"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "description": "queued | processing | completed | failed"
+        },
+        {
+          "name": "inputFileName",
+          "type": "string",
+          "description": "Original video filename"
+        },
+        {
+          "name": "durationSeconds",
+          "type": "number",
+          "description": "Video duration"
+        },
+        {
+          "name": "language",
+          "type": "string",
+          "description": "Whisper language setting"
+        },
+        {
+          "name": "modelKey",
+          "type": "string",
+          "description": "Whisper model key"
+        },
+        {
+          "name": "srtPreview",
+          "type": "string",
+          "description": "Short subtitle preview, not necessarily full SRT"
+        },
+        {
+          "name": "outputUrl",
+          "type": "string",
+          "description": "Output URL if stored externally"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "description": "Creation time"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "description": "Update time"
+        }
+      ],
+      "rules": [
+        {
+          "allow": "read",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "create",
+          "condition": "request.auth != null && request.auth.uid == request.resource.data.userId"
+        },
+        {
+          "allow": "update",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        },
+        {
+          "allow": "delete",
+          "condition": "request.auth != null && request.auth.uid == resource.data.userId"
+        }
+      ],
+      "optional": true,
+      "usedByRoutes": [
+        "/api/subtitle"
       ]
     }
+  ],
+  "recommendedIndexes": [
+    {
+      "collectionGroup": "flashcard_sets",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "flashcard_sets",
+      "fields": [
+        {
+          "fieldPath": "folderId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "flashcards",
+      "fields": [
+        {
+          "fieldPath": "setId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "flashcard_progress",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "cardId",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "user_daily_stats",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "date",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "fields": [
+        {
+          "fieldPath": "receiverId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "fields": [
+        {
+          "fieldPath": "receiverId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isRead",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quiz_results",
+      "fields": [
+        {
+          "fieldPath": "uid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quiz_rooms",
+      "fields": [
+        {
+          "fieldPath": "roomCode",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "community_posts",
+      "fields": [
+        {
+          "fieldPath": "tags",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "community_comments",
+      "fields": [
+        {
+          "fieldPath": "postId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "friend_requests",
+      "fields": [
+        {
+          "fieldPath": "fromId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "toId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "friend_requests",
+      "fields": [
+        {
+          "fieldPath": "toId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "friendships",
+      "fields": [
+        {
+          "fieldPath": "users",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "friend_messages",
+      "fields": [
+        {
+          "fieldPath": "chatId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "notebooks",
+      "fields": [
+        {
+          "fieldPath": "ownerId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "calculatorHistory",
+      "fields": [
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "translationHistory",
+      "fields": [
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "studyMethods",
+      "fields": [
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "leaderboard_weekly",
+      "fields": [
+        {
+          "fieldPath": "period",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "xp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "leaderboard_monthly",
+      "fields": [
+        {
+          "fieldPath": "period",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "xp",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "This is a schema/blueprint document, not a deployable firestore.rules file.",
+    "Several routes use Firebase Admin on the backend, so client-side Firestore rules can be stricter than the permissive examples shown here.",
+    "ai_generation_logs and subtitle_jobs are optional because the current AI/subtitle routes do not need persistence unless you want history."
   ]
 }

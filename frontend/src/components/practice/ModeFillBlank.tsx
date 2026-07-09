@@ -8,15 +8,19 @@ import { useSM2 } from "../../hooks/useSM2";
 interface ModeFillBlankProps {
   cards: Flashcard[];
   setId: string;
+  onComplete?: (wrongCardIds: string[]) => void;
+  completionActions?: React.ReactNode;
 }
 
 
-export function ModeFillBlank({ cards, setId }: ModeFillBlankProps) {
+export function ModeFillBlank({ cards, setId, onComplete, completionActions }: ModeFillBlankProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [wrongCardIds, setWrongCardIds] = useState<string[]>([]);
+  const wrongCardIdsRef = React.useRef<string[]>([]);
   const cardStartTime = useRef<number>(Date.now());
   
   const { playAudio, playSoundEffect } = useTTSAudio();
@@ -49,6 +53,7 @@ export function ModeFillBlank({ cards, setId }: ModeFillBlankProps) {
       playAudio(currentCard.term, undefined, 'correct');
     } else {
       reportWrong(currentCard.id, "fill_blank");
+      setWrongCardIds((prev) => { const next = prev.includes(currentCard.id) ? prev : [...prev, currentCard.id]; wrongCardIdsRef.current = next; return next; });
       playSoundEffect('wrong');
     }
 
@@ -60,6 +65,7 @@ export function ModeFillBlank({ cards, setId }: ModeFillBlankProps) {
           setStatus("idle");
         } else {
           flushProgress();
+          onComplete?.(wrongCardIdsRef.current);
           setCompleted(true);
         }
       } else {
@@ -79,12 +85,13 @@ export function ModeFillBlank({ cards, setId }: ModeFillBlankProps) {
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Thật xuất sắc!</h2>
         <p className="text-gray-500 mb-8">Bạn đã hoàn thành bài Điền từ.</p>
         <button 
-          onClick={() => { setCompleted(false); setCurrentIndex(0); setInputValue(""); setStatus("idle"); }}
+          onClick={() => { setCompleted(false); setCurrentIndex(0); setInputValue(""); setStatus("idle"); setWrongCardIds([]); wrongCardIdsRef.current = []; }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Luyện tập lại
         </button>
+        {completionActions}
       </div>
     );
   }
@@ -100,6 +107,21 @@ export function ModeFillBlank({ cards, setId }: ModeFillBlankProps) {
     exampleTranslation = currentCard.examples[0].vi;
   }
 
+  const renderBlankByWordLength = (compact = false) => {
+    const word = currentCard.term || "";
+    return (
+      <span className={cn("inline-flex max-w-full flex-wrap items-end justify-center gap-x-1 gap-y-1 align-middle", compact ? "mx-1" : "")}>
+        {word.split("").map((char, index) =>
+          char === " " ? (
+            <span key={index} className="w-3 sm:w-4" aria-hidden="true" />
+          ) : (
+            <span key={index} className={cn("inline-flex items-end justify-center border-b-2 border-blue-400", compact ? "h-7 w-3.5 sm:w-4" : "h-9 w-4 sm:w-5")} aria-hidden="true" />
+          ),
+        )}
+      </span>
+    );
+  };
+
   // Replace term with blank in example text
   const getBlankedExample = () => {
     if (!exampleText) return null;
@@ -111,8 +133,8 @@ export function ModeFillBlank({ cards, setId }: ModeFillBlankProps) {
       return (
         <span className="text-3xl font-medium leading-relaxed text-gray-800">
           {parts[0]}
-          <span className="inline-block border-b-4 border-blue-400 w-32 mx-2 text-center text-blue-600 font-bold bg-blue-50/50 rounded-t-lg align-baseline">
-            {status === "correct" ? currentCard.term : (status === "wrong" ? inputValue : "___")}
+          <span className="inline-flex max-w-full flex-wrap items-center justify-center rounded-t-lg bg-blue-50/70 px-2 py-1 text-center text-blue-600 font-bold align-middle [overflow-wrap:anywhere]">
+            {status === "correct" ? currentCard.term : (status === "wrong" ? inputValue : renderBlankByWordLength(true))}
           </span>
           {parts[1]}
         </span>
@@ -145,7 +167,8 @@ export function ModeFillBlank({ cards, setId }: ModeFillBlankProps) {
         ) : (
           <div className="text-center">
             <p className="text-gray-500 mb-2 font-medium uppercase tracking-wider">Viết từ có nghĩa sau:</p>
-            <h2 className="text-4xl font-bold text-gray-900 mb-8">{exampleTranslation}</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">{exampleTranslation}</h2>
+            <div className="mb-8 flex max-w-full justify-center text-blue-500">{status === "idle" ? renderBlankByWordLength(false) : ""}</div>
             
             {status === "correct" && <p className="text-2xl font-bold text-green-500 mb-4">{currentCard.term}</p>}
             {status === "wrong" && <p className="text-lg font-bold text-red-500 line-through mb-4">{inputValue}</p>}

@@ -1,16 +1,37 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Bot, FileText, ArrowLeft, Loader2, Sparkles, Plus, Trash2 } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Bot, FileText, ArrowLeft, Loader2, Sparkles, Plus, Trash2, Globe2, Lock, Crown } from "lucide-react";
 import { useQuizStore, QuizQuestion } from "../../services/quizService";
 import { useConfigStore } from "../../services/configService";
 import { useUserStore } from "../../services/userService";
 import toast from "react-hot-toast";
+import { useAuth } from "../../contexts/AuthContext";
 
 export function QuizCreate() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const { generateQuizByAI, createQuiz } = useQuizStore();
   const [mode, setMode] = useState<"manual" | "ai">("ai");
   const [loading, setLoading] = useState(false);
+  const [isPublic, setIsPublic] = useState(searchParams.get("privacy") !== "private");
+
+  const isVip = Boolean(
+    (user as any)?.isVip ||
+    (user as any)?.vip ||
+    user?.role === "admin" ||
+    (user as any)?.role === "vip" ||
+    ["vip", "pro", "premium"].includes(String((user as any)?.plan || (user as any)?.subscriptionPlan || "").toLowerCase()) ||
+    String((user as any)?.subscriptionStatus || "").toLowerCase() === "active"
+  );
+
+  const selectPrivate = () => {
+    if (!isVip) {
+      toast.error("Quiz riêng tư chỉ dành cho tài khoản VIP.");
+      return;
+    }
+    setIsPublic(false);
+  };
 
   // AI Settings
   const [aiPrompt, setAiPrompt] = useState("");
@@ -31,7 +52,7 @@ export function QuizCreate() {
     }
     try {
       setLoading(true);
-      const quiz = await generateQuizByAI(aiPrompt, aiNumQuestions, aiDifficulty);
+      const quiz = await generateQuizByAI(aiPrompt, aiNumQuestions, aiDifficulty, isPublic);
       if (quiz) {
         if (quiz.taskProgress) {
           useConfigStore.getState().setTaskProgress(quiz.taskProgress);
@@ -69,6 +90,7 @@ export function QuizCreate() {
         difficulty,
         duration,
         questions,
+        isPublic,
       });
       if (res) {
         if (res.taskProgress) {
@@ -139,6 +161,28 @@ export function QuizCreate() {
           <FileText className="w-5 h-5" />
           Thủ công
         </button>
+      </div>
+
+      <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
+        <label className="mb-3 block text-sm font-bold text-gray-700">Quyền hiển thị quiz</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setIsPublic(true)}
+            className={`rounded-2xl border p-4 text-left transition-all ${isPublic ? "border-emerald-400 bg-emerald-50 ring-4 ring-emerald-100" : "border-gray-200 bg-gray-50 hover:bg-white"}`}
+          >
+            <div className="flex items-center gap-2 font-extrabold text-gray-900"><Globe2 className="w-5 h-5 text-emerald-600" /> Công khai</div>
+            <p className="mt-1 text-xs font-medium text-gray-500">Mặc định. Quiz sẽ xuất hiện ở tab Công khai.</p>
+          </button>
+          <button
+            type="button"
+            onClick={selectPrivate}
+            className={`rounded-2xl border p-4 text-left transition-all ${!isPublic ? "border-slate-400 bg-slate-100 ring-4 ring-slate-100" : "border-gray-200 bg-gray-50 hover:bg-white"} ${!isVip ? "opacity-75" : ""}`}
+          >
+            <div className="flex items-center gap-2 font-extrabold text-gray-900"><Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}</div>
+            <p className="mt-1 text-xs font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo quiz riêng tư.</p>
+          </button>
+        </div>
       </div>
 
       {mode === "ai" ? (

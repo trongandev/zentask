@@ -5,6 +5,11 @@ import { useUserStore } from "./userService";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
+const readApiError = async (res: Response, fallback: string) => {
+  const data = await res.json().catch(() => null);
+  return data?.error || data?.message || fallback;
+};
+
 export interface FlashcardFolder {
   id: string;
   name: string;
@@ -24,6 +29,8 @@ export interface FlashcardSet {
   lastStudied: string | null;
   color: string;
   isNew: boolean;
+  isPublic?: boolean;
+  creator?: { uid: string; displayName: string; photoURL?: string } | null;
   createdAt: any;
   updatedAt: any;
 }
@@ -72,6 +79,7 @@ interface FlashcardState {
   loading: boolean;
   folders: FlashcardFolder[];
   sets: FlashcardSet[];
+  publicSets: FlashcardSet[];
   currentSet: FlashcardSet | null;
   cards: Flashcard[];
   cardProgress: Record<string, CardProgress>;
@@ -84,7 +92,8 @@ interface FlashcardState {
   deleteFolder: (folderId: string, deleteSets?: boolean) => Promise<void>;
 
   fetchSets: () => Promise<void>;
-  createSet: (title: string, description?: string, color?: string) => Promise<FlashcardSet | null>;
+  fetchPublicSets: () => Promise<void>;
+  createSet: (title: string, description?: string, color?: string, isPublic?: boolean) => Promise<FlashcardSet | null>;
   updateSet: (setId: string, data: Partial<FlashcardSet>) => Promise<FlashcardSet | null>;
   deleteSet: (setId: string) => Promise<void>;
 
@@ -114,6 +123,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   loading: false,
   folders: [],
   sets: [],
+  publicSets: [],
   currentSet: null,
   cards: [],
   cardProgress: {},
@@ -217,16 +227,33 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     }
   },
 
-  createSet: async (title, description = "", color = "bg-blue-500") => {
+
+  fetchPublicSets: async () => {
+    set({ loading: true });
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/public`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch public sets");
+      const data = await res.json();
+      set({ publicSets: data });
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi tải bộ thẻ công khai");
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  createSet: async (title, description = "", color = "bg-blue-500", isPublic = true) => {
     set({ loading: true });
     try {
       const res = await fetch(`${API_URL}/api/flashcard/set`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ title, description, color }),
+        body: JSON.stringify({ title, description, color, isPublic }),
       });
-      if (!res.ok) throw new Error("Failed to create set");
+      if (!res.ok) throw new Error(await readApiError(res, "Failed to create set"));
       const data = await res.json();
       set((state) => ({ sets: [data, ...state.sets] }));
       toast.success("Tạo bộ thẻ thành công");
@@ -265,7 +292,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
         credentials: "include",
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Failed to update set");
+      if (!res.ok) throw new Error(await readApiError(res, "Failed to update set"));
       const resData = await res.json();
       
       set((state) => ({
@@ -563,7 +590,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
         credentials: "include",
         body: JSON.stringify({ isPublic }),
       });
-      if (!res.ok) throw new Error("Failed to update privacy");
+      if (!res.ok) throw new Error(await readApiError(res, "Failed to update privacy"));
       
       set((state) => ({
         sets: state.sets.map(s => s.id === setId ? { ...s, isPublic } : s),

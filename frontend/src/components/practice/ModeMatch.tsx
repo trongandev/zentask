@@ -8,13 +8,17 @@ import { useSM2 } from "../../hooks/useSM2";
 interface ModeMatchProps {
   cards: Flashcard[];
   setId: string;
+  onComplete?: (wrongCardIds: string[]) => void;
+  completionActions?: React.ReactNode;
 }
 
 
 type MatchItem = { id: string; text: string; type: 'en' | 'vi'; flashcardId: string; isMatched: boolean };
 
-export function ModeMatch({ cards, setId }: ModeMatchProps) {
+export function ModeMatch({ cards, setId, onComplete, completionActions }: ModeMatchProps) {
   const [completed, setCompleted] = useState(false);
+  const [wrongCardIds, setWrongCardIds] = useState<string[]>([]);
+  const wrongCardIdsRef = React.useRef<string[]>([]);
   const [items, setItems] = useState<MatchItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [wrongPair, setWrongPair] = useState<string[]>([]);
@@ -57,6 +61,7 @@ export function ModeMatch({ cards, setId }: ModeMatchProps) {
     setSelectedIds([]);
     setWrongPair([]);
     setMatchedPairs([]);
+    setWrongCardIds([]); wrongCardIdsRef.current = [];
     setStartTime(Date.now());
     setTimeElapsed(0);
     setCompleted(false);
@@ -85,12 +90,15 @@ export function ModeMatch({ cards, setId }: ModeMatchProps) {
         if (newMatched.length === items.length) {
           setTimeout(() => {
             flushProgress();
+            onComplete?.(wrongCardIdsRef.current);
             setCompleted(true);
           }, 1500);
         }
       } else {
         // Wrong match
         reportWrong(item1.flashcardId, "match");
+        const wrongIds = Array.from(new Set([item1.flashcardId, item2.flashcardId]));
+        setWrongCardIds((prev) => { const next = Array.from(new Set([...prev, ...wrongIds])); wrongCardIdsRef.current = next; return next; });
         playSoundEffect('wrong');
         setWrongPair(newSelected);
         setTimeout(() => {
@@ -121,6 +129,7 @@ export function ModeMatch({ cards, setId }: ModeMatchProps) {
           <RotateCw className="w-5 h-5" />
           Chơi lại
         </button>
+        {completionActions}
       </div>
     );
   }

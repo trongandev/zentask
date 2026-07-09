@@ -486,6 +486,82 @@ router.post("/beginner-progress", async (req, res) => {
   }
 });
 
+
+// Complete beginner topic and award XP once per topic
+router.post("/beginner-topic-complete", async (req, res) => {
+  try {
+    const { topicId } = req.body;
+    if (!topicId || typeof topicId !== "string") {
+      return res.status(400).json({ error: "topicId is required" });
+    }
+
+    const xpToAdd = 20;
+    const userRef = db.collection("users").doc(req.uid);
+
+    const result = await db.runTransaction(async (t) => {
+      const doc = await t.get(userRef);
+      if (!doc.exists) throw new Error("User not found");
+
+      const userData = doc.data() || {};
+      const completedTopics = Array.isArray(userData.completedBeginnerTopics) ? userData.completedBeginnerTopics : [];
+      if (completedTopics.includes(topicId)) {
+        return {
+          alreadyAwarded: true,
+          awardedXp: 0,
+          xp: userData.xp || 0,
+          level: userData.level || 1,
+          levelUp: false,
+        };
+      }
+
+      const nextXp = (userData.xp || 0) + xpToAdd;
+      const previousLevel = userData.level || 1;
+      let nextLevel = 1;
+      for (let i = SYSTEM_LEVELS.length - 1; i >= 0; i--) {
+        if (nextXp >= SYSTEM_LEVELS[i].xp) {
+          nextLevel = SYSTEM_LEVELS[i].level;
+          break;
+        }
+      }
+
+      t.update(userRef, {
+        xp: nextXp,
+        level: nextLevel,
+        completedBeginnerTopics: FieldValue.arrayUnion(topicId),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      const weekString = getWeekString();
+      const monthString = getMonthString();
+      t.set(db.collection("leaderboard_weekly").doc(`${weekString}_${req.uid}`), {
+        uid: req.uid,
+        period: weekString,
+        xp: FieldValue.increment(xpToAdd),
+        updatedAt: FieldValue.serverTimestamp(),
+      }, { merge: true });
+      t.set(db.collection("leaderboard_monthly").doc(`${monthString}_${req.uid}`), {
+        uid: req.uid,
+        period: monthString,
+        xp: FieldValue.increment(xpToAdd),
+        updatedAt: FieldValue.serverTimestamp(),
+      }, { merge: true });
+
+      return {
+        alreadyAwarded: false,
+        awardedXp: xpToAdd,
+        xp: nextXp,
+        level: nextLevel,
+        levelUp: nextLevel > previousLevel,
+      };
+    });
+
+    res.json({ status: "success", ...result });
+  } catch (error) {
+    console.error("Complete beginner topic error:", error);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
+
 // Follow / Unfollow User
 router.post("/follow/:uid", async (req, res) => {
   try {

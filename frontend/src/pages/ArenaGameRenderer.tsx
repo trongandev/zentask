@@ -11,9 +11,10 @@ interface ArenaGameRendererProps {
   isX2: boolean;
   onAnswer: (isCorrect: boolean) => void;
   disabled: boolean; // if true, wait for next
+  answerStatus?: boolean | null; // null: chưa trả lời, true: đúng, false: sai/timeout
 }
 
-export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabled }: ArenaGameRendererProps) {
+export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabled, answerStatus = null }: ArenaGameRendererProps) {
   const { playAudio, isLoading, loadingText } = useTTSAudio();
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -46,6 +47,18 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
     onAnswer(isCorrect);
   };
 
+  const renderAnswerFeedback = (kind: "word" | "translation" = "word") => {
+    if (!disabled || answerStatus !== false) return null;
+    const correctText = kind === "translation" ? card.translation : card.term;
+
+    return (
+      <div className="mt-5 w-full rounded-2xl border border-emerald-400/40 bg-emerald-500/10 px-5 py-4 text-center shadow-[0_0_20px_rgba(16,185,129,0.18)] animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <p className="text-sm font-bold uppercase tracking-widest text-emerald-200">Đáp án đúng</p>
+        <p className="mt-1 break-words text-2xl font-black text-emerald-100">{correctText}</p>
+      </div>
+    );
+  };
+
   const renderQuiz = () => (
     <div className="w-full flex flex-col items-center">
       <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-10 rounded-3xl w-full text-center mb-8 shadow-2xl relative overflow-hidden">
@@ -67,12 +80,19 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
             key={idx} 
             disabled={disabled}
             onClick={() => onAnswer(opt.id === card.id)} 
-            className="p-6 rounded-2xl border-2 text-xl font-bold transition-all duration-300 bg-white/5 border-white/10 hover:bg-white/20 text-white disabled:opacity-50"
+            className={cn(
+              "p-6 rounded-2xl border-2 text-xl font-bold transition-all duration-300 text-white",
+              disabled && opt.id === card.id
+                ? "border-emerald-400 bg-emerald-500/25 shadow-[0_0_18px_rgba(16,185,129,0.25)]"
+                : "bg-white/5 border-white/10 hover:bg-white/20",
+              disabled && opt.id !== card.id ? "opacity-50" : "",
+            )}
           >
             {opt.translation}
           </button>
         ))}
       </div>
+      {renderAnswerFeedback("translation")}
     </div>
   );
 
@@ -103,6 +123,7 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
           <Send className="w-5 h-5" />
         </button>
       </form>
+      {renderAnswerFeedback("word")}
     </div>
   );
 
@@ -131,6 +152,7 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
           className="w-full bg-white/10 border-2 border-white/30 rounded-2xl px-6 py-5 text-xl font-bold text-white outline-none focus:border-blue-500 focus:bg-white/20 transition-all placeholder:text-white/30"
         />
       </form>
+      {renderAnswerFeedback("word")}
     </div>
   );
 

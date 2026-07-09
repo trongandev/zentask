@@ -9,33 +9,6 @@ export default defineConfig(() => {
     resolve: {
       alias: [
         { find: '@', replacement: path.resolve(__dirname, '.') },
-        {
-          find: /^@xenova\/transformers\/dist\/(.*)$/,
-          replacement:
-            path.resolve(__dirname, 'node_modules/@xenova/transformers/dist') +
-            '/$1',
-        },
-        {
-          find: /^@xenova\/transformers$/,
-          replacement: path.resolve(
-            __dirname,
-            'node_modules/@xenova/transformers/dist/transformers.min.js',
-          ),
-        },
-        {
-          find: 'onnxruntime-web',
-          replacement: path.resolve(
-            __dirname,
-            'node_modules/onnxruntime-web/dist/ort-web.es6.min.js',
-          ),
-        },
-        {
-          find: 'onnxruntime-common',
-          replacement: path.resolve(
-            __dirname,
-            'node_modules/onnxruntime-common/dist/lib/index.js',
-          ),
-        },
       ],
       fs: {
         allow: ['..'],
@@ -48,15 +21,5 @@ export default defineConfig(() => {
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
     },
-    optimizeDeps: {
-      exclude: [
-        '@xenova/transformers',
-        '@ffmpeg/ffmpeg',
-        '@ffmpeg/util',
-        '@ffmpeg/core',
-        'onnxruntime-web',
-        'onnxruntime-common',
-      ],
-    }
   };
 });

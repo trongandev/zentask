@@ -23,16 +23,142 @@ const authenticate = async (req, res, next) => {
 
 router.use(authenticate);
 
+
+const getUserProfile = async (uid) => {
+  const userDoc = await db.collection("users").doc(uid).get();
+  return userDoc.exists ? userDoc.data() : {};
+};
+
+const isVipUser = (profile = {}) => {
+  const role = String(profile.role || "").toLowerCase();
+  const plan = String(profile.plan || profile.subscriptionPlan || profile.membership || "").toLowerCase();
+  const status = String(profile.subscriptionStatus || profile.vipStatus || "").toLowerCase();
+  return Boolean(
+    profile.isVip ||
+    profile.vip ||
+    role === "admin" ||
+    role === "vip" ||
+    plan === "vip" ||
+    plan === "pro" ||
+    plan === "premium" ||
+    status === "active"
+  );
+};
+
+
+const isFeaturedQuiz = (quiz = {}) => {
+  const type = String(quiz.type || quiz.category || quiz.source || quiz.ownerType || "").toLowerCase();
+  const creatorId = quiz.creatorId;
+  return Boolean(
+    quiz.isFeatured ||
+    quiz.featured ||
+    quiz.isDefault ||
+    quiz.isSystem ||
+    type === "featured" ||
+    type === "default" ||
+    type === "system" ||
+    creatorId === "system" ||
+    creatorId === "default" ||
+    creatorId === "admin_seed" ||
+    !creatorId
+  );
+};
+
+const normalizePublicFlag = async (uid, requestedValue = true) => {
+  const wantsPublic = requestedValue !== false;
+  if (wantsPublic) return true;
+
+  const profile = await getUserProfile(uid);
+  if (!isVipUser(profile)) {
+    const err = new Error("Tính năng tạo quiz riêng tư chỉ dành cho tài khoản VIP.");
+    err.statusCode = 402;
+    throw err;
+  }
+  return false;
+};
+
+
+const toMillis = (value) => {
+  if (!value) return 0;
+  if (typeof value.toMillis === "function") return value.toMillis();
+  if (typeof value.toDate === "function") return value.toDate().getTime();
+  if (typeof value === "number") return value;
+  if (typeof value === "string") return Date.parse(value) || 0;
+  if (typeof value.seconds === "number") return value.seconds * 1000;
+  if (typeof value._seconds === "number") return value._seconds * 1000;
+  return 0;
+};
+
+const sortByCreatedAtDesc = (items) =>
+  items.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+
+const attachCreators = async (docs) => {
+  const creatorIds = [...new Set(docs.map((doc) => doc.data().creatorId).filter(Boolean))];
+  const creatorMap = {};
+  await Promise.all(creatorIds.map(async (uid) => {
+    try {
+      const userDoc = await db.collection("users").doc(uid).get();
+      if (userDoc.exists) {
+        const data = userDoc.data();
+        creatorMap[uid] = {
+          uid,
+          displayName: data.displayName || data.email || "Người dùng ZenTask",
+          photoURL: data.photoURL || "",
+        };
+      }
+    } catch (e) {
+      console.warn("Cannot load quiz creator", uid, e.message);
+    }
+  }));
+  return docs.map((doc) => {
+    const data = doc.data();
+    return { id: doc.id, ...data, creator: creatorMap[data.creatorId] || null };
+  });
+};
+
 // Generate room code
 const generateRoomCode = () => {
   return crypto.randomBytes(3).toString("hex").toUpperCase(); // 6 chars like "A1B2C3"
 };
 
-// GET /api/quiz
+// GET /api/quiz - featured quizzes first, then quizzes created by current user
 router.get("/", async (req, res) => {
   try {
-    const snapshot = await db.collection("quizzes").orderBy("createdAt", "desc").limit(20).get();
-    const quizzes = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    // The original Quiz page showed system/default quizzes in "Bài thi nổi bật".
+    // After adding public/private filtering, those quizzes could disappear because
+    // they do not always have creatorId === current user. To preserve the old UX,
+    // load quizzes and split them in memory: featured/default first, user's own next.
+    // We intentionally avoid orderBy + where here so Firestore does not require a
+    // composite index during local development.
+    const snapshot = await db.collection("quizzes").get();
+    const allQuizzes = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      const featured = isFeaturedQuiz(data);
+      return {
+        id: doc.id,
+        ...data,
+        isFeatured: featured,
+        isMine: data.creatorId === req.uid,
+      };
+    });
+
+    const featuredQuizzes = sortByCreatedAtDesc(
+      allQuizzes.filter((quiz) => quiz.isFeatured)
+    );
+
+    const myQuizzes = sortByCreatedAtDesc(
+      allQuizzes.filter((quiz) => quiz.creatorId === req.uid && !quiz.isFeatured)
+    );
+
+    const seen = new Set();
+    const quizzes = [...featuredQuizzes, ...myQuizzes]
+      .filter((quiz) => {
+        if (seen.has(quiz.id)) return false;
+        seen.add(quiz.id);
+        return true;
+      })
+      .slice(0, 80);
+
     res.json(quizzes);
   } catch (error) {
     console.error("Error getting quizzes:", error);
@@ -40,13 +166,32 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /api/quiz/public - public quizzes across the system
+router.get("/public", async (req, res) => {
+  try {
+    const snapshot = await db.collection("quizzes")
+      .where("isPublic", "==", true)
+      .get();
+    const quizzes = sortByCreatedAtDesc(await attachCreators(snapshot.docs));
+    res.json(quizzes);
+  } catch (error) {
+    console.error("Error getting public quizzes:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // GET /api/quiz/history
 router.get("/history", async (req, res) => {
   try {
-    const snapshot = await db.collection("quiz_results").where("uid", "==", req.uid).orderBy("createdAt", "desc").limit(20).get();
+    const snapshot = await db.collection("quiz_results").where("uid", "==", req.uid).get();
+
+    const historyDocs = snapshot.docs
+      .slice()
+      .sort((a, b) => toMillis(b.data().createdAt) - toMillis(a.data().createdAt))
+      .slice(0, 20);
 
     const history = [];
-    for (const doc of snapshot.docs) {
+    for (const doc of historyDocs) {
       const data = doc.data();
       const quizDoc = await db.collection("quizzes").doc(data.quizId).get();
       if (quizDoc.exists) {
@@ -73,6 +218,9 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ error: "Quiz not found" });
     }
     const data = doc.data();
+    if (data.creatorId !== req.uid && !data.isPublic && !isFeaturedQuiz(data)) {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
     // In a real strict environment, we might hide correct answers here,
     // but since we need client-side evaluation for Phoenix Rebirth quickly,
     // we'll send it down.
@@ -86,7 +234,7 @@ router.get("/:id", async (req, res) => {
 // POST /api/quiz (Create manual)
 router.post("/", async (req, res) => {
   try {
-    const { title, description, difficulty, duration, questions } = req.body;
+    const { title, description, difficulty, duration, questions, isPublic = true } = req.body;
 
     if (!title || !questions || questions.length === 0) {
       return res.status(400).json({ error: "Invalid quiz data" });
@@ -98,6 +246,8 @@ router.post("/", async (req, res) => {
       id: q.id || `q_${Date.now()}_${idx}`,
     }));
 
+    const publicFlag = await normalizePublicFlag(req.uid, isPublic);
+
     const newQuiz = {
       title,
       description: description || "",
@@ -105,7 +255,9 @@ router.post("/", async (req, res) => {
       duration: duration || 15,
       questions: formattedQuestions,
       creatorId: req.uid,
+      isPublic: publicFlag,
       createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     };
 
     const docRef = await db.collection("quizzes").add(newQuiz);
@@ -125,14 +277,14 @@ router.post("/", async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating quiz:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(error.statusCode || 500).json({ error: error.message || "Internal server error" });
   }
 });
 
 // POST /api/quiz/generate (AI)
 router.post("/generate", async (req, res) => {
   try {
-    const { prompt, numQuestions = 5, difficulty = "Medium" } = req.body;
+    const { prompt, numQuestions = 5, difficulty = "Medium", isPublic = true } = req.body;
 
     if (!prompt) {
       return res.status(400).json({ error: "Prompt is required" });
@@ -222,6 +374,8 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
       ...q,
     }));
 
+    const publicFlag = await normalizePublicFlag(req.uid, isPublic);
+
     const newQuiz = {
       title: quizData.title,
       description: quizData.description,
@@ -229,7 +383,9 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
       duration: numQuestions * 1.5, // 1.5 mins per question
       questions: formattedQuestions,
       creatorId: req.uid,
+      isPublic: publicFlag,
       createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     };
 
     const docRef = await db.collection("quizzes").add(newQuiz);
@@ -249,7 +405,7 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
     });
   } catch (error) {
     console.error("Error generating quiz:", error);
-    res.status(500).json({ error: "Failed to generate quiz" });
+    res.status(error.statusCode || 500).json({ error: error.message || "Failed to generate quiz" });
   }
 });
 
@@ -325,6 +481,9 @@ router.post("/:id/submit", async (req, res) => {
     if (!quizDoc.exists) return res.status(404).json({ error: "Quiz not found" });
 
     const quiz = quizDoc.data();
+    if (quiz.creatorId !== req.uid && !quiz.isPublic && !isFeaturedQuiz(quiz)) {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
     let correctCount = 0;
 
     // Evaluate answers
