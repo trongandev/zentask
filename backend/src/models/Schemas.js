@@ -24,6 +24,7 @@ export const NotificationSchema = new Schema({
   title: { type: String, required: true },
   message: { type: String, required: true },
   type: { type: String },
+  referenceId: { type: Schema.Types.Mixed, default: null },
   isRead: { type: Boolean, default: false },
 }, { timestamps: true });
 
@@ -56,9 +57,25 @@ export const FlashcardFolderSchema = new Schema({
   color: { type: String, default: "bg-blue-500" },
 }, { timestamps: true });
 
+export const FlashcardCategorySchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  name: { type: String, required: true },
+  color: { type: String, default: "bg-slate-500" },
+  description: { type: String, default: "" },
+}, { timestamps: true });
+
+export const QuizCategorySchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  name: { type: String, required: true },
+  color: { type: String, default: "bg-blue-500" },
+  description: { type: String, default: "" },
+}, { timestamps: true });
+
 export const FlashcardSetSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   folderId: { type: Schema.Types.ObjectId, ref: 'FlashcardFolder', default: null },
+  categoryId: { type: Schema.Types.ObjectId, ref: 'FlashcardCategory', default: null },
+  categoryName: { type: String, default: "" },
   title: { type: String, required: true },
   description: { type: String, default: "" },
   cardCount: { type: Number, default: 0 },
@@ -129,6 +146,8 @@ export const QuizSchema = new Schema({
   duration: { type: Number, default: 15 },
   questions: { type: Schema.Types.Mixed, default: [] },
   creatorId: { type: String }, // Can be ObjectId or system string
+  categoryId: { type: Schema.Types.ObjectId, ref: 'QuizCategory', default: null },
+  categoryName: { type: String, default: "" },
   isPublic: { type: Boolean, default: true },
   isFeatured: { type: Boolean, default: false },
   isDefault: { type: Boolean, default: false },
@@ -228,6 +247,31 @@ export const StudyMethodSchema = new Schema({
   isCustom: { type: Boolean, default: true }
 }, { timestamps: true });
 
+export const ArenaTournamentRoomSchema = new Schema({
+  code: { type: String, required: true, unique: true },
+  title: { type: String, default: "Giải đấu ZenTask" },
+  hostId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  participantIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  invitedUserIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  status: { type: String, enum: ["waiting", "playing", "ended"], default: "waiting" },
+  settings: { type: Schema.Types.Mixed, default: {} },
+  xpAwardedUserIds: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+}, { timestamps: true });
+
+export const SkillPracticeDailySchema = new Schema({
+  uid: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  date: { type: String, required: true },
+  completedModes: { type: [String], default: [] },
+  bonusClaimed: { type: Boolean, default: false },
+  attempts: { type: Schema.Types.Mixed, default: [] },
+}, { timestamps: true });
+
+export const SkillPracticeCacheSchema = new Schema({
+  mode: { type: String, required: true },
+  sourceHint: { type: String, default: "AI tổng hợp từ nguồn học tiếng Anh công khai" },
+  payload: { type: Schema.Types.Mixed, required: true },
+}, { timestamps: true });
+
 export const UserFollowSchema = new Schema({
   followerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   followingId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -246,6 +290,8 @@ export const LeaderboardMonthly = mongoose.models.LeaderboardMonthly || mongoose
 export const UserFollow = mongoose.models.UserFollow || mongoose.model('UserFollow', UserFollowSchema);
 export const QuizResult = mongoose.models.QuizResult || mongoose.model('QuizResult', QuizResultSchema);
 export const FlashcardFolder = mongoose.models.FlashcardFolder || mongoose.model('FlashcardFolder', FlashcardFolderSchema);
+export const FlashcardCategory = mongoose.models.FlashcardCategory || mongoose.model('FlashcardCategory', FlashcardCategorySchema);
+export const QuizCategory = mongoose.models.QuizCategory || mongoose.model('QuizCategory', QuizCategorySchema);
 export const FlashcardSet = mongoose.models.FlashcardSet || mongoose.model('FlashcardSet', FlashcardSetSchema);
 export const Vocabulary = mongoose.models.Vocabulary || mongoose.model('Vocabulary', VocabularySchema);
 export const Notebook = mongoose.models.Notebook || mongoose.model('Notebook', NotebookSchema);
@@ -260,3 +306,6 @@ export const ArenaMatchmakingStat = mongoose.models.ArenaMatchmakingStat || mong
 export const CalculatorHistory = mongoose.models.CalculatorHistory || mongoose.model('CalculatorHistory', CalculatorHistorySchema);
 export const TranslationHistory = mongoose.models.TranslationHistory || mongoose.model('TranslationHistory', TranslationHistorySchema);
 export const StudyMethod = mongoose.models.StudyMethod || mongoose.model('StudyMethod', StudyMethodSchema);
+export const ArenaTournamentRoom = mongoose.models.ArenaTournamentRoom || mongoose.model('ArenaTournamentRoom', ArenaTournamentRoomSchema);
+export const SkillPracticeDaily = mongoose.models.SkillPracticeDaily || mongoose.model('SkillPracticeDaily', SkillPracticeDailySchema);
+export const SkillPracticeCache = mongoose.models.SkillPracticeCache || mongoose.model('SkillPracticeCache', SkillPracticeCacheSchema);

@@ -73,6 +73,7 @@ export function QuizDetail() {
   }
 
   if (!quiz) return null;
+  const isBuiltInQuiz = Boolean((quiz as any).isBuiltIn || String(quiz.id || "").startsWith("builtin_quiz_"));
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4">
@@ -85,6 +86,7 @@ export function QuizDetail() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50 to-purple-50 rounded-full blur-3xl opacity-50 -z-10 translate-x-1/3 -translate-y-1/3" />
 
         <div className="flex flex-wrap items-center gap-3 mb-6">
+          {isBuiltInQuiz && <span className="px-3 py-1.5 rounded-xl text-sm font-bold border bg-indigo-50 text-indigo-700 border-indigo-100">Có sẵn</span>}
           <span className={`px-3 py-1.5 rounded-xl text-sm font-bold border ${getDifficultyColor(quiz.difficulty)}`}>{quiz.difficulty}</span>
           <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100">
             <Target className="w-4 h-4" />
@@ -108,19 +110,21 @@ export function QuizDetail() {
             Làm bài ngay (Cá nhân)
           </button>
 
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className={`flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg border-2 transition-all hover:scale-[1.02] ${
-              showSettings ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
-            }`}
-          >
-            <Users className="w-6 h-6" />
-            Mở phòng thi (Nhiều người)
-          </button>
+          {!isBuiltInQuiz && (
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className={`flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg border-2 transition-all hover:scale-[1.02] ${
+                showSettings ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
+              }`}
+            >
+              <Users className="w-6 h-6" />
+              Mở phòng thi (Nhiều người)
+            </button>
+          )}
         </div>
       </div>
 
-      {showSettings && (
+      {showSettings && !isBuiltInQuiz && (
         <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm animate-in fade-in slide-in-from-top-4">
           <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
             <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">

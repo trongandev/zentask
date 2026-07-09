@@ -190,39 +190,270 @@ function pickWords(result: any): WordResult[] {
   });
 }
 
+
 /** Renders a word with each character colored by its phoneme correctness. */
 function WordHighlight({ wordResult }: { wordResult: WordResult }) {
   const hasPhonemeData = wordResult.chars.some((c) => c.correct !== null);
 
   return (
     <span className="inline-flex flex-col items-center gap-0.5">
-      <span className="text-xl font-black tracking-wide">
+      <span className="text-lg font-black tracking-wide">
         {hasPhonemeData
           ? wordResult.chars.map((c, i) => (
             <span
               key={i}
               className={
                 c.correct === true
-                  ? "text-green-500"
+                  ? "text-emerald-600"
                   : c.correct === false
-                    ? "text-red-500"
-                    : "text-gray-700"
+                    ? "text-rose-600"
+                    : "text-slate-700"
               }
             >
               {c.char}
             </span>
           ))
           : (
-            <span className={wordResult.correct ? "text-green-500" : "text-red-500"}>
+            <span className={wordResult.correct ? "text-emerald-600" : "text-rose-600"}>
               {wordResult.word}
             </span>
           )}
       </span>
-      {/* tiny underline bar for quick scan */}
       <span
-        className={`h-0.5 w-full rounded-full ${wordResult.correct ? "bg-green-400" : "bg-red-400"
+        className={`h-0.5 w-full rounded-full ${wordResult.correct ? "bg-emerald-400" : "bg-rose-400"
           }`}
       />
+    </span>
+  );
+}
+
+type CharState = "correct" | "wrong" | "neutral";
+
+interface TargetCharFeedback {
+  char: string;
+  state: CharState;
+  compareIndex: number | null;
+}
+
+function normalizeChar(char: string) {
+  return char
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function buildComparableChars(text: string) {
+  const chars: Array<{ rawIndex: number; normalized: string }> = [];
+  Array.from(String(text || "")).forEach((char, rawIndex) => {
+    const normalized = normalizeChar(char);
+    if (normalized) chars.push({ rawIndex, normalized });
+  });
+  return chars;
+}
+
+function alignTargetToHeard(targetText: string, heardText: string, fallbackState: CharState): TargetCharFeedback[] {
+  const rawChars = Array.from(String(targetText || ""));
+  const target = buildComparableChars(targetText);
+  const heard = buildComparableChars(heardText);
+  const targetStates = new Array(target.length).fill(false);
+
+  if (!target.length) return [];
+
+  if (!heard.length) {
+    return rawChars.map((char, rawIndex) => {
+      const compareIndex = target.findIndex((item) => item.rawIndex === rawIndex);
+      return {
+        char,
+        compareIndex: compareIndex >= 0 ? compareIndex : null,
+        state: compareIndex >= 0 ? fallbackState : "neutral",
+      };
+    });
+  }
+
+  const m = target.length;
+  const n = heard.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = target[i - 1].normalized === heard[j - 1].normalized ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost,
+      );
+    }
+  }
+
+  let i = m;
+  let j = n;
+  while (i > 0 || j > 0) {
+    if (
+      i > 0 &&
+      j > 0 &&
+      target[i - 1].normalized === heard[j - 1].normalized &&
+      dp[i][j] === dp[i - 1][j - 1]
+    ) {
+      targetStates[i - 1] = true;
+      i -= 1;
+      j -= 1;
+      continue;
+    }
+
+    if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + 1) {
+      targetStates[i - 1] = false;
+      i -= 1;
+      j -= 1;
+      continue;
+    }
+
+    if (i > 0 && dp[i][j] === dp[i - 1][j] + 1) {
+      targetStates[i - 1] = false;
+      i -= 1;
+      continue;
+    }
+
+    if (j > 0) j -= 1;
+    else break;
+  }
+
+  const rawToCompare = new Map<number, number>();
+  target.forEach((item, index) => rawToCompare.set(item.rawIndex, index));
+
+  return rawChars.map((char, rawIndex) => {
+    const compareIndex = rawToCompare.get(rawIndex) ?? null;
+    if (compareIndex == null) return { char, compareIndex, state: "neutral" };
+    return {
+      char,
+      compareIndex,
+      state: targetStates[compareIndex] ? "correct" : "wrong",
+    };
+  });
+}
+
+function getHeardText(result: any, wordResults: WordResult[]) {
+  const direct = pickText(result, [
+    "recognizedtext",
+    "displaytext",
+    "display",
+    "transcript",
+    "recognized",
+    "text",
+    "lexical",
+  ]);
+  if (direct) return direct;
+  const fromWords = wordResults.map((item) => item.word).filter(Boolean).join(" ").trim();
+  return fromWords;
+}
+
+function scoreTone(score: number | null, status: PronunciationStatus) {
+  if ((score ?? 0) >= 85 || status === "correct") {
+    return {
+      label: "Tốt",
+      text: "text-emerald-700",
+      bg: "bg-emerald-50",
+      border: "border-emerald-200",
+      ring: "#10b981",
+      soft: "from-emerald-50 to-green-50",
+    };
+  }
+  if ((score ?? 0) >= PASS_SCORE) {
+    return {
+      label: "Đạt",
+      text: "text-blue-700",
+      bg: "bg-blue-50",
+      border: "border-blue-200",
+      ring: "#2563eb",
+      soft: "from-blue-50 to-cyan-50",
+    };
+  }
+  return {
+    label: "Cần luyện thêm",
+    text: "text-rose-700",
+    bg: "bg-rose-50",
+    border: "border-rose-200",
+    ring: "#e11d48",
+    soft: "from-rose-50 to-orange-50",
+  };
+}
+
+function CharacterFeedback({
+  target,
+  heard,
+  status,
+}: {
+  target: string;
+  heard: string;
+  status: PronunciationStatus;
+}) {
+  const fallbackState: CharState = status === "correct" ? "correct" : "wrong";
+  const feedback = alignTargetToHeard(target, heard, fallbackState);
+  const comparable = feedback.filter((item) => item.state !== "neutral");
+  const correctCount = comparable.filter((item) => item.state === "correct").length;
+  const wrongCount = comparable.filter((item) => item.state === "wrong").length;
+
+  return (
+    <div className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm md:p-5">
+      <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-400">Phân tích từng ký tự</p>
+          <h4 className="mt-1 text-lg font-black text-slate-900">Chữ xanh là đúng, chữ đỏ là cần luyện lại</h4>
+        </div>
+        <div className="flex gap-2 text-xs font-bold">
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">Đúng {correctCount}</span>
+          <span className="rounded-full bg-rose-50 px-3 py-1 text-rose-700">Sai {wrongCount}</span>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-center gap-2 rounded-[1.5rem] bg-slate-50 p-4">
+        {feedback.map((item, index) => {
+          if (item.state === "neutral") {
+            return (
+              <span key={`${item.char}-${index}`} className="mx-1 min-w-2 text-3xl font-black text-slate-300">
+                {item.char.trim() ? item.char : " "}
+              </span>
+            );
+          }
+
+          const cls = item.state === "correct"
+            ? "border-emerald-200 bg-emerald-100 text-emerald-700 shadow-emerald-100"
+            : "border-rose-200 bg-rose-100 text-rose-700 shadow-rose-100";
+
+          return (
+            <span
+              key={`${item.char}-${index}`}
+              className={`inline-flex h-12 min-w-10 items-center justify-center rounded-2xl border px-2 text-2xl font-black shadow-sm transition-transform ${cls}`}
+              title={item.state === "correct" ? "Ký tự này khớp với phần máy nghe được" : "Ký tự này chưa khớp"}
+            >
+              {item.char}
+            </span>
+          );
+        })}
+      </div>
+
+      {heard ? (
+        <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          Máy nghe được: <span className="font-black text-slate-900">{heard}</span>
+        </div>
+      ) : (
+        <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700">
+          API không trả transcript chi tiết, nên hệ thống tô theo kết quả tổng thể. Hãy ghi âm rõ hơn để có phân tích chính xác hơn.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MetricPill({ label, value }: { label: string; value: number | null }) {
+  if (value == null) return null;
+  const tone = value >= PASS_SCORE ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700";
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black ${tone}`}>
+      {label}: {Math.round(value)}
     </span>
   );
 }
@@ -513,46 +744,61 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
 
         {result && (() => {
           const wordResults = pickWords(result);
+          const heardText = recognizedText || getHeardText(result, wordResults);
+          const tone = scoreTone(mainScore, status);
+          const scoreForRing = Math.max(0, Math.min(100, mainScore ?? (status === "correct" ? PASS_SCORE : 0)));
           return (
-            <div className="mt-8 rounded-3xl border border-gray-100 bg-gray-50 p-4 md:p-6 text-left">
-              {/* Header: score badge + status */}
-              <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h3 className="text-lg font-black text-gray-900">Kết quả phát âm</h3>
-                  <p className="text-sm text-gray-500">
-                    {status === "correct" ? "✅ Bạn phát âm đạt yêu cầu!" : "❌ Chưa đạt — hãy thử lại hoặc chuyển câu tiếp."}
-                  </p>
-                </div>
-                <div className={cn("rounded-2xl px-5 py-3 text-center font-black text-xl", status === "correct" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
-                  {mainScore != null ? `${Math.round(mainScore)}/100` : "—"}
+            <div className={cn("mt-8 overflow-hidden rounded-[2rem] border p-4 text-left shadow-sm md:p-6", tone.bg, tone.border)}>
+              <div className={cn("mb-5 rounded-[1.75rem] bg-gradient-to-br p-4 md:p-5", tone.soft)}>
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">Kết quả phát âm</p>
+                    <h3 className="mt-1 text-2xl font-black text-slate-900">
+                      {status === "correct" ? "Bạn phát âm đạt yêu cầu" : "Cần luyện lại vài âm"}
+                    </h3>
+                    <p className="mt-2 max-w-xl text-sm font-medium text-slate-500">
+                      Hệ thống sẽ tô <span className="font-black text-emerald-600">xanh</span> những ký tự đã khớp và tô <span className="font-black text-rose-600">đỏ</span> những ký tự cần đọc rõ hơn.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="grid h-24 w-24 place-items-center rounded-full p-2 shadow-inner"
+                      style={{
+                        background: `conic-gradient(${tone.ring} ${scoreForRing * 3.6}deg, #e5e7eb 0deg)`,
+                      }}
+                    >
+                      <div className="grid h-full w-full place-items-center rounded-full bg-white text-center">
+                        <span className={cn("text-2xl font-black leading-none", tone.text)}>
+                          {mainScore != null ? Math.round(mainScore) : "—"}
+                        </span>
+                        <span className="-mt-1 text-[10px] font-black uppercase text-slate-400">/100</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <span className={cn("inline-flex rounded-full px-3 py-1 text-xs font-black", tone.bg, tone.text)}>{tone.label}</span>
+                      <div className="flex flex-wrap gap-2">
+                        <MetricPill label="Độ chính xác" value={accuracy} />
+                        <MetricPill label="Độ trôi chảy" value={fluency} />
+                        <MetricPill label="Đầy đủ" value={completeness} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Character-level feedback */}
-              {wordResults.length > 0 ? (
-                <div>
-                  <p className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-400">Từng chữ cái</p>
-                  <div className="flex flex-wrap items-end gap-x-3 gap-y-4">
+              <CharacterFeedback target={currentCard.term} heard={heardText} status={status} />
+
+              {wordResults.length > 0 && (
+                <details className="mt-4 rounded-3xl border border-slate-200 bg-white p-4">
+                  <summary className="cursor-pointer text-sm font-black text-slate-700">Xem phân tích theo từ/âm từ API</summary>
+                  <div className="mt-4 flex flex-wrap items-end gap-x-4 gap-y-4">
                     {wordResults.map((w, i) => (
                       <WordHighlight key={i} wordResult={w} />
                     ))}
                   </div>
-                  <div className="mt-4 flex gap-5 text-xs text-gray-400">
-                    <span className="flex items-center gap-1.5">
-                      <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-400" />
-                      Phát âm đúng
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-400" />
-                      Phát âm sai
-                    </span>
-                  </div>
-                </div>
-              ) : recognizedText ? (
-                <div className="rounded-2xl bg-white p-4 text-sm text-gray-600">
-                  Máy nghe được: <span className="font-bold text-gray-900">{recognizedText}</span>
-                </div>
-              ) : null}
+                </details>
+              )}
             </div>
           );
         })()}

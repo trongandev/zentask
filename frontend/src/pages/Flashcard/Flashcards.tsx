@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal, Trash2, Folder as FolderIcon, Edit2, Globe2, Lock, Crown, Copy, Search } from "lucide-react";
+import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal, Trash2, Folder as FolderIcon, Edit2, Globe2, Lock, Crown, Copy, Search, MoveRight, Smartphone } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 import { RankCard } from "../../components/shared/RankCard";
@@ -9,7 +9,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
 import { SEO } from "../../components/SEO";
 
-import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay, useDroppable, pointerWithin, rectIntersection } from "@dnd-kit/core";
+import { DndContext, closestCorners, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, DragOverlay, useDroppable, pointerWithin, rectIntersection } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -62,9 +62,61 @@ const timeAgo = (date: any) => {
   return "Gần đây";
 };
 
+const isEditableTarget = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) return false;
+  return Boolean(target.closest("button, a, input, textarea, select, [data-no-long-press]"));
+};
+
+const createMobileContextEvent = (x: number, y: number) =>
+  ({
+    preventDefault: () => {},
+    stopPropagation: () => {},
+    clientX: x,
+    clientY: y,
+  }) as any;
+
 // SORTABLE SET ITEM
 function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, setPopoverId, onEdit, onDelete }: any) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: set.id, data: { type: "set", set } });
+  const longPressTimerRef = React.useRef<number | null>(null);
+  const longPressStartRef = React.useRef<{ x: number; y: number } | null>(null);
+
+  const clearLongPressTimer = React.useCallback(() => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  React.useEffect(() => clearLongPressTimer, [clearLongPressTimer]);
+
+  const handleMobileLongPressStart = React.useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (event.pointerType === "mouse" || isEditableTarget(event.target)) return;
+      longPressStartRef.current = { x: event.clientX, y: event.clientY };
+      clearLongPressTimer();
+      longPressTimerRef.current = window.setTimeout(() => {
+        navigator.vibrate?.(12);
+        onContextMenu(createMobileContextEvent(event.clientX, event.clientY), "set", set);
+        clearLongPressTimer();
+      }, 560);
+    },
+    [clearLongPressTimer, onContextMenu, set],
+  );
+
+  const handleMobileLongPressMove = React.useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const start = longPressStartRef.current;
+      if (!start) return;
+      const distance = Math.hypot(event.clientX - start.x, event.clientY - start.y);
+      if (distance > 12) clearLongPressTimer();
+    },
+    [clearLongPressTimer],
+  );
+
+  const dragPointerDown = (listeners as any)?.onPointerDown;
+  const dragListeners = { ...(listeners as any) };
+  delete (dragListeners as any).onPointerDown;
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -80,10 +132,18 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
+      {...dragListeners}
+      data-flashcard-set-card="true"
+      onPointerDown={(e) => {
+        handleMobileLongPressStart(e);
+        dragPointerDown?.(e);
+      }}
+      onPointerMove={handleMobileLongPressMove}
+      onPointerUp={clearLongPressTimer}
+      onPointerCancel={clearLongPressTimer}
       onContextMenu={(e) => onContextMenu(e, "set", set)}
       onClick={onClick}
-      className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full group cursor-pointer relative overflow-hidden"
+      className="flashcard-mobile-draggable bg-white rounded-3xl p-4 sm:p-6 border border-gray-100 shadow-sm hover:shadow-md active:shadow-lg transition-shadow flex flex-col h-full group cursor-pointer relative overflow-hidden"
     >
       <div className="flex items-start justify-between mb-4">
         <div className={`w-12 h-12 rounded-2xl ${set.color || "bg-blue-500"} flex items-center justify-center text-white shadow-sm`}>
@@ -91,6 +151,7 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
         </div>
         <div className="relative">
           <button
+            data-no-long-press="true"
             onClick={(e) => {
               e.stopPropagation();
               setPopoverId(popoverId === set.id ? null : set.id);
@@ -103,6 +164,7 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
           {popoverId === set.id && (
             <div className="absolute right-0 mt-2 w-36 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 overflow-hidden">
               <button
+                data-no-long-press="true"
                 onClick={(e) => {
                   e.stopPropagation();
                   setPopoverId(null);
@@ -113,6 +175,7 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
                 Sửa & Đổi màu
               </button>
               <button
+                data-no-long-press="true"
                 onClick={(e) => {
                   e.stopPropagation();
                   setPopoverId(null);
@@ -133,6 +196,11 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
           {set.isPublic === false ? <Lock className="w-3 h-3" /> : <Globe2 className="w-3 h-3" />}
           {set.isPublic === false ? "Riêng tư" : "Công khai"}
         </span>
+        {set.categoryName && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-600">
+            {set.categoryName}
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 font-medium">
@@ -181,6 +249,43 @@ const FOLDER_THEMES: Record<string, { bg: string; text: string; fill: string }> 
 function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClick, popoverId, setPopoverId, onEditSet, onDeleteSet, forceOver = false }: any) {
   const { setNodeRef, isOver } = useDroppable({ id: `folder-${folder.id}`, data: { type: "folder", folder } });
   const activeOver = isOver || forceOver;
+  const longPressTimerRef = React.useRef<number | null>(null);
+  const longPressStartRef = React.useRef<{ x: number; y: number } | null>(null);
+
+  const clearLongPressTimer = React.useCallback(() => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  React.useEffect(() => clearLongPressTimer, [clearLongPressTimer]);
+
+  const handleFolderLongPressStart = React.useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (event.pointerType === "mouse" || isEditableTarget(event.target)) return;
+      const target = event.target as HTMLElement;
+      if (target.closest("[data-flashcard-set-card]")) return;
+      longPressStartRef.current = { x: event.clientX, y: event.clientY };
+      clearLongPressTimer();
+      longPressTimerRef.current = window.setTimeout(() => {
+        navigator.vibrate?.(12);
+        onContextMenu(createMobileContextEvent(event.clientX, event.clientY), "folder", folder);
+        clearLongPressTimer();
+      }, 560);
+    },
+    [clearLongPressTimer, folder, onContextMenu],
+  );
+
+  const handleFolderLongPressMove = React.useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const start = longPressStartRef.current;
+      if (!start) return;
+      const distance = Math.hypot(event.clientX - start.x, event.clientY - start.y);
+      if (distance > 12) clearLongPressTimer();
+    },
+    [clearLongPressTimer],
+  );
 
   const colorName = folder.color ? folder.color.replace("bg-", "") : "blue-500";
   const baseColor = colorName.split("-")[0];
@@ -190,14 +295,18 @@ function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClick, popo
     <div
       ref={setNodeRef}
       data-flashcard-dropzone={`folder-${folder.id}`}
+      onPointerDown={handleFolderLongPressStart}
+      onPointerMove={handleFolderLongPressMove}
+      onPointerUp={clearLongPressTimer}
+      onPointerCancel={clearLongPressTimer}
       onContextMenu={(e) => onContextMenu(e, "folder", folder)}
-      className={`${theme.bg} p-6 rounded-3xl border transition-all duration-200 ${activeOver ? "border-blue-500 shadow-lg ring-4 ring-blue-500/20 scale-[1.02]" : "border-gray-200"}`}
+      className={`${theme.bg} p-4 sm:p-6 rounded-3xl border transition-all duration-200 ${activeOver ? "border-blue-500 shadow-lg ring-4 ring-blue-500/20 scale-[1.01] sm:scale-[1.02]" : "border-gray-200"}`}
     >
       <h2 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}>
         <FolderIcon className={`${theme.text} ${theme.fill}`} /> {folder.name}
       </h2>
       <SortableContext items={setsInFolder.map((s: any) => s.id)} strategy={rectSortingStrategy}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[150px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 min-h-[150px]">
           {setsInFolder.length === 0 && (
             <div
               data-flashcard-dropzone={`folder-${folder.id}`}
@@ -225,7 +334,7 @@ function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClick, popo
 }
 
 export function Flashcards() {
-  const { sets, publicSets, folders, fetchSets, fetchPublicSets, fetchFolders, createSet, updateSet, deleteSet, createFolder, updateFolder, deleteFolder, cloneSet, loading } = useFlashcardStore();
+  const { sets, publicSets, builtinSets, folders, categories, fetchSets, fetchPublicSets, fetchBuiltinSets, fetchFolders, fetchCategories, createSet, updateSet, deleteSet, createFolder, updateFolder, deleteFolder, createCategory, deleteCategory, cloneSet, cloneBuiltinSet, loading } = useFlashcardStore();
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -243,8 +352,13 @@ export function Flashcards() {
   const [newDesc, setNewDesc] = useState("");
   const [selectedColor, setSelectedColor] = useState("bg-blue-500");
   const [setIsPublic, setSetIsPublic] = useState(true);
-  const [activeTab, setActiveTab] = useState<"mine" | "public">("mine");
+  const [activeTab, setActiveTab] = useState<"mine" | "builtin" | "public">("mine");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategoryId, setActiveCategoryId] = useState<string>("all");
+  const [activePublicCategoryName, setActivePublicCategoryName] = useState<string>("all");
+  const [activeBuiltinCategoryName, setActiveBuiltinCategoryName] = useState<string>("all");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  const [newCategoryName, setNewCategoryName] = useState("");
 
   const isVip = Boolean(
     (user as any)?.isVip ||
@@ -262,6 +376,7 @@ export function Flashcards() {
 
   // Context Menu
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; type: "root" | "folder" | "set"; item: any } | null>(null);
+  const [isMobileContextMenu, setIsMobileContextMenu] = useState(false);
 
   // Debounce saving
   const pendingUpdatesRef = React.useRef<Record<string, string | null>>({});
@@ -279,8 +394,10 @@ export function Flashcards() {
   useEffect(() => {
     fetchSets();
     fetchFolders();
+    fetchCategories();
     fetchPublicSets();
-  }, [fetchSets, fetchFolders, fetchPublicSets]);
+    fetchBuiltinSets();
+  }, [fetchSets, fetchFolders, fetchCategories, fetchPublicSets, fetchBuiltinSets]);
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -295,7 +412,11 @@ export function Flashcards() {
   const { setNodeRef: rootDropRef, isOver: isRootOver } = useDroppable({ id: "root", data: { type: "root" } });
   const { setNodeRef: removeZoneRef, isOver: isRemoveZoneOver } = useDroppable({ id: "remove-zone", data: { type: "root" } });
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 10 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [coordinateOverId, setCoordinateOverId] = useState<string | null>(null);
@@ -415,10 +536,13 @@ export function Flashcards() {
     e.preventDefault();
     e.stopPropagation();
 
-    // Calculate position keeping it within screen bounds
-    const x = Math.min(e.clientX, window.innerWidth - 200);
-    const y = Math.min(e.clientY, window.innerHeight - 200);
+    const isMobileLike = window.matchMedia?.("(pointer: coarse), (max-width: 640px)").matches || false;
+    const menuWidth = isMobileLike ? window.innerWidth - 24 : 240;
+    const menuHeight = type === "set" ? 420 : type === "folder" ? 320 : 220;
+    const x = Math.min(Math.max(12, e.clientX), Math.max(12, window.innerWidth - menuWidth - 12));
+    const y = Math.min(Math.max(12, e.clientY), Math.max(12, window.innerHeight - menuHeight - 12));
 
+    setIsMobileContextMenu(isMobileLike);
     setContextMenu({ x, y, type, item });
   };
 
@@ -427,6 +551,7 @@ export function Flashcards() {
     setNewTitle("");
     setNewDesc("");
     setSetIsPublic(true);
+    setSelectedCategoryId(activeCategoryId !== "all" ? activeCategoryId : "");
     setTargetFolderIdForNewSet(folderId);
     setSelectedColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
     setIsModalOpen(true);
@@ -445,9 +570,9 @@ export function Flashcards() {
 
     let res;
     if (editingSet) {
-      res = await updateSet(editingSet.id, { title: newTitle, description: newDesc, color: selectedColor, isPublic: setIsPublic });
+      res = await updateSet(editingSet.id, { title: newTitle, description: newDesc, color: selectedColor, isPublic: setIsPublic, categoryId: selectedCategoryId || null });
     } else {
-      res = await createSet(newTitle, newDesc, selectedColor, setIsPublic);
+      res = await createSet(newTitle, newDesc, selectedColor, setIsPublic, selectedCategoryId || null);
       if (res && targetFolderIdForNewSet) {
         await updateSet(res.id, { folderId: targetFolderIdForNewSet });
       }
@@ -492,18 +617,68 @@ export function Flashcards() {
     (set: any) => {
       const query = searchQuery.trim().toLowerCase();
       if (!query) return true;
-      const haystack = [set.title, set.description, set.creator?.displayName, String(set.cardCount || "")].filter(Boolean).join(" ").toLowerCase();
+      const haystack = [set.title, set.description, set.categoryName, set.category, set.creator?.displayName, String(set.cardCount || "")].filter(Boolean).join(" ").toLowerCase();
       return haystack.includes(query);
     },
     [searchQuery],
   );
 
   // Helper arrays
-  const searchedSets = sets.filter(matchesSearch);
+  const searchedSets = sets.filter(matchesSearch).filter((s) => activeCategoryId === "all" || s.categoryId === activeCategoryId);
   const unassignedSets = searchedSets.filter((s) => !s.folderId);
   const activeSetForOverlay = sets.find((s) => s.id === activeId);
   const isRootDropActive = isRootOver || coordinateOverId === "root" || coordinateOverId === "remove-zone";
-  const displayedPublicSets = publicSets.filter((set: any) => set.isPublic).filter(matchesSearch);
+  const getCategoryCount = (categoryId: string) => sets.filter((set: any) => String(set.categoryId || "") === String(categoryId)).length;
+  const publicCategoryOptions = Array.from(
+    publicSets
+      .filter((set: any) => set.isPublic && set.categoryName)
+      .reduce((map: Map<string, { name: string; count: number }>, set: any) => {
+        const name = String(set.categoryName).trim();
+        const key = name.toLowerCase();
+        const current = map.get(key) || { name, count: 0 };
+        current.count += 1;
+        map.set(key, current);
+        return map;
+      }, new Map<string, { name: string; count: number }>())
+      .values(),
+  ).sort((a, b) => a.name.localeCompare(b.name, "vi"));
+  const displayedPublicSets = publicSets
+    .filter((set: any) => set.isPublic)
+    .filter(matchesSearch)
+    .filter((set: any) => activePublicCategoryName === "all" || String(set.categoryName || "").trim().toLowerCase() === activePublicCategoryName);
+
+  const builtinCategoryOptions = [
+    { name: "IELTS", count: builtinSets.filter((set: any) => String(set.categoryName || set.category).toUpperCase() === "IELTS").length, color: "bg-indigo-600" },
+    { name: "TOEIC", count: builtinSets.filter((set: any) => String(set.categoryName || set.category).toUpperCase() === "TOEIC").length, color: "bg-emerald-600" },
+  ];
+
+  const displayedBuiltinSets = builtinSets
+    .filter(matchesSearch)
+    .filter((set: any) => activeBuiltinCategoryName === "all" || String(set.categoryName || set.category || "").trim().toLowerCase() === activeBuiltinCategoryName);
+
+  const handleMoveSetToFolder = async (set: any, folderId: string | null) => {
+    if (!set) return;
+    const oldFolderId = set.folderId ?? null;
+    if (oldFolderId === folderId) {
+      setContextMenu(null);
+      return;
+    }
+
+    useFlashcardStore.setState((state) => ({
+      sets: state.sets.map((item: any) => (item.id === set.id ? { ...item, folderId } : item)),
+    }));
+    setContextMenu(null);
+
+    const saved = await updateSet(set.id, { folderId });
+    if (!saved) {
+      useFlashcardStore.setState((state) => ({
+        sets: state.sets.map((item: any) => (item.id === set.id ? { ...item, folderId: oldFolderId } : item)),
+      }));
+      toast.error("Chưa lưu được vị trí mới của bộ thẻ.");
+    } else {
+      toast.success(folderId ? "Đã chuyển bộ thẻ vào thư mục." : "Đã đưa bộ thẻ ra ngoài thư mục.");
+    }
+  };
 
   const handleClonePublicSet = async (setId: string) => {
     const cloned = await cloneSet(setId);
@@ -513,18 +688,41 @@ export function Flashcards() {
     }
   };
 
+  const handleCloneBuiltinSet = async (setId: string) => {
+    const cloned = await cloneBuiltinSet(setId);
+    if (cloned) {
+      await fetchSets();
+      setActiveTab("mine");
+    }
+  };
+
+
+  const handleCreateCategory = async () => {
+    const name = newCategoryName.trim();
+    if (!name) {
+      toast.error("Nhập tên đề mục trước");
+      return;
+    }
+    const created = await createCategory(name, COLORS[Math.floor(Math.random() * COLORS.length)]);
+    if (created) {
+      setNewCategoryName("");
+      setActiveCategoryId(created.id);
+      setSelectedCategoryId(created.id);
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-8 min-h-screen" onContextMenu={(e) => handleContextMenu(e, "root")}>
+    <div className="max-w-7xl mx-auto space-y-5 sm:space-y-8 min-h-screen w-full overflow-x-hidden px-0 sm:px-0" onContextMenu={(e) => handleContextMenu(e, "root")}>
       <SEO title="Quản lý thẻ ghi nhớ" description="Tạo và quản lý các bộ thẻ Flashcards cá nhân để học từ vựng hiệu quả." />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <img src="/mascot/Lopy (11).png" className="w-16 h-16 object-contain drop-shadow-md" alt="Mascot" />
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+          <img src="/mascot/Lopy (11).png" className="w-12 h-12 sm:w-16 sm:h-16 object-contain drop-shadow-md flex-shrink-0" alt="Mascot" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Thẻ lật (Flashcard)</h1>
-            <p className="text-gray-500">Ôn tập và ghi nhớ từ vựng hiệu quả qua các bộ thẻ.</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 leading-tight">Thẻ lật (Flashcard)</h1>
+            <p className="text-sm sm:text-base text-gray-500 line-clamp-2">Ôn tập và ghi nhớ từ vựng hiệu quả qua các bộ thẻ.</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center sm:gap-3">
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -533,7 +731,7 @@ export function Flashcards() {
               setNewFolderColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
               setIsFolderModalOpen(true);
             }}
-            className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"
+            className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-3 sm:px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 text-sm sm:text-base"
           >
             <FolderIcon className="w-5 h-5" /> Tạo Folder
           </button>
@@ -542,24 +740,80 @@ export function Flashcards() {
               e.stopPropagation();
               openCreateSetModal(null);
             }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 whitespace-nowrap"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 whitespace-nowrap text-sm sm:text-base"
           >
             <Plus className="w-5 h-5" /> Tạo bộ thẻ
           </button>
         </div>
       </div>
 
+      {activeTab === "mine" && (
+        <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-sm font-extrabold uppercase tracking-wide text-gray-700">Đề mục flashcard</h2>
+              <p className="text-xs font-medium text-gray-400">Chia bộ thẻ theo mục như IELTS, TOEIC, Giao tiếp hoặc mục tự tạo.</p>
+            </div>
+            <div className="grid grid-cols-[1fr_auto] gap-2 sm:flex">
+              <input
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCreateCategory()}
+                placeholder="Tạo đề mục mới..."
+                className="min-w-0 w-full sm:w-44 rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold outline-none focus:border-blue-500"
+              />
+              <button onClick={handleCreateCategory} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800">
+                Thêm
+              </button>
+            </div>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            <button
+              onClick={() => setActiveCategoryId("all")}
+              className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryId === "all" ? "bg-blue-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+            >
+              Tất cả
+              <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === "all" ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{sets.length}</span>
+            </button>
+            {categories.map((category: any) => (
+              <div key={category.id} className="group inline-flex shrink-0 items-center overflow-hidden rounded-2xl bg-gray-100">
+                <button
+                  onClick={() => setActiveCategoryId(category.id)}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryId === category.id ? `${category.color || "bg-blue-600"} text-white shadow-sm` : "text-gray-600 hover:bg-gray-200"}`}
+                >
+                  <span>{category.name}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === category.id ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{getCategoryCount(category.id)}</span>
+                </button>
+                <button
+                  onClick={() => deleteCategory(category.id)}
+                  title="Xóa đề mục"
+                  className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 flex flex-col sm:flex-row gap-2 w-full sm:w-max">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 grid grid-cols-3 gap-2 w-full sm:flex sm:flex-row sm:w-max">
           <button
             onClick={() => setActiveTab("mine")}
-            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "mine" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={`px-2 sm:px-5 py-2.5 rounded-xl font-bold transition-all text-sm sm:text-base ${activeTab === "mine" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Của tôi
           </button>
           <button
+            onClick={() => setActiveTab("builtin")}
+            className={`px-2 sm:px-5 py-2.5 rounded-xl font-bold transition-all text-sm sm:text-base ${activeTab === "builtin" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+          >
+            Có sẵn
+          </button>
+          <button
             onClick={() => setActiveTab("public")}
-            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "public" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={`px-2 sm:px-5 py-2.5 rounded-xl font-bold transition-all text-sm sm:text-base ${activeTab === "public" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Công khai
           </button>
@@ -569,19 +823,111 @@ export function Flashcards() {
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={activeTab === "public" ? "Tìm bộ thẻ công khai..." : "Tìm bộ thẻ của tôi..."}
+            placeholder={activeTab === "public" ? "Tìm bộ thẻ công khai..." : activeTab === "builtin" ? "Tìm bộ thẻ có sẵn IELTS/TOEIC..." : "Tìm bộ thẻ của tôi..."}
             className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm font-semibold text-gray-700 shadow-sm outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
           />
         </div>
       </div>
 
-      {activeTab === "public" ? (
+      {activeTab === "builtin" ? (
+        <div className="space-y-5">
+          <div className="rounded-3xl border border-indigo-100 bg-indigo-50/70 p-5">
+            <h2 className="flex items-center gap-2 text-xl font-extrabold text-indigo-800">
+              <Star className="w-6 h-6" /> Bộ thẻ có sẵn cho người học
+            </h2>
+            <p className="mt-1 text-sm font-medium text-indigo-700/80">Học liệu IELTS và TOEIC được tách riêng khỏi bộ thẻ người dùng tạo. Đây là dữ liệu hệ thống nên không thể xóa.</p>
+          </div>
+
+          <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div className="mb-3">
+              <h3 className="text-sm font-extrabold uppercase tracking-wide text-gray-700">Đề mục có sẵn</h3>
+              <p className="text-xs font-medium text-gray-400">Chọn IELTS hoặc TOEIC để học nhanh theo mục tiêu.</p>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              <button
+                onClick={() => setActiveBuiltinCategoryName("all")}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activeBuiltinCategoryName === "all" ? "bg-indigo-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+              >
+                Tất cả
+                <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeBuiltinCategoryName === "all" ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{builtinSets.length}</span>
+              </button>
+              {builtinCategoryOptions.map((category) => {
+                const key = category.name.toLowerCase();
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setActiveBuiltinCategoryName(key)}
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activeBuiltinCategoryName === key ? `${category.color} text-white shadow-sm` : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                  >
+                    {category.name}
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeBuiltinCategoryName === key ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{category.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {displayedBuiltinSets.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-gray-300 bg-white p-12 text-center text-gray-500 font-medium">Không tìm thấy bộ thẻ có sẵn phù hợp.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">
+              {displayedBuiltinSets.map((set: any) => (
+                <div key={set.id} className="bg-white rounded-3xl p-6 border border-indigo-100 shadow-sm hover:shadow-md transition-shadow flex flex-col relative overflow-hidden">
+                  <div className={`w-12 h-12 rounded-2xl ${set.color || "bg-indigo-500"} flex items-center justify-center text-white shadow-sm mb-4`}>
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{set.title}</h3>
+                  <p className="text-sm text-gray-500 line-clamp-2 mb-4">{set.description || "Bộ thẻ có sẵn của ZenTask"}</p>
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-bold mb-5">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-indigo-600"><Star className="w-3 h-3" /> Có sẵn</span>
+                    <span className="rounded-full bg-gray-50 px-2.5 py-1 text-gray-600">{set.cardCount || 0} thẻ</span>
+                    <span className="rounded-full bg-blue-50 px-2.5 py-1 text-blue-600">{set.categoryName || set.category}</span>
+                  </div>
+                  <div className="mt-auto grid grid-cols-2 gap-3">
+                    <button onClick={() => navigate(`/flashcard/${set.id}`)} className="rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-100 transition-colors">Học ngay</button>
+                    <button onClick={() => handleCloneBuiltinSet(set.id)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors"><Copy className="w-4 h-4" /> Lưu</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : activeTab === "public" ? (
         <div className="space-y-5">
           <div className="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-5">
             <h2 className="flex items-center gap-2 text-xl font-extrabold text-emerald-800">
               <Globe2 className="w-6 h-6" /> Bộ thẻ công khai
             </h2>
             <p className="mt-1 text-sm font-medium text-emerald-700/80">Tất cả bộ thẻ được người dùng đặt công khai sẽ xuất hiện tại đây.</p>
+          </div>
+
+          <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div className="mb-3">
+              <h3 className="text-sm font-extrabold uppercase tracking-wide text-gray-700">Đề mục công khai</h3>
+              <p className="text-xs font-medium text-gray-400">Lọc nhanh các bộ thẻ công khai theo IELTS, TOEIC, Giao tiếp hoặc đề mục người chia sẻ đặt.</p>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              <button
+                onClick={() => setActivePublicCategoryName("all")}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activePublicCategoryName === "all" ? "bg-emerald-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+              >
+                Tất cả
+                <span className={`rounded-full px-2 py-0.5 text-[11px] ${activePublicCategoryName === "all" ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{publicSets.filter((set: any) => set.isPublic).length}</span>
+              </button>
+              {publicCategoryOptions.map((category) => {
+                const key = category.name.toLowerCase();
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setActivePublicCategoryName(key)}
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activePublicCategoryName === key ? "bg-emerald-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                  >
+                    {category.name}
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] ${activePublicCategoryName === key ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{category.count}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {loading && displayedPublicSets.length === 0 ? (
@@ -593,7 +939,7 @@ export function Flashcards() {
               {searchQuery.trim() ? "Không tìm thấy bộ thẻ công khai phù hợp." : "Chưa có bộ thẻ công khai nào."}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">
               {displayedPublicSets.map((set: any) => (
                 <div key={set.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col relative overflow-hidden">
                   <div className={`w-12 h-12 rounded-2xl ${set.color || "bg-blue-500"} flex items-center justify-center text-white shadow-sm mb-4`}>
@@ -606,6 +952,7 @@ export function Flashcards() {
                       <Globe2 className="w-3 h-3" /> Công khai
                     </span>
                     <span className="rounded-full bg-gray-50 px-2.5 py-1 text-gray-600">{set.cardCount || 0} thẻ</span>
+                    {set.categoryName && <span className="rounded-full bg-blue-50 px-2.5 py-1 text-blue-600">{set.categoryName}</span>}
                   </div>
                   {set.creator?.displayName && <p className="mb-5 text-xs font-semibold text-gray-400">Tác giả: {set.creator.displayName}</p>}
                   <div className="mt-auto grid grid-cols-2 gap-3">
@@ -630,16 +977,16 @@ export function Flashcards() {
           <div
             ref={removeZoneRef}
             data-flashcard-dropzone="remove-zone"
-            className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-full shadow-2xl transition-all duration-300 border-2 flex items-center gap-3 ${
+            className={`fixed bottom-4 sm:bottom-8 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[100] px-4 sm:px-8 py-3 sm:py-4 rounded-2xl sm:rounded-full shadow-2xl transition-all duration-300 border-2 flex items-center justify-center gap-2 sm:gap-3 ${
               activeId && activeSetForOverlay?.folderId ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20 pointer-events-none"
             } ${isRemoveZoneOver || coordinateOverId === "remove-zone" ? "bg-red-50 border-red-500 text-red-600 scale-110 shadow-red-200" : "bg-white border-dashed border-gray-400 text-gray-600"}`}
           >
             <FolderIcon className="w-6 h-6" />
-            <span className="font-bold text-lg">Kéo thả vào đây để đưa ra ngoài thư mục</span>
+            <span className="font-bold text-sm sm:text-lg text-center">Thả vào đây để đưa ra ngoài thư mục</span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div className="lg:col-span-3 space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 sm:gap-8">
+            <div className="lg:col-span-3 space-y-5 sm:space-y-8">
               {/* Folders */}
               {folders.map((folder) => (
                 <FolderDroppable
@@ -656,6 +1003,7 @@ export function Flashcards() {
                     setNewDesc(s.description || "");
                     setSelectedColor(s.color || "bg-blue-500");
                     setSetIsPublic(s.isPublic !== false);
+                    setSelectedCategoryId(s.categoryId || "");
                     setIsModalOpen(true);
                   }}
                   onDeleteSet={(s: any) => setSetToDelete(s)}
@@ -667,7 +1015,7 @@ export function Flashcards() {
               <div
                 ref={rootDropRef}
                 data-flashcard-dropzone="root"
-                className={`space-y-4 min-h-[240px] p-4 rounded-3xl transition-all duration-200 border ${isRootDropActive ? "border-blue-500 shadow-md ring-4 ring-blue-500/20 bg-blue-50/50" : "border-transparent"}`}
+                className={`space-y-4 min-h-[220px] p-2 sm:p-4 rounded-3xl transition-all duration-200 border ${isRootDropActive ? "border-blue-500 shadow-md ring-4 ring-blue-500/20 bg-blue-50/50" : "border-transparent"}`}
               >
                 <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Bộ thẻ chưa phân loại</h2>
 
@@ -679,12 +1027,12 @@ export function Flashcards() {
                   <SortableContext items={unassignedSets.map((s) => s.id)} strategy={rectSortingStrategy}>
                     <div
                       data-flashcard-dropzone="root"
-                      className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[200px] p-4 rounded-3xl border transition-all ${isRootDropActive ? "bg-blue-50 border-blue-300 ring-4 ring-blue-500/10" : "bg-gray-50/50 border-gray-100"}`}
+                      className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6 min-h-[200px] p-2 sm:p-4 rounded-3xl border transition-all ${isRootDropActive ? "bg-blue-50 border-blue-300 ring-4 ring-blue-500/10" : "bg-gray-50/50 border-gray-100"}`}
                     >
                       {unassignedSets.length === 0 && (
                         <div
                           data-flashcard-dropzone="root"
-                          className={`col-span-full flex min-h-[150px] flex-col items-center justify-center p-12 text-center border-2 border-dashed rounded-2xl transition-all ${isRootDropActive ? "border-blue-400 bg-white text-blue-700" : "border-gray-300 text-gray-500"}`}
+                          className={`col-span-full flex min-h-[150px] flex-col items-center justify-center p-5 sm:p-12 text-center border-2 border-dashed rounded-2xl transition-all ${isRootDropActive ? "border-blue-400 bg-white text-blue-700" : "border-gray-300 text-gray-500"}`}
                         >
                           <h3 className="text-lg font-bold text-gray-900 mb-2">
                             {searchQuery.trim() ? "Không tìm thấy bộ thẻ phù hợp" : folders.length === 0 ? "Chưa có bộ thẻ nào" : "Chưa có bộ thẻ chưa phân loại"}
@@ -712,6 +1060,7 @@ export function Flashcards() {
                             setNewDesc(s.description || "");
                             setSelectedColor(s.color || "bg-blue-500");
                             setSetIsPublic(s.isPublic !== false);
+                            setSelectedCategoryId(s.categoryId || "");
                             setIsModalOpen(true);
                           }}
                           onDelete={(s: any) => setSetToDelete(s)}
@@ -738,7 +1087,7 @@ export function Flashcards() {
 
           <DragOverlay>
             {activeSetForOverlay ? (
-              <div className="w-[300px] pointer-events-none">
+              <div className="w-[min(320px,calc(100vw-32px))] pointer-events-none">
                 <SortableSetItem set={activeSetForOverlay} onClick={() => {}} onContextMenu={() => {}} popoverId={null} setPopoverId={() => {}} onEdit={() => {}} onDelete={() => {}} />
               </div>
             ) : null}
@@ -749,10 +1098,23 @@ export function Flashcards() {
       {/* --- Context Menu Portal --- */}
       {contextMenu && (
         <div
-          className="fixed bg-white rounded-xl shadow-2xl border border-gray-100 py-2 w-48 z-[200] overflow-hidden animate-in fade-in zoom-in duration-200"
-          style={{ top: contextMenu.y, left: contextMenu.x }}
+          className={cn(
+            "fixed bg-white shadow-2xl border border-gray-100 py-2 z-[200] overflow-hidden animate-in fade-in zoom-in duration-200",
+            isMobileContextMenu ? "left-3 right-3 bottom-3 w-auto max-h-[82vh] overflow-y-auto rounded-3xl p-2" : "w-60 rounded-xl",
+          )}
+          style={isMobileContextMenu ? undefined : { top: contextMenu.y, left: contextMenu.x }}
           onClick={(e) => e.stopPropagation()}
         >
+          {isMobileContextMenu && (
+            <div className="mb-2 flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
+              <div className="flex items-center gap-2 text-sm font-extrabold text-gray-800">
+                <Smartphone className="h-4 w-4 text-blue-600" /> Tùy chỉnh nhanh
+              </div>
+              <button onClick={() => setContextMenu(null)} className="rounded-full bg-white px-3 py-1 text-xs font-bold text-gray-500 shadow-sm" data-no-long-press="true">
+                Đóng
+              </button>
+            </div>
+          )}
           {contextMenu.type === "root" && (
             <>
               <button
@@ -760,7 +1122,7 @@ export function Flashcards() {
                   openCreateSetModal(null);
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-3 rounded-xl sm:rounded-none"
               >
                 <Plus className="w-4 h-4" /> Tạo bộ thẻ mới
               </button>
@@ -772,7 +1134,7 @@ export function Flashcards() {
                   setIsFolderModalOpen(true);
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-3 rounded-xl sm:rounded-none"
               >
                 <FolderIcon className="w-4 h-4" /> Tạo Folder mới
               </button>
@@ -788,7 +1150,7 @@ export function Flashcards() {
                   setIsFolderModalOpen(true);
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-3 rounded-xl sm:rounded-none"
               >
                 <Edit2 className="w-4 h-4" /> Sửa thư mục
               </button>
@@ -797,7 +1159,7 @@ export function Flashcards() {
                   openCreateSetModal(contextMenu.item.id);
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-3 rounded-xl sm:rounded-none"
               >
                 <Plus className="w-4 h-4" /> Tạo thẻ trong folder
               </button>
@@ -807,7 +1169,7 @@ export function Flashcards() {
                   setFolderToDelete({ folder: contextMenu.item, step: 1 });
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
+                className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 flex items-center gap-3 rounded-xl sm:rounded-none"
               >
                 <Trash2 className="w-4 h-4" /> Xóa folder
               </button>
@@ -816,7 +1178,7 @@ export function Flashcards() {
                   setFolderToDelete({ folder: contextMenu.item, step: 2 });
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100 flex items-center gap-2"
+                className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-bold text-red-700 hover:bg-red-100 flex items-center gap-3 rounded-xl sm:rounded-none"
               >
                 <Trash2 className="w-4 h-4" /> Xóa folder + thẻ
               </button>
@@ -824,6 +1186,35 @@ export function Flashcards() {
           )}
           {contextMenu.type === "set" && (
             <>
+              <button
+                onClick={() => {
+                  navigate(`/flashcard/${contextMenu.item.id}`);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50 flex items-center gap-3 rounded-xl sm:rounded-none"
+              >
+                <Play className="w-4 h-4" /> Mở bộ thẻ
+              </button>
+              <div className="my-1 h-px bg-gray-100"></div>
+              <div className="px-4 py-2 text-[11px] font-extrabold uppercase tracking-wide text-gray-400">Chuyển thư mục</div>
+              <button
+                onClick={() => handleMoveSetToFolder(contextMenu.item, null)}
+                disabled={!contextMenu.item?.folderId}
+                className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 flex items-center gap-3 rounded-xl sm:rounded-none"
+              >
+                <MoveRight className="w-4 h-4" /> Đưa ra ngoài thư mục
+              </button>
+              {folders.map((folder: any) => (
+                <button
+                  key={folder.id}
+                  onClick={() => handleMoveSetToFolder(contextMenu.item, folder.id)}
+                  disabled={String(contextMenu.item?.folderId || "") === String(folder.id)}
+                  className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 flex items-center gap-3 rounded-xl sm:rounded-none"
+                >
+                  <FolderIcon className="w-4 h-4" /> {folder.name}
+                </button>
+              ))}
+              <div className="my-1 h-px bg-gray-100"></div>
               <button
                 onClick={() => {
                   setEditingSet(contextMenu.item);
@@ -834,7 +1225,7 @@ export function Flashcards() {
                   setIsModalOpen(true);
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-3 rounded-xl sm:rounded-none"
               >
                 <Edit2 className="w-4 h-4" /> Sửa bộ thẻ
               </button>
@@ -843,7 +1234,7 @@ export function Flashcards() {
                   setSetToDelete(contextMenu.item);
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
+                className="w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 flex items-center gap-3 rounded-xl sm:rounded-none"
               >
                 <Trash2 className="w-4 h-4" /> Xóa
               </button>
@@ -854,7 +1245,7 @@ export function Flashcards() {
 
       {isFolderModalOpen && (
         <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6">
+          <div className="bg-white rounded-3xl w-full max-w-sm max-h-[92vh] overflow-y-auto shadow-2xl p-5 sm:p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">{editingFolder ? "Sửa thư mục" : "Tạo Folder mới"}</h2>
             <div className="space-y-4 mb-6">
               <div>
@@ -937,14 +1328,14 @@ export function Flashcards() {
       {/* --- Set Create/Edit Modal --- */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
+          <div className="bg-white rounded-3xl w-full max-w-md max-h-[92vh] overflow-hidden shadow-2xl flex flex-col">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900">{editingSet ? "Sửa bộ thẻ" : "Tạo bộ thẻ mới"}</h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                 ✕
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-4 overflow-y-auto">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">Tên bộ thẻ</label>
                 <input
@@ -966,6 +1357,19 @@ export function Flashcards() {
                   rows={3}
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors resize-none"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Đề mục</label>
+                <select
+                  value={selectedCategoryId}
+                  onChange={(e) => setSelectedCategoryId(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
+                >
+                  <option value="">Không chọn đề mục</option>
+                  {categories.map((category: any) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Quyền riêng tư</label>

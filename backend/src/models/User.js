@@ -59,6 +59,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    arenaMatchesPlayed: {
+      type: Number,
+      default: 0,
+    },
     learnedBeginnerWords: {
       type: [String],
       default: [],
@@ -74,6 +78,14 @@ const userSchema = new mongoose.Schema(
     appSettings: {
       theme: { type: String, default: 'light' },
       accentColor: { type: String, default: 'blue' },
+    },
+    onboarding: {
+      completed: { type: Boolean, default: false },
+      completedAt: { type: Date, default: null },
+      skipped: { type: Boolean, default: false },
+      skippedAt: { type: Date, default: null },
+      lastStep: { type: Number, default: 0 },
+      version: { type: String, default: 'zentask-onboarding-v1' },
     },
     grammarProgress: {
       maxStage: { type: Number, default: 1 },

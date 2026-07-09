@@ -18,9 +18,20 @@ export interface FlashcardFolder {
   updatedAt: any;
 }
 
+export interface FlashcardCategory {
+  id: string;
+  name: string;
+  color?: string;
+  description?: string;
+  createdAt?: any;
+  updatedAt?: any;
+}
+
 export interface FlashcardSet {
   id: string;
   folderId?: string | null;
+  categoryId?: string | null;
+  categoryName?: string;
   order?: number;
   title: string;
   description: string;
@@ -30,6 +41,9 @@ export interface FlashcardSet {
   color: string;
   isNew: boolean;
   isPublic?: boolean;
+  isBuiltIn?: boolean;
+  isSystem?: boolean;
+  source?: string;
   creator?: { uid: string; displayName: string; photoURL?: string } | null;
   createdAt: any;
   updatedAt: any;
@@ -78,8 +92,10 @@ interface PendingUpdate {
 interface FlashcardState {
   loading: boolean;
   folders: FlashcardFolder[];
+  categories: FlashcardCategory[];
   sets: FlashcardSet[];
   publicSets: FlashcardSet[];
+  builtinSets: FlashcardSet[];
   currentSet: FlashcardSet | null;
   cards: Flashcard[];
   cardProgress: Record<string, CardProgress>;
@@ -87,13 +103,19 @@ interface FlashcardState {
   pendingBeginnerUpdates: string[];
 
   fetchFolders: () => Promise<void>;
+  fetchCategories: () => Promise<void>;
+  createCategory: (name: string, color?: string, description?: string) => Promise<FlashcardCategory | null>;
+  updateCategory: (categoryId: string, data: Partial<FlashcardCategory>) => Promise<FlashcardCategory | null>;
+  deleteCategory: (categoryId: string) => Promise<void>;
   createFolder: (name: string, color?: string) => Promise<FlashcardFolder | null>;
   updateFolder: (folderId: string, data: Partial<FlashcardFolder>) => Promise<FlashcardFolder | null>;
   deleteFolder: (folderId: string, deleteSets?: boolean) => Promise<void>;
 
   fetchSets: () => Promise<void>;
   fetchPublicSets: () => Promise<void>;
-  createSet: (title: string, description?: string, color?: string, isPublic?: boolean) => Promise<FlashcardSet | null>;
+  fetchBuiltinSets: () => Promise<void>;
+  cloneBuiltinSet: (setId: string) => Promise<FlashcardSet | null>;
+  createSet: (title: string, description?: string, color?: string, isPublic?: boolean, categoryId?: string | null) => Promise<FlashcardSet | null>;
   updateSet: (setId: string, data: Partial<FlashcardSet>) => Promise<FlashcardSet | null>;
   deleteSet: (setId: string) => Promise<void>;
 
@@ -122,8 +144,10 @@ interface FlashcardState {
 export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   loading: false,
   folders: [],
+  categories: [],
   sets: [],
   publicSets: [],
+  builtinSets: [],
   currentSet: null,
   cards: [],
   cardProgress: {},
@@ -142,6 +166,74 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       }
     } catch (err) {
       console.error(err);
+    }
+  },
+
+
+  fetchCategories: async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/categories`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        set({ categories: data });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  },
+
+  createCategory: async (name, color = "bg-slate-500", description = "") => {
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/category`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name, color, description }),
+      });
+      if (!res.ok) throw new Error(await readApiError(res, "Không tạo được đề mục"));
+      const data = await res.json();
+      set((state) => ({ categories: [data, ...state.categories.filter((c) => c.id !== data.id)] }));
+      toast.success("Đã tạo đề mục");
+      return data;
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi tạo đề mục");
+      return null;
+    }
+  },
+
+  updateCategory: async (categoryId, data) => {
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/category/${categoryId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error(await readApiError(res, "Không cập nhật được đề mục"));
+      const updated = await res.json();
+      set((state) => ({ categories: state.categories.map((c) => c.id === categoryId ? updated : c) }));
+      toast.success("Đã cập nhật đề mục");
+      return updated;
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi cập nhật đề mục");
+      return null;
+    }
+  },
+
+  deleteCategory: async (categoryId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/category/${categoryId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error(await readApiError(res, "Không xóa được đề mục"));
+      set((state) => ({
+        categories: state.categories.filter((c) => c.id !== categoryId),
+        sets: state.sets.map((set) => set.categoryId === categoryId ? { ...set, categoryId: null, categoryName: "" } : set),
+      }));
+      toast.success("Đã xóa đề mục");
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi xóa đề mục");
     }
   },
 
@@ -244,14 +336,47 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     }
   },
 
-  createSet: async (title, description = "", color = "bg-blue-500", isPublic = true) => {
+
+
+  fetchBuiltinSets: async () => {
+    set({ loading: true });
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/builtin`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch built-in sets");
+      const data = await res.json();
+      set({ builtinSets: data });
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi tải bộ thẻ có sẵn");
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  cloneBuiltinSet: async (setId) => {
+    set({ loading: true });
+    try {
+      const res = await fetch(`${API_URL}/api/flashcard/builtin/${setId}/clone`, { method: "POST", credentials: "include" });
+      if (!res.ok) throw new Error(await readApiError(res, "Không lưu được bộ thẻ có sẵn"));
+      const data = await res.json();
+      set((state) => ({ sets: [data, ...state.sets] }));
+      toast.success("Đã lưu vào bộ thẻ của tôi");
+      return data;
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi lưu bộ thẻ có sẵn");
+      return null;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  createSet: async (title, description = "", color = "bg-blue-500", isPublic = true, categoryId = null) => {
     set({ loading: true });
     try {
       const res = await fetch(`${API_URL}/api/flashcard/set`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ title, description, color, isPublic }),
+        body: JSON.stringify({ title, description, color, isPublic, categoryId }),
       });
       if (!res.ok) throw new Error(await readApiError(res, "Failed to create set"));
       const data = await res.json();
@@ -313,7 +438,10 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   fetchCards: async (setId) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/set/${setId}/cards`, {
+      const endpoint = String(setId).startsWith("builtin_")
+        ? `${API_URL}/api/flashcard/builtin/${setId}/cards`
+        : `${API_URL}/api/flashcard/set/${setId}/cards`;
+      const res = await fetch(endpoint, {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch cards");
@@ -425,6 +553,10 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   // ==================== SM-2 METHODS ====================
 
   fetchProgress: async (setId) => {
+    if (String(setId).startsWith("builtin_")) {
+      set({ cardProgress: {} });
+      return;
+    }
     try {
       const res = await fetch(`${API_URL}/api/flashcard/set/${setId}/progress`, {
         credentials: "include",
@@ -438,6 +570,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   },
 
   recordAnswer: (cardId, setId, quality, mode) => {
+    if (String(setId).startsWith("builtin_") || String(cardId).startsWith("builtin_")) return;
     const newUpdate: PendingUpdate = { cardId, setId, quality, mode };
     set((state) => {
       const newPending = [...state.pendingUpdates, newUpdate];
@@ -538,6 +671,10 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   },
 
   setManualProgress: async (cardId, setId, level) => {
+    if (String(setId).startsWith("builtin_") || String(cardId).startsWith("builtin_")) {
+      toast("Bộ thẻ có sẵn không lưu tiến độ thủ công.");
+      return;
+    }
     // Optimistic update
     const qualityMap: Record<string, number> = { known: 5, almost: 3, unknown: 1 };
     const quality = qualityMap[level];

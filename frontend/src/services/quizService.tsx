@@ -28,6 +28,15 @@ export interface QuizQuestion {
   explanation?: string;
 }
 
+export interface QuizCategory {
+  id: string;
+  name: string;
+  color?: string;
+  description?: string;
+  createdAt?: any;
+  updatedAt?: any;
+}
+
 export interface Quiz {
   id: string;
   title: string;
@@ -36,8 +45,12 @@ export interface Quiz {
   duration: number; // in minutes
   questions: QuizQuestion[];
   creatorId: string;
+  categoryId?: string | null;
+  categoryName?: string;
   isPublic?: boolean;
   isFeatured?: boolean;
+  isBuiltIn?: boolean;
+  source?: string;
   isMine?: boolean;
   creator?: { uid: string; displayName: string; photoURL?: string } | null;
   createdAt: any;
@@ -81,14 +94,21 @@ interface QuizState {
   loading: boolean;
   quizzes: Quiz[];
   publicQuizzes: Quiz[];
+  builtinQuizzes: Quiz[];
   quizHistory: QuizResult[];
+  quizCategories: QuizCategory[];
   
   getQuizzes: () => Promise<Quiz[]>;
   getPublicQuizzes: () => Promise<Quiz[]>;
+  getBuiltinQuizzes: () => Promise<Quiz[]>;
+  fetchQuizCategories: () => Promise<QuizCategory[]>;
+  createQuizCategory: (name: string, color?: string, description?: string) => Promise<QuizCategory | null>;
+  updateQuizCategory: (categoryId: string, data: Partial<QuizCategory>) => Promise<QuizCategory | null>;
+  deleteQuizCategory: (categoryId: string) => Promise<void>;
   getQuizHistory: () => Promise<QuizResult[]>;
   getQuizById: (id: string) => Promise<Quiz | null>;
   createQuiz: (data: Partial<Quiz>) => Promise<{ id: string; status: string } | null>;
-  generateQuizByAI: (prompt: string, numQuestions?: number, difficulty?: string, isPublic?: boolean) => Promise<Quiz | null>;
+  generateQuizByAI: (prompt: string, numQuestions?: number, difficulty?: string, isPublic?: boolean, categoryId?: string | null) => Promise<Quiz | null>;
   submitQuiz: (quizId: string, answers: Record<string, string>, usedRebirth?: boolean, roomId?: string) => Promise<any | null>;
   createRoom: (quizId: string, settings: QuizRoomSettings) => Promise<{ id: string; roomCode: string; status: string } | null>;
   getRoomByCode: (code: string) => Promise<QuizRoom | null>;
@@ -100,7 +120,9 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   loading: false,
   quizzes: [],
   publicQuizzes: [],
+  builtinQuizzes: [],
   quizHistory: [],
+  quizCategories: [],
 
   getQuizzes: async () => {
     set({ loading: true });
@@ -126,6 +148,75 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       toast.error(error.message);
       set({ loading: false });
       return [];
+    }
+  },
+
+
+
+  getBuiltinQuizzes: async () => {
+    set({ loading: true });
+    try {
+      const data = await fetchApi("/quiz/builtin");
+      set({ builtinQuizzes: data, loading: false });
+      return data;
+    } catch (error: any) {
+      toast.error(error.message || "Không tải được quiz có sẵn");
+      set({ loading: false });
+      return [];
+    }
+  },
+
+  fetchQuizCategories: async () => {
+    try {
+      const data = await fetchApi("/quiz/categories");
+      set({ quizCategories: data });
+      return data;
+    } catch (error: any) {
+      console.error(error);
+      return [];
+    }
+  },
+
+  createQuizCategory: async (name, color = "bg-blue-500", description = "") => {
+    try {
+      const data = await fetchApi("/quiz/category", {
+        method: "POST",
+        body: JSON.stringify({ name, color, description }),
+      });
+      set((state) => ({ quizCategories: [data, ...state.quizCategories.filter((c) => c.id !== data.id)] }));
+      toast.success("Đã tạo đề mục quiz");
+      return data;
+    } catch (error: any) {
+      toast.error(error.message || "Không tạo được đề mục quiz");
+      return null;
+    }
+  },
+
+  updateQuizCategory: async (categoryId, data) => {
+    try {
+      const updated = await fetchApi(`/quiz/category/${categoryId}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+      set((state) => ({ quizCategories: state.quizCategories.map((c) => c.id === categoryId ? updated : c) }));
+      toast.success("Đã cập nhật đề mục quiz");
+      return updated;
+    } catch (error: any) {
+      toast.error(error.message || "Không cập nhật được đề mục quiz");
+      return null;
+    }
+  },
+
+  deleteQuizCategory: async (categoryId) => {
+    try {
+      await fetchApi(`/quiz/category/${categoryId}`, { method: "DELETE" });
+      set((state) => ({
+        quizCategories: state.quizCategories.filter((c) => c.id !== categoryId),
+        quizzes: state.quizzes.map((quiz) => quiz.categoryId === categoryId ? { ...quiz, categoryId: null, categoryName: "" } : quiz),
+      }));
+      toast.success("Đã xóa đề mục quiz");
+    } catch (error: any) {
+      toast.error(error.message || "Không xóa được đề mục quiz");
     }
   },
 
@@ -174,12 +265,12 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     }
   },
 
-  generateQuizByAI: async (prompt: string, numQuestions: number = 5, difficulty: string = "Trung bình", isPublic: boolean = true) => {
+  generateQuizByAI: async (prompt: string, numQuestions: number = 5, difficulty: string = "Trung bình", isPublic: boolean = true, categoryId: string | null = null) => {
     set({ loading: true });
     try {
       const data = await fetchApi("/quiz/generate", {
         method: "POST",
-        body: JSON.stringify({ prompt, numQuestions, difficulty, isPublic }),
+        body: JSON.stringify({ prompt, numQuestions, difficulty, isPublic, categoryId }),
       });
       set({ loading: false });
       return data;
@@ -193,7 +284,8 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   submitQuiz: async (quizId: string, answers: Record<string, string>, usedRebirth: boolean = false, roomId?: string) => {
     set({ loading: true });
     try {
-      const data = await fetchApi(`/quiz/${quizId}/submit`, {
+      const endpoint = String(quizId).startsWith("builtin_quiz_") ? `/quiz/builtin/${quizId}/submit` : `/quiz/${quizId}/submit`;
+      const data = await fetchApi(endpoint, {
         method: "POST",
         body: JSON.stringify({ answers, usedRebirth, roomId }),
       });

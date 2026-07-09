@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Bot, FileText, ArrowLeft, Loader2, Sparkles, Plus, Trash2, Globe2, Lock, Crown } from "lucide-react";
 import { useQuizStore, QuizQuestion } from "../../services/quizService";
@@ -11,10 +11,11 @@ export function QuizCreate() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const { generateQuizByAI, createQuiz } = useQuizStore();
+  const { generateQuizByAI, createQuiz, quizCategories, fetchQuizCategories } = useQuizStore();
   const [mode, setMode] = useState<"manual" | "ai">("ai");
   const [loading, setLoading] = useState(false);
   const [isPublic, setIsPublic] = useState(searchParams.get("privacy") !== "private");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(searchParams.get("categoryId") || "");
 
   const isVip = Boolean(
     (user as any)?.isVip ||
@@ -24,6 +25,10 @@ export function QuizCreate() {
     ["vip", "pro", "premium"].includes(String((user as any)?.plan || (user as any)?.subscriptionPlan || "").toLowerCase()) ||
     String((user as any)?.subscriptionStatus || "").toLowerCase() === "active"
   );
+
+  useEffect(() => {
+    fetchQuizCategories();
+  }, [fetchQuizCategories]);
 
   const selectPrivate = () => {
     if (!isVip) {
@@ -52,7 +57,7 @@ export function QuizCreate() {
     }
     try {
       setLoading(true);
-      const quiz = await generateQuizByAI(aiPrompt, aiNumQuestions, aiDifficulty, isPublic);
+      const quiz = await generateQuizByAI(aiPrompt, aiNumQuestions, aiDifficulty, isPublic, selectedCategoryId || null);
       if (quiz) {
         if (quiz.taskProgress) {
           useConfigStore.getState().setTaskProgress(quiz.taskProgress);
@@ -91,6 +96,7 @@ export function QuizCreate() {
         duration,
         questions,
         isPublic,
+        categoryId: selectedCategoryId || null,
       });
       if (res) {
         if (res.taskProgress) {
@@ -183,6 +189,21 @@ export function QuizCreate() {
             <p className="mt-1 text-xs font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo quiz riêng tư.</p>
           </button>
         </div>
+      </div>
+
+      <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
+        <label className="mb-3 block text-sm font-bold text-gray-700">Đề mục quiz</label>
+        <select
+          value={selectedCategoryId}
+          onChange={(e) => setSelectedCategoryId(e.target.value)}
+          className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 font-bold text-gray-800 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+        >
+          <option value="">Chưa phân loại</option>
+          {quizCategories.map((category) => (
+            <option key={category.id} value={category.id}>{category.name}</option>
+          ))}
+        </select>
+        <p className="mt-2 text-xs font-medium text-gray-500">Đề mục giúp bài quiz xuất hiện đúng nhóm trong tab Của tôi và Công khai.</p>
       </div>
 
       {mode === "ai" ? (

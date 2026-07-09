@@ -342,6 +342,18 @@ export function Settings() {
               <div>
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Bảo mật</h2>
                 <div className="space-y-4">
+                  <button
+                    onClick={() => {
+                      window.location.href = "/?tour=1";
+                    }}
+                    className="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 transition-colors rounded-2xl border border-blue-100"
+                  >
+                    <div className="text-left">
+                      <h3 className="font-bold text-blue-900">Xem lại hướng dẫn sử dụng ZenTask</h3>
+                      <p className="text-sm text-blue-700/80">Mở lại mascot Lopy và tour chi tiết cho người mới bắt đầu</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-blue-500" />
+                  </button>
                   <button className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-2xl border border-gray-100">
                     <div className="text-left">
                       <h3 className="font-bold text-gray-900">Đổi mật khẩu</h3>
@@ -511,6 +523,18 @@ export function Settings() {
               <div>
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Trợ giúp & Hỗ trợ</h2>
                 <div className="space-y-4">
+                  <button
+                    onClick={() => {
+                      window.location.href = "/?tour=1";
+                    }}
+                    className="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 transition-colors rounded-2xl border border-blue-100"
+                  >
+                    <div className="text-left">
+                      <h3 className="font-bold text-blue-900">Xem lại hướng dẫn sử dụng ZenTask</h3>
+                      <p className="text-sm text-blue-700/80">Mở lại mascot Lopy và tour chi tiết cho người mới bắt đầu</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-blue-500" />
+                  </button>
                   <button className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-2xl border border-gray-100">
                     <div className="text-left">
                       <h3 className="font-bold text-gray-900">Trung tâm trợ giúp</h3>

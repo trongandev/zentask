@@ -3,10 +3,12 @@ import User from "../models/User.js";
 import { 
   FlashcardProgress, 
   FlashcardFolder, 
+  FlashcardCategory,
   FlashcardSet, 
   Flashcard, 
   Vocabulary 
 } from "../models/Schemas.js";
+import { BUILTIN_FLASHCARD_SETS, getBuiltinFlashcardSetById } from "../data/builtinLearning/index.js";
 import { addXpToUser, incrementDailyTask } from "./user.js";
 import { GoogleGenAI, Type } from "@google/genai";
 import { checkAchievements } from "../utils/achievements.js";
@@ -136,6 +138,145 @@ router.delete("/folder/:folderId", asyncHandler(async (req, res) => {
   res.json({ success: true });
 }));
 
+
+// ==================== CATEGORY ROUTES ====================
+
+const DEFAULT_FLASHCARD_CATEGORIES = [
+  { name: "IELTS", color: "bg-indigo-500" },
+  { name: "TOEIC", color: "bg-emerald-500" },
+  { name: "Giao tiếp", color: "bg-orange-500" },
+  { name: "Ngữ pháp", color: "bg-purple-500" },
+];
+
+const formatCategory = (category) => ({ id: category._id, ...category });
+
+router.get("/categories", asyncHandler(async (req, res) => {
+  let categories = await FlashcardCategory.find({ userId: req.user.uid }).sort({ createdAt: 1 }).lean();
+
+  if (categories.length === 0) {
+    const created = await FlashcardCategory.insertMany(DEFAULT_FLASHCARD_CATEGORIES.map((item) => ({
+      userId: req.user.uid,
+      ...item,
+    })));
+    categories = created.map((doc) => doc.toObject());
+  }
+
+  res.json(categories.map(formatCategory));
+}));
+
+router.post("/category", asyncHandler(async (req, res) => {
+  const { name, color = "bg-slate-500", description = "" } = req.body;
+  if (!name || !String(name).trim()) return res.status(400).json({ error: "Tên đề mục là bắt buộc" });
+
+  const existing = await FlashcardCategory.findOne({ userId: req.user.uid, name: String(name).trim() });
+  if (existing) return res.json(formatCategory(existing.toObject()));
+
+  const category = await FlashcardCategory.create({
+    userId: req.user.uid,
+    name: String(name).trim(),
+    color,
+    description,
+  });
+  res.json(formatCategory(category.toObject()));
+}));
+
+router.patch("/category/:categoryId", asyncHandler(async (req, res) => {
+  const { categoryId } = req.params;
+  const { name, color, description } = req.body;
+  const category = await FlashcardCategory.findById(categoryId);
+  if (!category || category.userId.toString() !== req.user.uid) return res.status(404).json({ error: "Không tìm thấy đề mục" });
+
+  if (name !== undefined) category.name = String(name).trim();
+  if (color !== undefined) category.color = color;
+  if (description !== undefined) category.description = description;
+  await category.save();
+
+  res.json(formatCategory(category.toObject()));
+}));
+
+router.delete("/category/:categoryId", asyncHandler(async (req, res) => {
+  const { categoryId } = req.params;
+  const category = await FlashcardCategory.findById(categoryId);
+  if (!category || category.userId.toString() !== req.user.uid) return res.status(404).json({ error: "Không tìm thấy đề mục" });
+
+  await FlashcardSet.updateMany({ userId: req.user.uid, categoryId }, { $set: { categoryId: null, categoryName: "" } });
+  await FlashcardCategory.findByIdAndDelete(categoryId);
+  res.json({ success: true });
+}));
+
+
+// ==================== BUILT-IN LEARNING FLASHCARDS ====================
+// Static IELTS/TOEIC learning materials generated from the bundled LEARNING documents.
+// They are not stored as user-created MongoDB documents, so users cannot delete or edit them.
+const formatBuiltinSetSummary = (set) => {
+  const { words, ...summary } = set;
+  return {
+    ...summary,
+    id: set.id,
+    folderId: null,
+    categoryId: set.category.toLowerCase(),
+    categoryName: set.categoryName || set.category,
+    creator: { uid: "system", displayName: "ZenTask", photoURL: "" },
+    createdAt: summary.createdAt || "2026-01-01T00:00:00.000Z",
+    updatedAt: summary.updatedAt || "2026-01-01T00:00:00.000Z",
+  };
+};
+
+router.get("/builtin", asyncHandler(async (req, res) => {
+  res.json(BUILTIN_FLASHCARD_SETS.map(formatBuiltinSetSummary));
+}));
+
+router.get("/builtin/:setId/cards", asyncHandler(async (req, res) => {
+  const set = getBuiltinFlashcardSetById(req.params.setId);
+  if (!set) return res.status(404).json({ error: "Không tìm thấy bộ thẻ có sẵn" });
+  const summary = formatBuiltinSetSummary(set);
+  res.json({
+    set: summary,
+    cards: (set.words || []).map((word) => ({
+      ...word,
+      setId: set.id,
+      userId: "system",
+      isLearned: false,
+      isBuiltIn: true,
+      createdAt: summary.createdAt,
+      updatedAt: summary.updatedAt,
+    })),
+  });
+}));
+
+router.post("/builtin/:setId/clone", asyncHandler(async (req, res) => {
+  const set = getBuiltinFlashcardSetById(req.params.setId);
+  if (!set) return res.status(404).json({ error: "Không tìm thấy bộ thẻ có sẵn" });
+
+  const newSet = await FlashcardSet.create({
+    userId: req.user.uid,
+    title: `${set.title} (Bản của tôi)`,
+    description: set.description || "",
+    cardCount: set.words?.length || 0,
+    learnedCount: 0,
+    color: set.color || "bg-blue-500",
+    isNew: true,
+    isPublic: false,
+    categoryName: set.categoryName || set.category || "",
+    clonedFrom: null,
+  });
+
+  if (set.words?.length) {
+    await Flashcard.insertMany(set.words.map((word) => ({
+      setId: newSet._id,
+      userId: req.user.uid,
+      term: word.term,
+      phonetic: word.phonetic || "",
+      translation: word.translation || "",
+      examples: word.examples || [],
+      notes: word.notes || "",
+    })));
+  }
+
+  const setObj = newSet.toObject();
+  res.json({ id: setObj._id, ...setObj });
+}));
+
 // ==================== SET ROUTES ====================
 
 // List flashcard sets for the user
@@ -165,16 +306,27 @@ router.get("/public", asyncHandler(async (req, res) => {
 
 // Create a new flashcard set
 router.post("/set", asyncHandler(async (req, res) => {
-  const { title, description = "", color = "bg-blue-500", isPublic = true } = req.body;
+  const { title, description = "", color = "bg-blue-500", isPublic = true, categoryId = null } = req.body;
   if (!title) return res.status(400).json({ error: "Title is required" });
 
   const publicFlag = await normalizePublicFlag(req.user.uid, isPublic);
+  let categoryName = "";
+  let safeCategoryId = null;
+  if (categoryId) {
+    const category = await FlashcardCategory.findById(categoryId).lean();
+    if (category && category.userId.toString() === req.user.uid) {
+      safeCategoryId = category._id;
+      categoryName = category.name || "";
+    }
+  }
 
   const newSet = await FlashcardSet.create({
     userId: req.user.uid,
     title,
     description,
     color,
+    categoryId: safeCategoryId,
+    categoryName,
     isPublic: publicFlag,
   });
 
@@ -185,7 +337,7 @@ router.post("/set", asyncHandler(async (req, res) => {
 // Update a flashcard set
 router.patch("/set/:setId", asyncHandler(async (req, res) => {
   const { setId } = req.params;
-  const { title, description, color, folderId, order, isPublic } = req.body;
+  const { title, description, color, folderId, categoryId, order, isPublic } = req.body;
   
   const set = await FlashcardSet.findById(setId);
   if (!set || set.userId.toString() !== req.user.uid) {
@@ -196,11 +348,23 @@ router.patch("/set/:setId", asyncHandler(async (req, res) => {
   if (description !== undefined) set.description = description;
   if (color) set.color = color;
   if (folderId !== undefined) set.folderId = folderId;
+  if (categoryId !== undefined) {
+    if (!categoryId) {
+      set.categoryId = null;
+      set.categoryName = "";
+    } else {
+      const category = await FlashcardCategory.findById(categoryId).lean();
+      if (category && category.userId.toString() === req.user.uid) {
+        set.categoryId = category._id;
+        set.categoryName = category.name || "";
+      }
+    }
+  }
   if (order !== undefined) set.order = order;
   if (isPublic !== undefined) set.isPublic = await normalizePublicFlag(req.user.uid, isPublic);
   
   await set.save();
-  res.json({ success: true });
+  res.json({ success: true, updates: { title: set.title, description: set.description, color: set.color, folderId: set.folderId, categoryId: set.categoryId, categoryName: set.categoryName, order: set.order, isPublic: set.isPublic } });
 }));
 
 // Get a flashcard set and its cards

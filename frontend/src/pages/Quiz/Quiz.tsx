@@ -1,4 +1,4 @@
-import { HelpCircle, Clock, Target, Play, Award, RotateCcw, Plus, LogIn, Globe2, Lock, Crown, X, Star, Search } from "lucide-react";
+import { HelpCircle, Clock, Target, Play, Award, RotateCcw, Plus, LogIn, Globe2, Lock, Crown, X, Star, Search, Tags } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuizStore } from "../../services/quizService";
@@ -6,13 +6,16 @@ import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
 
 export function Quiz() {
-  const { quizzes, publicQuizzes, quizHistory: history, getQuizzes, getPublicQuizzes, getQuizHistory, loading, getRoomByCode } = useQuizStore();
+  const { quizzes, publicQuizzes, builtinQuizzes, quizHistory: history, quizCategories, getQuizzes, getPublicQuizzes, getBuiltinQuizzes, getQuizHistory, fetchQuizCategories, createQuizCategory, deleteQuizCategory, loading, getRoomByCode } = useQuizStore();
   const { user } = useAuth();
   const [roomCode, setRoomCode] = useState("");
-  const [activeTab, setActiveTab] = useState<"mine" | "public">("mine");
+  const [activeTab, setActiveTab] = useState<"mine" | "builtin" | "public">("mine");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createIsPublic, setCreateIsPublic] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategoryKey, setActiveCategoryKey] = useState("all");
+  const [newQuizCategoryName, setNewQuizCategoryName] = useState("");
+  const [selectedCreateCategoryId, setSelectedCreateCategoryId] = useState("");
   const navigate = useNavigate();
 
   const isVip = Boolean(
@@ -24,23 +27,36 @@ export function Quiz() {
     String((user as any)?.subscriptionStatus || "").toLowerCase() === "active"
   );
 
-  const visibleQuizzes = activeTab === "mine" ? quizzes : publicQuizzes;
+  const visibleQuizzes = activeTab === "mine" ? quizzes : activeTab === "builtin" ? builtinQuizzes : publicQuizzes;
   const normalizedSearch = searchQuery.trim().toLowerCase();
-  const searchedVisibleQuizzes = normalizedSearch
-    ? visibleQuizzes.filter((quiz) => {
-        const haystack = [
-          quiz.title,
-          quiz.description,
-          quiz.difficulty,
-          (quiz as any).creator?.displayName,
-          ...(quiz.questions || []).flatMap((q: any) => [q.text, ...(q.options || []), q.correctAnswer]),
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        return haystack.includes(normalizedSearch);
-      })
-    : visibleQuizzes;
+
+  const getQuizCategoryKey = (quiz: any) => {
+    if ((activeTab === "public" || activeTab === "builtin") && quiz.categoryName) return `name:${String(quiz.categoryName).trim().toLowerCase()}`;
+    if (quiz.categoryId) return `id:${quiz.categoryId}`;
+    if (quiz.categoryName) return `name:${String(quiz.categoryName).trim().toLowerCase()}`;
+    return "uncategorized";
+  };
+
+  const matchesCategory = (quiz: any) => activeCategoryKey === "all" || getQuizCategoryKey(quiz) === activeCategoryKey;
+
+  const searchedVisibleQuizzes = visibleQuizzes
+    .filter(matchesCategory)
+    .filter((quiz) => {
+      if (!normalizedSearch) return true;
+      const haystack = [
+        quiz.title,
+        quiz.description,
+        quiz.difficulty,
+        quiz.categoryName,
+        (quiz as any).creator?.displayName,
+        ...(quiz.questions || []).flatMap((q: any) => [q.text, ...(q.options || []), q.correctAnswer]),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(normalizedSearch);
+    });
+
   const orderedVisibleQuizzes = activeTab === "mine"
     ? [
         ...searchedVisibleQuizzes.filter((quiz) => (quiz as any).isFeatured),
@@ -48,11 +64,47 @@ export function Quiz() {
       ]
     : searchedVisibleQuizzes;
 
+  const quizCategoryOptions = (() => {
+    const base = [{ key: "all", name: "Tất cả", count: visibleQuizzes.length, color: "bg-blue-600" }];
+    const uncategorizedCount = visibleQuizzes.filter((quiz: any) => getQuizCategoryKey(quiz) === "uncategorized").length;
+    if (uncategorizedCount > 0) base.push({ key: "uncategorized", name: "Chưa phân loại", count: uncategorizedCount, color: "bg-slate-500" });
+
+    if (activeTab === "mine") {
+      return [
+        ...base,
+        ...quizCategories.map((category) => ({
+          key: `id:${category.id}`,
+          id: category.id,
+          name: category.name,
+          color: category.color || "bg-blue-500",
+          count: visibleQuizzes.filter((quiz: any) => String(quiz.categoryId || "") === String(category.id)).length,
+        })),
+      ];
+    }
+
+    const byName = new Map<string, { key: string; name: string; count: number; color: string }>();
+    visibleQuizzes.forEach((quiz: any) => {
+      if (!quiz.categoryName) return;
+      const name = String(quiz.categoryName).trim();
+      const key = `name:${name.toLowerCase()}`;
+      const current = byName.get(key) || { key, name, count: 0, color: activeTab === "builtin" ? (name.toUpperCase() === "IELTS" ? "bg-indigo-500" : "bg-emerald-500") : "bg-emerald-500" };
+      current.count += 1;
+      byName.set(key, current);
+    });
+    return [...base, ...Array.from(byName.values()).sort((a, b) => a.name.localeCompare(b.name, "vi"))];
+  })();
+
   useEffect(() => {
     getQuizzes();
     getPublicQuizzes();
+    getBuiltinQuizzes();
     getQuizHistory();
-  }, [getQuizzes, getPublicQuizzes, getQuizHistory]);
+    fetchQuizCategories();
+  }, [getQuizzes, getPublicQuizzes, getBuiltinQuizzes, getQuizHistory, fetchQuizCategories]);
+
+  useEffect(() => {
+    setActiveCategoryKey("all");
+  }, [activeTab]);
 
   const handleJoinRoom = async () => {
     if (!roomCode.trim()) return toast.error("Vui lòng nhập mã phòng");
@@ -64,6 +116,7 @@ export function Quiz() {
 
   const openCreateQuizModal = () => {
     setCreateIsPublic(true);
+    setSelectedCreateCategoryId(activeCategoryKey.startsWith("id:") ? activeCategoryKey.replace("id:", "") : "");
     setIsCreateModalOpen(true);
   };
 
@@ -73,7 +126,20 @@ export function Quiz() {
       return;
     }
     setIsCreateModalOpen(false);
-    navigate(`/quiz/create?privacy=${createIsPublic ? "public" : "private"}`);
+    const params = new URLSearchParams({ privacy: createIsPublic ? "public" : "private" });
+    if (selectedCreateCategoryId) params.set("categoryId", selectedCreateCategoryId);
+    navigate(`/quiz/create?${params.toString()}`);
+  };
+
+  const handleCreateQuizCategory = async () => {
+    const name = newQuizCategoryName.trim();
+    if (!name) return toast.error("Nhập tên đề mục quiz trước");
+    const created = await createQuizCategory(name, "bg-blue-500");
+    if (created) {
+      setNewQuizCategoryName("");
+      setActiveCategoryKey(`id:${created.id}`);
+      setSelectedCreateCategoryId(created.id);
+    }
   };
 
   const getDifficultyColor = (diff: string) => {
@@ -132,6 +198,12 @@ export function Quiz() {
             Của tôi
           </button>
           <button
+            onClick={() => setActiveTab("builtin")}
+            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "builtin" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+          >
+            Có sẵn
+          </button>
+          <button
             onClick={() => setActiveTab("public")}
             className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "public" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
@@ -143,9 +215,58 @@ export function Quiz() {
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={activeTab === "public" ? "Tìm quiz công khai..." : "Tìm trong bài thi nổi bật và quiz của tôi..."}
+            placeholder={activeTab === "public" ? "Tìm quiz công khai..." : activeTab === "builtin" ? "Tìm quiz có sẵn IELTS/TOEIC..." : "Tìm trong bài thi nổi bật và quiz của tôi..."}
             className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm font-semibold text-gray-700 shadow-sm outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
           />
+        </div>
+      </div>
+
+      <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+        <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="flex items-center gap-2 text-sm font-extrabold uppercase tracking-wide text-gray-700">
+              <Tags className="h-4 w-4 text-blue-500" /> Đề mục trắc nghiệm
+            </h2>
+            <p className="text-xs font-medium text-gray-400">
+              {activeTab === "public" ? "Lọc quiz công khai theo đề mục do người chia sẻ đặt." : "Sắp xếp quiz của bạn theo IELTS, TOEIC, Ngữ pháp hoặc đề mục tự tạo."}
+            </p>
+          </div>
+          {activeTab === "mine" && (
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <input
+                value={newQuizCategoryName}
+                onChange={(e) => setNewQuizCategoryName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCreateQuizCategory()}
+                placeholder="Tạo đề mục quiz..."
+                className="w-full rounded-2xl border border-gray-200 px-4 py-2.5 text-sm font-bold outline-none focus:border-blue-500 sm:w-56"
+              />
+              <button onClick={handleCreateQuizCategory} className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-slate-800">
+                Thêm
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {quizCategoryOptions.map((category: any) => (
+            <div key={category.key} className="group inline-flex shrink-0 items-center overflow-hidden rounded-2xl bg-gray-100">
+              <button
+                onClick={() => setActiveCategoryKey(category.key)}
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryKey === category.key ? `${category.color || "bg-blue-600"} text-white shadow-sm` : "text-gray-600 hover:bg-gray-200"}`}
+              >
+                <span>{category.name}</span>
+                <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryKey === category.key ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{category.count}</span>
+              </button>
+              {activeTab === "mine" && category.id && (
+                <button
+                  onClick={() => deleteQuizCategory(category.id)}
+                  title="Xóa đề mục"
+                  className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -153,11 +274,13 @@ export function Quiz() {
       <div>
         <div className="mb-4 flex flex-col gap-1">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            {activeTab === "public" ? <Globe2 className="w-6 h-6 text-emerald-500" /> : <Award className="w-6 h-6 text-blue-500" />}
-            {activeTab === "public" ? "Quiz công khai" : "Bài thi nổi bật"}
+            {activeTab === "public" ? <Globe2 className="w-6 h-6 text-emerald-500" /> : activeTab === "builtin" ? <Star className="w-6 h-6 text-indigo-500" /> : <Award className="w-6 h-6 text-blue-500" />}
+            {activeTab === "public" ? "Quiz công khai" : activeTab === "builtin" ? "Quiz có sẵn IELTS/TOEIC" : "Bài thi nổi bật"}
           </h2>
           {activeTab === "mine" ? (
             <p className="text-sm font-medium text-gray-500">Các bài thi nổi bật có sẵn được xếp lên đầu. Quiz bạn tự tạo hoặc lưu về cá nhân nằm phía sau.</p>
+          ) : activeTab === "builtin" ? (
+            <p className="text-sm font-medium text-gray-500">Mock quiz IELTS/TOEIC được tách riêng khỏi quiz người dùng tạo và không thể xóa.</p>
           ) : (
             <p className="text-sm font-medium text-gray-500">Các quiz công khai từ mọi người trong hệ thống.</p>
           )}
@@ -170,7 +293,7 @@ export function Quiz() {
           </div>
         ) : orderedVisibleQuizzes.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-300">
-            <p className="text-gray-500 mb-4">{searchQuery.trim() ? "Không tìm thấy quiz phù hợp." : activeTab === "public" ? "Chưa có quiz công khai nào." : "Chưa có bài thi nào được tạo."}</p>
+            <p className="text-gray-500 mb-4">{searchQuery.trim() ? "Không tìm thấy quiz phù hợp." : activeTab === "public" ? "Chưa có quiz công khai nào." : activeTab === "builtin" ? "Chưa có quiz có sẵn nào." : "Chưa có bài thi nào được tạo."}</p>
             {activeTab === "mine" && (
               <button onClick={openCreateQuizModal} className="text-blue-600 font-bold hover:underline">
                 Tạo bài thi đầu tiên
@@ -194,13 +317,19 @@ export function Quiz() {
                           <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors line-clamp-1">{quiz.title}</h3>
                           <p className="text-sm text-gray-500 line-clamp-2">{quiz.description}</p>
                           {activeTab === "public" && (quiz as any).creator?.displayName && <p className="mt-1 text-xs font-semibold text-gray-400">Tác giả: {(quiz as any).creator.displayName}</p>}
+                          {(quiz as any).categoryName && <span className="mt-2 inline-flex w-max rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-extrabold text-indigo-600">{(quiz as any).categoryName}</span>}
                         </div>
                       </div>
                     </div>
                   </Link>
 
                   <div className="flex flex-wrap items-center gap-2 mb-6">
-                    {(quiz as any).isFeatured && (
+                    {(quiz as any).isBuiltIn && (
+                      <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-100">
+                        <Star className="w-3.5 h-3.5" /> Có sẵn
+                      </span>
+                    )}
+                    {(quiz as any).isFeatured && !(quiz as any).isBuiltIn && (
                       <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg border bg-yellow-50 text-yellow-700 border-yellow-100">
                         <Star className="w-3.5 h-3.5" /> Nổi bật
                       </span>
@@ -339,6 +468,19 @@ export function Quiz() {
                 <div className="flex items-center gap-2 font-extrabold text-gray-900"><Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}</div>
                 <p className="mt-1 text-sm font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo quiz riêng tư.</p>
               </button>
+            </div>
+            <div className="border-t border-gray-100 px-6 py-5">
+              <label className="mb-2 block text-sm font-bold text-gray-700">Đề mục</label>
+              <select
+                value={selectedCreateCategoryId}
+                onChange={(e) => setSelectedCreateCategoryId(e.target.value)}
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-800 outline-none focus:border-blue-500"
+              >
+                <option value="">Chưa phân loại</option>
+                {quizCategories.map((category) => (
+                  <option key={category.id} value={category.id}>{category.name}</option>
+                ))}
+              </select>
             </div>
             <div className="flex gap-3 border-t border-gray-100 p-6">
               <button onClick={() => setIsCreateModalOpen(false)} className="flex-1 rounded-xl bg-gray-100 py-3 font-bold text-gray-700 hover:bg-gray-200">Hủy</button>

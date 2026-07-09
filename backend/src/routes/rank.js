@@ -46,9 +46,10 @@ router.post("/win", asyncHandler(async (req, res) => {
   user.rankId = rankId;
   user.tier = tier;
   user.stars = stars;
+  user.arenaMatchesPlayed = (user.arenaMatchesPlayed || 0) + 1;
   await user.save();
 
-  res.json({ status: "success", rankId, tier, stars });
+  res.json({ status: "success", rankId, tier, stars, arenaMatchesPlayed: user.arenaMatchesPlayed });
 }));
 
 router.post("/lose", asyncHandler(async (req, res) => {
@@ -60,7 +61,9 @@ router.post("/lose", asyncHandler(async (req, res) => {
 
   // Rank 1 lose protection
   if (config.loseProtection && rankId === 1) {
-    return res.json({ status: "protected", message: "Không bị trừ sao ở Rank Đồng", rankId, tier, stars });
+    user.arenaMatchesPlayed = (user.arenaMatchesPlayed || 0) + 1;
+    await user.save();
+    return res.json({ status: "protected", message: "Không bị trừ sao ở Rank Đồng", rankId, tier, stars, arenaMatchesPlayed: user.arenaMatchesPlayed });
   }
 
   if (stars > 0) {
@@ -91,9 +94,10 @@ router.post("/lose", asyncHandler(async (req, res) => {
   user.rankId = rankId;
   user.tier = tier;
   user.stars = stars;
+  user.arenaMatchesPlayed = (user.arenaMatchesPlayed || 0) + 1;
   await user.save();
 
-  res.json({ status: "success", rankId, tier, stars });
+  res.json({ status: "success", rankId, tier, stars, arenaMatchesPlayed: user.arenaMatchesPlayed });
 }));
 
 export default router;

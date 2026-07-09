@@ -180,9 +180,15 @@ export function FlashcardDetail() {
     );
   }
 
+  const isBuiltInSet = Boolean((currentSet as any)?.isBuiltIn || String(currentSet.id || "").startsWith("builtin_"));
+
   // ─── Card item renderers per view ───────────────────────────────────────────
 
-  const renderPopover = (cardId: string) => (
+  const renderPopover = (cardId: string) => {
+    if (isBuiltInSet) {
+      return <span className="rounded-full bg-indigo-50 px-2 py-1 text-xs font-extrabold text-indigo-600">Có sẵn</span>;
+    }
+    return (
     <div data-popover-root className="relative" onClick={(e) => e.stopPropagation()}>
       <button onClick={() => setOpenPopoverId(openPopoverId === cardId ? null : cardId)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
         <MoreVertical className="w-4 h-4" />
@@ -218,6 +224,7 @@ export function FlashcardDetail() {
       )}
     </div>
   );
+  };
 
   const renderBadge = (cardId: string) => {
     const level = getMemoryLevel(cardProgress[cardId]);
@@ -360,7 +367,7 @@ export function FlashcardDetail() {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{currentSet.title}</h1>
-            <p className="text-gray-500">{currentSet.cardCount} thẻ</p>
+            <p className="text-gray-500">{currentSet.cardCount} thẻ {isBuiltInSet ? "• Học liệu có sẵn, không thể xóa/sửa" : ""}</p>
           </div>
         </div>
         <button onClick={() => setIsVoiceModalOpen(true)} className="px-4 py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors">
@@ -393,15 +400,17 @@ export function FlashcardDetail() {
               </button>
             ))}
           </div>
-          <button
-            onClick={() => {
-              setIsModalOpen(true);
-              resetForm();
-            }}
-            className="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-800 transition-colors"
-          >
-            <Plus className="w-5 h-5" /> Thêm từ mới
-          </button>
+          {!isBuiltInSet && (
+            <button
+              onClick={() => {
+                setIsModalOpen(true);
+                resetForm();
+              }}
+              className="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-800 transition-colors"
+            >
+              <Plus className="w-5 h-5" /> Thêm từ mới
+            </button>
+          )}
         </div>
       </div>
 
@@ -475,16 +484,18 @@ export function FlashcardDetail() {
       {cards.length === 0 ? (
         <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300">
           <h3 className="text-lg font-bold text-gray-900 mb-2">Chưa có từ vựng nào</h3>
-          <p className="text-gray-500 mb-6">Hãy thêm những từ vựng đầu tiên vào bộ thẻ này.</p>
-          <button
-            onClick={() => {
-              setIsModalOpen(true);
-              resetForm();
-            }}
-            className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 mx-auto hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-5 h-5" /> Thêm từ mới
-          </button>
+          <p className="text-gray-500 mb-6">{isBuiltInSet ? "Bộ thẻ có sẵn này đang chưa có dữ liệu." : "Hãy thêm những từ vựng đầu tiên vào bộ thẻ này."}</p>
+          {!isBuiltInSet && (
+            <button
+              onClick={() => {
+                setIsModalOpen(true);
+                resetForm();
+              }}
+              className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 mx-auto hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-5 h-5" /> Thêm từ mới
+            </button>
+          )}
         </div>
       ) : viewMode === "line" ? (
         <div className="space-y-4">{cards.map(renderLineCard)}</div>

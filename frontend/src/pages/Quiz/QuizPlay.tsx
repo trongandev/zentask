@@ -92,6 +92,9 @@ export function QuizPlay() {
           if (socket && user && roomCode) {
             socket.emit("student_finished", { roomCode, user: { uid: user.uid, name: user.displayName }, score: res.score });
           }
+          if ((res as any).isBuiltIn) {
+            sessionStorage.setItem(`builtin_quiz_result_${res.id}`, JSON.stringify({ result: res, quiz }));
+          }
           navigate(`/quiz/result/${res.id}`);
         } else {
           navigate("/quiz");
@@ -162,6 +165,9 @@ export function QuizPlay() {
           });
         }
 
+        if ((res as any).isBuiltIn) {
+          sessionStorage.setItem(`builtin_quiz_result_${res.id}`, JSON.stringify({ result: res, quiz }));
+        }
         toast.success(`Nộp bài thành công! Điểm: ${res.score}/100`);
         navigate(`/quiz/result/${res.id}`);
       }

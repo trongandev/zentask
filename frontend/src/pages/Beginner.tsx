@@ -379,7 +379,7 @@ export function Beginner() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div
                 className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl p-5 border border-blue-100 flex flex-col items-center text-center cursor-pointer hover:shadow-md transition-all group"
-                onClick={() => toast("Tính năng Luyện nghe đang phát triển!")}
+                onClick={() => navigate("/beginner/skills/listening")}
               >
                 <div className="w-12 h-12 bg-blue-600 rounded-xl text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
                   <Headphones className="w-6 h-6" />
@@ -390,7 +390,7 @@ export function Beginner() {
 
               <div
                 className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl p-5 border border-purple-100 flex flex-col items-center text-center cursor-pointer hover:shadow-md transition-all group"
-                onClick={() => toast("Tính năng Nói đang phát triển!")}
+                onClick={() => navigate("/beginner/skills/speaking")}
               >
                 <div className="w-12 h-12 bg-purple-600 rounded-xl text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
                   <Mic className="w-6 h-6" />
@@ -401,7 +401,7 @@ export function Beginner() {
 
               <div
                 className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-2xl p-5 border border-green-100 flex flex-col items-center text-center cursor-pointer hover:shadow-md transition-all group"
-                onClick={() => toast("Tính năng Đọc/Điền từ đang phát triển!")}
+                onClick={() => navigate("/beginner/skills/fill_blank")}
               >
                 <div className="w-12 h-12 bg-green-600 rounded-xl text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
                   <Edit3 className="w-6 h-6" />
@@ -412,7 +412,7 @@ export function Beginner() {
 
               <div
                 className="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-2xl p-5 border border-orange-100 flex flex-col items-center text-center cursor-pointer hover:shadow-md transition-all group"
-                onClick={() => toast("Tính năng Phản xạ đang phát triển!")}
+                onClick={() => navigate("/beginner/skills/reflex")}
               >
                 <div className="w-12 h-12 bg-orange-600 rounded-xl text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-sm">
                   <BookOpen className="w-6 h-6" />

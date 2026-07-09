@@ -1,6 +1,7 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { Quiz, QuizResult, QuizRoom } from "../models/Schemas.js";
+import { Quiz, QuizCategory, QuizResult, QuizRoom } from "../models/Schemas.js";
+import { BUILTIN_QUIZZES, getBuiltinQuizById } from "../data/builtinLearning/index.js";
 import { GoogleGenAI, Type } from "@google/genai";
 import crypto from "crypto";
 import { checkAchievements } from "../utils/achievements.js";
@@ -49,6 +50,23 @@ const normalizePublicFlag = async (uid, requestedValue = true) => {
   return false;
 };
 
+const DEFAULT_QUIZ_CATEGORIES = [
+  { name: "IELTS", color: "bg-indigo-500" },
+  { name: "TOEIC", color: "bg-emerald-500" },
+  { name: "Ngữ pháp", color: "bg-purple-500" },
+  { name: "Từ vựng", color: "bg-blue-500" },
+  { name: "Giao tiếp", color: "bg-orange-500" },
+];
+
+const formatCategory = (category) => ({ id: category._id, ...category });
+
+const resolveQuizCategory = async (uid, categoryId) => {
+  if (!categoryId) return { categoryId: null, categoryName: "" };
+  const category = await QuizCategory.findById(categoryId).lean();
+  if (!category || category.userId.toString() !== uid) return { categoryId: null, categoryName: "" };
+  return { categoryId: category._id, categoryName: category.name || "" };
+};
+
 const attachCreators = async (quizzes) => {
   const creatorIds = [...new Set(quizzes.map((q) => q.creatorId).filter((id) => id && id.length === 24))];
   const users = await User.find({ _id: { $in: creatorIds } }).lean();
@@ -71,6 +89,148 @@ const attachCreators = async (quizzes) => {
 const generateRoomCode = () => {
   return crypto.randomInt(100000, 1000000).toString();
 };
+
+const formatBuiltinQuiz = (quiz) => ({
+  ...quiz,
+  id: quiz.id,
+  creator: { uid: "system", displayName: "ZenTask", photoURL: "" },
+  isBuiltIn: true,
+  isFeatured: true,
+  isDefault: true,
+  isPublic: true,
+});
+
+const evaluateQuizAnswers = (quiz, answers = {}) => {
+  let correctCount = 0;
+  const evaluation = {};
+  for (const q of quiz.questions || []) {
+    const userAnswer = answers[q.id] || "";
+    const isCorrect = userAnswer === q.correctAnswer;
+    if (isCorrect) correctCount++;
+    evaluation[q.id] = {
+      userAnswer,
+      correctAnswer: q.correctAnswer,
+      isCorrect,
+      explanation: q.explanation || "",
+    };
+  }
+  const totalQuestions = quiz.questions?.length || 0;
+  const score = totalQuestions ? Math.round((correctCount / totalQuestions) * 100) : 0;
+  return { score, correctCount, totalQuestions, evaluation };
+};
+
+// ==================== CATEGORY ROUTES ====================
+router.get(
+  "/categories",
+  asyncHandler(async (req, res) => {
+    let categories = await QuizCategory.find({ userId: req.user.uid }).sort({ createdAt: 1 }).lean();
+
+    if (categories.length === 0) {
+      const created = await QuizCategory.insertMany(DEFAULT_QUIZ_CATEGORIES.map((item) => ({
+        userId: req.user.uid,
+        ...item,
+      })));
+      categories = created.map((doc) => doc.toObject());
+    }
+
+    res.json(categories.map(formatCategory));
+  }),
+);
+
+router.post(
+  "/category",
+  asyncHandler(async (req, res) => {
+    const { name, color = "bg-blue-500", description = "" } = req.body;
+    const safeName = String(name || "").trim();
+    if (!safeName) return res.status(400).json({ error: "Tên đề mục là bắt buộc" });
+
+    const existing = await QuizCategory.findOne({ userId: req.user.uid, name: safeName });
+    if (existing) return res.json(formatCategory(existing.toObject()));
+
+    const category = await QuizCategory.create({ userId: req.user.uid, name: safeName, color, description });
+    res.json(formatCategory(category.toObject()));
+  }),
+);
+
+router.patch(
+  "/category/:categoryId",
+  asyncHandler(async (req, res) => {
+    const { categoryId } = req.params;
+    const { name, color, description } = req.body;
+    const category = await QuizCategory.findById(categoryId);
+    if (!category || category.userId.toString() !== req.user.uid) return res.status(404).json({ error: "Không tìm thấy đề mục" });
+
+    if (name !== undefined) category.name = String(name).trim();
+    if (color !== undefined) category.color = color;
+    if (description !== undefined) category.description = description;
+    await category.save();
+
+    await Quiz.updateMany(
+      { creatorId: req.user.uid, categoryId },
+      { $set: { categoryName: category.name || "" } },
+    );
+
+    res.json(formatCategory(category.toObject()));
+  }),
+);
+
+router.delete(
+  "/category/:categoryId",
+  asyncHandler(async (req, res) => {
+    const { categoryId } = req.params;
+    const category = await QuizCategory.findById(categoryId);
+    if (!category || category.userId.toString() !== req.user.uid) return res.status(404).json({ error: "Không tìm thấy đề mục" });
+
+    await Quiz.updateMany({ creatorId: req.user.uid, categoryId }, { $set: { categoryId: null, categoryName: "" } });
+    await QuizCategory.findByIdAndDelete(categoryId);
+    res.json({ success: true });
+  }),
+);
+
+
+// ==================== BUILT-IN LEARNING QUIZZES ====================
+// Static IELTS/TOEIC mock quizzes generated from bundled LEARNING documents.
+// They are separate from user-created MongoDB quizzes and cannot be deleted by users.
+router.get(
+  "/builtin",
+  asyncHandler(async (req, res) => {
+    res.json(BUILTIN_QUIZZES.map(formatBuiltinQuiz));
+  }),
+);
+
+router.get(
+  "/builtin/:id",
+  asyncHandler(async (req, res) => {
+    const quiz = getBuiltinQuizById(req.params.id);
+    if (!quiz) return res.status(404).json({ error: "Không tìm thấy quiz có sẵn" });
+    res.json(formatBuiltinQuiz(quiz));
+  }),
+);
+
+router.post(
+  "/builtin/:id/submit",
+  asyncHandler(async (req, res) => {
+    const quiz = getBuiltinQuizById(req.params.id);
+    if (!quiz) return res.status(404).json({ error: "Không tìm thấy quiz có sẵn" });
+    const { answers = {}, usedRebirth = false } = req.body;
+    const { score, correctCount, totalQuestions, evaluation } = evaluateQuizAnswers(quiz, answers);
+    res.json({
+      id: `builtin_result_${Date.now()}`,
+      quizId: quiz.id,
+      uid: req.user.uid,
+      score,
+      totalCorrect: correctCount,
+      totalQuestions,
+      answers,
+      evaluation,
+      usedRebirth: !!usedRebirth,
+      roomId: null,
+      roomSettings: null,
+      isBuiltIn: true,
+      createdAt: new Date().toISOString(),
+    });
+  }),
+);
 
 // GET /api/quiz - featured quizzes first, then quizzes created by current user
 router.get(
@@ -136,6 +296,9 @@ router.get(
 router.get(
   "/:id",
   asyncHandler(async (req, res) => {
+    const builtinQuiz = getBuiltinQuizById(req.params.id);
+    if (builtinQuiz) return res.json(formatBuiltinQuiz(builtinQuiz));
+
     const quiz = await Quiz.findById(req.params.id).lean();
     if (!quiz) {
       return res.status(404).json({ error: "Quiz not found" });
@@ -153,7 +316,7 @@ router.get(
 router.post(
   "/",
   asyncHandler(async (req, res) => {
-    const { title, description, difficulty, duration, questions, isPublic = true } = req.body;
+    const { title, description, difficulty, duration, questions, isPublic = true, categoryId = null } = req.body;
 
     if (!title || !questions || questions.length === 0) {
       return res.status(400).json({ error: "Invalid quiz data" });
@@ -165,6 +328,7 @@ router.post(
     }));
 
     const publicFlag = await normalizePublicFlag(req.user.uid, isPublic);
+    const categoryInfo = await resolveQuizCategory(req.user.uid, categoryId);
 
     const newQuiz = await Quiz.create({
       title,
@@ -173,6 +337,7 @@ router.post(
       duration: duration || 15,
       questions: formattedQuestions,
       creatorId: req.user.uid,
+      ...categoryInfo,
       isPublic: publicFlag,
     });
 
@@ -195,7 +360,7 @@ router.post(
 router.post(
   "/generate",
   asyncHandler(async (req, res) => {
-    const { prompt, numQuestions = 5, difficulty = "Medium", isPublic = true } = req.body;
+    const { prompt, numQuestions = 5, difficulty = "Medium", isPublic = true, categoryId = null } = req.body;
 
     if (!prompt) return res.status(400).json({ error: "Prompt is required" });
 
@@ -281,6 +446,7 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
     }));
 
     const publicFlag = await normalizePublicFlag(req.user.uid, isPublic);
+    const categoryInfo = await resolveQuizCategory(req.user.uid, categoryId);
 
     const newQuiz = await Quiz.create({
       title: quizData.title,
@@ -289,6 +455,7 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
       duration: numQuestions * 1.5,
       questions: formattedQuestions,
       creatorId: req.user.uid,
+      ...categoryInfo,
       isPublic: publicFlag,
     });
 
@@ -362,6 +529,26 @@ router.post(
   asyncHandler(async (req, res) => {
     const { answers, usedRebirth, roomId } = req.body;
     const quizId = req.params.id;
+
+    const builtinQuiz = getBuiltinQuizById(quizId);
+    if (builtinQuiz) {
+      const { score, correctCount, totalQuestions, evaluation } = evaluateQuizAnswers(builtinQuiz, answers);
+      return res.json({
+        id: `builtin_result_${Date.now()}`,
+        quizId: builtinQuiz.id,
+        uid: req.user.uid,
+        score,
+        totalCorrect: correctCount,
+        totalQuestions,
+        answers,
+        evaluation,
+        usedRebirth: !!usedRebirth,
+        roomId: null,
+        roomSettings: null,
+        isBuiltIn: true,
+        createdAt: new Date().toISOString(),
+      });
+    }
 
     const quiz = await Quiz.findById(quizId).lean();
     if (!quiz) return res.status(404).json({ error: "Quiz not found" });

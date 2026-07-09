@@ -23,6 +23,17 @@ export function QuizResult() {
   useEffect(() => {
     const fetchResult = async () => {
       try {
+        if (resultId?.startsWith("builtin_result_")) {
+          const raw = sessionStorage.getItem(`builtin_quiz_result_${resultId}`);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            setResult(parsed.result);
+            setQuiz(parsed.quiz);
+            if (parsed.result?.score >= 80) triggerConfetti();
+            return;
+          }
+        }
+
         const history = await getQuizHistory();
         const found = history.find((h) => h.id === resultId);
         if (found) {
@@ -115,7 +126,7 @@ export function QuizResult() {
   if (!result || !quiz) return <div className="text-center p-12 text-gray-500">Không tìm thấy dữ liệu</div>;
 
   const wrongQuestions = quiz.questions.filter((q) => !result.evaluation[q.id]?.isCorrect);
-  const canRebirth = !result.usedRebirth && !result.roomId && wrongQuestions.length > 0;
+  const canRebirth = !result.usedRebirth && !result.roomId && wrongQuestions.length > 0 && !(result as any).isBuiltIn;
 
   const hideDetails = result.roomId && roomSettings && !roomSettings.showAnswers;
 
@@ -126,7 +137,7 @@ export function QuizResult() {
         <div className={`absolute top-0 left-0 w-full h-2 ${result.score >= 80 ? "bg-green-500" : result.score >= 50 ? "bg-orange-500" : "bg-red-500"}`} />
 
         <h1 className="text-2xl font-bold text-gray-900 mb-2">{quiz.title}</h1>
-        <p className="text-gray-500 mb-8">Hoàn thành lúc: {new Date(result.createdAt._seconds * 1000 || Date.now()).toLocaleString("vi-VN")}</p>
+        <p className="text-gray-500 mb-8">Hoàn thành lúc: {new Date((result as any).createdAt?._seconds ? (result as any).createdAt._seconds * 1000 : ((result as any).createdAt || Date.now())).toLocaleString("vi-VN")}</p>
 
         <div className="flex justify-center mb-8">
           <div className="relative">

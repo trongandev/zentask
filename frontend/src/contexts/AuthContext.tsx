@@ -11,6 +11,15 @@ export interface AppSettings {
   accentColor?: AppAccentColor;
 }
 
+export interface OnboardingState {
+  completed?: boolean;
+  completedAt?: string | null;
+  skipped?: boolean;
+  skippedAt?: string | null;
+  lastStep?: number;
+  version?: string;
+}
+
 interface UserProfile {
   uid: string;
   email: string;
@@ -45,6 +54,7 @@ interface UserProfile {
   };
   customTensesTests?: any[]; // Array of TensesStage
   appSettings?: AppSettings;
+  onboarding?: OnboardingState;
 }
 
 interface AuthContextType {
