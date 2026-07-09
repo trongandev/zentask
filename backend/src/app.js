@@ -1,3 +1,8 @@
+import crypto from "crypto";
+if (!global.crypto) {
+  global.crypto = crypto.webcrypto || crypto;
+}
+
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";

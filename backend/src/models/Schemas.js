@@ -69,7 +69,7 @@ export const FlashcardSetSchema = new Schema({
   isPublic: { type: Boolean, default: false },
   order: { type: Number },
   clonedFrom: { type: Schema.Types.ObjectId, ref: 'FlashcardSet' },
-}, { timestamps: true });
+}, { timestamps: true, suppressReservedKeysWarning: true });
 
 export const VocabularySchema = new Schema({
   term: { type: String, required: true, lowercase: true },
