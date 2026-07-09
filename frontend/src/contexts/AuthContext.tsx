@@ -3,6 +3,14 @@ import { useConfigStore } from "../services/configService";
 import { useUserStore } from "../services/userService";
 import { useFlashcardStore } from "../services/flashcardService";
 import { useEtcStore } from "../services/etcService";
+export type AppThemeMode = "light" | "dark" | "system";
+export type AppAccentColor = "blue" | "purple" | "green" | "orange" | "pink" | "slate";
+
+export interface AppSettings {
+  theme?: AppThemeMode;
+  accentColor?: AppAccentColor;
+}
+
 interface UserProfile {
   uid: string;
   email: string;
@@ -36,6 +44,7 @@ interface UserProfile {
     completedStages: number[];
   };
   customTensesTests?: any[]; // Array of TensesStage
+  appSettings?: AppSettings;
 }
 
 interface AuthContextType {
@@ -51,6 +60,32 @@ const AuthContext = createContext<AuthContextType>({ user: null, loading: true, 
 export const useAuth = () => useContext(AuthContext);
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
+
+const ACCENT_HEX: Record<AppAccentColor, string> = {
+  blue: "#2563eb",
+  purple: "#7c3aed",
+  green: "#16a34a",
+  orange: "#f97316",
+  pink: "#db2777",
+  slate: "#334155",
+};
+
+export function applyAppAppearance(settings?: AppSettings | null) {
+  const stored = localStorage.getItem("zentaskAppearance");
+  const localSettings = stored ? JSON.parse(stored) : {};
+  const next = { ...localSettings, ...(settings || {}) } as AppSettings;
+  const theme = next.theme || "light";
+  const accentColor = next.accentColor || "blue";
+  const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+  const useDark = theme === "dark" || (theme === "system" && prefersDark);
+
+  document.documentElement.classList.toggle("theme-dark", useDark);
+  document.documentElement.dataset.theme = useDark ? "dark" : "light";
+  document.documentElement.dataset.accent = accentColor;
+  document.documentElement.style.setProperty("--zt-accent", ACCENT_HEX[accentColor] || ACCENT_HEX.blue);
+  localStorage.setItem("zentaskAppearance", JSON.stringify(next));
+}
+
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -68,12 +103,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!res.ok) {
         setUser(null);
+        applyAppAppearance(null);
         setLoading(false);
         return;
       }
 
       const data = await res.json();
       setUser(data.user as UserProfile);
+      applyAppAppearance(data.user?.appSettings);
       setInitialNotifications(data.notifications || []);
 
       // Đồng bộ sang Extension qua externally_connectable
@@ -111,6 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Error setting up auth:", error);
       setUser(null);
+      applyAppAppearance(null);
     } finally {
       setLoading(false);
     }
@@ -119,6 +157,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia?.("(prefers-color-scheme: dark)");
+    const onChange = () => applyAppAppearance(user?.appSettings || null);
+    media?.addEventListener?.("change", onChange);
+    return () => media?.removeEventListener?.("change", onChange);
+  }, [user?.appSettings]);
 
   useEffect(() => {
     const handleXpUpdate = (e: any) => {
@@ -152,7 +197,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateUser = (updates: Partial<UserProfile>) => {
     setUser((prevUser) => {
       if (prevUser) {
-        return { ...prevUser, ...updates };
+        const merged = { ...prevUser, ...updates };
+        applyAppAppearance(merged.appSettings);
+        return merged;
       }
       return prevUser;
     });

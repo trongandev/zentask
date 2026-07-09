@@ -354,6 +354,40 @@ router.put("/profile", async (req, res) => {
   }
 });
 
+
+// Update app appearance/settings
+router.put("/settings", async (req, res) => {
+  try {
+    const { appSettings } = req.body || {};
+    const allowedThemes = ["light", "dark", "system"];
+    const allowedAccentColors = ["blue", "purple", "green", "orange", "pink", "slate"];
+
+    const currentDoc = await db.collection("users").doc(req.uid).get();
+    const currentSettings = currentDoc.exists ? currentDoc.data().appSettings || {} : {};
+
+    const nextSettings = {
+      ...currentSettings,
+      ...(appSettings || {}),
+    };
+
+    nextSettings.theme = allowedThemes.includes(nextSettings.theme) ? nextSettings.theme : "light";
+    nextSettings.accentColor = allowedAccentColors.includes(nextSettings.accentColor) ? nextSettings.accentColor : "blue";
+
+    await db.collection("users").doc(req.uid).set(
+      {
+        appSettings: nextSettings,
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
+
+    res.json({ status: "success", appSettings: nextSettings });
+  } catch (error) {
+    console.error("Update settings error:", error);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
+
 // Get user profile by UID
 router.get("/profile/:uid", async (req, res) => {
   try {

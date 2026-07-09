@@ -1,0 +1,751 @@
+/* ZenTask Subtitle AI engine
+ * Browser-only engine for React:
+ * - FFmpeg.wasm from /ffmpeg/*
+ * - Whisper via Transformers.js CDN
+ * - Google Translate public endpoint for SRT translation
+ */
+
+export type EngineCallbacks = {
+  onLog?: (message: string) => void;
+  onStatus?: (message: string) => void;
+  onProgress?: (ratio: number) => void;
+  onChunk?: (text: string, ratio: number) => void;
+};
+
+export type WhisperModelKey =
+  | "tiny"
+  | "tiny.en"
+  | "base"
+  | "small"
+  | "small.en";
+
+export const WHISPER_MODELS: Record<
+  WhisperModelKey,
+  { id: string; size: string; note: string }
+> = {
+  tiny: {
+    id: "Xenova/whisper-tiny",
+    size: "~75 MB",
+    note: "Nhanh nhất, phù hợp test nhanh",
+  },
+  "tiny.en": {
+    id: "Xenova/whisper-tiny.en",
+    size: "~75 MB",
+    note: "Chỉ tiếng Anh, nhanh",
+  },
+  base: {
+    id: "Xenova/whisper-base",
+    size: "~145 MB",
+    note: "Cân bằng tốc độ và độ chính xác",
+  },
+  small: {
+    id: "Xenova/whisper-small",
+    size: "~250 MB",
+    note: "Chính xác hơn, chậm hơn",
+  },
+  "small.en": {
+    id: "Xenova/whisper-small.en",
+    size: "~250 MB",
+    note: "Chỉ tiếng Anh, chính xác",
+  },
+};
+
+export const WHISPER_LANGUAGES = [
+  { label: "Auto detect", value: "auto" },
+  { label: "English", value: "english" },
+  { label: "Vietnamese", value: "vietnamese" },
+  { label: "Chinese", value: "chinese" },
+  { label: "Japanese", value: "japanese" },
+  { label: "Korean", value: "korean" },
+  { label: "French", value: "french" },
+  { label: "German", value: "german" },
+  { label: "Spanish", value: "spanish" },
+  { label: "Thai", value: "thai" },
+  { label: "Indonesian", value: "indonesian" },
+];
+
+export const TARGET_LANGUAGES = [
+  { label: "Tiếng Việt", value: "vi" },
+  { label: "English", value: "en" },
+  { label: "中文", value: "zh" },
+  { label: "日本語", value: "ja" },
+  { label: "한국어", value: "ko" },
+  { label: "Français", value: "fr" },
+  { label: "Deutsch", value: "de" },
+  { label: "Español", value: "es" },
+  { label: "ไทย", value: "th" },
+  { label: "Bahasa Indonesia", value: "id" },
+];
+
+const WHISPER_TO_CODE: Record<string, string | null> = {
+  auto: null,
+  english: "en",
+  vietnamese: "vi",
+  chinese: "zh",
+  japanese: "ja",
+  korean: "ko",
+  french: "fr",
+  german: "de",
+  spanish: "es",
+  portuguese: "pt",
+  italian: "it",
+  russian: "ru",
+  arabic: "ar",
+  thai: "th",
+  indonesian: "id",
+  dutch: "nl",
+  turkish: "tr",
+  polish: "pl",
+  ukrainian: "uk",
+  swedish: "sv",
+  czech: "cs",
+  hindi: "hi",
+};
+
+type FFmpegInstance = any;
+
+let ffmpeg: FFmpegInstance | null = null;
+let ffmpegLoaded = false;
+let transcriber: any = null;
+let loadedWhisperModel = "";
+let videoFile: File | null = null;
+let audioData: Uint8Array | null = null;
+let outputVideo: Blob | null = null;
+
+const callbacks: Required<EngineCallbacks> = {
+  onLog: (message) => console.log("[SubtitleAI]", message),
+  onStatus: () => {},
+  onProgress: () => {},
+  onChunk: () => {},
+};
+
+export function setCallbacks(next: EngineCallbacks) {
+  callbacks.onLog = next.onLog ?? callbacks.onLog;
+  callbacks.onStatus = next.onStatus ?? callbacks.onStatus;
+  callbacks.onProgress = next.onProgress ?? callbacks.onProgress;
+  callbacks.onChunk = next.onChunk ?? callbacks.onChunk;
+}
+
+function log(message: string) {
+  callbacks.onLog(message);
+}
+
+function status(message: string) {
+  callbacks.onStatus(message);
+}
+
+function progress(ratio: number) {
+  callbacks.onProgress(Math.max(0, Math.min(1, ratio)));
+}
+
+function makeInputName(file: File) {
+  const ext = file.name.split(".").pop()?.toLowerCase() || "mp4";
+  return `input.${ext.replace(/[^a-z0-9]/g, "") || "mp4"}`;
+}
+
+async function importFFmpegModules() {
+  try {
+    const ffmpegModule = await import(/* @vite-ignore */ "/ffmpeg/ffmpeg/index.js");
+    const utilModule = await import(/* @vite-ignore */ "/ffmpeg/util/index.js");
+
+    return {
+      FFmpeg: ffmpegModule.FFmpeg,
+      fetchFile: utilModule.fetchFile,
+      toBlobURL: utilModule.toBlobURL,
+    };
+  } catch (error: any) {
+    throw new Error(
+      "Không tải được FFmpeg assets ở /ffmpeg. Hãy chạy installer hoặc copy @ffmpeg vào public/ffmpeg. " +
+        (error?.message || ""),
+    );
+  }
+}
+
+export async function loadFFmpeg() {
+  if (ffmpegLoaded && ffmpeg) {
+    status("FFmpeg đã sẵn sàng");
+    return;
+  }
+
+  status("Đang tải FFmpeg.wasm...");
+  progress(0);
+  log("Khởi tạo FFmpeg...");
+
+  const { FFmpeg, toBlobURL } = await importFFmpegModules();
+  const instance = new FFmpeg();
+
+  instance.on("log", ({ message }: { message: string }) => {
+    if (message) log(message);
+  });
+
+  instance.on("progress", ({ progress: ratio }: { progress: number }) => {
+    progress(Math.min(1, ratio || 0));
+    status(`FFmpeg đang xử lý... ${Math.round((ratio || 0) * 100)}%`);
+  });
+
+  const coreBase = "/ffmpeg/core";
+
+  await instance.load({
+    workerURL: "/ffmpeg/ffmpeg/worker.js",
+    coreURL: await toBlobURL(`${coreBase}/ffmpeg-core.js`, "text/javascript"),
+    wasmURL: await toBlobURL(`${coreBase}/ffmpeg-core.wasm`, "application/wasm"),
+  });
+
+  ffmpeg = instance;
+  ffmpegLoaded = true;
+
+  progress(1);
+  status("FFmpeg loaded ✓");
+  log("FFmpeg đã sẵn sàng.");
+}
+
+export function setVideoFile(file: File) {
+  videoFile = file;
+  audioData = null;
+  outputVideo = null;
+}
+
+export async function extractAudio(file = videoFile) {
+  if (!file) {
+    throw new Error("Chưa chọn video.");
+  }
+
+  if (!ffmpeg || !ffmpegLoaded) {
+    await loadFFmpeg();
+  }
+
+  const { fetchFile } = await importFFmpegModules();
+
+  const inputName = makeInputName(file);
+  const audioName = "audio.wav";
+
+  status("Đang tách audio 16kHz mono...");
+  progress(0);
+  log(`Ghi video vào FFmpeg FS: ${inputName}`);
+
+  await ffmpeg.writeFile(inputName, await fetchFile(file));
+
+  await ffmpeg.exec([
+    "-i",
+    inputName,
+    "-vn",
+    "-ac",
+    "1",
+    "-ar",
+    "16000",
+    "-f",
+    "wav",
+    audioName,
+  ]);
+
+  const wav = await ffmpeg.readFile(audioName);
+  audioData = wav instanceof Uint8Array ? wav : new Uint8Array(wav as ArrayBuffer);
+
+  try {
+    await ffmpeg.deleteFile(inputName);
+    await ffmpeg.deleteFile(audioName);
+  } catch {
+    // ignore
+  }
+
+  progress(1);
+  status("Audio ready ✓");
+  log(`Audio WAV: ${audioData.byteLength.toLocaleString()} bytes`);
+
+  return audioData;
+}
+
+async function importTransformers() {
+  try {
+    const mod = await import(
+      /* @vite-ignore */
+      "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js"
+    );
+
+    return mod as any;
+  } catch (error: any) {
+    throw new Error(
+      "Không tải được Transformers.js. Nếu chạy trong Chrome Extension MV3, cần đóng gói @xenova/transformers local thay vì CDN. " +
+        (error?.message || ""),
+    );
+  }
+}
+
+export async function loadWhisper(modelKey: WhisperModelKey = "small") {
+  const model = WHISPER_MODELS[modelKey];
+
+  if (!model) {
+    throw new Error(`Model không hợp lệ: ${modelKey}`);
+  }
+
+  if (transcriber && loadedWhisperModel === model.id) {
+    status("Whisper đã sẵn sàng");
+    return;
+  }
+
+  status(`Đang tải Whisper ${modelKey} (${model.size})...`);
+  progress(0);
+  log(`Load Whisper model: ${model.id}`);
+
+  const { pipeline, env } = await importTransformers();
+
+  env.allowRemoteModels = true;
+  env.allowLocalModels = false;
+
+  const fileProgress: Record<string, number> = {};
+
+  transcriber = await pipeline("automatic-speech-recognition", model.id, {
+    progress_callback: (event: any) => {
+      if (event.status === "initiate") {
+        fileProgress[event.file] = 0;
+        log(`Chuẩn bị tải: ${event.file}`);
+      }
+
+      if (event.status === "progress") {
+        fileProgress[event.file] = event.progress ?? 0;
+        const values = Object.values(fileProgress);
+        const average =
+          values.reduce((sum, item) => sum + item, 0) /
+          Math.max(1, values.length);
+
+        progress(average / 100);
+        status(`Tải Whisper... ${Math.round(average)}%`);
+      }
+
+      if (event.status === "done") {
+        fileProgress[event.file] = 100;
+        log(`✓ ${event.file}`);
+      }
+    },
+  });
+
+  loadedWhisperModel = model.id;
+  progress(1);
+  status("Whisper loaded ✓");
+  log("Whisper đã sẵn sàng.");
+}
+
+function decodeWavToFloat32(wav: Uint8Array) {
+  const view = new DataView(wav.buffer, wav.byteOffset, wav.byteLength);
+
+  function text(offset: number, length: number) {
+    return Array.from({ length }, (_, index) =>
+      String.fromCharCode(view.getUint8(offset + index)),
+    ).join("");
+  }
+
+  if (text(0, 4) !== "RIFF" || text(8, 4) !== "WAVE") {
+    throw new Error("Audio không phải WAV hợp lệ.");
+  }
+
+  let offset = 12;
+  let audioFormat = 1;
+  let channels = 1;
+  let sampleRate = 16000;
+  let bitsPerSample = 16;
+  let dataOffset = -1;
+  let dataSize = 0;
+
+  while (offset + 8 <= view.byteLength) {
+    const chunkId = text(offset, 4);
+    const chunkSize = view.getUint32(offset + 4, true);
+    const chunkData = offset + 8;
+
+    if (chunkId === "fmt ") {
+      audioFormat = view.getUint16(chunkData, true);
+      channels = view.getUint16(chunkData + 2, true);
+      sampleRate = view.getUint32(chunkData + 4, true);
+      bitsPerSample = view.getUint16(chunkData + 14, true);
+    }
+
+    if (chunkId === "data") {
+      dataOffset = chunkData;
+      dataSize = chunkSize;
+      break;
+    }
+
+    offset = chunkData + chunkSize + (chunkSize % 2);
+  }
+
+  if (dataOffset < 0) {
+    throw new Error("Không tìm thấy data chunk trong WAV.");
+  }
+
+  if (audioFormat !== 1 || bitsPerSample !== 16) {
+    throw new Error("Chỉ hỗ trợ WAV PCM 16-bit.");
+  }
+
+  const sampleCount = Math.floor(dataSize / 2 / channels);
+  const samples = new Float32Array(sampleCount);
+
+  for (let i = 0; i < sampleCount; i += 1) {
+    let sum = 0;
+
+    for (let ch = 0; ch < channels; ch += 1) {
+      const sample = view.getInt16(dataOffset + (i * channels + ch) * 2, true);
+      sum += sample / 32768;
+    }
+
+    samples[i] = sum / channels;
+  }
+
+  if (sampleRate !== 16000) {
+    log(`WAV sample rate là ${sampleRate}, nhưng FFmpeg đã được yêu cầu xuất 16kHz.`);
+  }
+
+  return samples;
+}
+
+type WhisperChunk = {
+  timestamp?: [number | null, number | null];
+  text?: string;
+};
+
+function normalizeTimestamp(timestamp: any): [number, number] {
+  if (!Array.isArray(timestamp)) return [0, 0];
+
+  const start = Number(timestamp[0] ?? 0);
+  const end = Number(timestamp[1] ?? start + 2);
+
+  return [
+    Number.isFinite(start) ? Math.max(0, start) : 0,
+    Number.isFinite(end) ? Math.max(start + 0.4, end) : start + 2,
+  ];
+}
+
+function cleanText(value: string) {
+  return value
+    .replace(/\s+/g, " ")
+    .replace(/(.{2,}?)\s+\1/gi, "$1")
+    .trim();
+}
+
+export async function transcribeAudio(options: {
+  modelKey?: WhisperModelKey;
+  language?: string;
+  chunkLengthS?: number;
+  strideLengthS?: number;
+}) {
+  if (!audioData) {
+    throw new Error("Chưa có audio. Hãy tách audio trước.");
+  }
+
+  await loadWhisper(options.modelKey ?? "small");
+
+  status("Đang nhận dạng giọng nói...");
+  progress(0);
+
+  const samples = decodeWavToFloat32(audioData);
+  const duration = samples.length / 16000;
+  const totalChunks = Math.max(
+    1,
+    Math.ceil(duration / ((options.chunkLengthS ?? 30) - (options.strideLengthS ?? 2))),
+  );
+
+  let doneChunks = 0;
+  const partials: string[] = [];
+
+  const result = await transcriber(samples, {
+    language:
+      options.language && options.language !== "auto"
+        ? options.language
+        : undefined,
+    task: "transcribe",
+    return_timestamps: true,
+    chunk_length_s: options.chunkLengthS ?? 30,
+    stride_length_s: options.strideLengthS ?? 2,
+    chunk_callback: (chunk: any) => {
+      doneChunks += 1;
+      const ratio = Math.min(0.99, doneChunks / totalChunks);
+
+      if (chunk?.text?.trim()) {
+        partials.push(cleanText(chunk.text));
+        callbacks.onChunk(partials.join(" "), ratio);
+      }
+
+      progress(ratio);
+      status(`Nhận dạng... ${Math.round(ratio * 100)}%`);
+    },
+  });
+
+  const chunks: WhisperChunk[] = Array.isArray(result?.chunks)
+    ? result.chunks
+    : [];
+
+  const cleanChunks = chunks
+    .map((chunk) => {
+      const [start, end] = normalizeTimestamp(chunk.timestamp);
+
+      return {
+        start,
+        end,
+        text: cleanText(chunk.text || ""),
+      };
+    })
+    .filter((chunk) => chunk.text);
+
+  progress(1);
+  status("Transcribe hoàn tất ✓");
+  log(`Subtitle segments: ${cleanChunks.length}`);
+
+  return {
+    text: cleanText(result?.text || cleanChunks.map((c) => c.text).join(" ")),
+    language: result?.language || options.language || "auto",
+    chunks: cleanChunks,
+  };
+}
+
+function secondsToSrtTime(seconds: number) {
+  const ms = Math.floor((seconds % 1) * 1000);
+  const total = Math.floor(seconds);
+  const s = total % 60;
+  const m = Math.floor(total / 60) % 60;
+  const h = Math.floor(total / 3600);
+
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")},${String(ms).padStart(3, "0")}`;
+}
+
+export function chunksToSRT(chunks: { start: number; end: number; text: string }[]) {
+  return chunks
+    .map((chunk, index) => {
+      return [
+        index + 1,
+        `${secondsToSrtTime(chunk.start)} --> ${secondsToSrtTime(chunk.end)}`,
+        chunk.text,
+      ].join("\n");
+    })
+    .join("\n\n");
+}
+
+export function mergeShortChunks(
+  chunks: { start: number; end: number; text: string }[],
+  maxDuration = 4,
+  maxChars = 84,
+) {
+  const merged: { start: number; end: number; text: string }[] = [];
+
+  for (const chunk of chunks) {
+    const last = merged[merged.length - 1];
+
+    if (
+      last &&
+      chunk.end - last.start <= maxDuration &&
+      `${last.text} ${chunk.text}`.length <= maxChars
+    ) {
+      last.end = chunk.end;
+      last.text = `${last.text} ${chunk.text}`.trim();
+      continue;
+    }
+
+    merged.push({ ...chunk });
+  }
+
+  return merged;
+}
+
+export type SRTBlock = {
+  index: number;
+  timestamp: string;
+  text: string;
+};
+
+export function parseSRT(content: string): SRTBlock[] {
+  return content
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .trim()
+    .split(/\n{2,}/)
+    .map((part) => {
+      const lines = part.trim().split("\n");
+
+      if (lines.length < 3 || !lines[1]?.includes("-->")) {
+        return null;
+      }
+
+      return {
+        index: Number.parseInt(lines[0], 10),
+        timestamp: lines[1].trim(),
+        text: lines.slice(2).join("\n").trim(),
+      };
+    })
+    .filter(Boolean) as SRTBlock[];
+}
+
+export function buildSRT(blocks: SRTBlock[]) {
+  return blocks
+    .map((block, index) =>
+      [index + 1, block.timestamp, block.text.trim()].join("\n"),
+    )
+    .join("\n\n");
+}
+
+async function translateText(text: string, srcCode: string, targetCode: string) {
+  if (!text.trim() || srcCode === targetCode) return text;
+
+  const url =
+    "https://translate.googleapis.com/translate_a/single?client=gtx" +
+    `&sl=${encodeURIComponent(srcCode)}` +
+    `&tl=${encodeURIComponent(targetCode)}` +
+    "&dt=t&q=" +
+    encodeURIComponent(text);
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Google Translate HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  return Array.isArray(data?.[0])
+    ? data[0].map((item: any[]) => item?.[0] || "").join("")
+    : text;
+}
+
+export async function translateSRT(
+  srt: string,
+  sourceLang: string,
+  targetLang: string,
+) {
+  const blocks = parseSRT(srt);
+
+  if (!blocks.length) {
+    throw new Error("SRT rỗng hoặc không hợp lệ.");
+  }
+
+  const sourceCode = WHISPER_TO_CODE[sourceLang] || sourceLang || "auto";
+
+  status("Đang dịch phụ đề...");
+  progress(0);
+
+  const translated: SRTBlock[] = [];
+
+  for (let i = 0; i < blocks.length; i += 1) {
+    const block = blocks[i];
+
+    try {
+      translated.push({
+        ...block,
+        text: await translateText(block.text, sourceCode || "auto", targetLang),
+      });
+    } catch {
+      translated.push(block);
+    }
+
+    progress((i + 1) / blocks.length);
+    status(`Dịch phụ đề... ${i + 1}/${blocks.length}`);
+  }
+
+  status("Dịch xong ✓");
+  return buildSRT(translated);
+}
+
+export async function burnSubtitle(
+  srtContent: string,
+  file = videoFile,
+  options: {
+    fontSize?: number;
+    position?: "bottom" | "top";
+  } = {},
+) {
+  if (!file) {
+    throw new Error("Chưa chọn video.");
+  }
+
+  if (!srtContent.trim()) {
+    throw new Error("Chưa có phụ đề.");
+  }
+
+  if (!ffmpeg || !ffmpegLoaded) {
+    await loadFFmpeg();
+  }
+
+  const { fetchFile } = await importFFmpegModules();
+
+  const inputName = makeInputName(file);
+  const outputName = "subtitle-output.mp4";
+  const subtitleName = "subs.srt";
+  const alignment = options.position === "top" ? 8 : 2;
+  const fontSize = options.fontSize ?? 22;
+
+  status("Đang burn phụ đề vào video...");
+  progress(0);
+
+  await ffmpeg.writeFile(inputName, await fetchFile(file));
+  await ffmpeg.writeFile(
+    subtitleName,
+    new TextEncoder().encode(srtContent),
+  );
+
+  const style =
+    `FontName=Arial,FontSize=${fontSize},` +
+    "PrimaryColour=&H00FFFFFF,OutlineColour=&HAA000000," +
+    "BackColour=&H80000000,BorderStyle=3,Outline=1,Shadow=0," +
+    `Alignment=${alignment},MarginV=44`;
+
+  await ffmpeg.exec([
+    "-i",
+    inputName,
+    "-vf",
+    `subtitles=${subtitleName}:force_style='${style}'`,
+    "-c:a",
+    "copy",
+    "-movflags",
+    "+faststart",
+    outputName,
+  ]);
+
+  const output = await ffmpeg.readFile(outputName);
+  const bytes = output instanceof Uint8Array ? output : new Uint8Array(output as ArrayBuffer);
+
+  outputVideo = new Blob([bytes], { type: "video/mp4" });
+
+  try {
+    await ffmpeg.deleteFile(inputName);
+    await ffmpeg.deleteFile(subtitleName);
+    await ffmpeg.deleteFile(outputName);
+  } catch {
+    // ignore
+  }
+
+  progress(1);
+  status("Export video hoàn tất ✓");
+  return outputVideo;
+}
+
+export function createDownload(
+  blob: Blob,
+  filename: string,
+) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+export function downloadSRT(srt: string, filename = "subtitle.srt") {
+  createDownload(
+    new Blob([srt], { type: "text/plain;charset=utf-8" }),
+    filename,
+  );
+}
+
+export function getOutputVideo() {
+  return outputVideo;
+}
+
+export function isEngineReady() {
+  return {
+    ffmpeg: ffmpegLoaded,
+    whisper: Boolean(transcriber),
+    audio: Boolean(audioData),
+    video: Boolean(videoFile),
+  };
+}

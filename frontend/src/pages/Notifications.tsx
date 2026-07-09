@@ -23,6 +23,8 @@ export function Notifications() {
       link = "/community";
     } else if (n.type === "learning_reminder") {
       link = "/flashcards";
+    } else if (["friend_request", "friend_accept", "friend_message", "friend_share"].includes(n.type)) {
+      link = "/friends";
     }
     
     navigate(link);
@@ -31,6 +33,10 @@ export function Notifications() {
   const getNotificationStyles = (type: string) => {
     switch(type) {
       case 'follow': return { Icon: UserPlus, color: "text-purple-600", bg: "bg-purple-100" };
+      case 'friend_request': return { Icon: UserPlus, color: "text-blue-600", bg: "bg-blue-100" };
+      case 'friend_accept': return { Icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-100" };
+      case 'friend_message': return { Icon: MessageSquare, color: "text-indigo-600", bg: "bg-indigo-100" };
+      case 'friend_share': return { Icon: BookOpen, color: "text-orange-600", bg: "bg-orange-100" };
       case 'leaderboard': return { Icon: Trophy, color: "text-yellow-600", bg: "bg-yellow-100" };
       case 'community_like': return { Icon: Heart, color: "text-red-600", bg: "bg-red-100" };
       case 'community_comment': return { Icon: MessageSquare, color: "text-green-600", bg: "bg-green-100" };

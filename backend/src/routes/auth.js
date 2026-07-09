@@ -115,6 +115,10 @@ router.get("/google/callback", async (req, res) => {
         tier: 3,
         stars: 0,
         achievedBadges: [],
+        appSettings: {
+          theme: "light",
+          accentColor: "blue",
+        },
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
       });
@@ -242,6 +246,10 @@ router.get("/me", async (req, res) => {
         tier: 3,
         stars: 0,
         achievedBadges: [],
+        appSettings: {
+          theme: "light",
+          accentColor: "blue",
+        },
       };
 
       await userDocRef.set({

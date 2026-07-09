@@ -176,7 +176,7 @@ export function ModeBubble({ cards, setId }: ModeBubbleProps) {
   }
 
   return (
-    <div ref={containerRef} className="w-full h-full flex flex-col relative overflow-hidden bg-gradient-to-b from-blue-50 to-white">
+    <div ref={containerRef} className="w-full h-full rounded-3xl shadow-sm border border-gray-100 flex flex-col relative overflow-hidden bg-gradient-to-b from-blue-50 to-white">
       <style>{`
         @keyframes pop {
           0% { transform: scale(1) translateY(0); opacity: 1; }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { UserAvatar } from "../components/UserAvatar";
-import { User, Bell, Shield, Key, Moon, Volume2, Globe, HelpCircle, LogOut, Settings as SettingsIconLucide, ChevronRight } from "lucide-react";
+import { User, Bell, Shield, Key, Moon, Volume2, Globe, HelpCircle, LogOut, Settings as SettingsIconLucide, ChevronRight, Sun, Monitor, Palette } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useAuth } from "../contexts/AuthContext";
+import { applyAppAppearance, type AppAccentColor, type AppThemeMode, useAuth } from "../contexts/AuthContext";
 import { useFlashcardStore } from "../services/flashcardService";
 import toast from "react-hot-toast";
 
@@ -24,6 +24,9 @@ export function Settings() {
   // App Settings State
   const { sets, fetchSets } = useFlashcardStore();
   const [defaultSetId, setDefaultSetId] = useState("");
+  const [themeMode, setThemeMode] = useState<AppThemeMode>("light");
+  const [accentColor, setAccentColor] = useState<AppAccentColor>("blue");
+  const [isSavingAppearance, setIsSavingAppearance] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -31,6 +34,10 @@ export function Settings() {
       setUsername(user.username || user.email?.split("@")[0] || "");
       setBio(user.bio || "");
       setPhotoURL(user.photoURL || "");
+      const settings = user.appSettings || {};
+      setThemeMode(settings.theme || "light");
+      setAccentColor(settings.accentColor || "blue");
+      applyAppAppearance(settings);
     }
     fetchSets();
     const savedDefault = localStorage.getItem("defaultFlashcardSetId");
@@ -47,6 +54,34 @@ export function Settings() {
   const handleConfirmAvatar = () => {
     setPhotoURL(tempPhotoURL.trim());
     setShowAvatarModal(false);
+  };
+
+
+  const handlePreviewAppearance = (nextTheme = themeMode, nextAccent = accentColor) => {
+    setThemeMode(nextTheme);
+    setAccentColor(nextAccent);
+    applyAppAppearance({ theme: nextTheme, accentColor: nextAccent });
+  };
+
+  const handleSaveAppearance = async () => {
+    setIsSavingAppearance(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BACKEND}/api/user/settings`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ appSettings: { theme: themeMode, accentColor } }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "Không thể lưu giao diện");
+      updateUser({ appSettings: data.appSettings || { theme: themeMode, accentColor } });
+      applyAppAppearance(data.appSettings || { theme: themeMode, accentColor });
+      toast.success("Đã lưu giao diện cho tài khoản của bạn!");
+    } catch (error: any) {
+      toast.error(error?.message || "Lưu giao diện thất bại");
+    } finally {
+      setIsSavingAppearance(false);
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -339,39 +374,76 @@ export function Settings() {
           {activeTab === "appearance" && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Giao diện</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Giao diện</h2>
+                <p className="text-sm text-gray-500 mb-6">Chọn giao diện sáng/tối và màu nhấn. Lựa chọn này sẽ được lưu theo tài khoản của bạn.</p>
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <button className="flex flex-col items-center gap-3 p-4 bg-blue-50 border-2 border-blue-600 rounded-2xl transition-all">
-                    <div className="w-full h-24 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-                      <div className="h-6 bg-gray-100 border-b border-gray-200"></div>
-                      <div className="flex-1 p-2 flex gap-2">
-                        <div className="w-1/3 h-full bg-gray-100 rounded"></div>
-                        <div className="w-2/3 h-full bg-blue-50 rounded"></div>
-                      </div>
-                    </div>
-                    <span className="font-bold text-blue-700">Sáng</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-3 p-4 bg-gray-50 border-2 border-transparent hover:border-gray-200 rounded-2xl transition-all">
-                    <div className="w-full h-24 bg-gray-900 rounded-xl shadow-sm border border-gray-800 overflow-hidden flex flex-col">
-                      <div className="h-6 bg-gray-800 border-b border-gray-700"></div>
-                      <div className="flex-1 p-2 flex gap-2">
-                        <div className="w-1/3 h-full bg-gray-800 rounded"></div>
-                        <div className="w-2/3 h-full bg-gray-800/50 rounded"></div>
-                      </div>
-                    </div>
-                    <span className="font-bold text-gray-600">Tối</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-3 p-4 bg-gray-50 border-2 border-transparent hover:border-gray-200 rounded-2xl transition-all">
-                    <div className="w-full h-24 bg-gradient-to-br from-white to-gray-900 rounded-xl shadow-sm border border-gray-300 overflow-hidden flex flex-col">
-                      <div className="h-6 bg-gray-200 border-b border-gray-300"></div>
-                      <div className="flex-1 flex">
-                        <div className="w-1/2 h-full bg-white"></div>
-                        <div className="w-1/2 h-full bg-gray-900"></div>
-                      </div>
-                    </div>
-                    <span className="font-bold text-gray-600">Hệ thống</span>
-                  </button>
+                  {[
+                    { id: "light" as AppThemeMode, label: "Sáng", icon: Sun, preview: "light" },
+                    { id: "dark" as AppThemeMode, label: "Tối", icon: Moon, preview: "dark" },
+                    { id: "system" as AppThemeMode, label: "Theo máy", icon: Monitor, preview: "system" },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    const active = themeMode === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handlePreviewAppearance(item.id, accentColor)}
+                        className={cn(
+                          "flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left",
+                          active ? "border-blue-600 bg-blue-50 shadow-sm" : "border-transparent bg-gray-50 hover:border-gray-200",
+                        )}
+                      >
+                        <div className={cn("w-full h-24 rounded-xl shadow-sm border overflow-hidden flex flex-col", item.preview === "dark" ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200")}> 
+                          <div className={cn("h-6 border-b", item.preview === "dark" ? "bg-gray-800 border-gray-700" : "bg-gray-100 border-gray-200")}></div>
+                          <div className="flex-1 p-2 flex gap-2">
+                            <div className={cn("w-1/3 h-full rounded", item.preview === "dark" ? "bg-gray-800" : "bg-gray-100")}></div>
+                            <div className={cn("w-2/3 h-full rounded", item.preview === "dark" ? "bg-gray-800/60" : "bg-blue-50")}></div>
+                          </div>
+                        </div>
+                        <span className={cn("font-bold flex items-center gap-2", active ? "text-blue-700" : "text-gray-600")}><Icon className="w-4 h-4" /> {item.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
+              </div>
+
+              <div className="pt-6 border-t border-gray-100">
+                <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2"><Palette className="w-5 h-5 text-blue-600" /> Màu nhấn</h3>
+                <div className="flex flex-wrap gap-3">
+                  {[
+                    { id: "blue" as AppAccentColor, label: "Xanh dương", color: "#2563eb" },
+                    { id: "purple" as AppAccentColor, label: "Tím", color: "#7c3aed" },
+                    { id: "green" as AppAccentColor, label: "Xanh lá", color: "#16a34a" },
+                    { id: "orange" as AppAccentColor, label: "Cam", color: "#f97316" },
+                    { id: "pink" as AppAccentColor, label: "Hồng", color: "#db2777" },
+                    { id: "slate" as AppAccentColor, label: "Ghi", color: "#334155" },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handlePreviewAppearance(themeMode, item.id)}
+                      className={cn(
+                        "flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-bold transition-all",
+                        accentColor === item.id ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50",
+                      )}
+                    >
+                      <span className="w-5 h-5 rounded-full shadow-sm" style={{ backgroundColor: item.color }} />
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-gray-100 flex justify-end">
+                <button
+                  onClick={handleSaveAppearance}
+                  disabled={isSavingAppearance}
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl transition-colors flex items-center gap-2"
+                >
+                  {isSavingAppearance ? "Đang lưu..." : "Lưu giao diện"}
+                </button>
               </div>
             </div>
           )}

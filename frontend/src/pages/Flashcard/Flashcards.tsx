@@ -9,7 +9,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
 import { SEO } from "../../components/SEO";
 
-import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay, useDroppable } from "@dnd-kit/core";
+import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay, useDroppable, pointerWithin, rectIntersection } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -172,22 +172,33 @@ const FOLDER_THEMES: Record<string, { bg: string; text: string; fill: string }> 
 };
 
 // DROPPABLE FOLDER
-function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClick, popoverId, setPopoverId, onEditSet, onDeleteSet }: any) {
-  const { setNodeRef } = useDroppable({ id: `folder-${folder.id}`, data: { type: "folder", folder } });
+function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClick, popoverId, setPopoverId, onEditSet, onDeleteSet, forceOver = false }: any) {
+  const { setNodeRef, isOver } = useDroppable({ id: `folder-${folder.id}`, data: { type: "folder", folder } });
+  const activeOver = isOver || forceOver;
 
   const colorName = folder.color ? folder.color.replace("bg-", "") : "blue-500";
   const baseColor = colorName.split("-")[0];
   const theme = FOLDER_THEMES[baseColor] || FOLDER_THEMES.blue;
 
   return (
-    <div ref={setNodeRef} onContextMenu={(e) => onContextMenu(e, "folder", folder)} className={`${theme.bg} p-6 rounded-3xl border border-gray-200`}>
+    <div 
+      ref={setNodeRef}
+      data-flashcard-dropzone={`folder-${folder.id}`}
+      onContextMenu={(e) => onContextMenu(e, "folder", folder)} 
+      className={`${theme.bg} p-6 rounded-3xl border transition-all duration-200 ${activeOver ? "border-blue-500 shadow-lg ring-4 ring-blue-500/20 scale-[1.02]" : "border-gray-200"}`}
+    >
       <h2 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}>
         <FolderIcon className={`${theme.text} ${theme.fill}`} /> {folder.name}
       </h2>
       <SortableContext items={setsInFolder.map((s: any) => s.id)} strategy={rectSortingStrategy}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[150px]">
           {setsInFolder.length === 0 && (
-            <div className="col-span-full flex items-center justify-center border-2 border-dashed border-gray-300 rounded-2xl text-gray-400 font-medium">Kéo thả bộ thẻ vào đây</div>
+            <div
+              data-flashcard-dropzone={`folder-${folder.id}`}
+              className={`col-span-full flex min-h-[120px] items-center justify-center rounded-2xl border-2 border-dashed font-medium transition-all ${activeOver ? "border-blue-400 bg-white text-blue-700" : "border-gray-300 text-gray-400"}`}
+            >
+              Kéo thả bộ thẻ vào đây
+            </div>
           )}
           {setsInFolder.map((s: any) => (
             <SortableSetItem
@@ -262,58 +273,121 @@ export function Flashcards() {
   }, []);
 
   // --- DND Logic ---
-  const { setNodeRef: rootDropRef } = useDroppable({ id: "root" });
+  const { setNodeRef: rootDropRef, isOver: isRootOver } = useDroppable({ id: "root", data: { type: "root" } });
+  const { setNodeRef: removeZoneRef, isOver: isRemoveZoneOver } = useDroppable({ id: "remove-zone", data: { type: "root" } });
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
 
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [coordinateOverId, setCoordinateOverId] = useState<string | null>(null);
+  const lastPointerRef = React.useRef<{ x: number; y: number } | null>(null);
+
+  const getDropzoneIdAtPoint = React.useCallback((x: number, y: number) => {
+    const elements = document.elementsFromPoint(x, y);
+    for (const element of elements) {
+      if (!(element instanceof HTMLElement)) continue;
+      const dropzone = element.dataset.flashcardDropzone;
+      if (dropzone) return dropzone;
+    }
+    return null;
+  }, []);
+
+  const getDropzoneIdAtLastPointer = React.useCallback(() => {
+    const point = lastPointerRef.current;
+    if (!point) return null;
+    return getDropzoneIdAtPoint(point.x, point.y);
+  }, [getDropzoneIdAtPoint]);
+
+  useEffect(() => {
+    if (!activeId) {
+      setCoordinateOverId(null);
+      return;
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      lastPointerRef.current = { x: event.clientX, y: event.clientY };
+      setCoordinateOverId(getDropzoneIdAtPoint(event.clientX, event.clientY));
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, true);
+    window.addEventListener("pointerup", handlePointerMove, true);
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove, true);
+      window.removeEventListener("pointerup", handlePointerMove, true);
+    };
+  }, [activeId, getDropzoneIdAtPoint]);
+
+  const collisionDetectionStrategy = (args: any) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) return pointerCollisions;
+
+    const intersecting = rectIntersection(args);
+    if (intersecting.length > 0) return intersecting;
+
+    return closestCorners(args);
+  };
 
   const handleDragStart = (event: any) => {
     setActiveId(event.active.id);
+    setCoordinateOverId(null);
     setContextMenu(null);
+
+    const activatorEvent = event.activatorEvent;
+    if (activatorEvent && typeof activatorEvent.clientX === "number" && typeof activatorEvent.clientY === "number") {
+      lastPointerRef.current = { x: activatorEvent.clientX, y: activatorEvent.clientY };
+    }
+  };
+
+  const handleDragMove = () => {
+    const dropzoneId = getDropzoneIdAtLastPointer();
+    setCoordinateOverId(dropzoneId);
+  };
+
+  const resolveFolderIdFromDropTarget = (targetId: any, activeSetId: string) => {
+    if (!targetId) return undefined;
+
+    const target = String(targetId);
+    if (target === "root" || target === "remove-zone") return null;
+    if (target.startsWith("folder-")) return target.replace("folder-", "");
+
+    const overSet = sets.find((s) => s.id === target && s.id !== activeSetId);
+    if (overSet) return overSet.folderId ?? null;
+
+    return undefined;
   };
 
   const handleDragEnd = async (event: any) => {
-    setActiveId(null);
     const { active, over } = event;
-    if (!over) return;
-
-    const activeSetId = active.id;
+    const activeSetId = String(active.id);
     const activeSet = sets.find((s) => s.id === activeSetId);
+
+    setActiveId(null);
+    setCoordinateOverId(null);
+
     if (!activeSet) return;
 
-    const overId = over.id; // could be `folder-${id}`, `root`, or another `setId`
+    const coordinateDropId = getDropzoneIdAtLastPointer();
+    const resolvedByPointer = resolveFolderIdFromDropTarget(coordinateDropId, activeSetId);
+    const resolvedByDnd = resolveFolderIdFromDropTarget(over?.id, activeSetId);
 
-    let newFolderId = activeSet.folderId;
+    // Pointer position is more reliable than over.id when the root area is empty.
+    // over.id can still be the dragged card or its old folder, so prefer the real dropzone under the cursor.
+    const newFolderId = resolvedByPointer !== undefined ? resolvedByPointer : resolvedByDnd;
+    if (newFolderId === undefined) return;
 
-    if (String(overId).startsWith("folder-")) {
-      newFolderId = String(overId).replace("folder-", "");
-    } else if (overId === "root") {
-      newFolderId = null;
-    } else {
-      // dropped over another set
-      const overSet = sets.find((s) => s.id === overId);
-      if (overSet) {
-        newFolderId = overSet.folderId;
-      }
-    }
+    const oldFolderId = activeSet.folderId ?? null;
+    if (oldFolderId === newFolderId) return;
 
-    if (activeSet.folderId !== newFolderId) {
-      // Optimistic update locally
+    useFlashcardStore.setState((state) => ({
+      sets: state.sets.map((s) => (s.id === activeSet.id ? { ...s, folderId: newFolderId } : s)),
+    }));
+
+    const saved = await updateSet(activeSet.id, { folderId: newFolderId });
+    if (!saved) {
       useFlashcardStore.setState((state) => ({
-        sets: state.sets.map((s) => (s.id === activeSet.id ? { ...s, folderId: newFolderId } : s)),
+        sets: state.sets.map((s) => (s.id === activeSet.id ? { ...s, folderId: oldFolderId } : s)),
       }));
-
-      // Debounce backend sync
-      pendingUpdatesRef.current[activeSet.id] = newFolderId;
-      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-
-      saveTimeoutRef.current = setTimeout(() => {
-        Object.entries(pendingUpdatesRef.current).forEach(([id, fId]) => {
-          updateSet(id, { folderId: fId });
-        });
-        pendingUpdatesRef.current = {};
-      }, 5000);
+      toast.error("Chưa lưu được vị trí mới của bộ thẻ.");
     }
   };
 
@@ -388,6 +462,7 @@ export function Flashcards() {
   // Helper arrays
   const unassignedSets = sets.filter((s) => !s.folderId);
   const activeSetForOverlay = sets.find((s) => s.id === activeId);
+  const isRootDropActive = isRootOver || coordinateOverId === "root" || coordinateOverId === "remove-zone";
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 min-h-screen" onContextMenu={(e) => handleContextMenu(e, "root")}>
@@ -425,7 +500,23 @@ export function Flashcards() {
         </div>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={collisionDetectionStrategy} onDragStart={handleDragStart} onDragMove={handleDragMove} onDragEnd={handleDragEnd}>
+        {/* Floating Remove Dropzone */}
+        <div 
+          ref={removeZoneRef}
+          data-flashcard-dropzone="remove-zone"
+          className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-8 py-4 rounded-full shadow-2xl transition-all duration-300 border-2 flex items-center gap-3 ${
+            activeId && activeSetForOverlay?.folderId 
+              ? "opacity-100 translate-y-0" 
+              : "opacity-0 translate-y-20 pointer-events-none"
+          } ${
+            isRemoveZoneOver || coordinateOverId === "remove-zone" ? "bg-red-50 border-red-500 text-red-600 scale-110 shadow-red-200" : "bg-white border-dashed border-gray-400 text-gray-600"
+          }`}
+        >
+          <FolderIcon className="w-6 h-6" />
+          <span className="font-bold text-lg">Kéo thả vào đây để đưa ra ngoài thư mục</span>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3 space-y-8">
             {/* Folders */}
@@ -446,11 +537,16 @@ export function Flashcards() {
                   setIsModalOpen(true);
                 }}
                 onDeleteSet={(s: any) => setSetToDelete(s)}
+                forceOver={coordinateOverId === `folder-${folder.id}`}
               />
             ))}
 
             {/* Unassigned Sets (Root) */}
-            <div className="space-y-4">
+            <div
+              ref={rootDropRef}
+              data-flashcard-dropzone="root"
+              className={`space-y-4 min-h-[240px] p-4 rounded-3xl transition-all duration-200 border ${isRootDropActive ? "border-blue-500 shadow-md ring-4 ring-blue-500/20 bg-blue-50/50" : "border-transparent"}`}
+            >
               <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Bộ thẻ chưa phân loại</h2>
 
               {loading && sets.length === 0 ? (
@@ -459,11 +555,11 @@ export function Flashcards() {
                 </div>
               ) : (
                 <SortableContext items={unassignedSets.map((s) => s.id)} strategy={rectSortingStrategy}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[150px] p-4 bg-gray-50/50 rounded-3xl border border-gray-100" ref={rootDropRef}>
-                    {unassignedSets.length === 0 && folders.length === 0 && (
-                      <div className="col-span-full flex flex-col items-center justify-center p-12 text-center border border-dashed border-gray-300 rounded-2xl">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">Chưa có bộ thẻ nào</h3>
-                        <p className="text-gray-500 mb-6">Hãy tạo bộ thẻ đầu tiên hoặc thư mục để bắt đầu.</p>
+                  <div data-flashcard-dropzone="root" className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[200px] p-4 rounded-3xl border transition-all ${isRootDropActive ? "bg-blue-50 border-blue-300 ring-4 ring-blue-500/10" : "bg-gray-50/50 border-gray-100"}`}>
+                    {unassignedSets.length === 0 && (
+                      <div data-flashcard-dropzone="root" className={`col-span-full flex min-h-[150px] flex-col items-center justify-center p-12 text-center border-2 border-dashed rounded-2xl transition-all ${isRootDropActive ? "border-blue-400 bg-white text-blue-700" : "border-gray-300 text-gray-500"}`}>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">{folders.length === 0 ? "Chưa có bộ thẻ nào" : "Chưa có bộ thẻ chưa phân loại"}</h3>
+                        <p className="text-gray-500 mb-6">{folders.length === 0 ? "Hãy tạo bộ thẻ đầu tiên hoặc thư mục để bắt đầu." : "Kéo bộ thẻ từ thư mục vào vùng này để đưa ra ngoài."}</p>
                       </div>
                     )}
                     {unassignedSets.map((set) => (

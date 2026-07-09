@@ -33,8 +33,14 @@ import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { TermsOfService } from "./pages/TermsOfService";
 import { useAuth } from "./contexts/AuthContext";
 import { SocketProvider } from "./contexts/SocketContext";
+import SubtitleAI from "./features/subtitle-ai/SubtitleAI";
+import AIChat from "./pages/AIChat";
+import Notebook from "./pages/Notebook";
+import Utilities from "./pages/Utilities";
+
 
 import { Posts } from "./pages/Posts";
+import { PostDetail } from "./pages/PostDetail";
 import { RightSidebar } from "./components/RightSidebar";
 import { LevelUpModal } from "./components/LevelUpModal";
 import { useUserStore } from "./services/userService";
@@ -46,6 +52,7 @@ import { QuizPlay } from "./pages/Quiz/QuizPlay";
 import { QuizResult } from "./pages/Quiz/QuizResult";
 import { GrammarPractice } from "./pages/GrammarPractice";
 import { TensesPractice } from "./pages/TensesPractice";
+import Friends from "./pages/Friends";
 
 function MainLayout() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(() => {
@@ -143,7 +150,7 @@ function MainLayout() {
         `}
         >
           <div className="h-full w-full">
-            <RightSidebar isOpen={true} onClose={() => setIsRightMobileMenuOpen(false)} onOpen={() => {}} />
+            <RightSidebar isOpen={true} onClose={() => setIsRightMobileMenuOpen(false)} onOpen={() => { }} />
           </div>
         </div>
       )}
@@ -223,10 +230,16 @@ function AppContent() {
           <Route path="arena" element={<Arena />} />
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="community" element={<Community />} />
+          <Route path="subtitle-ai" element={<SubtitleAI />} />
+          <Route path="ai-chat" element={<AIChat />} />
+          <Route path="notebook" element={<Notebook />} />
+          <Route path="utilities" element={<Utilities />} />
+          <Route path="friends" element={<Friends />} />
           <Route path="settings" element={<Settings />} />
           <Route path="setting" element={<Settings />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="posts" element={<Posts />} />
+          <Route path="posts/:id" element={<PostDetail />} />
           <Route path="post" element={<Posts />} />
           <Route path="privacy-policy" element={<PrivacyPolicy />} />
           <Route path="terms-of-service" element={<TermsOfService />} />

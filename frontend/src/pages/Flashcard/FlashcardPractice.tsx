@@ -155,7 +155,7 @@ export function FlashcardPractice() {
       <div className="flex-1 flex overflow-hidden relative">
         {/* Play Area (75%) */}
         <div className="flex-1 bg-gray-50/50 p-4 md:p-6 overflow-y-auto relative h-full flex flex-col">
-          <div className="m-auto w-full flex flex-col items-center justify-center py-4">
+          <div className={cn("m-auto w-full flex flex-col items-center justify-center", activeMode === "bubble" ? "h-full py-0" : "min-h-full py-4")}>
             {activeMode === "flashcard" && <ModeFlashcard cards={cards} setId={id!} />}
             {activeMode === "quiz" && <ModeQuiz cards={cards} setId={id!} />}
             {activeMode === "fill_blank" && <ModeFillBlank cards={cards} setId={id!} />}

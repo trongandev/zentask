@@ -281,7 +281,7 @@ app.use(
 );
 app.use(compression());
 app.use(morgan("dev"));
-app.use(express.json());
+app.use(express.json({ limit: "25mb" }));
 app.use(cookieParser());
 
 // Support Bearer token from Extension (map to req.cookies.session)
@@ -301,6 +301,11 @@ import adminRoutes from "./routes/admin.js";
 import arenaRoutes from "./routes/arena.js";
 import grammarRoutes from "./routes/grammar.js";
 import tensesRoutes from "./routes/tenses.js";
+import subtitleRoutes from "./routes/subtitle.js";
+import aiRoutes from "./routes/ai.js";
+import notebookRoutes from "./routes/notebook.js";
+import utilitiesRoutes from "./routes/utilities.js";
+import friendsRoutes from "./routes/friends.js";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/rank", rankRoutes);
@@ -315,6 +320,11 @@ app.use("/api/quiz", quizRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/arena", arenaRoutes);
 app.use("/api/tenses", tensesRoutes);
+app.use("/api/subtitle", subtitleRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/notebook", notebookRoutes);
+app.use("/api/utilities", utilitiesRoutes);
+app.use("/api/friends", friendsRoutes);
 
 app.get("/health", (req, res) => {
   res.send("OK");

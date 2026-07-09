@@ -1,7 +1,7 @@
 import { cn } from "../lib/utils";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Home, Copy, HelpCircle, BookOpen, Clock, Trophy, Users, Globe, FileText, Diamond, ChevronRight, PanelLeftOpen, PanelLeftClose, ShieldAlert, MountainSnow } from "lucide-react";
+import { Home, Copy, HelpCircle, BookOpen, Clock, Trophy, Users, Globe, FileText, Diamond, ChevronRight, PanelLeftOpen, PanelLeftClose, ShieldAlert, MountainSnow, MessageCircle, NotebookPen, Wrench, UserRoundPlus } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -35,7 +35,12 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       items: [
         { icon: Trophy, label: "Bảng xếp hạng", to: "/leaderboard" },
         { icon: Globe, label: "Cộng đồng", to: "/community" },
+        { icon: UserRoundPlus, label: "Bạn bè", to: "/friends" },
         { icon: FileText, label: "Bài viết", to: "/posts" },
+        { icon: Diamond, label: "Subtitle AI", to: "/subtitle-ai" },
+        { icon: MessageCircle, label: "Trợ lý AI", to: "/ai-chat" },
+        { icon: NotebookPen, label: "Sổ tay", to: "/notebook" },
+        { icon: Wrench, label: "Tiện ích", to: "/utilities" },
       ],
     },
   ];

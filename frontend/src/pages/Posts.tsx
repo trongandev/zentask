@@ -1,16 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { UserAvatar } from "../components/UserAvatar";
 import { Calendar, Clock, ChevronRight, BookOpen, Star, Zap } from "lucide-react";
 import { cn } from "../lib/utils";
 
-const CATEGORIES = [
+export const CATEGORIES = [
   { id: "all", label: "Tất cả" },
   { id: "tips", label: "Kinh nghiệm học" },
   { id: "exam", label: "Kinh nghiệm thi" },
   { id: "news", label: "Tin tức Zentask" },
 ];
 
-const FEATURED_POST = {
+export const FEATURED_POST = {
   id: 1,
   title: "Bí kíp đạt điểm tuyệt đối trong bài kiểm tra TOEIC Reading",
   excerpt: "Khám phá những phương pháp làm bài và mẹo phân bổ thời gian hiệu quả nhất giúp bạn chinh phục phần thi TOEIC Reading dễ dàng hơn bao giờ hết. Chúng tôi đã tổng hợp từ kinh nghiệm của hơn 100 học viên xuất sắc.",
@@ -25,7 +26,7 @@ const FEATURED_POST = {
   }
 };
 
-const POSTS = [
+export const POSTS = [
   {
     id: 2,
     title: "Lộ trình học từ vựng tiếng Anh cơ bản cho người mới bắt đầu",
@@ -86,6 +87,7 @@ const POSTS = [
 
 export function Posts() {
   const [activeCategory, setActiveCategory] = useState("all");
+  const navigate = useNavigate();
 
   const filteredPosts = activeCategory === "all" 
     ? POSTS 
@@ -121,7 +123,10 @@ export function Posts() {
 
       {/* Featured Post */}
       {activeCategory === "all" && (
-        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row group cursor-pointer transition-all hover:shadow-md">
+        <div 
+          onClick={() => navigate(`/posts/${FEATURED_POST.id}`)}
+          className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row group cursor-pointer transition-all hover:shadow-md"
+        >
           <div className="lg:w-1/2 relative overflow-hidden h-64 lg:h-auto">
             <img 
               src={FEATURED_POST.image} 
@@ -187,7 +192,11 @@ export function Posts() {
       {/* Post Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPosts.map(post => (
-          <div key={post.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group cursor-pointer hover:shadow-md transition-all">
+          <div 
+            key={post.id} 
+            onClick={() => navigate(`/posts/${post.id}`)}
+            className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group cursor-pointer hover:shadow-md transition-all"
+          >
             <div className="relative h-48 overflow-hidden">
               <img 
                 src={post.image} 
