@@ -2,8 +2,8 @@ import express from "express";
 import multer from "multer";
 import { GoogleGenAI } from "@google/genai";
 import { verifyToken } from "../middleware/auth.js";
-import { consumeDailyLimit } from "../utils/usageLimits.js";
-import { cleanAndValidatePublicText } from "../utils/moderation.js";
+import { consumeDailyLimit } from "../../utils/usageLimits.js";
+import { cleanAndValidatePublicText } from "../../utils/moderation.js";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -28,24 +28,23 @@ const DEFAULT_HF_IMAGE_MODEL = process.env.HF_IMAGE_MODEL || "black-forest-labs/
 const DEFAULT_HF_PROVIDER = process.env.HF_PROVIDER || "auto";
 
 function unique(values) {
-  return [...new Set(values.filter(Boolean).map((item) => String(item).trim()).filter(Boolean))];
+  return [
+    ...new Set(
+      values
+        .filter(Boolean)
+        .map((item) => String(item).trim())
+        .filter(Boolean),
+    ),
+  ];
 }
 
 function readGeminiKeys() {
   const numberedKeys = Array.from({ length: 20 }, (_, index) => process.env[`API_KEY_AI_${index + 1}`]);
-  return unique([
-    process.env.GEMINI_API_KEY,
-    ...(process.env.GEMINI_API_KEYS || "").split(/[\n,;|]+/),
-    ...numberedKeys,
-  ]);
+  return unique([process.env.GEMINI_API_KEY, ...(process.env.GEMINI_API_KEYS || "").split(/[\n,;|]+/), ...numberedKeys]);
 }
 
 function readHfTokens() {
-  return unique([
-    process.env.HF_TOKEN,
-    process.env.HUGGINGFACE_API_KEY,
-    ...(process.env.HF_TOKENS || "").split(/[\n,;|]+/),
-  ]);
+  return unique([process.env.HF_TOKEN, process.env.HUGGINGFACE_API_KEY, ...(process.env.HF_TOKENS || "").split(/[\n,;|]+/)]);
 }
 
 function keyLabel(index) {
@@ -113,14 +112,7 @@ function shouldTryNextGeminiKey(error) {
   const message = String(error?.message || error || "").toLowerCase();
 
   if ([401, 403, 429, 500, 502, 503, 504].includes(status)) return true;
-  return (
-    message.includes("api key") ||
-    message.includes("quota") ||
-    message.includes("permission") ||
-    message.includes("rate") ||
-    message.includes("overloaded") ||
-    message.includes("unavailable")
-  );
+  return message.includes("api key") || message.includes("quota") || message.includes("permission") || message.includes("rate") || message.includes("overloaded") || message.includes("unavailable");
 }
 
 async function callGeminiWithFailover({ contents, systemInstruction, model, temperature, maxOutputTokens }) {
@@ -219,8 +211,7 @@ async function translatePromptToEnglish({ text, label = "image prompt" }) {
         ],
       },
     ],
-    systemInstruction:
-      "You are a professional image-prompt translator. Output English only. No markdown, no labels, no explanations.",
+    systemInstruction: "You are a professional image-prompt translator. Output English only. No markdown, no labels, no explanations.",
     model: process.env.GEMINI_TRANSLATE_MODEL || DEFAULT_GEMINI_MODEL,
     temperature: 0.2,
     maxOutputTokens: 900,
@@ -234,9 +225,7 @@ async function prepareImagePrompts({ prompt, negativePrompt }) {
   const originalNegativePrompt = String(negativePrompt || "").trim();
 
   const translatedPrompt = await translatePromptToEnglish({ text: originalPrompt, label: "positive image prompt" });
-  const translatedNegativePrompt = originalNegativePrompt
-    ? await translatePromptToEnglish({ text: originalNegativePrompt, label: "negative image prompt" })
-    : "";
+  const translatedNegativePrompt = originalNegativePrompt ? await translatePromptToEnglish({ text: originalNegativePrompt, label: "negative image prompt" }) : "";
 
   return {
     originalPrompt,
@@ -395,9 +384,7 @@ router.post("/chat", upload.array("images", 6), async (req, res) => {
 
     const result = await callGeminiWithFailover({
       contents,
-      systemInstruction:
-        req.body.systemInstruction ||
-        "Bạn là trợ lý AI trong ứng dụng ZenTask. Trả lời rõ ràng, ngắn gọn, ưu tiên tiếng Việt khi người dùng dùng tiếng Việt.",
+      systemInstruction: req.body.systemInstruction || "Bạn là trợ lý AI trong ứng dụng ZenTask. Trả lời rõ ràng, ngắn gọn, ưu tiên tiếng Việt khi người dùng dùng tiếng Việt.",
       model: req.body.model || DEFAULT_GEMINI_MODEL,
       temperature: req.body.temperature,
       maxOutputTokens: req.body.maxOutputTokens,

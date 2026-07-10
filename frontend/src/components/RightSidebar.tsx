@@ -272,7 +272,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
           </div>
 
           <p className="text-xs text-gray-500 font-medium text-center">
-            Hoàn thành tất cả để nhận <span className="text-blue-600 font-bold">150 XP!</span>
+            Hoàn thành tất cả để nhận <span className="text-blue-600 font-bold">{tasks.reduce((acc, task) => acc + (task.total * (task.xpPerItem || 0)), 0)} XP!</span>
           </p>
         </div>
       ) : (

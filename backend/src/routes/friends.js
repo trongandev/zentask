@@ -1,15 +1,7 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { 
-  Friendship, 
-  FriendRequest, 
-  FriendMessage,
-  FlashcardFolder,
-  FlashcardSet,
-  Flashcard,
-  Quiz
-} from "../models/Schemas.js";
-import { createNotification } from "../utils/notifications.js";
+import { Friendship, FriendRequest, FriendMessage, FlashcardFolder, FlashcardSet, Flashcard, Quiz } from "../models/Schemas.js";
+import { createNotification } from "../../utils/notifications.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 
@@ -62,7 +54,7 @@ async function getRequestStatus(uid, otherUid) {
 
   const friendship = await Friendship.findOne({ users: { $all: [uid, otherUid] } }).lean();
   if (friendship) return "friend";
-  
+
   return "none";
 }
 
@@ -78,7 +70,7 @@ async function copyFlashcardFolderToUser(sourceFolderId, targetUid) {
   });
 
   const sets = await FlashcardSet.find({ folderId: sourceFolderId }).lean();
-  
+
   let copiedSets = 0;
   let copiedCards = 0;
 
@@ -98,9 +90,9 @@ async function copyFlashcardFolderToUser(sourceFolderId, targetUid) {
 
     copiedSets += 1;
     const cards = await Flashcard.find({ setId: set._id }).lean();
-    
+
     if (cards.length > 0) {
-      const newCards = cards.map(card => ({
+      const newCards = cards.map((card) => ({
         setId: newSet._id,
         userId: targetUid,
         term: card.term || "",
@@ -111,9 +103,9 @@ async function copyFlashcardFolderToUser(sourceFolderId, targetUid) {
         isLearned: false,
         sourceCardId: card._id,
       }));
-      
+
       await Flashcard.insertMany(newCards);
-      
+
       copiedCards += cards.length;
       newSet.cardCount = cards.length;
       await newSet.save();
@@ -134,15 +126,15 @@ async function buildFlashcardFolderPreview(folderId) {
   for (const set of sets) {
     const cards = await Flashcard.find({ setId: set._id }).limit(50).lean();
     totalCards += cards.length;
-    setsPreview.push({ id: set._id, ...set, cards: cards.map(c => ({ id: c._id, ...c })) });
+    setsPreview.push({ id: set._id, ...set, cards: cards.map((c) => ({ id: c._id, ...c })) });
   }
 
-  return { 
-    type: "flashcard_folder", 
-    folder: { id: folder._id, ...folder }, 
-    sets: setsPreview, 
-    totalSets: setsPreview.length, 
-    totalCards 
+  return {
+    type: "flashcard_folder",
+    folder: { id: folder._id, ...folder },
+    sets: setsPreview,
+    totalSets: setsPreview.length,
+    totalCards,
   };
 }
 
@@ -152,300 +144,335 @@ async function buildQuizPreview(quizId) {
   return { type: "quiz", quiz: { id: quiz._id, ...quiz } };
 }
 
-router.get("/search", asyncHandler(async (req, res) => {
-  const query = String(req.query.q || "").trim().toLowerCase();
-  if (query.length < 2) return res.json([]);
+router.get(
+  "/search",
+  asyncHandler(async (req, res) => {
+    const query = String(req.query.q || "")
+      .trim()
+      .toLowerCase();
+    if (query.length < 2) return res.json([]);
 
-  const usersDocs = await User.find({
-    $or: [
-      { displayName: { $regex: query, $options: "i" } },
-      { email: { $regex: query, $options: "i" } },
-      { username: { $regex: query, $options: "i" } }
-    ]
-  }).limit(20).lean();
+    const usersDocs = await User.find({
+      $or: [{ displayName: { $regex: query, $options: "i" } }, { email: { $regex: query, $options: "i" } }, { username: { $regex: query, $options: "i" } }],
+    })
+      .limit(20)
+      .lean();
 
-  const users = [];
-  for (const user of usersDocs) {
-    if (user._id.toString() === req.user.uid) continue;
-    const status = await getRequestStatus(req.user.uid, user._id.toString());
-    users.push({ ...publicUserFromDoc(user), friendStatus: status });
-  }
-
-  res.json(users);
-}));
-
-router.get("/list", asyncHandler(async (req, res) => {
-  const friendships = await Friendship.find({ users: req.user.uid }).lean();
-
-  const friends = [];
-  for (const doc of friendships) {
-    const friendId = doc.users.find((id) => id.toString() !== req.user.uid);
-    const friend = await getPublicUser(friendId);
-    if (friend) {
-      friends.push({ 
-        friendshipId: doc._id, 
-        friendId, 
-        ...friend, 
-        createdAt: doc.createdAt ? doc.createdAt.toISOString() : null 
-      });
+    const users = [];
+    for (const user of usersDocs) {
+      if (user._id.toString() === req.user.uid) continue;
+      const status = await getRequestStatus(req.user.uid, user._id.toString());
+      users.push({ ...publicUserFromDoc(user), friendStatus: status });
     }
-  }
 
-  res.json(friends);
-}));
+    res.json(users);
+  }),
+);
 
-router.get("/requests", asyncHandler(async (req, res) => {
-  const incomingDocs = await FriendRequest.find({ toId: req.user.uid, status: "pending" }).lean();
-  const outgoingDocs = await FriendRequest.find({ fromId: req.user.uid, status: "pending" }).lean();
+router.get(
+  "/list",
+  asyncHandler(async (req, res) => {
+    const friendships = await Friendship.find({ users: req.user.uid }).lean();
 
-  const incoming = [];
-  for (const doc of incomingDocs) {
-    const item = serializeDoc(doc);
-    incoming.push({ ...item, user: await getPublicUser(item.fromId) });
-  }
+    const friends = [];
+    for (const doc of friendships) {
+      const friendId = doc.users.find((id) => id.toString() !== req.user.uid);
+      const friend = await getPublicUser(friendId);
+      if (friend) {
+        friends.push({
+          friendshipId: doc._id,
+          friendId,
+          ...friend,
+          createdAt: doc.createdAt ? doc.createdAt.toISOString() : null,
+        });
+      }
+    }
 
-  const outgoing = [];
-  for (const doc of outgoingDocs) {
-    const item = serializeDoc(doc);
-    outgoing.push({ ...item, user: await getPublicUser(item.toId) });
-  }
+    res.json(friends);
+  }),
+);
 
-  res.json({ incoming, outgoing });
-}));
+router.get(
+  "/requests",
+  asyncHandler(async (req, res) => {
+    const incomingDocs = await FriendRequest.find({ toId: req.user.uid, status: "pending" }).lean();
+    const outgoingDocs = await FriendRequest.find({ fromId: req.user.uid, status: "pending" }).lean();
 
-router.post("/request", asyncHandler(async (req, res) => {
-  const { userId } = req.body;
-  if (!userId || userId === req.user.uid) return res.status(400).json({ error: "Người nhận không hợp lệ." });
+    const incoming = [];
+    for (const doc of incomingDocs) {
+      const item = serializeDoc(doc);
+      incoming.push({ ...item, user: await getPublicUser(item.fromId) });
+    }
 
-  const target = await getPublicUser(userId);
-  const me = await getPublicUser(req.user.uid);
-  if (!target) return res.status(404).json({ error: "Không tìm thấy người dùng." });
+    const outgoing = [];
+    for (const doc of outgoingDocs) {
+      const item = serializeDoc(doc);
+      outgoing.push({ ...item, user: await getPublicUser(item.toId) });
+    }
 
-  if (await ensureFriendship(req.user.uid, userId)) return res.status(400).json({ error: "Hai bạn đã là bạn bè." });
+    res.json({ incoming, outgoing });
+  }),
+);
 
-  const reverse = await FriendRequest.findOne({ fromId: userId, toId: req.user.uid, status: "pending" });
-  if (reverse) {
-    reverse.status = "accepted";
-    await reverse.save();
-    
-    await Friendship.create({ users: [req.user.uid, userId] });
-    await createNotification(req.app, userId, "friend_accept", "Đã chấp nhận kết bạn", `${me?.displayName || "Một học viên"} đã chấp nhận lời mời kết bạn.`, req.user.uid);
-    return res.json({ status: "accepted" });
-  }
+router.post(
+  "/request",
+  asyncHandler(async (req, res) => {
+    const { userId } = req.body;
+    if (!userId || userId === req.user.uid) return res.status(400).json({ error: "Người nhận không hợp lệ." });
 
-  const existing = await FriendRequest.findOne({ fromId: req.user.uid, toId: userId, status: "pending" });
-  if (existing) return res.status(400).json({ error: "Bạn đã gửi lời mời trước đó." });
+    const target = await getPublicUser(userId);
+    const me = await getPublicUser(req.user.uid);
+    if (!target) return res.status(404).json({ error: "Không tìm thấy người dùng." });
 
-  const docRef = await FriendRequest.create({
-    fromId: req.user.uid,
-    toId: userId,
-    status: "pending",
-  });
+    if (await ensureFriendship(req.user.uid, userId)) return res.status(400).json({ error: "Hai bạn đã là bạn bè." });
 
-  await createNotification(req.app, userId, "friend_request", "Lời mời kết bạn mới", `${me?.displayName || "Một học viên"} muốn kết bạn với bạn.`, docRef._id.toString());
+    const reverse = await FriendRequest.findOne({ fromId: userId, toId: req.user.uid, status: "pending" });
+    if (reverse) {
+      reverse.status = "accepted";
+      await reverse.save();
 
-  res.json({ id: docRef._id, status: "pending" });
-}));
+      await Friendship.create({ users: [req.user.uid, userId] });
+      await createNotification(req.app, userId, "friend_accept", "Đã chấp nhận kết bạn", `${me?.displayName || "Một học viên"} đã chấp nhận lời mời kết bạn.`, req.user.uid);
+      return res.json({ status: "accepted" });
+    }
 
-router.post("/request/:id/respond", asyncHandler(async (req, res) => {
-  const { action } = req.body;
-  if (!["accept", "decline"].includes(action)) return res.status(400).json({ error: "Hành động không hợp lệ." });
+    const existing = await FriendRequest.findOne({ fromId: req.user.uid, toId: userId, status: "pending" });
+    if (existing) return res.status(400).json({ error: "Bạn đã gửi lời mời trước đó." });
 
-  const request = await FriendRequest.findById(req.params.id);
-  if (!request) return res.status(404).json({ error: "Không tìm thấy lời mời." });
-  
-  if (request.toId.toString() !== req.user.uid) return res.status(403).json({ error: "Bạn không có quyền xử lý lời mời này." });
-  if (request.status !== "pending") return res.status(400).json({ error: "Lời mời này đã được xử lý." });
-
-  const me = await getPublicUser(req.user.uid);
-  const nextStatus = action === "accept" ? "accepted" : "declined";
-  
-  request.status = nextStatus;
-  await request.save();
-
-  if (action === "accept") {
-    await Friendship.create({ users: [req.user.uid, request.fromId] });
-    await createNotification(req.app, request.fromId.toString(), "friend_accept", "Bạn có bạn mới", `${me?.displayName || "Một học viên"} đã chấp nhận lời mời kết bạn.`, req.user.uid);
-  }
-
-  res.json({ status: nextStatus });
-}));
-
-router.get("/messages/:friendId", asyncHandler(async (req, res) => {
-  const { friendId } = req.params;
-  if (!(await ensureFriendship(req.user.uid, friendId))) return res.status(403).json({ error: "Hai bạn chưa là bạn bè." });
-
-  const chatId = pairId(req.user.uid, friendId);
-  const messagesDocs = await FriendMessage.find({ chatId })
-    .sort({ createdAt: 1 })
-    .limit(150)
-    .lean();
-
-  res.json(messagesDocs.map(serializeDoc));
-}));
-
-router.post("/messages/:friendId", asyncHandler(async (req, res) => {
-  const { friendId } = req.params;
-  const text = String(req.body.text || "").trim();
-  
-  if (!text) return res.status(400).json({ error: "Tin nhắn đang trống." });
-  if (!(await ensureFriendship(req.user.uid, friendId))) return res.status(403).json({ error: "Hai bạn chưa là bạn bè." });
-
-  const me = await getPublicUser(req.user.uid);
-  const docRef = await FriendMessage.create({
-    chatId: pairId(req.user.uid, friendId),
-    senderId: req.user.uid,
-    receiverId: friendId,
-    type: "text",
-    text,
-  });
-
-  await createNotification(req.app, friendId, "friend_message", "Tin nhắn mới", `${me?.displayName || "Bạn bè"}: ${text.slice(0, 80)}`, req.user.uid);
-
-  res.json({ 
-    id: docRef._id, 
-    type: "text", 
-    text, 
-    senderId: req.user.uid, 
-    receiverId: friendId, 
-    createdAt: docRef.createdAt.toISOString() 
-  });
-}));
-
-router.get("/share-options", asyncHandler(async (req, res) => {
-  const folders = await FlashcardFolder.find({ userId: req.user.uid }).lean();
-  const foldersWithCount = [];
-  
-  for (const folder of folders) {
-    const setCount = await FlashcardSet.countDocuments({ folderId: folder._id });
-    foldersWithCount.push({ id: folder._id, ...folder, setCount });
-  }
-
-  const quizzes = await Quiz.find({ creatorId: req.user.uid }).limit(50).lean();
-  const quizzesFormatted = quizzes.map((q) => ({ 
-    id: q._id, 
-    ...q, 
-    questionCount: q.questions?.length || 0 
-  }));
-
-  res.json({ folders: foldersWithCount, quizzes: quizzesFormatted });
-}));
-
-router.post("/share", asyncHandler(async (req, res) => {
-  const { friendId, type, itemId, text = "" } = req.body;
-  
-  if (!["flashcard_folder", "quiz"].includes(type)) return res.status(400).json({ error: "Loại chia sẻ không hợp lệ." });
-  if (!(await ensureFriendship(req.user.uid, friendId))) return res.status(403).json({ error: "Hai bạn chưa là bạn bè." });
-
-  let share;
-  if (type === "flashcard_folder") {
-    const folder = await FlashcardFolder.findById(itemId).lean();
-    if (!folder || folder.userId.toString() !== req.user.uid) return res.status(404).json({ error: "Không tìm thấy thư mục flashcard." });
-    
-    const preview = await buildFlashcardFolderPreview(itemId);
-    share = {
-      type,
-      itemId,
-      ownerId: req.user.uid,
-      title: folder.name || "Thư mục flashcard",
-      summary: `${preview.totalSets} bộ thẻ • ${preview.totalCards} thẻ`,
-    };
-  } else {
-    const quiz = await Quiz.findById(itemId).lean();
-    if (!quiz || quiz.creatorId !== req.user.uid) return res.status(404).json({ error: "Không tìm thấy quiz của bạn." });
-    
-    share = {
-      type,
-      itemId,
-      ownerId: req.user.uid,
-      title: quiz.title || "Quiz",
-      summary: `${quiz.questions?.length || 0} câu hỏi • ${quiz.difficulty || "Medium"}`,
-    };
-  }
-
-  const me = await getPublicUser(req.user.uid);
-  const docRef = await FriendMessage.create({
-    chatId: pairId(req.user.uid, friendId),
-    senderId: req.user.uid,
-    receiverId: friendId,
-    type: "share",
-    text: String(text || ""),
-    share,
-    savedBy: [],
-  });
-
-  await createNotification(req.app, friendId, "friend_share", "Bạn nhận được nội dung học tập", `${me?.displayName || "Bạn bè"} đã chia sẻ ${type === "flashcard_folder" ? "thư mục flashcard" : "quiz"}: ${share.title}`, docRef._id.toString());
-
-  res.json({ 
-    id: docRef._id, 
-    type: "share", 
-    text, 
-    share, 
-    senderId: req.user.uid, 
-    receiverId: friendId, 
-    createdAt: docRef.createdAt.toISOString() 
-  });
-}));
-
-router.get("/share/:messageId/preview", asyncHandler(async (req, res) => {
-  const msg = await FriendMessage.findById(req.params.messageId).lean();
-  if (!msg) return res.status(404).json({ error: "Không tìm thấy nội dung chia sẻ." });
-  
-  if (![msg.senderId.toString(), msg.receiverId.toString()].includes(req.user.uid)) {
-    return res.status(403).json({ error: "Bạn không có quyền xem nội dung này." });
-  }
-  
-  if (msg.type !== "share" || !msg.share) {
-    return res.status(400).json({ error: "Tin nhắn này không phải nội dung chia sẻ." });
-  }
-
-  const preview = msg.share.type === "flashcard_folder"
-    ? await buildFlashcardFolderPreview(msg.share.itemId)
-    : await buildQuizPreview(msg.share.itemId);
-
-  const saved = Array.isArray(msg.savedBy) && msg.savedBy.some(id => id.toString() === req.user.uid);
-  res.json({ messageId: msg._id, share: msg.share, preview, saved });
-}));
-
-router.post("/share/:messageId/save", asyncHandler(async (req, res) => {
-  const msg = await FriendMessage.findById(req.params.messageId);
-  if (!msg) return res.status(404).json({ error: "Không tìm thấy nội dung chia sẻ." });
-  
-  if (![msg.senderId.toString(), msg.receiverId.toString()].includes(req.user.uid)) {
-    return res.status(403).json({ error: "Bạn không có quyền lưu nội dung này." });
-  }
-  
-  if (msg.type !== "share" || !msg.share) {
-    return res.status(400).json({ error: "Tin nhắn này không phải nội dung chia sẻ." });
-  }
-
-  if (Array.isArray(msg.savedBy) && msg.savedBy.some(id => id.toString() === req.user.uid)) {
-    return res.status(400).json({ error: "Bạn đã lưu nội dung này rồi." });
-  }
-
-  let result;
-  if (msg.share.type === "flashcard_folder") {
-    result = await copyFlashcardFolderToUser(msg.share.itemId, req.user.uid);
-  } else {
-    const quiz = await Quiz.findById(msg.share.itemId).lean();
-    if (!quiz) throw new Error("Không tìm thấy quiz được chia sẻ.");
-    
-    const newQuiz = await Quiz.create({
-      title: `${quiz.title || "Quiz"} (đã lưu)`,
-      description: quiz.description || "",
-      difficulty: quiz.difficulty || "Medium",
-      duration: quiz.duration || 15,
-      questions: quiz.questions || [],
-      creatorId: req.user.uid,
-      sourceQuizId: msg.share.itemId,
+    const docRef = await FriendRequest.create({
+      fromId: req.user.uid,
+      toId: userId,
+      status: "pending",
     });
-    result = { quizId: newQuiz._id, copiedQuestions: quiz.questions?.length || 0 };
-  }
 
-  msg.savedBy.push(req.user.uid);
-  await msg.save();
-  
-  res.json({ success: true, result });
-}));
+    await createNotification(req.app, userId, "friend_request", "Lời mời kết bạn mới", `${me?.displayName || "Một học viên"} muốn kết bạn với bạn.`, docRef._id.toString());
+
+    res.json({ id: docRef._id, status: "pending" });
+  }),
+);
+
+router.post(
+  "/request/:id/respond",
+  asyncHandler(async (req, res) => {
+    const { action } = req.body;
+    if (!["accept", "decline"].includes(action)) return res.status(400).json({ error: "Hành động không hợp lệ." });
+
+    const request = await FriendRequest.findById(req.params.id);
+    if (!request) return res.status(404).json({ error: "Không tìm thấy lời mời." });
+
+    if (request.toId.toString() !== req.user.uid) return res.status(403).json({ error: "Bạn không có quyền xử lý lời mời này." });
+    if (request.status !== "pending") return res.status(400).json({ error: "Lời mời này đã được xử lý." });
+
+    const me = await getPublicUser(req.user.uid);
+    const nextStatus = action === "accept" ? "accepted" : "declined";
+
+    request.status = nextStatus;
+    await request.save();
+
+    if (action === "accept") {
+      await Friendship.create({ users: [req.user.uid, request.fromId] });
+      await createNotification(req.app, request.fromId.toString(), "friend_accept", "Bạn có bạn mới", `${me?.displayName || "Một học viên"} đã chấp nhận lời mời kết bạn.`, req.user.uid);
+    }
+
+    res.json({ status: nextStatus });
+  }),
+);
+
+router.get(
+  "/messages/:friendId",
+  asyncHandler(async (req, res) => {
+    const { friendId } = req.params;
+    if (!(await ensureFriendship(req.user.uid, friendId))) return res.status(403).json({ error: "Hai bạn chưa là bạn bè." });
+
+    const chatId = pairId(req.user.uid, friendId);
+    const messagesDocs = await FriendMessage.find({ chatId }).sort({ createdAt: 1 }).limit(150).lean();
+
+    res.json(messagesDocs.map(serializeDoc));
+  }),
+);
+
+router.post(
+  "/messages/:friendId",
+  asyncHandler(async (req, res) => {
+    const { friendId } = req.params;
+    const text = String(req.body.text || "").trim();
+
+    if (!text) return res.status(400).json({ error: "Tin nhắn đang trống." });
+    if (!(await ensureFriendship(req.user.uid, friendId))) return res.status(403).json({ error: "Hai bạn chưa là bạn bè." });
+
+    const me = await getPublicUser(req.user.uid);
+    const docRef = await FriendMessage.create({
+      chatId: pairId(req.user.uid, friendId),
+      senderId: req.user.uid,
+      receiverId: friendId,
+      type: "text",
+      text,
+    });
+
+    await createNotification(req.app, friendId, "friend_message", "Tin nhắn mới", `${me?.displayName || "Bạn bè"}: ${text.slice(0, 80)}`, req.user.uid);
+
+    res.json({
+      id: docRef._id,
+      type: "text",
+      text,
+      senderId: req.user.uid,
+      receiverId: friendId,
+      createdAt: docRef.createdAt.toISOString(),
+    });
+  }),
+);
+
+router.get(
+  "/share-options",
+  asyncHandler(async (req, res) => {
+    const folders = await FlashcardFolder.find({ userId: req.user.uid }).lean();
+    const foldersWithCount = [];
+
+    for (const folder of folders) {
+      const setCount = await FlashcardSet.countDocuments({ folderId: folder._id });
+      foldersWithCount.push({ id: folder._id, ...folder, setCount });
+    }
+
+    const quizzes = await Quiz.find({ creatorId: req.user.uid }).limit(50).lean();
+    const quizzesFormatted = quizzes.map((q) => ({
+      id: q._id,
+      ...q,
+      questionCount: q.questions?.length || 0,
+    }));
+
+    res.json({ folders: foldersWithCount, quizzes: quizzesFormatted });
+  }),
+);
+
+router.post(
+  "/share",
+  asyncHandler(async (req, res) => {
+    const { friendId, type, itemId, text = "" } = req.body;
+
+    if (!["flashcard_folder", "quiz"].includes(type)) return res.status(400).json({ error: "Loại chia sẻ không hợp lệ." });
+    if (!(await ensureFriendship(req.user.uid, friendId))) return res.status(403).json({ error: "Hai bạn chưa là bạn bè." });
+
+    let share;
+    if (type === "flashcard_folder") {
+      const folder = await FlashcardFolder.findById(itemId).lean();
+      if (!folder || folder.userId.toString() !== req.user.uid) return res.status(404).json({ error: "Không tìm thấy thư mục flashcard." });
+
+      const preview = await buildFlashcardFolderPreview(itemId);
+      share = {
+        type,
+        itemId,
+        ownerId: req.user.uid,
+        title: folder.name || "Thư mục flashcard",
+        summary: `${preview.totalSets} bộ thẻ • ${preview.totalCards} thẻ`,
+      };
+    } else {
+      const quiz = await Quiz.findById(itemId).lean();
+      if (!quiz || quiz.creatorId !== req.user.uid) return res.status(404).json({ error: "Không tìm thấy quiz của bạn." });
+
+      share = {
+        type,
+        itemId,
+        ownerId: req.user.uid,
+        title: quiz.title || "Quiz",
+        summary: `${quiz.questions?.length || 0} câu hỏi • ${quiz.difficulty || "Medium"}`,
+      };
+    }
+
+    const me = await getPublicUser(req.user.uid);
+    const docRef = await FriendMessage.create({
+      chatId: pairId(req.user.uid, friendId),
+      senderId: req.user.uid,
+      receiverId: friendId,
+      type: "share",
+      text: String(text || ""),
+      share,
+      savedBy: [],
+    });
+
+    await createNotification(
+      req.app,
+      friendId,
+      "friend_share",
+      "Bạn nhận được nội dung học tập",
+      `${me?.displayName || "Bạn bè"} đã chia sẻ ${type === "flashcard_folder" ? "thư mục flashcard" : "quiz"}: ${share.title}`,
+      docRef._id.toString(),
+    );
+
+    res.json({
+      id: docRef._id,
+      type: "share",
+      text,
+      share,
+      senderId: req.user.uid,
+      receiverId: friendId,
+      createdAt: docRef.createdAt.toISOString(),
+    });
+  }),
+);
+
+router.get(
+  "/share/:messageId/preview",
+  asyncHandler(async (req, res) => {
+    const msg = await FriendMessage.findById(req.params.messageId).lean();
+    if (!msg) return res.status(404).json({ error: "Không tìm thấy nội dung chia sẻ." });
+
+    if (![msg.senderId.toString(), msg.receiverId.toString()].includes(req.user.uid)) {
+      return res.status(403).json({ error: "Bạn không có quyền xem nội dung này." });
+    }
+
+    if (msg.type !== "share" || !msg.share) {
+      return res.status(400).json({ error: "Tin nhắn này không phải nội dung chia sẻ." });
+    }
+
+    const preview = msg.share.type === "flashcard_folder" ? await buildFlashcardFolderPreview(msg.share.itemId) : await buildQuizPreview(msg.share.itemId);
+
+    const saved = Array.isArray(msg.savedBy) && msg.savedBy.some((id) => id.toString() === req.user.uid);
+    res.json({ messageId: msg._id, share: msg.share, preview, saved });
+  }),
+);
+
+router.post(
+  "/share/:messageId/save",
+  asyncHandler(async (req, res) => {
+    const msg = await FriendMessage.findById(req.params.messageId);
+    if (!msg) return res.status(404).json({ error: "Không tìm thấy nội dung chia sẻ." });
+
+    if (![msg.senderId.toString(), msg.receiverId.toString()].includes(req.user.uid)) {
+      return res.status(403).json({ error: "Bạn không có quyền lưu nội dung này." });
+    }
+
+    if (msg.type !== "share" || !msg.share) {
+      return res.status(400).json({ error: "Tin nhắn này không phải nội dung chia sẻ." });
+    }
+
+    if (Array.isArray(msg.savedBy) && msg.savedBy.some((id) => id.toString() === req.user.uid)) {
+      return res.status(400).json({ error: "Bạn đã lưu nội dung này rồi." });
+    }
+
+    let result;
+    if (msg.share.type === "flashcard_folder") {
+      result = await copyFlashcardFolderToUser(msg.share.itemId, req.user.uid);
+    } else {
+      const quiz = await Quiz.findById(msg.share.itemId).lean();
+      if (!quiz) throw new Error("Không tìm thấy quiz được chia sẻ.");
+
+      const newQuiz = await Quiz.create({
+        title: `${quiz.title || "Quiz"} (đã lưu)`,
+        description: quiz.description || "",
+        difficulty: quiz.difficulty || "Medium",
+        duration: quiz.duration || 15,
+        questions: quiz.questions || [],
+        creatorId: req.user.uid,
+        sourceQuizId: msg.share.itemId,
+      });
+      result = { quizId: newQuiz._id, copiedQuestions: quiz.questions?.length || 0 };
+    }
+
+    msg.savedBy.push(req.user.uid);
+    await msg.save();
+
+    res.json({ success: true, result });
+  }),
+);
 
 export default router;

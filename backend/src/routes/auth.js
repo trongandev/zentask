@@ -1,13 +1,13 @@
 import { Router } from "express";
 import User from "../models/User.js";
 import { IpSignupCounter } from "../models/Schemas.js";
-import { getClientIp, hashIp, DEFAULT_LIMITS } from "../utils/usageLimits.js";
-import { cleanAndValidatePublicText } from "../utils/moderation.js";
-import { verifyRecaptchaFromRequest } from "../utils/recaptcha.js";
+import { getClientIp, hashIp, DEFAULT_LIMITS } from "../../utils/usageLimits.js";
+import { cleanAndValidatePublicText } from "../../utils/moderation.js";
+import { verifyRecaptchaFromRequest } from "../../utils/recaptcha.js";
 import { DailyTask, UserDailyStat, Notification, FlashcardProgress, Flashcard, LeaderboardWeekly, GrammarTest, TensesTest } from "../models/Schemas.js";
 import jwt from "jsonwebtoken";
 import { SYSTEM_LEVELS, SYSTEM_BADGES } from "../config/system.js";
-import { getWeekString } from "../utils/dateUtils.js";
+import { getWeekString } from "../../utils/dateUtils.js";
 import dotenv from "dotenv";
 import { OAuth2Client } from "google-auth-library";
 import { verifyToken } from "../middleware/auth.js";
@@ -42,7 +42,6 @@ const recordAccountSignup = async (ipHash, email) => {
     { upsert: true, new: true },
   );
 };
-
 
 // Helper to generate JWT and set cookie
 const generateTokenAndSetCookie = (res, user) => {
@@ -150,7 +149,9 @@ router.post("/register", async (req, res) => {
   try {
     await verifyRecaptchaFromRequest(req);
 
-    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const normalizedEmail = String(email || "")
+      .trim()
+      .toLowerCase();
     const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ error: "Email already exists" });

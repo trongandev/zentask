@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Swords, Trophy, X, User, Users, CheckCircle } from "lucide-react";
+import { Swords, Trophy, X, User, Users, CheckCircle, Clock } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
 import { cn } from "../lib/utils";
@@ -40,6 +40,7 @@ export function Arena() {
   const [selectedInviteIds, setSelectedInviteIds] = useState<string[]>([]);
   const [tournamentParticipants, setTournamentParticipants] = useState<any[]>([]);
   const [tournamentCanStart, setTournamentCanStart] = useState(false);
+  const [matchHistory, setMatchHistory] = useState<any[]>([]);
 
   const [roomCode, setRoomCode] = useState<string>("");
   const [timeLeft, setTimeLeft] = useState(10);
@@ -77,13 +78,26 @@ export function Arena() {
   }, [showTournamentModal]);
 
   useEffect(() => {
+    if (matchState !== "selecting") return;
+    const token = localStorage.getItem("token");
+    const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+
+    fetch(`${import.meta.env.VITE_API_BACKEND || "http://localhost:3001"}/api/arena/history`, {
+      headers,
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setMatchHistory(Array.isArray(data) ? data : []))
+      .catch(() => setMatchHistory([]));
+  }, [matchState]);
+
+  useEffect(() => {
     matchStateRef.current = matchState;
   }, [matchState]);
 
   useEffect(() => {
     roomCodeRef.current = roomCode;
   }, [roomCode]);
-
 
   useEffect(() => {
     if (!socket) return;
@@ -104,18 +118,21 @@ export function Arena() {
     return () => window.clearInterval(presenceTimer);
   }, [socket, matchState, arenaMode, tournamentRoom?.code, tournamentCode]);
 
-  const cleanupArenaSession = useCallback((reason: "leave" | "cancel" | "surrender" = "leave") => {
-    if (!socket || isLeavingArenaRef.current) return;
-    const state = matchStateRef.current;
-    const currentRoomCode = roomCodeRef.current;
+  const cleanupArenaSession = useCallback(
+    (reason: "leave" | "cancel" | "surrender" = "leave") => {
+      if (!socket || isLeavingArenaRef.current) return;
+      const state = matchStateRef.current;
+      const currentRoomCode = roomCodeRef.current;
 
-    if (state === "searching") {
-      socket.emit("cancel_arena_search");
-    }
-    if (currentRoomCode) {
-      socket.emit("arena_leave", { roomCode: currentRoomCode, reason });
-    }
-  }, [socket]);
+      if (state === "searching") {
+        socket.emit("cancel_arena_search");
+      }
+      if (currentRoomCode) {
+        socket.emit("arena_leave", { roomCode: currentRoomCode, reason });
+      }
+    },
+    [socket],
+  );
 
   useEffect(() => {
     if (!socket || !user) return;
@@ -128,7 +145,11 @@ export function Arena() {
       // Save duration to backend
       fetch(`${import.meta.env.VITE_API_BACKEND || "http://localhost:3001"}/api/arena/stats/matchmaking`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}),
+        },
+        credentials: "include",
         body: JSON.stringify({ uid: user.uid, durationMs, rankId: user.rankId, tier: user.tier }),
       }).catch((err) => console.error(err));
 
@@ -189,9 +210,9 @@ export function Arena() {
       if (!user || !opponent) return;
 
       const finalMode = data.arenaMode || arenaMode;
-      const myScore = finalMode === "team2v2" ? (data.teamScores?.[myTeam] || 0) : (data.userScores[user.uid] || 0);
+      const myScore = finalMode === "team2v2" ? data.teamScores?.[myTeam] || 0 : data.userScores[user.uid] || 0;
       const enemyTeam = myTeam === "blue" ? "red" : "blue";
-      const oppScore = finalMode === "team2v2" ? (data.teamScores?.[enemyTeam] || 0) : (data.userScores[opponent.uid] || 0);
+      const oppScore = finalMode === "team2v2" ? data.teamScores?.[enemyTeam] || 0 : data.userScores[opponent.uid] || 0;
 
       setUserScore(myScore);
       setOpponentScore(oppScore);
@@ -407,22 +428,24 @@ export function Arena() {
     if (searchTimerRef.current) clearInterval(searchTimerRef.current);
   };
 
-
-  const joinTournamentLobby = useCallback((room: any) => {
-    if (!socket || !user || !room?.code) return;
-    socket.emit("join_arena_tournament_lobby", {
-      code: room.code,
-      user: {
-        uid: user.uid,
-        name: user.displayName || "Học viên",
-        displayName: user.displayName || "Học viên",
-        avatar: user.photoURL || "",
-        photoURL: user.photoURL || "",
-        rankId: user.rankId || 1,
-        tier: user.tier || 3,
-      },
-    });
-  }, [socket, user]);
+  const joinTournamentLobby = useCallback(
+    (room: any) => {
+      if (!socket || !user || !room?.code) return;
+      socket.emit("join_arena_tournament_lobby", {
+        code: room.code,
+        user: {
+          uid: user.uid,
+          name: user.displayName || "Học viên",
+          displayName: user.displayName || "Học viên",
+          avatar: user.photoURL || "",
+          photoURL: user.photoURL || "",
+          rankId: user.rankId || 1,
+          tier: user.tier || 3,
+        },
+      });
+    },
+    [socket, user],
+  );
 
   const createTournamentRoom = async () => {
     const res = await fetch(`${import.meta.env.VITE_API_BACKEND || "http://localhost:3001"}/api/arena/tournaments`, {
@@ -508,7 +531,7 @@ export function Arena() {
       cancelSearch();
       handleReset();
     } else {
-      navigate("/flashcards");
+      navigate(-1);
     }
   };
 
@@ -556,7 +579,7 @@ export function Arena() {
   const isX2 = matchData?.x2Indices?.includes(currentQuestionIndex) || false;
 
   return (
-    <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-b from-indigo-950 via-slate-900 to-black">
+    <div className="min-h-[100vh] flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-b from-indigo-950 via-slate-900 to-black">
       {/* Background decorations */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
@@ -590,7 +613,9 @@ export function Arena() {
           <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-slate-900 p-6 text-white shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
               <h3 className="text-2xl font-black">Giải đấu</h3>
-              <button onClick={() => setShowTournamentModal(false)} className="text-white/50 hover:text-white">✕</button>
+              <button onClick={() => setShowTournamentModal(false)} className="text-white/50 hover:text-white">
+                ✕
+              </button>
             </div>
             <div className="space-y-4">
               <div className="rounded-2xl bg-white/5 p-4">
@@ -605,7 +630,7 @@ export function Arena() {
                           <input
                             type="checkbox"
                             checked={selectedInviteIds.includes(friend.uid)}
-                            onChange={(e) => setSelectedInviteIds((prev) => e.target.checked ? [...prev, friend.uid] : prev.filter((id) => id !== friend.uid))}
+                            onChange={(e) => setSelectedInviteIds((prev) => (e.target.checked ? [...prev, friend.uid] : prev.filter((id) => id !== friend.uid)))}
                           />
                           {friend.displayName || friend.email || "Bạn bè"}
                         </label>
@@ -613,20 +638,14 @@ export function Arena() {
                     </div>
                   </div>
                 )}
-                <button
-                  onClick={createTournamentRoom}
-                  className="mt-3 w-full rounded-xl bg-yellow-500 px-4 py-3 font-black text-black hover:bg-yellow-400"
-                >
+                <button onClick={createTournamentRoom} className="mt-3 w-full rounded-xl bg-yellow-500 px-4 py-3 font-black text-black hover:bg-yellow-400">
                   Tạo phòng cố định
                 </button>
               </div>
               <div className="rounded-2xl bg-white/5 p-4">
                 <label className="mb-2 block text-sm font-bold text-white/70">Mã mời</label>
                 <input value={tournamentCode} onChange={(e) => setTournamentCode(e.target.value)} placeholder="Nhập mã phòng" className="w-full rounded-xl bg-white/10 px-4 py-3 outline-none" />
-                <button
-                  onClick={joinTournamentByCode}
-                  className="mt-3 w-full rounded-xl bg-white/10 px-4 py-3 font-bold hover:bg-white/20"
-                >
+                <button onClick={joinTournamentByCode} className="mt-3 w-full rounded-xl bg-white/10 px-4 py-3 font-bold hover:bg-white/20">
                   Vào phòng bằng mã
                 </button>
               </div>
@@ -664,7 +683,7 @@ export function Arena() {
       {/* --- SELECTING MODE --- */}
       {matchState === "selecting" && (
         <div className="flex flex-col items-center z-10 w-full max-w-6xl px-4 animate-in fade-in zoom-in duration-500 py-12 overflow-y-auto">
-          <h2 className="text-4xl md:text-5xl py-2 font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-4 text-center uppercase tracking-wider drop-shadow-sm">
+          <h2 className="text-4xl md:text-5xl py-5 font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-4 text-center uppercase tracking-wider drop-shadow-sm">
             Chọn Thể Thức Thi Đấu
           </h2>
           <p className="text-blue-200/80 mb-12 text-center max-w-2xl text-lg">Khẳng định bản lĩnh và leo rank bằng cách đánh bại đối thủ trong các chế độ chơi đa dạng.</p>
@@ -705,7 +724,10 @@ export function Arena() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
               {/* Team 2v2 */}
-              <div onClick={() => startSearch("team2v2")} className="bg-white/5 border border-purple-500/30 hover:border-purple-400 rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col h-full cursor-pointer hover:bg-purple-950/20 transition-all">
+              <div
+                onClick={() => startSearch("team2v2")}
+                className="bg-white/5 border border-purple-500/30 hover:border-purple-400 rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col h-full cursor-pointer hover:bg-purple-950/20 transition-all"
+              >
                 <div className="w-14 h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/30 relative z-10">
                   <Users className="w-7 h-7 text-purple-400" />
                 </div>
@@ -721,7 +743,10 @@ export function Arena() {
               </div>
 
               {/* Tournament */}
-              <div onClick={() => setShowTournamentModal(true)} className="bg-white/5 border border-yellow-500/30 hover:border-yellow-400 rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col h-full cursor-pointer hover:bg-yellow-950/20 transition-all">
+              <div
+                onClick={() => setShowTournamentModal(true)}
+                className="bg-white/5 border border-yellow-500/30 hover:border-yellow-400 rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col h-full cursor-pointer hover:bg-yellow-950/20 transition-all"
+              >
                 <div className="w-14 h-14 bg-yellow-500/20 rounded-2xl flex items-center justify-center mb-6 border border-yellow-500/30 relative z-10">
                   <Trophy className="w-7 h-7 text-yellow-400" />
                 </div>
@@ -736,6 +761,41 @@ export function Arena() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Match History */}
+          <div className="w-full mt-10">
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-blue-400" />
+              Lịch sử thi đấu gần đây
+            </h3>
+
+            {matchHistory.length === 0 ? (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center text-white/50 font-medium">Bạn chưa tham gia trận đấu nào gần đây.</div>
+            ) : (
+              <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col shadow-lg">
+                {matchHistory.map((match, i) => (
+                  <div
+                    key={match._id || i}
+                    className={cn("p-4 md:p-5 flex items-center justify-between hover:bg-white/10 transition-colors", i !== matchHistory.length - 1 && "border-b border-white/5")}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0 shadow-inner">
+                        <Swords className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <div className="text-white font-bold text-sm md:text-base line-clamp-1">{match.target || "Trận đấu ngẫu nhiên"}</div>
+                        <div className="text-xs text-white/50 mt-1">{new Date(match.createdAt).toLocaleString("vi-VN")}</div>
+                      </div>
+                    </div>
+                    <div className="text-right pl-4">
+                      <div className="text-blue-400 font-bold text-sm md:text-base">{match.action}</div>
+                      {match.xpEarned > 0 && <div className="text-xs font-black text-yellow-400 mt-1">+{match.xpEarned} XP</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -754,7 +814,7 @@ export function Arena() {
           <p className="max-w-2xl text-center text-blue-200/70 font-medium">
             {arenaMode === "team2v2"
               ? "Đang tìm đồng đội và đối thủ. Sau 15 giây có thể ghép bot nếu rank phù hợp. 5 trận đầu bot rất dễ để người mới làm quen."
-              : "Hệ thống đang ghép cặp bạn với người chơi cùng Rank. Sau 15 giây có thể ghép bot nếu rank phù hợp. 5 trận đầu bot rất dễ để bạn có nhịp thắng."}
+              : "Hệ thống đang ghép cặp bạn với người chơi cùng Rank"}
           </p>
           <div className="mt-4 text-xl font-mono text-yellow-300">
             {Math.floor(searchElapsed / 60)
@@ -804,7 +864,9 @@ export function Arena() {
               </div>
               <h3 className="text-sm md:text-xl font-bold text-white text-center line-clamp-1 max-w-[100px] md:max-w-none">{opponent.name}</h3>
               <p className="text-red-400 font-medium text-xs md:text-base text-center line-clamp-1">{opponent.rankInfo || "Bạc III"}</p>
-              {opponent.isBot && <p className="mt-1 rounded-full bg-yellow-500/15 px-3 py-1 text-[11px] font-extrabold text-yellow-200">Bot {opponent.botAccuracyLabel ? `• ${opponent.botAccuracyLabel}` : ""}</p>}
+              {opponent.isBot && (
+                <p className="mt-1 rounded-full bg-yellow-500/15 px-3 py-1 text-[11px] font-extrabold text-yellow-200">Bot {opponent.botAccuracyLabel ? `• ${opponent.botAccuracyLabel}` : ""}</p>
+              )}
             </div>
           </div>
         </div>
@@ -817,7 +879,9 @@ export function Arena() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
             {/* Timer on mobile */}
             <div className="flex md:hidden flex-col items-center order-first w-full bg-white/5 py-2 rounded-2xl border border-white/10">
-              <div className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">Thời gian ({currentQuestionIndex + 1}/{totalQuestions})</div>
+              <div className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                Thời gian ({currentQuestionIndex + 1}/{totalQuestions})
+              </div>
               <div className={cn("text-3xl font-black", timeLeft <= 3 ? "text-red-500 animate-pulse" : "text-white")}>{timeLeft}s</div>
             </div>
 
@@ -844,7 +908,9 @@ export function Arena() {
 
               {/* Timer on Desktop */}
               <div className="hidden md:flex flex-col items-center mx-4">
-                <div className="text-sm font-bold text-gray-400 mb-1 uppercase tracking-wider">Thời gian ({currentQuestionIndex + 1}/{totalQuestions})</div>
+                <div className="text-sm font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                  Thời gian ({currentQuestionIndex + 1}/{totalQuestions})
+                </div>
                 <div className={cn("text-5xl font-black", timeLeft <= 3 ? "text-red-500 animate-pulse" : "text-white")}>{timeLeft}s</div>
               </div>
 
@@ -875,18 +941,47 @@ export function Arena() {
               <div>
                 <p className="mb-2 text-xs font-black uppercase tracking-widest text-blue-300">Đội của bạn</p>
                 <div className="flex flex-wrap gap-2">
-                  {arenaPlayers.filter((p: any) => p.team === myTeam).map((p: any) => (
-                    <span key={p.uid} className="rounded-full bg-blue-500/20 px-3 py-1 text-sm font-bold">{p.name}{p.isBot ? " 🤖" : ""}</span>
-                  ))}
+                  {arenaPlayers
+                    .filter((p: any) => p.team === myTeam)
+                    .map((p: any) => (
+                      <span key={p.uid} className="rounded-full bg-blue-500/20 px-3 py-1 text-sm font-bold">
+                        {p.name}
+                        {p.isBot ? " 🤖" : ""}
+                      </span>
+                    ))}
                 </div>
               </div>
               <div>
                 <p className="mb-2 text-xs font-black uppercase tracking-widest text-purple-300">Gợi ý cho đồng đội</p>
                 <div className="flex gap-2">
-                  <input value={teamHint} onChange={(e) => setTeamHint(e.target.value)} placeholder="Gửi gợi ý ngắn..." className="min-w-0 flex-1 rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold outline-none placeholder:text-white/30" />
-                  <button onClick={() => { if (teamHint.trim()) { socket?.emit("arena_team_hint", { roomCode, uid: user?.uid, message: teamHint.trim() }); setTeamHints((prev) => [...prev.slice(-4), { from: "Bạn", message: teamHint.trim() }]); setTeamHint(""); } }} className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold">Gửi</button>
+                  <input
+                    value={teamHint}
+                    onChange={(e) => setTeamHint(e.target.value)}
+                    placeholder="Gửi gợi ý ngắn..."
+                    className="min-w-0 flex-1 rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold outline-none placeholder:text-white/30"
+                  />
+                  <button
+                    onClick={() => {
+                      if (teamHint.trim()) {
+                        socket?.emit("arena_team_hint", { roomCode, uid: user?.uid, message: teamHint.trim() });
+                        setTeamHints((prev) => [...prev.slice(-4), { from: "Bạn", message: teamHint.trim() }]);
+                        setTeamHint("");
+                      }
+                    }}
+                    className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold"
+                  >
+                    Gửi
+                  </button>
                 </div>
-                {teamHints.length > 0 && <div className="mt-2 space-y-1 text-xs text-purple-100">{teamHints.map((h, i) => <div key={i}><b>{h.from}:</b> {h.message}</div>)}</div>}
+                {teamHints.length > 0 && (
+                  <div className="mt-2 space-y-1 text-xs text-purple-100">
+                    {teamHints.map((h, i) => (
+                      <div key={i}>
+                        <b>{h.from}:</b> {h.message}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -948,7 +1043,7 @@ export function Arena() {
           </div>
 
           <div className="mt-8 md:mt-12 flex flex-col md:flex-row gap-4 w-full md:w-auto">
-            <button onClick={() => navigate("/flashcards")} className="w-full md:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all text-center">
+            <button onClick={() => navigate(-1)} className="w-full md:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all text-center">
               Về trang chủ
             </button>
             <button

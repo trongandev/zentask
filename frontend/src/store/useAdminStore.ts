@@ -5,6 +5,7 @@ interface CacheState<T> {
   pages: Record<number, { items: T[]; totalPages: number }>;
   currentPage: number;
   loading: boolean;
+  totalItems?: number;
 }
 
 interface AdminState {
@@ -45,6 +46,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       users: {
         ...state.users,
         loading: false,
+        totalItems: data.total || 0,
         pages: { ...state.users.pages, [page]: { items: data.users || [], totalPages: data.totalPages || 1 } }
       }
     }));
@@ -69,6 +71,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       vocabSets: {
         ...state.vocabSets,
         loading: false,
+        totalItems: data.total || 0,
         pages: { ...state.vocabSets.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } }
       }
     }));
@@ -84,6 +87,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       vocab: {
         ...state.vocab,
         loading: false,
+        totalItems: data.total || 0,
         pages: { ...state.vocab.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } }
       }
     }));
@@ -99,6 +103,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       quizzes: {
         ...state.quizzes,
         loading: false,
+        totalItems: data.total || 0,
         pages: { ...state.quizzes.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } }
       }
     }));
@@ -114,6 +119,7 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       quizHistory: {
         ...state.quizHistory,
         loading: false,
+        totalItems: data.total || 0,
         pages: { ...state.quizHistory.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } }
       }
     }));

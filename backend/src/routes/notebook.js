@@ -48,63 +48,75 @@ function serializeNotebook(doc) {
   };
 }
 
-router.get("/", asyncHandler(async (req, res) => {
-  const notebooks = await Notebook.find({ ownerId: req.user.uid })
-    .sort({ updatedAt: -1 })
-    .limit(40)
-    .lean();
+router.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const notebooks = await Notebook.find({ ownerId: req.user.uid }).sort({ updatedAt: -1 }).limit(40).lean();
 
-  res.json(notebooks.map(serializeNotebook));
-}));
+    res.json(notebooks.map(serializeNotebook));
+  }),
+);
 
-router.get("/:id", asyncHandler(async (req, res) => {
-  const notebook = await Notebook.findById(req.params.id).lean();
-  
-  if (!notebook) return res.status(404).json({ error: "Không tìm thấy notebook." });
-  if (notebook.ownerId.toString() !== req.user.uid) {
-    return res.status(403).json({ error: "Bạn không có quyền truy cập notebook này." });
-  }
+router.get(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const notebook = await Notebook.findById(req.params.id).lean();
 
-  res.json(serializeNotebook(notebook));
-}));
+    if (!notebook) return res.status(404).json({ error: "Không tìm thấy notebook." });
+    if (notebook.ownerId.toString() !== req.user.uid) {
+      return res.status(403).json({ error: "Bạn không có quyền truy cập notebook này." });
+    }
 
-router.post("/", asyncHandler(async (req, res) => {
-  const payload = sanitizeNotebookPayload(req.body || {});
-  
-  const newNotebook = await Notebook.create({
-    ...payload,
-    ownerId: req.user.uid,
-  });
+    res.json(serializeNotebook(notebook));
+  }),
+);
 
-  res.status(201).json(serializeNotebook(newNotebook.toObject()));
-}));
+router.post(
+  "/",
+  asyncHandler(async (req, res) => {
+    const payload = sanitizeNotebookPayload(req.body || {});
 
-router.put("/:id", asyncHandler(async (req, res) => {
-  const notebook = await Notebook.findById(req.params.id);
-  
-  if (!notebook) return res.status(404).json({ error: "Không tìm thấy notebook." });
-  if (notebook.ownerId.toString() !== req.user.uid) {
-    return res.status(403).json({ error: "Bạn không có quyền sửa notebook này." });
-  }
+    const newNotebook = await Notebook.create({
+      ...payload,
+      ownerId: req.user.uid,
+    });
 
-  const payload = sanitizeNotebookPayload(req.body || {});
-  
-  Object.assign(notebook, payload);
-  await notebook.save();
+    res.status(201).json(serializeNotebook(newNotebook.toObject()));
+  }),
+);
 
-  res.json(serializeNotebook(notebook.toObject()));
-}));
+router.put(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const notebook = await Notebook.findById(req.params.id);
 
-router.delete("/:id", asyncHandler(async (req, res) => {
-  const notebook = await Notebook.findById(req.params.id);
-  
-  if (!notebook) return res.status(404).json({ error: "Không tìm thấy notebook." });
-  if (notebook.ownerId.toString() !== req.user.uid) {
-    return res.status(403).json({ error: "Bạn không có quyền xóa notebook này." });
-  }
+    if (!notebook) return res.status(404).json({ error: "Không tìm thấy notebook." });
+    if (notebook.ownerId.toString() !== req.user.uid) {
+      return res.status(403).json({ error: "Bạn không có quyền sửa notebook này." });
+    }
 
-  await Notebook.findByIdAndDelete(req.params.id);
-  res.json({ ok: true });
-}));
+    const payload = sanitizeNotebookPayload(req.body || {});
+
+    Object.assign(notebook, payload);
+    await notebook.save();
+
+    res.json(serializeNotebook(notebook.toObject()));
+  }),
+);
+
+router.delete(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    const notebook = await Notebook.findById(req.params.id);
+
+    if (!notebook) return res.status(404).json({ error: "Không tìm thấy notebook." });
+    if (notebook.ownerId.toString() !== req.user.uid) {
+      return res.status(403).json({ error: "Bạn không có quyền xóa notebook này." });
+    }
+
+    await Notebook.findByIdAndDelete(req.params.id);
+    res.json({ ok: true });
+  }),
+);
 
 export default router;

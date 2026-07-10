@@ -1,31 +1,87 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const seedDailyTasks = async () => {
   try {
-    const { DailyTask } = await import('../models/Schemas.js');
-    const { DAILY_TASKS } = await import('./system.js');
-    
+    const { DailyTask } = await import("../models/Schemas.js");
+    const { DAILY_TASKS } = await import("./system.js");
+
     // Check if tasks have missing desc field, if so, re-seed
     const sampleTask = await DailyTask.findOne();
     if (!sampleTask || !sampleTask.desc) {
-      console.log('Seeding DailyTasks...');
+      console.log("Seeding DailyTasks...");
       await DailyTask.deleteMany({}); // wipe out old tasks without desc
-      const tasksToSeed = DAILY_TASKS.map(task => ({
+      const tasksToSeed = DAILY_TASKS.map((task) => ({
         type: task.id,
         title: task.title,
         desc: task.desc,
         xpPerItem: task.xpPerItem,
         icon: task.icon,
-        total: task.total
+        total: task.total,
       }));
       await DailyTask.insertMany(tasksToSeed);
-      console.log('DailyTasks seeded successfully');
+      console.log("DailyTasks seeded successfully");
     }
   } catch (error) {
-    console.error('Error seeding DailyTasks:', error.message);
+    console.error("Error seeding DailyTasks:", error.message);
+  }
+};
+
+const seedBotConfigs = async () => {
+  try {
+    const { BotConfig } = await import("../models/Schemas.js");
+    const count = await BotConfig.countDocuments();
+    if (count === 0) {
+      console.log("Seeding BotConfigs...");
+      const botConfigs = [
+        {
+          rankId: 1,
+          rankName: "Bạc",
+          correctRate: 40,
+          fastResponseRate: 30,
+          slowResponseRate: 70,
+          timeDistribution: { 8: 10, 9: 10, 10: 10 },
+        },
+        {
+          rankId: 2,
+          rankName: "Lục Bảo",
+          correctRate: 50,
+          fastResponseRate: 45,
+          slowResponseRate: 55,
+          timeDistribution: { 6: 9, 7: 9, 8: 9, 9: 9, 10: 9 },
+        },
+        {
+          rankId: 3,
+          rankName: "Tinh Anh",
+          correctRate: 60,
+          fastResponseRate: 60,
+          slowResponseRate: 40,
+          timeDistribution: { 5: 10, 6: 10, 7: 10, 8: 10, 9: 10, 10: 10 },
+        },
+        {
+          rankId: 4,
+          rankName: "Kim Cương",
+          correctRate: 70,
+          fastResponseRate: 75,
+          slowResponseRate: 25,
+          timeDistribution: { 3: 9.3, 4: 9.3, 5: 9.4, 6: 9.4, 7: 9.4, 8: 9.4, 9: 9.4, 10: 9.4 },
+        },
+        {
+          rankId: 5,
+          rankName: "Cao Thủ",
+          correctRate: 85,
+          fastResponseRate: 90,
+          slowResponseRate: 10,
+          timeDistribution: { 1: 9, 2: 9, 3: 9, 4: 9, 5: 9, 6: 9, 7: 9, 8: 9, 9: 9, 10: 9 },
+        },
+      ];
+      await BotConfig.insertMany(botConfigs);
+      console.log("BotConfigs seeded successfully");
+    }
+  } catch (error) {
+    console.error("Error seeding BotConfigs:", error.message);
   }
 };
 
@@ -35,9 +91,10 @@ const connectDB = async () => {
       // These options are mostly defaults in Mongoose 6+, but explicitly set them if needed
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
+
     // Run seeders
     await seedDailyTasks();
+    await seedBotConfigs();
   } catch (error) {
     console.error(`Error connecting to MongoDB: ${error.message}`);
     process.exit(1);

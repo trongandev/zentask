@@ -22,21 +22,21 @@ export const SYSTEM_LEVELS = [
 ];
 
 export const DAILY_TASKS = [
-  { 
+  {
     id: "create_material",
-    title: "Khởi Tạo Chất Liệu", 
-    total: 10, 
-    icon: "/daily-task/material-init.png", 
-    xpPerItem: 5, 
-    desc: "Thêm mới thành công từ vựng vào bộ Thẻ lật cá nhân của bạn (+5XP/từ)." 
+    title: "Khởi Tạo Chất Liệu",
+    total: 10,
+    icon: "/daily-task/material-init.png",
+    xpPerItem: 5,
+    desc: "Thêm mới thành công từ vựng vào bộ Thẻ lật cá nhân của bạn (+5XP/từ).",
   },
-  { 
+  {
     id: "quiz_master",
-    title: "Bậc Thầy Đố Vui", 
-    total: 2, 
-    icon: "/daily-task/master-of-riddles.png", 
-    xpPerItem: 20, 
-    desc: "Tự thiết kế và xuất bản thành công câu hỏi trắc nghiệm mới (+20XP/câu)." 
+    title: "Bậc Thầy Đố Vui",
+    total: 2,
+    icon: "/daily-task/master-of-riddles.png",
+    xpPerItem: 20,
+    desc: "Tự thiết kế và xuất bản thành công câu hỏi trắc nghiệm mới (+20XP/câu).",
   },
   {
     id: "daily_checkin",
@@ -46,22 +46,38 @@ export const DAILY_TASKS = [
     xpPerItem: 10,
     desc: "Nhấn nút Điểm danh hàng ngày ngay khi đăng nhập ứng dụng (+10XP).",
   },
-  { 
+  {
     id: "learn_past",
-    title: "Ôn Cố Tri Tân", 
-    total: 10, 
-    icon: "/daily-task/learn-past.png", 
-    xpPerItem: 2, 
-    desc: "Hoàn thành việc lật và ôn tập lại từ vựng cũ đã học (+2XP/từ)." 
+    title: "Ôn Cố Tri Tân",
+    total: 10,
+    icon: "/daily-task/learn-past.png",
+    xpPerItem: 2,
+    desc: "Hoàn thành việc lật và ôn tập lại từ vựng cũ đã học (+2XP/từ).",
   },
-  { 
+  {
     id: "community_share",
-    title: "Kẻ Gieo Hạt Tri Thức", 
-    total: 1, 
-    icon: "/daily-task/sower-of-knl.png", 
-    xpPerItem: 30, 
-    desc: "Tạo và đăng tải bài viết chia sẻ trong phần Cộng đồng (+30XP/bài)." 
-  }
+    title: "Kẻ Gieo Hạt Tri Thức",
+    total: 1,
+    icon: "/daily-task/sower-of-knl.png",
+    xpPerItem: 30,
+    desc: "Tạo và đăng tải bài viết chia sẻ trong phần Cộng đồng (+30XP/bài).",
+  },
+  {
+    id: "winning",
+    title: "Chiến thắng đấu hạng",
+    total: 1,
+    icon: "/daily-task/learn-past.png",
+    xpPerItem: 50,
+    desc: "Chiến thắng trận đấu hạng (+50XP).",
+  },
+  {
+    id: "hard_working",
+    title: "Con người của công việc",
+    total: 1,
+    icon: "/daily-task/calm-every-day.png",
+    xpPerItem: 20,
+    desc: "Học liên tục trong vòng 30 phút (+20XP).",
+  },
 ];
 
 export const SYSTEM_BADGES = [

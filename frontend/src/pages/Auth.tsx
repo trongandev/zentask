@@ -1,19 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
-import {
-  ArrowRight,
-  BookOpenCheck,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-  Lock,
-  LogIn,
-  Mail,
-  ShieldCheck,
-  Sparkles,
-  UserCheck,
-  Trophy,
-  UserPlus,
-} from "lucide-react";
+import { ArrowRight, BookOpenCheck, CheckCircle2, Eye, EyeOff, Lock, LogIn, Mail, ShieldCheck, Sparkles, UserCheck, Trophy, UserPlus } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuthStore } from "../services/authService";
 import toast from "react-hot-toast";
@@ -39,7 +25,7 @@ const featureCards = [
   },
 ];
 
-const loginTips = ["Học từ vựng", "Luyện nghe nói", "Thi đấu Arena", "Theo dõi XP", "Chống spam"];
+const loginTips = ["Học từ vựng", "Luyện nghe nói", "Thi đấu Arena", "Theo dõi XP"];
 
 export function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -53,16 +39,10 @@ export function Auth() {
 
   const { loading, login, register, loginWithGoogle } = useAuthStore();
 
-  const authTitle = useMemo(
-    () => (isLogin ? "Chào mừng bạn quay lại" : "Tạo tài khoản ZenTask"),
-    [isLogin],
-  );
+  const authTitle = useMemo(() => (isLogin ? "Chào mừng bạn quay lại" : "Tạo tài khoản ZenTask"), [isLogin]);
 
   const authDescription = useMemo(
-    () =>
-      isLogin
-        ? "Đăng nhập để tiếp tục lộ trình học, flashcard, quiz và Arena của bạn."
-        : "Bắt đầu miễn phí để lưu tiến độ học tập, tạo bộ thẻ và tham gia thử thách.",
+    () => (isLogin ? "Đăng nhập để tiếp tục lộ trình học, flashcard, quiz và Arena của bạn." : "Bắt đầu miễn phí để lưu tiến độ học tập, tạo bộ thẻ và tham gia thử thách."),
     [isLogin],
   );
 
@@ -111,9 +91,7 @@ export function Auth() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_20%,rgba(96,165,250,0.24),transparent_32%),radial-gradient(circle_at_70%_70%,rgba(34,197,94,0.14),transparent_28%)]" />
             <div className="relative z-10">
               <div className="mb-10 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl font-black text-blue-600 shadow-lg shadow-blue-950/30">
-                  Z
-                </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl font-black text-blue-600 shadow-lg shadow-blue-950/30">Z</div>
                 <div>
                   <h1 className="text-2xl font-black tracking-tight">ZenTask</h1>
                   <p className="text-sm font-medium text-blue-100/80">Learning workspace</p>
@@ -125,9 +103,7 @@ export function Auth() {
                   <Sparkles className="h-4 w-4 text-yellow-300" />
                   Học đều hơn, nhớ lâu hơn, vui hơn mỗi ngày
                 </div>
-                <h2 className="text-5xl font-black leading-tight tracking-tight">
-                  Tất cả công cụ học tiếng Anh trong một nền tảng.
-                </h2>
+                <h2 className="text-5xl font-black leading-tight tracking-tight">Tất cả công cụ học tiếng Anh trong một nền tảng.</h2>
                 <p className="mt-5 text-lg leading-8 text-slate-200">
                   ZenTask kết hợp flashcard, quiz, AI, luyện phát âm, sổ tay và Arena để biến việc học thành một hành trình rõ ràng, có tiến độ và có động lực.
                 </p>
@@ -137,10 +113,7 @@ export function Auth() {
                 {featureCards.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <div
-                      key={item.title}
-                      className="flex gap-4 rounded-3xl border border-white/10 bg-white/[0.08] p-4 shadow-lg shadow-black/10"
-                    >
+                    <div key={item.title} className="flex gap-4 rounded-3xl border border-white/10 bg-white/[0.08] p-4 shadow-lg shadow-black/10">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-blue-100">
                         <Icon className="h-6 w-6" />
                       </div>
@@ -168,9 +141,7 @@ export function Auth() {
                 </div>
                 <div>
                   <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-200">Lopy gợi ý</p>
-                  <p className="mt-2 text-base font-semibold leading-7 text-white">
-                    Đăng nhập để tiếp tục bài đang học, nhận XP và mở lại hướng dẫn sử dụng khi cần.
-                  </p>
+                  <p className="mt-2 text-base font-semibold leading-7 text-white">Đăng nhập để tiếp tục bài đang học, nhận XP và mở lại hướng dẫn sử dụng khi cần.</p>
                 </div>
               </div>
             </div>
@@ -180,9 +151,7 @@ export function Auth() {
             <div className="mx-auto flex min-h-[620px] w-full max-w-md flex-col justify-center">
               <div className="mb-8 flex items-center justify-between lg:hidden">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-xl font-black text-white shadow-lg shadow-blue-200">
-                    Z
-                  </div>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-xl font-black text-white shadow-lg shadow-blue-200">Z</div>
                   <div>
                     <h1 className="text-xl font-black tracking-tight text-slate-950">ZenTask</h1>
                     <p className="text-xs font-semibold text-slate-500">Learning workspace</p>
@@ -207,36 +176,13 @@ export function Auth() {
                 <p className="mt-3 text-base leading-7 text-slate-600">{authDescription}</p>
               </div>
 
-              <div className="mb-7 grid grid-cols-2 gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-3">
-                <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-wide text-slate-400">Bảo vệ</p>
-                    <p className="text-sm font-extrabold text-slate-800">reCAPTCHA</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
-                    <UserCheck className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-wide text-slate-400">Giới hạn</p>
-                    <p className="text-sm font-extrabold text-slate-800">Chống tài khoản ảo</p>
-                  </div>
-                </div>
-              </div>
-
               <div className="mb-7 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1.5 ring-1 ring-slate-200">
                 <button
                   type="button"
                   onClick={() => switchMode(true)}
                   className={cn(
                     "rounded-xl px-4 py-3 text-sm font-extrabold transition-all",
-                    isLogin
-                      ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200"
-                      : "text-slate-500 hover:text-slate-800",
+                    isLogin ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200" : "text-slate-500 hover:text-slate-800",
                   )}
                 >
                   Đăng nhập
@@ -246,9 +192,7 @@ export function Auth() {
                   onClick={() => switchMode(false)}
                   className={cn(
                     "rounded-xl px-4 py-3 text-sm font-extrabold transition-all",
-                    !isLogin
-                      ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200"
-                      : "text-slate-500 hover:text-slate-800",
+                    !isLogin ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200" : "text-slate-500 hover:text-slate-800",
                   )}
                 >
                   Đăng ký
@@ -280,9 +224,7 @@ export function Auth() {
                     <label htmlFor="auth-password" className="text-sm font-extrabold text-slate-700">
                       Mật khẩu
                     </label>
-                    {isLogin && (
-                      <span className="text-xs font-bold text-slate-400">Tối thiểu 6 ký tự</span>
-                    )}
+                    {isLogin && <span className="text-xs font-bold text-slate-400">Tối thiểu 6 ký tự</span>}
                   </div>
                   <div className="relative group">
                     <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600" />
@@ -308,14 +250,7 @@ export function Auth() {
                   </div>
                 </div>
 
-                <RecaptchaBox
-                  key={recaptchaFormKey}
-                  ref={recaptchaRef}
-                  value={recaptchaToken}
-                  resetKey={recaptchaFormKey}
-                  onChange={handleRecaptchaChange}
-                  onReady={setRecaptchaReady}
-                />
+                <RecaptchaBox key={recaptchaFormKey} ref={recaptchaRef} value={recaptchaToken} resetKey={recaptchaFormKey} onChange={handleRecaptchaChange} onReady={setRecaptchaReady} />
 
                 <button
                   type="submit"
@@ -357,10 +292,7 @@ export function Auth() {
 
               <div className="mt-7 flex flex-wrap gap-2">
                 {loginTips.map((tip) => (
-                  <span
-                    key={tip}
-                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600"
-                  >
+                  <span key={tip} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600">
                     {tip}
                   </span>
                 ))}

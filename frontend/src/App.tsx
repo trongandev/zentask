@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation, Link } from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
@@ -37,7 +37,6 @@ import AIChat from "./pages/AIChat";
 import Notebook from "./pages/Notebook";
 import Utilities from "./pages/Utilities";
 
-
 import { Posts } from "./pages/Posts";
 import { PostDetail } from "./pages/PostDetail";
 import { RightSidebar } from "./components/RightSidebar";
@@ -54,6 +53,7 @@ import { TensesPractice } from "./pages/TensesPractice";
 import Friends from "./pages/Friends";
 import SkillPracticeRoom from "./pages/SkillPracticeRoom";
 import FirstLoginOnboarding from "./components/onboarding/FirstLoginOnboarding";
+import BotConfigPage from "./pages/Admin/BotConfigPage";
 
 function MainLayout() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(() => {
@@ -70,6 +70,21 @@ function MainLayout() {
   const [isRightMobileMenuOpen, setIsRightMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isPracticePage = location.pathname.match(/\/flashcard\/[^\/]+\/practice/);
+
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  const handleScroll = (e: React.UIEvent<HTMLElement>) => {
+    const currentScrollY = e.currentTarget.scrollTop;
+    if (currentScrollY <= 10) {
+      setIsHeaderVisible(true);
+    } else if (currentScrollY > lastScrollY.current + 10) {
+      setIsHeaderVisible(false); // Scroll down
+    } else if (currentScrollY < lastScrollY.current - 10) {
+      setIsHeaderVisible(true); // Scroll up
+    }
+    lastScrollY.current = currentScrollY;
+  };
 
   useEffect(() => {
     localStorage.setItem("isLeftSidebarOpen", JSON.stringify(isLeftSidebarOpen));
@@ -111,9 +126,11 @@ function MainLayout() {
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <Header isLeftSidebarOpen={isLeftSidebarOpen} onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
+        <div className={`transition-all duration-300 ease-in-out ${isHeaderVisible ? "mt-0" : "-mt-20"} relative z-10 shrink-0`}>
+          <Header isLeftSidebarOpen={isLeftSidebarOpen} onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
+        </div>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col" onScroll={handleScroll}>
           <div className="flex-1">
             <Outlet />
           </div>
@@ -151,7 +168,7 @@ function MainLayout() {
         `}
         >
           <div className="h-full w-full">
-            <RightSidebar isOpen={true} onClose={() => setIsRightMobileMenuOpen(false)} onOpen={() => { }} />
+            <RightSidebar isOpen={true} onClose={() => setIsRightMobileMenuOpen(false)} onOpen={() => {}} />
           </div>
         </div>
       )}
@@ -205,7 +222,10 @@ function AppContent() {
           <Route path="vocab" element={<AdminVocab />} />
           <Route path="quizzes" element={<AdminQuizzes />} />
           <Route path="quiz-history" element={<AdminQuizHistory />} />
+          <Route path="bot-config" element={<BotConfigPage />} />
         </Route>
+        <Route path="arena" element={<Arena />} />
+
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="beginner" element={<Beginner />} />
@@ -229,7 +249,6 @@ function AppContent() {
           <Route path="tenses/practice/:stageId" element={<TensesPractice />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:id" element={<Profile />} />
-          <Route path="arena" element={<Arena />} />
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="community" element={<Community />} />
           <Route path="ai-chat" element={<AIChat />} />

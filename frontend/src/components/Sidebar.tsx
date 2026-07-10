@@ -1,5 +1,7 @@
 import { cn } from "../lib/utils";
 import { NavLink } from "react-router-dom";
+import { useState } from "react";
+import { PricingModal } from "./PricingModal";
 import { useAuth } from "../contexts/AuthContext";
 import { Home, Copy, HelpCircle, BookOpen, Clock, Trophy, Users, Globe, FileText, Diamond, ChevronRight, PanelLeftOpen, PanelLeftClose, ShieldAlert, MountainSnow, MessageCircle, NotebookPen, Wrench, UserRoundPlus } from "lucide-react";
 
@@ -10,6 +12,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const { user } = useAuth();
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const menuGroups = [
     {
       label: "",
@@ -119,7 +122,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       {/* Footer Area */}
       <div className="p-4 mt-auto">
         {isOpen ? (
-          <div className="bg-blue-50/50 rounded-2xl p-4 border border-blue-100 hover:border-blue-200 transition-colors cursor-pointer group">
+          <div onClick={() => setIsPricingModalOpen(true)} className="bg-blue-50/50 rounded-2xl p-4 border border-blue-100 hover:border-blue-200 transition-colors cursor-pointer group">
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center gap-2">
                 <img src="/etc/upgrade.png" className="w-9" />
@@ -135,6 +138,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           </button>
         )}
       </div>
+
+      <PricingModal isOpen={isPricingModalOpen} onClose={() => setIsPricingModalOpen(false)} />
     </aside>
   );
 }

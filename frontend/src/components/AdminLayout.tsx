@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet, Navigate, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Shield, Users, ListTodo, LogOut, ArrowLeft, BookOpen, Type, HelpCircle, History } from "lucide-react";
+import { Shield, Users, ListTodo, LogOut, ArrowLeft, BookOpen, Type, HelpCircle, History, Bot } from "lucide-react";
 
 export function AdminLayout() {
   const { user } = useAuth();
@@ -32,6 +32,7 @@ const ADMIN_NAV_LINKS = [
     { path: "/admin/vocab", label: "Từ vựng", icon: Type },
     { path: "/admin/quizzes", label: "Quiz", icon: HelpCircle },
     { path: "/admin/quiz-history", label: "Lịch sử Quiz", icon: History },
+    { path: "/admin/bot-config", label: "Cấu hình Bot", icon: Bot },
   ];
 
   return (

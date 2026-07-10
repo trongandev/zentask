@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Edit2, Check, ListTodo, DownloadCloud } from "lucide-react";
+import { Plus, Trash2, Edit2, Check, ListTodo, DownloadCloud, CheckCircle, CalendarClock, Activity } from "lucide-react";
 import { adminService } from "@/src/services/adminService";
 import { DataTable } from "@/src/components/Admin/DataTable";
 import { Modal } from "@/src/components/Admin/Modal";
+import { AdminStatCards } from "@/src/components/Admin/AdminStatCards";
 import { useAdminStore } from "@/src/store/useAdminStore";
 
 export function AdminTasks() {
@@ -59,55 +60,6 @@ export function AdminTasks() {
     if (success) fetchTasks(true);
   };
 
-  const handleImportDefaultTasks = async () => {
-    if (!window.confirm("Bạn có muốn thêm các nhiệm vụ mặc định?")) return;
-    try {
-      const defaultTasks = [
-        {
-          id: "create_material",
-          title: "Khởi Tạo Chất Liệu",
-          total: 10,
-          icon: "/daily-task/material-init.png",
-          xpPerItem: 5,
-          desc: "Thêm mới thành công từ vựng vào bộ Thẻ lật cá nhân của bạn (+5XP/từ).",
-        },
-        {
-          id: "quiz_master",
-          title: "Bậc Thầy Đố Vui",
-          total: 2,
-          icon: "/daily-task/master-of-riddles.png",
-          xpPerItem: 20,
-          desc: "Tự thiết kế và xuất bản thành công câu hỏi trắc nghiệm mới (+20XP/câu).",
-        },
-        {
-          id: "daily_checkin",
-          title: "Điểm Tĩnh Mỗi Ngày",
-          total: 1,
-          icon: "/daily-task/calm-every-day.png",
-          xpPerItem: 10,
-          desc: "Nhấn nút Điểm danh hàng ngày ngay khi đăng nhập ứng dụng (+10XP).",
-        },
-        { id: "learn_past", title: "Ôn Cố Tri Tân", total: 10, icon: "/daily-task/learn-past.png", xpPerItem: 2, desc: "Hoàn thành việc lật và ôn tập lại từ vựng cũ đã học (+2XP/từ)." },
-        {
-          id: "community_share",
-          title: "Kẻ Gieo Hạt Tri Thức",
-          total: 1,
-          icon: "/daily-task/sower-of-knl.png",
-          xpPerItem: 30,
-          desc: "Tạo và đăng tải bài viết chia sẻ trong phần Cộng đồng (+30XP/bài).",
-        },
-      ];
-
-      for (const task of defaultTasks) {
-        await adminService.createTask(task);
-      }
-      fetchTasks(true);
-    } catch (error) {
-      console.error("Error importing default tasks:", error);
-      alert("Có lỗi xảy ra khi nhập dữ liệu.");
-    }
-  };
-
   const columns = [
     {
       header: "Tiêu đề",
@@ -146,6 +98,17 @@ export function AdminTasks() {
     },
   ];
 
+  const totalTasks = tasks.items.length;
+  const highXpTasks = tasks.items.filter((t: any) => (t.xpPerItem || t.xpReward) >= 20).length;
+  const multiStepTasks = tasks.items.filter((t: any) => t.total > 1).length;
+
+  const stats = [
+    { title: "Tổng nhiệm vụ", value: totalTasks, icon: ListTodo, color: "text-blue-600", bg: "bg-blue-50" },
+    { title: "Nhiệm vụ nhiều bước", value: multiStepTasks, icon: CalendarClock, color: "text-green-600", bg: "bg-green-50" },
+    { title: "Thưởng cao (≥20XP)", value: highXpTasks, icon: CheckCircle, color: "text-teal-600", bg: "bg-teal-50" },
+    { title: "Hoạt động", value: "Ổn định", icon: Activity, color: "text-orange-600", bg: "bg-orange-50" },
+  ];
+
   return (
     <div>
       <div className="flex items-center justify-between gap-3 mb-8">
@@ -158,20 +121,14 @@ export function AdminTasks() {
             <p className="text-gray-500 font-medium">Quản lý và tạo mới các nhiệm vụ</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleImportDefaultTasks}
-            className="px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors shadow-sm flex items-center gap-2"
-          >
-            <DownloadCloud className="w-5 h-5 text-blue-600" />
-            Import Mặc định
-          </button>
-          <button onClick={startCreateTask} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-md flex items-center gap-2">
-            <Plus className="w-5 h-5" />
-            Thêm mới
-          </button>
-        </div>
+
+        <button onClick={startCreateTask} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-md flex items-center gap-2">
+          <Plus className="w-5 h-5" />
+          Thêm mới
+        </button>
       </div>
+
+      <AdminStatCards stats={stats} />
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
         <DataTable columns={columns} data={tasks.items} loading={tasks.loading} />

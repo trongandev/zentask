@@ -43,6 +43,22 @@ export function FlashcardDetail() {
     return localStorage.getItem("tts_voice") || "en-GB-SoniaNeural";
   });
 
+  // Sticky header state
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const headerSentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!headerSentinelRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHeaderVisible(entry.isIntersecting);
+      },
+      { threshold: 0, rootMargin: "-1px 0px 0px 0px" }
+    );
+    observer.observe(headerSentinelRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   // Form states
   const [term, setTerm] = useState("");
   const [phonetic, setPhonetic] = useState("");
@@ -189,41 +205,41 @@ export function FlashcardDetail() {
       return <span className="rounded-full bg-indigo-50 px-2 py-1 text-xs font-extrabold text-indigo-600">Có sẵn</span>;
     }
     return (
-    <div data-popover-root className="relative" onClick={(e) => e.stopPropagation()}>
-      <button onClick={() => setOpenPopoverId(openPopoverId === cardId ? null : cardId)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-        <MoreVertical className="w-4 h-4" />
-      </button>
-      {openPopoverId === cardId && (
-        <div className="absolute right-0 top-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 animate-in fade-in slide-in-from-top-2 duration-150">
-          <button
-            onClick={() => {
-              setOpenPopoverId(null);
-              toast("Tính năng chỉnh sửa đang phát triển");
-            }}
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <Pencil className="w-4 h-4 text-blue-500" />
-            Chỉnh sửa từ vựng
-          </button>
-          <button
-            onClick={() => {
-              setMemoryModalCardId(cardId);
-              setOpenPopoverId(null);
-            }}
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <Star className="w-4 h-4 text-yellow-500" />
-            Thay đổi độ nhớ
-          </button>
-          <div className="my-1 border-t border-gray-100" />
-          <button onClick={() => handleDeleteCard(cardId)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
-            <Trash2 className="w-4 h-4" />
-            Xóa từ
-          </button>
-        </div>
-      )}
-    </div>
-  );
+      <div data-popover-root className="relative" onClick={(e) => e.stopPropagation()}>
+        <button onClick={() => setOpenPopoverId(openPopoverId === cardId ? null : cardId)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+          <MoreVertical className="w-4 h-4" />
+        </button>
+        {openPopoverId === cardId && (
+          <div className="absolute right-0 top-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 animate-in fade-in slide-in-from-top-2 duration-150">
+            <button
+              onClick={() => {
+                setOpenPopoverId(null);
+                toast("Tính năng chỉnh sửa đang phát triển");
+              }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Pencil className="w-4 h-4 text-blue-500" />
+              Chỉnh sửa từ vựng
+            </button>
+            <button
+              onClick={() => {
+                setMemoryModalCardId(cardId);
+                setOpenPopoverId(null);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Star className="w-4 h-4 text-yellow-500" />
+              Thay đổi độ nhớ
+            </button>
+            <div className="my-1 border-t border-gray-100" />
+            <button onClick={() => handleDeleteCard(cardId)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+              <Trash2 className="w-4 h-4" />
+              Xóa từ
+            </button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderBadge = (cardId: string) => {
@@ -358,16 +374,49 @@ export function FlashcardDetail() {
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 relative">
+      {/* Sentinel for sticky header */}
+      <div ref={headerSentinelRef} className="absolute top-0 w-full h-px pointer-events-none" />
+      
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-50 h-0 overflow-visible">
+        <div 
+          className={cn(
+            "absolute top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300 flex items-center justify-between px-4 sm:px-6 py-3 rounded-b-2xl -mx-4 sm:-mx-6",
+            !isHeaderVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-full opacity-0 pointer-events-none"
+          )}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <button onClick={() => navigate(-1)} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors shrink-0">
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-gray-900 text-sm leading-tight truncate">{currentSet.title}</span>
+              <span className="text-xs text-gray-500">{currentSet.cardCount} thẻ</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={() => setIsVoiceModalOpen(true)} className="px-3 py-1.5 bg-gray-100 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors hidden sm:block">
+              Đổi giọng
+            </button>
+            <button onClick={() => navigate(`/flashcard/${id}/practice`)} className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-blue-100 transition-colors">
+              <Play className="w-4 h-4 fill-current" /> Học
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate("/flashcards")} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
             <ArrowLeft className="w-6 h-6 text-gray-600" />
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{currentSet.title}</h1>
-            <p className="text-gray-500">{currentSet.cardCount} thẻ {isBuiltInSet ? "• Học liệu có sẵn, không thể xóa/sửa" : ""}</p>
+            <p className="text-gray-500">
+              {currentSet.cardCount} thẻ {isBuiltInSet ? "• Học liệu có sẵn, không thể xóa/sửa" : ""}
+            </p>
           </div>
         </div>
         <button onClick={() => setIsVoiceModalOpen(true)} className="px-4 py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors">

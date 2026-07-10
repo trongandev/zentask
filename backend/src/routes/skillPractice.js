@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { GoogleGenAI, Type } from "@google/genai";
-import { SkillPracticeCache, SkillPracticeDaily } from "../models/Schemas.js";
+import { SkillPracticeCache, SkillPracticeDaily, UserActivity } from "../models/Schemas.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { addXpToUser } from "./user.js";
@@ -14,12 +14,16 @@ const SOURCES = ["VOA Learning English", "British Council LearnEnglish"];
 const getToday = () => new Date().toISOString().slice(0, 10);
 const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
-const normalize = (value) => String(value || "").trim().replace(/\s+/g, " ");
+const normalize = (value) =>
+  String(value || "")
+    .trim()
+    .replace(/\s+/g, " ");
 
 const LISTENING_BANK = [
   {
     title: "A morning routine",
-    passage: "Sarah wakes up at seven o'clock every morning. She drinks a glass of water and does some light stretching exercises. After that, she prepares a healthy breakfast with oatmeal and fresh fruit.",
+    passage:
+      "Sarah wakes up at seven o'clock every morning. She drinks a glass of water and does some light stretching exercises. After that, she prepares a healthy breakfast with oatmeal and fresh fruit.",
     targetAnswer: "She drinks a glass of water and does some light stretching exercises.",
   },
   {
@@ -80,10 +84,28 @@ const REFLEX_BANK = [
 const VIETNAMESE_CHAR_RE = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
 const COMMON_VIETNAMESE_WORDS = ["cải thiện", "quên", "mua", "đóng cửa", "lịch trình", "tự tin", "giảm bớt", "mượn", "chuẩn bị", "khỏe mạnh", "bài viết"];
 const ENGLISH_REFLEX_DISTRACTORS = [
-  "always", "usually", "often", "sometimes", "rarely", "never",
-  "quickly", "carefully", "slowly", "clearly",
-  "improve", "prepare", "reduce", "compare", "borrow", "schedule",
-  "confidence", "healthy", "article", "energy", "practice", "understand",
+  "always",
+  "usually",
+  "often",
+  "sometimes",
+  "rarely",
+  "never",
+  "quickly",
+  "carefully",
+  "slowly",
+  "clearly",
+  "improve",
+  "prepare",
+  "reduce",
+  "compare",
+  "borrow",
+  "schedule",
+  "confidence",
+  "healthy",
+  "article",
+  "energy",
+  "practice",
+  "understand",
 ];
 
 function looksVietnamese(value) {
@@ -113,9 +135,7 @@ function buildReflexOptions({ question, correctAnswer, options }) {
 
   const blankQuestion = isBlankStyleQuestion(question);
   const useEnglishPool = blankQuestion || looksEnglishOnly(cleanCorrect);
-  const pool = useEnglishPool
-    ? ENGLISH_REFLEX_DISTRACTORS
-    : REFLEX_BANK.flatMap((item) => [item.correctAnswer, ...item.distractors]);
+  const pool = useEnglishPool ? ENGLISH_REFLEX_DISTRACTORS : REFLEX_BANK.flatMap((item) => [item.correctAnswer, ...item.distractors]);
 
   if (blankQuestion) {
     cleanOptions = cleanOptions.filter((option, index) => index === 0 || looksEnglishOnly(option));
@@ -159,7 +179,6 @@ function normalizeReflexExercise(data) {
     correctAnswer,
   };
 }
-
 
 function makeBlankSentence(sentence, answer) {
   const safeSentence = normalize(sentence);
@@ -269,7 +288,12 @@ const getAiKey = () => {
     if (process.env[`API_KEY_AI_${i}`]) keys.push(process.env[`API_KEY_AI_${i}`]);
   }
   if (process.env.GEMINI_API_KEY) keys.push(process.env.GEMINI_API_KEY);
-  if (process.env.GEMINI_API_KEYS) keys.push(...process.env.GEMINI_API_KEYS.split(",").map((v) => v.trim()).filter(Boolean));
+  if (process.env.GEMINI_API_KEYS)
+    keys.push(
+      ...process.env.GEMINI_API_KEYS.split(",")
+        .map((v) => v.trim())
+        .filter(Boolean),
+    );
   return keys[Math.floor(Math.random() * keys.length)] || null;
 };
 
@@ -324,57 +348,76 @@ Yêu cầu:
   }
 }
 
-router.get("/random", asyncHandler(async (req, res) => {
-  const mode = String(req.query.mode || "listening");
-  if (!MODES.includes(mode)) return res.status(400).json({ error: "Mode không hợp lệ" });
+router.get(
+  "/random",
+  asyncHandler(async (req, res) => {
+    const mode = String(req.query.mode || "listening");
+    if (!MODES.includes(mode)) return res.status(400).json({ error: "Mode không hợp lệ" });
 
-  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-  const payload = await generateExercise(mode);
-  const cache = await SkillPracticeCache.create({ mode, payload, sourceHint: payload.sourceHint || "AI tổng hợp" });
-  res.json({ id: String(cache._id), ...payload });
-}));
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    const payload = await generateExercise(mode);
+    const cache = await SkillPracticeCache.create({ mode, payload, sourceHint: payload.sourceHint || "AI tổng hợp" });
+    res.json({ id: String(cache._id), ...payload });
+  }),
+);
 
-router.post("/submit", asyncHandler(async (req, res) => {
-  const { mode, isCorrect, responseMs = 0, exerciseId = null } = req.body;
-  if (!MODES.includes(mode)) return res.status(400).json({ error: "Mode không hợp lệ" });
+router.post(
+  "/submit",
+  asyncHandler(async (req, res) => {
+    const { mode, isCorrect, responseMs = 0, exerciseId = null } = req.body;
+    if (!MODES.includes(mode)) return res.status(400).json({ error: "Mode không hợp lệ" });
 
-  const today = getToday();
-  let daily = await SkillPracticeDaily.findOne({ uid: req.user.uid, date: today });
-  if (!daily) daily = await SkillPracticeDaily.create({ uid: req.user.uid, date: today, completedModes: [], bonusClaimed: false, attempts: [] });
+    const today = getToday();
+    let daily = await SkillPracticeDaily.findOne({ uid: req.user.uid, date: today });
+    if (!daily) daily = await SkillPracticeDaily.create({ uid: req.user.uid, date: today, completedModes: [], bonusClaimed: false, attempts: [] });
 
-  const completed = new Set(daily.completedModes || []);
-  let awardedXp = 0;
-  let reason = "no_reward";
+    const completed = new Set(daily.completedModes || []);
+    let awardedXp = 0;
+    let reason = "no_reward";
 
-  if (isCorrect && !completed.has(mode)) {
-    completed.add(mode);
-    if (mode === "reflex") {
-      awardedXp += Number(responseMs || 0) <= 5000 ? 20 : 10;
-      reason = Number(responseMs || 0) <= 5000 ? "reflex_fast" : "reflex_slow";
-    } else {
-      reason = "mode_completed";
+    if (isCorrect && !completed.has(mode)) {
+      completed.add(mode);
+      if (mode === "reflex") {
+        awardedXp += Number(responseMs || 0) <= 5000 ? 20 : 10;
+        reason = Number(responseMs || 0) <= 5000 ? "reflex_fast" : "reflex_slow";
+      } else {
+        reason = "mode_completed";
+      }
     }
-  }
 
-  if (completed.size >= 4 && !daily.bonusClaimed) {
-    awardedXp += 50;
-    daily.bonusClaimed = true;
-    reason = awardedXp > 50 ? `${reason}_daily_bonus` : "daily_bonus";
-  }
+    if (completed.size >= 4 && !daily.bonusClaimed) {
+      awardedXp += 50;
+      daily.bonusClaimed = true;
+      reason = awardedXp > 50 ? `${reason}_daily_bonus` : "daily_bonus";
+    }
 
-  daily.completedModes = Array.from(completed);
-  daily.attempts = [...(daily.attempts || []), { mode, isCorrect: !!isCorrect, responseMs, exerciseId, at: new Date() }].slice(-50);
-  await daily.save();
+    daily.completedModes = Array.from(completed);
+    daily.attempts = [...(daily.attempts || []), { mode, isCorrect: !!isCorrect, responseMs, exerciseId, at: new Date() }].slice(-50);
+    await daily.save();
 
-  let xpResult = null;
-  if (awardedXp > 0) xpResult = await addXpToUser(req.user.uid, awardedXp);
+    let xpResult = null;
+    if (awardedXp > 0) {
+      xpResult = await addXpToUser(req.user.uid, awardedXp);
+      
+      await UserActivity.create({
+        uid: req.user.uid,
+        action: "Luyện tập kỹ năng",
+        target: `Chế độ ${mode}`,
+        type: "quiz", 
+        xpEarned: awardedXp
+      });
+    }
 
-  res.json({ success: true, awardedXp, reason, completedModes: daily.completedModes, bonusClaimed: daily.bonusClaimed, xpResult });
-}));
+    res.json({ success: true, awardedXp, reason, completedModes: daily.completedModes, bonusClaimed: daily.bonusClaimed, xpResult });
+  }),
+);
 
-router.get("/daily", asyncHandler(async (req, res) => {
-  const daily = await SkillPracticeDaily.findOne({ uid: req.user.uid, date: getToday() }).lean();
-  res.json(daily || { completedModes: [], bonusClaimed: false });
-}));
+router.get(
+  "/daily",
+  asyncHandler(async (req, res) => {
+    const daily = await SkillPracticeDaily.findOne({ uid: req.user.uid, date: getToday() }).lean();
+    res.json(daily || { completedModes: [], bonusClaimed: false });
+  }),
+);
 
 export default router;

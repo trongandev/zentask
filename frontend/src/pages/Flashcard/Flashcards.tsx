@@ -4,7 +4,7 @@ import { cn } from "../../lib/utils";
 
 import { RankCard } from "../../components/shared/RankCard";
 import { useFlashcardStore } from "../../services/flashcardService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
 import { SEO } from "../../components/SEO";
@@ -133,11 +133,7 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
           {set.isPublic === false ? <Lock className="w-3 h-3" /> : <Globe2 className="w-3 h-3" />}
           {set.isPublic === false ? "Riêng tư" : "Công khai"}
         </span>
-        {set.categoryName && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-600">
-            {set.categoryName}
-          </span>
-        )}
+        {set.categoryName && <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-600">{set.categoryName}</span>}
       </div>
 
       <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 font-medium">
@@ -230,7 +226,29 @@ function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClick, popo
 }
 
 export function Flashcards() {
-  const { sets, publicSets, builtinSets, folders, categories, fetchSets, fetchPublicSets, fetchBuiltinSets, fetchFolders, fetchCategories, createSet, updateSet, deleteSet, createFolder, updateFolder, deleteFolder, createCategory, deleteCategory, cloneSet, cloneBuiltinSet, loading } = useFlashcardStore();
+  const {
+    sets,
+    publicSets,
+    builtinSets,
+    folders,
+    categories,
+    fetchSets,
+    fetchPublicSets,
+    fetchBuiltinSets,
+    fetchFolders,
+    fetchCategories,
+    createSet,
+    updateSet,
+    deleteSet,
+    createFolder,
+    updateFolder,
+    deleteFolder,
+    createCategory,
+    deleteCategory,
+    cloneSet,
+    cloneBuiltinSet,
+    loading,
+  } = useFlashcardStore();
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -248,11 +266,33 @@ export function Flashcards() {
   const [newDesc, setNewDesc] = useState("");
   const [selectedColor, setSelectedColor] = useState("bg-blue-500");
   const [setIsPublic, setSetIsPublic] = useState(true);
-  const [activeTab, setActiveTab] = useState<"mine" | "builtin" | "public">("mine");
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = (searchParams.get("tab") as "mine" | "builtin" | "public") || "mine";
+
+  const setActiveTab = (tab: "mine" | "builtin" | "public") => {
+    setSearchParams((prev) => {
+      prev.set("tab", tab);
+      return prev;
+    });
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategoryId, setActiveCategoryId] = useState<string>("all");
-  const [activePublicCategoryName, setActivePublicCategoryName] = useState<string>("all");
-  const [activeBuiltinCategoryName, setActiveBuiltinCategoryName] = useState<string>("all");
+  const activePublicCategoryName = searchParams.get("publicCategory") || "all";
+  const setActivePublicCategoryName = (category: string) => {
+    setSearchParams((prev) => {
+      prev.set("publicCategory", category);
+      return prev;
+    });
+  };
+
+  const activeBuiltinCategoryName = searchParams.get("builtinCategory") || "all";
+  const setActiveBuiltinCategoryName = (category: string) => {
+    setSearchParams((prev) => {
+      prev.set("builtinCategory", category);
+      return prev;
+    });
+  };
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [newCategoryName, setNewCategoryName] = useState("");
 
@@ -533,16 +573,26 @@ export function Flashcards() {
   const displayedPublicSets = publicSets
     .filter((set: any) => set.isPublic)
     .filter(matchesSearch)
-    .filter((set: any) => activePublicCategoryName === "all" || String(set.categoryName || "").trim().toLowerCase() === activePublicCategoryName);
+    .filter(
+      (set: any) =>
+        activePublicCategoryName === "all" ||
+        String(set.categoryName || "")
+          .trim()
+          .toLowerCase() === activePublicCategoryName,
+    );
 
   const builtinCategoryOptions = [
     { name: "IELTS", count: builtinSets.filter((set: any) => String(set.categoryName || set.category).toUpperCase() === "IELTS").length, color: "bg-indigo-600" },
     { name: "TOEIC", count: builtinSets.filter((set: any) => String(set.categoryName || set.category).toUpperCase() === "TOEIC").length, color: "bg-emerald-600" },
   ];
 
-  const displayedBuiltinSets = builtinSets
-    .filter(matchesSearch)
-    .filter((set: any) => activeBuiltinCategoryName === "all" || String(set.categoryName || set.category || "").trim().toLowerCase() === activeBuiltinCategoryName);
+  const displayedBuiltinSets = builtinSets.filter(matchesSearch).filter(
+    (set: any) =>
+      activeBuiltinCategoryName === "all" ||
+      String(set.categoryName || set.category || "")
+        .trim()
+        .toLowerCase() === activeBuiltinCategoryName,
+  );
 
   const handleClonePublicSet = async (setId: string) => {
     const cloned = await cloneSet(setId);
@@ -559,7 +609,6 @@ export function Flashcards() {
       setActiveTab("mine");
     }
   };
-
 
   const handleCreateCategory = async () => {
     const name = newCategoryName.trim();
@@ -582,7 +631,7 @@ export function Flashcards() {
         <div className="flex items-center gap-4">
           <img src="/mascot/Lopy (11).png" className="w-16 h-16 object-contain drop-shadow-md" alt="Mascot" />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Thẻ lật (Flashcard)</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">Thẻ lật</h1>
             <p className="text-gray-500">Ôn tập và ghi nhớ từ vựng hiệu quả qua các bộ thẻ.</p>
           </div>
         </div>
@@ -646,13 +695,11 @@ export function Flashcards() {
                   className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryId === category.id ? `${category.color || "bg-blue-600"} text-white shadow-sm` : "text-gray-600 hover:bg-gray-200"}`}
                 >
                   <span>{category.name}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === category.id ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{getCategoryCount(category.id)}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === category.id ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>
+                    {getCategoryCount(category.id)}
+                  </span>
                 </button>
-                <button
-                  onClick={() => deleteCategory(category.id)}
-                  title="Xóa đề mục"
-                  className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
-                >
+                <button onClick={() => deleteCategory(category.id)} title="Xóa đề mục" className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">
                   ×
                 </button>
               </div>
@@ -743,13 +790,22 @@ export function Flashcards() {
                   <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{set.title}</h3>
                   <p className="text-sm text-gray-500 line-clamp-2 mb-4">{set.description || "Bộ thẻ có sẵn của ZenTask"}</p>
                   <div className="flex flex-wrap items-center gap-2 text-xs font-bold mb-5">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-indigo-600"><Star className="w-3 h-3" /> Có sẵn</span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-indigo-600">
+                      <Star className="w-3 h-3" /> Có sẵn
+                    </span>
                     <span className="rounded-full bg-gray-50 px-2.5 py-1 text-gray-600">{set.cardCount || 0} thẻ</span>
                     <span className="rounded-full bg-blue-50 px-2.5 py-1 text-blue-600">{set.categoryName || set.category}</span>
                   </div>
                   <div className="mt-auto grid grid-cols-2 gap-3">
-                    <button onClick={() => navigate(`/flashcard/${set.id}`)} className="rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-100 transition-colors">Học ngay</button>
-                    <button onClick={() => handleCloneBuiltinSet(set.id)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors"><Copy className="w-4 h-4" /> Lưu</button>
+                    <button onClick={() => navigate(`/flashcard/${set.id}`)} className="rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-100 transition-colors">
+                      Học ngay
+                    </button>
+                    <button
+                      onClick={() => handleCloneBuiltinSet(set.id)}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 transition-colors"
+                    >
+                      <Copy className="w-4 h-4" /> Lưu
+                    </button>
                   </div>
                 </div>
               ))}
@@ -776,7 +832,9 @@ export function Flashcards() {
                 className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activePublicCategoryName === "all" ? "bg-emerald-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
               >
                 Tất cả
-                <span className={`rounded-full px-2 py-0.5 text-[11px] ${activePublicCategoryName === "all" ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{publicSets.filter((set: any) => set.isPublic).length}</span>
+                <span className={`rounded-full px-2 py-0.5 text-[11px] ${activePublicCategoryName === "all" ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>
+                  {publicSets.filter((set: any) => set.isPublic).length}
+                </span>
               </button>
               {publicCategoryOptions.map((category) => {
                 const key = category.name.toLowerCase();
@@ -1189,7 +1247,9 @@ export function Flashcards() {
                 >
                   <option value="">Không chọn đề mục</option>
                   {categories.map((category: any) => (
-                    <option key={category.id} value={category.id}>{category.name}</option>
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
                   ))}
                 </select>
               </div>

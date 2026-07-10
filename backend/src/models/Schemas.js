@@ -255,6 +255,15 @@ export const TranslationHistorySchema = new Schema({
   target: { type: String, default: "en" }
 }, { timestamps: true });
 
+export const UserActivitySchema = new Schema({
+  uid: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  action: { type: String, required: true },
+  target: { type: String, required: true },
+  type: { type: String, enum: ["quiz", "flashcard", "arena", "other"], default: "other" },
+  xpEarned: { type: Number, default: 0 },
+  metadata: { type: Schema.Types.Mixed, default: {} }
+}, { timestamps: true });
+
 export const StudyMethodSchema = new Schema({
   uid: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   name: { type: String, required: true },
@@ -294,6 +303,15 @@ export const UserFollowSchema = new Schema({
   followingId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 }, { timestamps: true });
 
+export const BotConfigSchema = new Schema({
+  rankId: { type: Number, required: true, unique: true },
+  rankName: { type: String, required: true },
+  correctRate: { type: Number, required: true },
+  fastResponseRate: { type: Number, required: true }, // <= 10s
+  timeDistribution: { type: Schema.Types.Mixed, default: {} }, // % for seconds 1 to 10
+  slowResponseRate: { type: Number, required: true }, // > 10s
+}, { timestamps: true });
+
 export const DailyUsage = mongoose.models.DailyUsage || mongoose.model('DailyUsage', DailyUsageSchema);
 export const IpSignupCounter = mongoose.models.IpSignupCounter || mongoose.model('IpSignupCounter', IpSignupCounterSchema);
 export const DailyTask = mongoose.models.DailyTask || mongoose.model('DailyTask', DailyTaskSchema);
@@ -328,3 +346,5 @@ export const StudyMethod = mongoose.models.StudyMethod || mongoose.model('StudyM
 export const ArenaTournamentRoom = mongoose.models.ArenaTournamentRoom || mongoose.model('ArenaTournamentRoom', ArenaTournamentRoomSchema);
 export const SkillPracticeDaily = mongoose.models.SkillPracticeDaily || mongoose.model('SkillPracticeDaily', SkillPracticeDailySchema);
 export const SkillPracticeCache = mongoose.models.SkillPracticeCache || mongoose.model('SkillPracticeCache', SkillPracticeCacheSchema);
+export const BotConfig = mongoose.models.BotConfig || mongoose.model('BotConfig', BotConfigSchema);
+export const UserActivity = mongoose.models.UserActivity || mongoose.model('UserActivity', UserActivitySchema);

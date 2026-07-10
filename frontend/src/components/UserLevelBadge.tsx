@@ -22,9 +22,9 @@ export function UserLevelBadge({ level, className, size = "md", showText = true 
   };
 
   return (
-    <div className={cn("inline-flex items-center gap-1.5", className)}>
+    <div className={cn("inline-flex items-center gap-1.5", className || "text-blue-700")}>
       <img src={getLevelImage(level)} alt={`Level ${level}`} className={cn("object-contain drop-shadow-sm", sizeClasses[size])} />
-      {showText && <span className={cn("font-bold text-blue-700", size === "sm" ? "text-xs" : size === "md" ? "text-sm" : "text-base")}>Lv.{level}</span>}
+      {showText && <span className={cn("font-bold ", size === "sm" ? "text-xs" : size === "md" ? "text-sm" : "text-base")}>Lv.{level}</span>}
     </div>
   );
 }

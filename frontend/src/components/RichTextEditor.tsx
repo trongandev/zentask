@@ -1,21 +1,21 @@
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import { TextStyle } from '@tiptap/extension-text-style';
-import { Color } from '@tiptap/extension-color';
-import { Extension } from '@tiptap/core';
-import { Plugin, PluginKey } from '@tiptap/pm/state';
-import { Decoration, DecorationSet } from '@tiptap/pm/view';
-import { Bold, Italic, Strikethrough, List, ListOrdered, Palette, Type } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { containsForbiddenPublicContent } from '../utils/publicContentGuard';
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { Color } from "@tiptap/extension-color";
+import { Extension } from "@tiptap/core";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
+import { Bold, Italic, Strikethrough, List, ListOrdered, Palette, Type } from "lucide-react";
+import { useEffect, useState } from "react";
+import { containsForbiddenPublicContent } from "../utils/publicContentGuard";
 
 // Custom Extension for Font Size
 const FontSize = Extension.create({
-  name: 'fontSize',
+  name: "fontSize",
   addOptions() {
     return {
-      types: ['textStyle'],
+      types: ["textStyle"],
     };
   },
   addGlobalAttributes() {
@@ -25,8 +25,8 @@ const FontSize = Extension.create({
         attributes: {
           fontSize: {
             default: null,
-            parseHTML: element => element.style.fontSize?.replace(/['"]+/g, ''),
-            renderHTML: attributes => {
+            parseHTML: (element) => element.style.fontSize?.replace(/['"]+/g, ""),
+            renderHTML: (attributes) => {
               if (!attributes.fontSize) {
                 return {};
               }
@@ -41,28 +41,27 @@ const FontSize = Extension.create({
   },
   addCommands() {
     return {
-      setFontSize: fontSize => ({ chain }) => {
-        return chain()
-          .setMark('textStyle', { fontSize })
-          .run();
-      },
-      unsetFontSize: () => ({ chain }) => {
-        return chain()
-          .setMark('textStyle', { fontSize: null })
-          .removeEmptyTextStyle()
-          .run();
-      },
+      setFontSize:
+        (fontSize) =>
+        ({ chain }) => {
+          return chain().setMark("textStyle", { fontSize }).run();
+        },
+      unsetFontSize:
+        () =>
+        ({ chain }) => {
+          return chain().setMark("textStyle", { fontSize: null }).removeEmptyTextStyle().run();
+        },
     };
   },
 });
 
 // Custom Extension for Hashtag Highlighting
 const HashtagHighlight = Extension.create({
-  name: 'hashtagHighlight',
+  name: "hashtagHighlight",
   addProseMirrorPlugins() {
     return [
       new Plugin({
-        key: new PluginKey('hashtagHighlight'),
+        key: new PluginKey("hashtagHighlight"),
         state: {
           init() {
             return DecorationSet.empty;
@@ -70,7 +69,7 @@ const HashtagHighlight = Extension.create({
           apply(tr, oldState) {
             const doc = tr.doc;
             const decorations: Decoration[] = [];
-            
+
             doc.descendants((node, pos) => {
               if (node.isText && node.text) {
                 const regex = /#[\wÀ-ỹ]+/g;
@@ -78,23 +77,23 @@ const HashtagHighlight = Extension.create({
                 while ((match = regex.exec(node.text)) !== null) {
                   decorations.push(
                     Decoration.inline(pos + match.index, pos + match.index + match[0].length, {
-                      class: 'text-blue-500 font-bold bg-blue-50 px-1 rounded'
-                    })
+                      class: "text-blue-500 font-bold bg-blue-50 px-1 rounded",
+                    }),
                   );
                 }
               }
             });
             return DecorationSet.create(doc, decorations);
-          }
+          },
         },
         props: {
           decorations(state) {
             return this.getState(state);
-          }
-        }
-      })
+          },
+        },
+      }),
     ];
-  }
+  },
 });
 
 interface RichTextEditorProps {
@@ -104,15 +103,15 @@ interface RichTextEditorProps {
   minHeight?: string;
 }
 
-const COLORS = ['#000000', '#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'];
+const COLORS = ["#000000", "#EF4444", "#3B82F6", "#10B981", "#F59E0B", "#8B5CF6"];
 const FONT_SIZES = [
-  { label: 'Nhỏ', value: '12px' },
-  { label: 'Thường', value: '16px' },
-  { label: 'Vừa', value: '20px' },
-  { label: 'Lớn', value: '24px' },
+  { label: "Nhỏ", value: "12px" },
+  { label: "Thường", value: "16px" },
+  { label: "Vừa", value: "20px" },
+  { label: "Lớn", value: "24px" },
 ];
 
-export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội dung...', minHeight = '100px' }: RichTextEditorProps) {
+export function RichTextEditor({ content, onChange, placeholder = "Nhập nội dung...", minHeight = "100px" }: RichTextEditorProps) {
   const [showColors, setShowColors] = useState(false);
   const [showFontSizes, setShowFontSizes] = useState(false);
   const [contentWarning, setContentWarning] = useState("");
@@ -149,8 +148,8 @@ export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội 
 
   // Sync external content changes
   useEffect(() => {
-    if (editor && content === '' && editor.getHTML() !== '<p></p>') {
-      editor.commands.setContent('');
+    if (editor && content === "" && editor.getHTML() !== "<p></p>") {
+      editor.commands.setContent("");
     }
   }, [content, editor]);
 
@@ -163,27 +162,21 @@ export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội 
       <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-100 bg-gray-50 rounded-t-2xl relative z-10">
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`p-1.5 rounded-lg transition-colors ${
-            editor.isActive('bold') ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
-          }`}
+          className={`p-1.5 rounded-lg transition-colors ${editor.isActive("bold") ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"}`}
           title="In đậm"
         >
           <Bold className="w-4 h-4" />
         </button>
         <button
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`p-1.5 rounded-lg transition-colors ${
-            editor.isActive('italic') ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
-          }`}
+          className={`p-1.5 rounded-lg transition-colors ${editor.isActive("italic") ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"}`}
           title="In nghiêng"
         >
           <Italic className="w-4 h-4" />
         </button>
         <button
           onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={`p-1.5 rounded-lg transition-colors ${
-            editor.isActive('strike') ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
-          }`}
+          className={`p-1.5 rounded-lg transition-colors ${editor.isActive("strike") ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"}`}
           title="Gạch ngang"
         >
           <Strikethrough className="w-4 h-4" />
@@ -193,18 +186,14 @@ export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội 
 
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-1.5 rounded-lg transition-colors ${
-            editor.isActive('bulletList') ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
-          }`}
+          className={`p-1.5 rounded-lg transition-colors ${editor.isActive("bulletList") ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"}`}
           title="Danh sách dấu chấm"
         >
           <List className="w-4 h-4" />
         </button>
         <button
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`p-1.5 rounded-lg transition-colors ${
-            editor.isActive('orderedList') ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
-          }`}
+          className={`p-1.5 rounded-lg transition-colors ${editor.isActive("orderedList") ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"}`}
           title="Danh sách số"
         >
           <ListOrdered className="w-4 h-4" />
@@ -215,7 +204,10 @@ export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội 
         {/* Font Size */}
         <div className="relative">
           <button
-            onClick={() => { setShowFontSizes(!showFontSizes); setShowColors(false); }}
+            onClick={() => {
+              setShowFontSizes(!showFontSizes);
+              setShowColors(false);
+            }}
             className={`p-1.5 rounded-lg transition-colors text-gray-500 hover:bg-gray-200 hover:text-gray-700`}
             title="Cỡ chữ"
           >
@@ -223,7 +215,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội 
           </button>
           {showFontSizes && (
             <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-lg py-2 w-32 flex flex-col z-20">
-              {FONT_SIZES.map(size => (
+              {FONT_SIZES.map((size) => (
                 <button
                   key={size.value}
                   onClick={() => {
@@ -243,7 +235,10 @@ export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội 
         {/* Color */}
         <div className="relative">
           <button
-            onClick={() => { setShowColors(!showColors); setShowFontSizes(false); }}
+            onClick={() => {
+              setShowColors(!showColors);
+              setShowFontSizes(false);
+            }}
             className={`p-1.5 rounded-lg transition-colors text-gray-500 hover:bg-gray-200 hover:text-gray-700`}
             title="Màu chữ"
           >
@@ -251,7 +246,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội 
           </button>
           {showColors && (
             <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-lg p-2 flex gap-1 z-20">
-              {COLORS.map(color => (
+              {COLORS.map((color) => (
                 <button
                   key={color}
                   onClick={() => {
@@ -266,12 +261,8 @@ export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội 
           )}
         </div>
       </div>
-      <EditorContent editor={editor} className="flex-1 cursor-text" />
-      {contentWarning && (
-        <div className="px-4 py-2 text-xs font-semibold text-red-700 bg-red-50 border-t border-red-100 rounded-b-2xl">
-          {contentWarning}
-        </div>
-      )}
+      <EditorContent editor={editor} className="flex-1 cursor-text" autoFocus />
+      {contentWarning && <div className="px-4 py-2 text-xs font-semibold text-red-700 bg-red-50 border-t border-red-100 rounded-b-2xl">{contentWarning}</div>}
     </div>
   );
 }

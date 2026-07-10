@@ -1,15 +1,15 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { Quiz, QuizCategory, QuizResult, QuizRoom } from "../models/Schemas.js";
+import { Quiz, QuizCategory, QuizResult, QuizRoom, UserActivity } from "../models/Schemas.js";
 import { BUILTIN_QUIZZES, getBuiltinQuizById } from "../data/builtinLearning/index.js";
 import { GoogleGenAI, Type } from "@google/genai";
 import crypto from "crypto";
-import { checkAchievements } from "../utils/achievements.js";
+import { checkAchievements } from "../../utils/achievements.js";
 import { addXpToUser, incrementDailyTask } from "./user.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
-import { consumeDailyLimit } from "../utils/usageLimits.js";
-import { cleanAndValidatePublicText, validatePublicObject } from "../utils/moderation.js";
+import { consumeDailyLimit } from "../../utils/usageLimits.js";
+import { cleanAndValidatePublicText, validatePublicObject } from "../../utils/moderation.js";
 
 const router = Router();
 router.use(verifyToken);
@@ -128,10 +128,12 @@ router.get(
     let categories = await QuizCategory.find({ userId: req.user.uid }).sort({ createdAt: 1 }).lean();
 
     if (categories.length === 0) {
-      const created = await QuizCategory.insertMany(DEFAULT_QUIZ_CATEGORIES.map((item) => ({
-        userId: req.user.uid,
-        ...item,
-      })));
+      const created = await QuizCategory.insertMany(
+        DEFAULT_QUIZ_CATEGORIES.map((item) => ({
+          userId: req.user.uid,
+          ...item,
+        })),
+      );
       categories = created.map((doc) => doc.toObject());
     }
 
@@ -168,10 +170,7 @@ router.patch(
     if (description !== undefined) category.description = await cleanAndValidatePublicText(description, "Mô tả đề mục quiz", { maxLength: 300 });
     await category.save();
 
-    await Quiz.updateMany(
-      { creatorId: req.user.uid, categoryId },
-      { $set: { categoryName: category.name || "" } },
-    );
+    await Quiz.updateMany({ creatorId: req.user.uid, categoryId }, { $set: { categoryName: category.name || "" } });
 
     res.json(formatCategory(category.toObject()));
   }),
@@ -189,7 +188,6 @@ router.delete(
     res.json({ success: true });
   }),
 );
-
 
 // ==================== BUILT-IN LEARNING QUIZZES ====================
 // Static IELTS/TOEIC mock quizzes generated from bundled LEARNING documents.
@@ -360,6 +358,14 @@ router.post(
       xpResult = await addXpToUser(req.user.uid, taskResult.xpToAdd);
     }
 
+    await UserActivity.create({
+      uid: req.user.uid,
+      action: "Tạo Quiz",
+      target: newQuiz.title,
+      type: "quiz",
+      xpEarned: taskResult.success ? taskResult.xpToAdd : 0
+    });
+
     res.json({
       id: newQuiz._id,
       status: "success",
@@ -488,6 +494,14 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
     if (taskResult.success && taskResult.xpToAdd > 0) {
       xpResult = await addXpToUser(req.user.uid, taskResult.xpToAdd);
     }
+
+    await UserActivity.create({
+      uid: req.user.uid,
+      action: "Tạo Quiz bằng AI",
+      target: newQuiz.title,
+      type: "quiz",
+      xpEarned: taskResult.success ? taskResult.xpToAdd : 0
+    });
 
     const quizObj = newQuiz.toObject();
     res.json({
@@ -621,6 +635,14 @@ router.post(
     const { xp, level, levelUp } = await addXpToUser(req.user.uid, expGain);
 
     checkAchievements(req.user.uid, "QUIZ_SUBMIT", {}, req.app);
+
+    await UserActivity.create({
+      uid: req.user.uid,
+      action: "Làm bài Quiz",
+      target: quiz.title,
+      type: "quiz",
+      xpEarned: expGain
+    });
 
     res.json({
       id: resultData._id,

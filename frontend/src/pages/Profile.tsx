@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Trophy, Flame, Star, BookOpen, Clock, Target, Award, Edit3, UserPlus, MapPin, Calendar, Link as LinkIcon, ChevronRight, Lock, Check, Medal } from "lucide-react";
+import { Trophy, Flame, Star, BookOpen, Clock, Target, Award, Edit3, UserPlus, MapPin, Calendar, Link as LinkIcon, ChevronRight, Lock, Check, Medal, Gamepad2 } from "lucide-react";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserLevelBadge } from "../components/UserLevelBadge";
 import { RankCard } from "../components/shared/RankCard";
@@ -29,7 +29,7 @@ export function Profile() {
   const isCurrentUser = !id;
   const [activeTab, setActiveTab] = useState("overview"); // overview, badges, activities, levels
   const [profileData, setProfileData] = useState<any>(null);
-  const [loading, setLoading] = useState(!isCurrentUser);
+  const [loading, setLoading] = useState(true);
 
   const { toggleFollow, checkFollow } = useUserStore();
   const [isFollowing, setIsFollowing] = useState(false);
@@ -37,16 +37,19 @@ export function Profile() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (id) {
+      const targetId = id || authUser?.uid;
+      if (targetId) {
         setLoading(true);
-        const data = await getUserProfile(id);
+        const data = await getUserProfile(targetId);
         setProfileData(data);
 
-        if (authUser && authUser.uid !== id) {
+        if (id && authUser && authUser.uid !== id) {
           const followStatus = await checkFollow(id);
           setIsFollowing(!!followStatus);
         }
 
+        setLoading(false);
+      } else {
         setLoading(false);
       }
     };
@@ -69,47 +72,29 @@ export function Profile() {
     setIsFollowLoading(false);
   };
 
-  const user = isCurrentUser
+  const user = profileData
     ? {
-        name: authUser?.displayName || "Người dùng",
-        username: "@" + (authUser?.email?.split("@")[0] || "user"),
-        avatar: authUser?.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
-        cover: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1200&auto=format&fit=crop",
-        bio: (authUser as any)?.bio || "Học tập không ngừng nghỉ. Đam mê ngôn ngữ và lập trình.",
-        location: "Hồ Chí Minh, Việt Nam",
-        joined: "Gần đây",
+        name: profileData.name,
+        username: profileData.username,
+        avatar: profileData.avatar,
+        cover: profileData.cover,
+        bio: profileData.bio,
+        location: "Việt Nam",
+        joined: profileData.joined,
         website: "",
-        level: authUser?.level || 1,
-        xp: authUser?.xp || 0,
-        following: 124,
-        followers: 892,
-        achievedBadges: authUser?.achievedBadges || [],
-        rankId: authUser?.rankId || 1,
-        tier: authUser?.tier || 3,
-        stars: authUser?.stars || 0,
-        streak: (authUser as any)?.streak || 0,
+        level: profileData.level,
+        xp: profileData.xp,
+        following: profileData.following || 0,
+        followers: profileData.followers || 0,
+        achievedBadges: profileData.achievedBadges || [],
+        rankId: profileData.rankId,
+        tier: profileData.tier,
+        stars: profileData.stars,
+        streak: profileData.streak,
+        stats: profileData.stats || {},
+        recentActivities: profileData.recentActivities || [],
       }
-    : profileData
-      ? {
-          name: profileData.name,
-          username: profileData.username,
-          avatar: profileData.avatar,
-          cover: profileData.cover,
-          bio: profileData.bio,
-          location: "Việt Nam",
-          joined: profileData.joined,
-          website: "",
-          level: profileData.level,
-          xp: profileData.xp,
-          following: profileData.following || 0,
-          followers: profileData.followers || 0,
-          achievedBadges: profileData.achievedBadges || [],
-          rankId: profileData.rankId,
-          tier: profileData.tier,
-          stars: profileData.stars,
-          streak: profileData.streak,
-        }
-      : null;
+    : null;
 
   if (loading) {
     return (
@@ -140,11 +125,12 @@ export function Profile() {
     position: isCurrentUser ? 142 : 1,
   };
 
+  const backendStats = user?.stats || {};
   const stats = [
     { label: "Chuỗi ngày", value: `${user.streak || 0} ngày`, icon: Flame, color: "text-orange-500", bgColor: "bg-orange-50" },
-    { label: "Thẻ lật đã học", value: isCurrentUser ? "1,240" : "850", icon: BookOpen, color: "text-blue-500", bgColor: "bg-blue-50" },
-    { label: "Quiz hoàn thành", value: "156", icon: Target, color: "text-green-500", bgColor: "bg-green-50" },
-    { label: "Giờ học", value: "84h", icon: Clock, color: "text-purple-500", bgColor: "bg-purple-50" },
+    { label: "Thẻ lật đã học", value: (backendStats.flashcardsLearned || 0).toLocaleString(), icon: BookOpen, color: "text-blue-500", bgColor: "bg-blue-50" },
+    { label: "Quiz hoàn thành", value: (backendStats.quizzesCompleted || 0).toLocaleString(), icon: Target, color: "text-green-500", bgColor: "bg-green-50" },
+    { label: "Giờ học", value: `${backendStats.studyHours || 0}h`, icon: Clock, color: "text-purple-500", bgColor: "bg-purple-50" },
   ];
 
   const currentLevelInfo = SYSTEM_LEVELS.find((l) => l.level === user.level) || SYSTEM_LEVELS[0];
@@ -284,27 +270,51 @@ export function Profile() {
                 </div>
 
                 <div className="relative border-l-2 border-gray-100 ml-3 md:ml-4 space-y-6 pb-2">
-                  {RECENT_ACTIVITIES.slice(0, 3).map((activity) => {
-                    const Icon = activity.icon;
-                    return (
-                      <div key={activity.id} className="relative pl-6 md:pl-8">
-                        <div className="absolute -left-[11px] top-0.5 w-5 h-5 rounded-full bg-white border-2 border-gray-100 flex items-center justify-center">
-                          <div className={`w-2 h-2 rounded-full bg-current ${activity.color}`}></div>
-                        </div>
+                  {!user.recentActivities || user.recentActivities.length === 0 ? (
+                    <div className="pl-6 text-sm text-gray-500">Chưa có hoạt động nào gần đây.</div>
+                  ) : (
+                    user.recentActivities.slice(0, 3).map((activity: any) => {
+                      const getIconForType = (type: string) => {
+                        switch (type) {
+                          case "quiz":
+                            return { icon: Target, color: "text-green-500", bg: "bg-green-50" };
+                          case "flashcard":
+                            return { icon: BookOpen, color: "text-blue-500", bg: "bg-blue-50" };
+                          case "arena":
+                            return { icon: Gamepad2, color: "text-orange-500", bg: "bg-orange-50" };
+                          default:
+                            return { icon: Clock, color: "text-purple-500", bg: "bg-purple-50" };
+                        }
+                      };
 
-                        <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 hover:bg-white hover:shadow-md hover:border-gray-200 transition-all">
-                          <div className="flex items-start justify-between gap-4 mb-1">
-                            <div className="flex items-center gap-2">
-                              <Icon className={`w-4 h-4 ${activity.color}`} />
-                              <p className="text-sm font-bold text-gray-900">{activity.action}</p>
-                            </div>
-                            <span className="text-xs font-medium text-gray-500 whitespace-nowrap">{activity.time}</span>
+                      const style = getIconForType(activity.type);
+                      const Icon = style.icon;
+
+                      // Format time nicely
+                      const actDate = new Date(activity.time);
+                      const timeStr = actDate.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+
+                      return (
+                        <div key={activity.id} className="relative pl-6 md:pl-8">
+                          <div className="absolute -left-[11px] top-0.5 w-5 h-5 rounded-full bg-white border-2 border-gray-100 flex items-center justify-center">
+                            <div className={`w-2 h-2 rounded-full bg-current ${style.color}`}></div>
                           </div>
-                          <p className="text-sm text-gray-600 font-medium">{activity.target}</p>
+
+                          <div className={`rounded-2xl p-4 border border-gray-100 hover:bg-white hover:shadow-md hover:border-gray-200 transition-all ${style.bg}`}>
+                            <div className="flex items-start justify-between gap-4 mb-1">
+                              <div className="flex items-center gap-2">
+                                <Icon className={`w-4 h-4 ${style.color}`} />
+                                <p className="text-sm font-bold text-gray-900">{activity.action}</p>
+                              </div>
+                              <span className="text-xs font-medium text-gray-500 whitespace-nowrap">{timeStr}</span>
+                            </div>
+                            <p className="text-sm text-gray-600 font-medium">{activity.target}</p>
+                            {activity.xpEarned > 0 && <p className="text-xs font-bold text-yellow-600 mt-2">+{activity.xpEarned} XP</p>}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </div>
@@ -436,7 +446,7 @@ export function Profile() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {SYSTEM_BADGES.map((badge) => {
                 const isAchieved = user.achievedBadges.includes(badge.id);
                 return (
@@ -476,31 +486,54 @@ export function Profile() {
             </h2>
 
             <div className="relative border-l-2 border-gray-100 ml-4 space-y-8 pb-4 max-w-3xl">
-              {RECENT_ACTIVITIES.map((activity) => {
-                const Icon = activity.icon;
-                return (
-                  <div key={activity.id} className="relative pl-8">
-                    <div className="absolute -left-[17px] top-0.5 w-8 h-8 rounded-full bg-white border-4 border-gray-50 flex items-center justify-center shadow-sm">
-                      <div className={`w-3 h-3 rounded-full bg-current ${activity.color}`}></div>
-                    </div>
+              {!user.recentActivities || user.recentActivities.length === 0 ? (
+                <div className="pl-8 text-gray-500 font-medium">Chưa có hoạt động nào được ghi nhận.</div>
+              ) : (
+                user.recentActivities.map((activity: any) => {
+                  const getIconForType = (type: string) => {
+                    switch (type) {
+                      case "quiz":
+                        return { icon: Target, color: "text-green-500", bg: "bg-green-50" };
+                      case "flashcard":
+                        return { icon: BookOpen, color: "text-blue-500", bg: "bg-blue-50" };
+                      case "arena":
+                        return { icon: Gamepad2, color: "text-orange-500", bg: "bg-orange-50" };
+                      default:
+                        return { icon: Clock, color: "text-purple-500", bg: "bg-purple-50" };
+                    }
+                  };
 
-                    <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-md hover:border-gray-200 transition-all">
-                      <div className="flex items-start justify-between gap-4 mb-2">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-xl bg-white shadow-sm border border-gray-100`}>
-                            <Icon className={`w-5 h-5 ${activity.color}`} />
-                          </div>
-                          <div>
-                            <p className="text-base font-bold text-gray-900">{activity.action}</p>
-                            <span className="text-xs font-medium text-gray-500">{activity.time}</span>
-                          </div>
-                        </div>
+                  const style = getIconForType(activity.type);
+                  const Icon = style.icon;
+
+                  const actDate = new Date(activity.time);
+                  const timeStr = actDate.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+
+                  return (
+                    <div key={activity.id} className="relative pl-8">
+                      <div className="absolute -left-[17px] top-0.5 w-8 h-8 rounded-full bg-white border-4 border-gray-50 flex items-center justify-center shadow-sm">
+                        <div className={`w-3 h-3 rounded-full bg-current ${style.color}`}></div>
                       </div>
-                      <div className="mt-3 p-3 bg-white rounded-xl border border-gray-100 text-sm text-gray-700 font-medium inline-block">{activity.target}</div>
+
+                      <div className={`rounded-2xl p-5 border border-gray-100 hover:bg-white hover:shadow-md hover:border-gray-200 transition-all ${style.bg}`}>
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-xl bg-white shadow-sm border border-gray-100`}>
+                              <Icon className={`w-5 h-5 ${style.color}`} />
+                            </div>
+                            <div>
+                              <p className="text-base font-bold text-gray-900">{activity.action}</p>
+                              <span className="text-xs font-medium text-gray-500">{timeStr}</span>
+                            </div>
+                          </div>
+                          {activity.xpEarned > 0 && <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-lg whitespace-nowrap">+{activity.xpEarned} XP</span>}
+                        </div>
+                        <div className="mt-3 p-3 bg-white rounded-xl border border-gray-100 text-sm text-gray-700 font-medium inline-block">{activity.target}</div>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
         )}
@@ -554,7 +587,7 @@ export function Profile() {
                 Lộ Trình Thăng Cấp (1 - 20)
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {SYSTEM_LEVELS.map((lvl) => {
                   const isCurrent = lvl.level === user.level;
                   const isPassed = lvl.level < user.level;

@@ -177,5 +177,43 @@ export const adminService = {
       toast.error(error.message);
       return { items: [], total: 0, page: 1, totalPages: 1 };
     }
+  },
+
+  // Bot Configs
+  getBotConfigs: async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/bot-config`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch bot configs");
+      return await res.json();
+    } catch (error: any) {
+      toast.error(error.message);
+      return { items: [] };
+    }
+  },
+  saveBotConfig: async (config: any) => {
+    try {
+      const id = config.id || config._id;
+      const url = id ? `${API_URL}/api/admin/bot-config/${id}` : `${API_URL}/api/admin/bot-config`;
+      const method = id ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Failed to save bot config");
+      return await res.json();
+    } catch (error: any) {
+      throw error;
+    }
+  },
+  deleteBotConfig: async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/bot-config/${id}`, { method: "DELETE", credentials: "include" });
+      if (!res.ok) throw new Error("Failed to delete bot config");
+      return true;
+    } catch (error: any) {
+      throw error;
+    }
   }
 };
