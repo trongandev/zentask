@@ -1,7 +1,5 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { IpSignupCounter } from "../models/Schemas.js";
-import { getClientIp, hashIp, DEFAULT_LIMITS } from "../../utils/usageLimits.js";
 import { cleanAndValidatePublicText } from "../../utils/moderation.js";
 import { verifyRecaptchaFromRequest } from "../../utils/recaptcha.js";
 import { DailyTask, UserDailyStat, Notification, FlashcardProgress, Flashcard, LeaderboardWeekly, GrammarTest, TensesTest } from "../models/Schemas.js";
@@ -16,32 +14,6 @@ dotenv.config();
 const router = Router();
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, process.env.BACKEND_URL + "/api/auth/google/callback");
-
-const enforceAccountLimitForNewUser = async (req, email) => {
-  const ipHash = hashIp(getClientIp(req));
-  const current = await IpSignupCounter.findOne({ ipHash }).lean();
-  const maxAccounts = DEFAULT_LIMITS.accounts_per_ip;
-  if (current && Number(current.count || 0) >= maxAccounts) {
-    const error = new Error(`IP này đã tạo tối đa ${maxAccounts} tài khoản. Vui lòng liên hệ admin nếu đây là nhầm lẫn.`);
-    error.status = 429;
-    error.code = "IP_SIGNUP_LIMIT_REACHED";
-    throw error;
-  }
-  return ipHash;
-};
-
-const recordAccountSignup = async (ipHash, email) => {
-  if (!ipHash) return;
-  await IpSignupCounter.findOneAndUpdate(
-    { ipHash },
-    {
-      $inc: { count: 1 },
-      $addToSet: { emails: String(email || "").toLowerCase() },
-      $set: { lastSignupAt: new Date() },
-    },
-    { upsert: true, new: true },
-  );
-};
 
 // Helper to generate JWT and set cookie
 const generateTokenAndSetCookie = (res, user) => {
@@ -90,17 +62,15 @@ router.get("/google/callback", async (req, res) => {
       return res.redirect(`${process.env.FRONTEND_URL}/auth?error=NoEmail`);
     }
 
-    // Find or create user in MongoDB. New Google accounts also count toward IP anti-spam limit.
+    // Find or create user in MongoDB.
     let user = await User.findOne({ email });
     if (!user) {
-      const ipHash = await enforceAccountLimitForNewUser(req, email);
       const safeName = await cleanAndValidatePublicText(name || "Học viên", "Tên người dùng", { maxLength: 60 });
       user = await User.create({
         email: email,
         displayName: safeName || "Học viên",
         photoURL: picture || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
       });
-      await recordAccountSignup(ipHash, email);
     }
 
     generateTokenAndSetCookie(res, user);
@@ -157,9 +127,7 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Email already exists" });
     }
 
-    const ipHash = await enforceAccountLimitForNewUser(req, normalizedEmail);
     const user = await User.create({ email: normalizedEmail, password });
-    await recordAccountSignup(ipHash, normalizedEmail);
 
     generateTokenAndSetCookie(res, user);
     res.status(200).json({ status: "success", uid: user._id });
