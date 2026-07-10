@@ -10,6 +10,33 @@ import { RichTextEditor } from "../components/RichTextEditor";
 import toast from "react-hot-toast";
 import { SEO } from "../components/SEO";
 
+// Cấu hình DOMPurify để chặn các thẻ và style độc hại
+DOMPurify.addHook("uponSanitizeAttribute", (node, data) => {
+  if (data.attrName === "style") {
+    // Chỉ cho phép color và font-size (từ Tiptap config của bạn)
+    const allowedProps = ["color", "font-size"];
+    const styles = data.attrValue.split(";").map((s) => s.trim()).filter(Boolean);
+    
+    const safeStyles = styles.filter((style) => {
+      const prop = style.split(":")[0].trim().toLowerCase();
+      return allowedProps.includes(prop);
+    });
+    
+    if (safeStyles.length > 0) {
+      data.attrValue = safeStyles.join("; ");
+    } else {
+      data.keepAttr = false; // Xóa luôn thuộc tính style nếu không có gì hợp lệ
+    }
+  }
+});
+
+const sanitizeConfig = {
+  // Chỉ cho phép các thẻ bạn dùng trong Tiptap
+  ALLOWED_TAGS: ["p", "strong", "b", "i", "em", "s", "strike", "ul", "ol", "li", "span", "br"],
+  // Chỉ cho phép thuộc tính style và class (nếu có dùng class)
+  ALLOWED_ATTR: ["style", "class"],
+};
+
 function timeAgo(dateInput: any) {
   if (!dateInput) return "Vừa xong";
   const date = dateInput._seconds ? new Date(dateInput._seconds * 1000) : new Date(dateInput);
@@ -315,7 +342,7 @@ export function Community() {
                       </div>
                     </div>
                   ) : (
-                    <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed mb-4 break-words" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
+                    <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed mb-4 break-words" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content, sanitizeConfig) }} />
                   )}
 
                   {/* Tags */}

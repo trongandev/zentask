@@ -17,7 +17,7 @@ import { Grammar } from "./pages/Grammar";
 import { Tenses } from "./pages/Tenses";
 import { Profile } from "./pages/Profile";
 import { Leaderboard } from "./pages/Leaderboard";
-// import { Community } from "./pages/Community";
+import { Community } from "./pages/Community";
 import { Settings } from "./pages/Settings";
 import { Notifications } from "./pages/Notifications";
 import { Auth } from "./pages/Auth";
@@ -248,7 +248,7 @@ function AppContent() {
                     <Route path="profile" element={<Profile />} />
                     <Route path="profile/:id" element={<Profile />} />
                     <Route path="leaderboard" element={<Leaderboard />} />
-                    {/* <Route path="community" element={<Community />} /> */}
+                    <Route path="community" element={<Community />} />
                     <Route path="ai-chat" element={<AIChat />} />
                     <Route path="notebook" element={<Notebook />} />
                     <Route path="utilities" element={<Utilities />} />
