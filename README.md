@@ -1,6 +1,6 @@
 # ZenTask
 
-ZenTask là nền tảng học tập đa tính năng, tập trung vào học tiếng Anh, flashcard, quiz, ghi chú, AI hỗ trợ học tập, xử lý phụ đề, bạn bè và các tiện ích cá nhân. Dự án gồm **frontend React** và **backend Node.js/Express**, dữ liệu người dùng được lưu trên **Firebase/Firestore**.
+ZenTask là nền tảng học tập đa tính năng, tập trung vào học tiếng Anh, flashcard, quiz, ghi chú, AI hỗ trợ học tập, xử lý phụ đề, bạn bè và các tiện ích cá nhân. Dự án gồm **frontend React** và **backend Node.js/Express**, dữ liệu người dùng được lưu trên **MongoDB**.
 
 ## Mục lục
 
