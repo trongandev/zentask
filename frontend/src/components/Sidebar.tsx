@@ -57,7 +57,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             label: "CỘNG ĐỒNG",
             items: [
                 { icon: Trophy, label: "Bảng xếp hạng", to: "/leaderboard" },
-                { icon: Globe, label: "Cộng đồng", to: "/community" },
+                // { icon: Globe, label: "Cộng đồng", to: "/community" },
                 { icon: UserRoundPlus, label: "Bạn bè", to: "/friends" },
                 { icon: FileText, label: "Bài viết", to: "/posts" },
             ],
