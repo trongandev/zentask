@@ -378,7 +378,7 @@ export default function FirstLoginOnboarding() {
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col overflow-y-auto p-5 md:p-8">
+        <div className="flex flex-1 flex-col overflow-y-auto p-5 md:max-h-[calc(100vh-48px)] md:p-8">
           <div className="pr-8 md:pr-10">
             <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 md:mb-4 md:gap-2 md:px-3 md:py-1.5 md:text-sm">
               <Sparkles className="h-3.5 w-3.5 md:h-4 md:w-4" />
