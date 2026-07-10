@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
+import { assertPublicContentSafe } from "../utils/publicContentGuard";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
@@ -84,6 +85,8 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
 
   createPost: async (content: string, tags: string[]) => {
     try {
+      assertPublicContentSafe(content, "Bài viết");
+      tags.forEach((tag) => assertPublicContentSafe(tag, "Hashtag"));
       const result = await fetchApi("/community/posts", {
         method: "POST",
         body: JSON.stringify({ content, tags }),
@@ -99,6 +102,8 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
 
   updatePost: async (id: string, content: string, tags: string[]) => {
     try {
+      assertPublicContentSafe(content, "Bài viết");
+      tags.forEach((tag) => assertPublicContentSafe(tag, "Hashtag"));
       const result = await fetchApi(`/community/posts/${id}`, {
         method: "PUT",
         body: JSON.stringify({ content, tags }),
@@ -150,6 +155,7 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
 
   createComment: async (postId: string, content: string, parentId?: string) => {
     try {
+      assertPublicContentSafe(content, "Bình luận");
       const result = await fetchApi(`/community/posts/${postId}/comments`, {
         method: "POST",
         body: JSON.stringify({ content, parentId }),
@@ -175,6 +181,7 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
 
   updateComment: async (commentId: string, content: string) => {
     try {
+      assertPublicContentSafe(content, "Bình luận");
       const result = await fetchApi(`/community/comments/${commentId}`, {
         method: "PUT",
         body: JSON.stringify({ content }),

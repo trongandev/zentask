@@ -8,6 +8,8 @@ import { checkAchievements } from "../utils/achievements.js";
 import { addXpToUser, incrementDailyTask } from "./user.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
+import { consumeDailyLimit } from "../utils/usageLimits.js";
+import { cleanAndValidatePublicText, validatePublicObject } from "../utils/moderation.js";
 
 const router = Router();
 router.use(verifyToken);
@@ -141,13 +143,14 @@ router.post(
   "/category",
   asyncHandler(async (req, res) => {
     const { name, color = "bg-blue-500", description = "" } = req.body;
-    const safeName = String(name || "").trim();
+    const safeName = await cleanAndValidatePublicText(name, "Tên đề mục quiz", { maxLength: 80 });
     if (!safeName) return res.status(400).json({ error: "Tên đề mục là bắt buộc" });
+    const safeDescription = await cleanAndValidatePublicText(description, "Mô tả đề mục quiz", { maxLength: 300 });
 
     const existing = await QuizCategory.findOne({ userId: req.user.uid, name: safeName });
     if (existing) return res.json(formatCategory(existing.toObject()));
 
-    const category = await QuizCategory.create({ userId: req.user.uid, name: safeName, color, description });
+    const category = await QuizCategory.create({ userId: req.user.uid, name: safeName, color, description: safeDescription });
     res.json(formatCategory(category.toObject()));
   }),
 );
@@ -160,9 +163,9 @@ router.patch(
     const category = await QuizCategory.findById(categoryId);
     if (!category || category.userId.toString() !== req.user.uid) return res.status(404).json({ error: "Không tìm thấy đề mục" });
 
-    if (name !== undefined) category.name = String(name).trim();
+    if (name !== undefined) category.name = await cleanAndValidatePublicText(name, "Tên đề mục quiz", { maxLength: 80 });
     if (color !== undefined) category.color = color;
-    if (description !== undefined) category.description = description;
+    if (description !== undefined) category.description = await cleanAndValidatePublicText(description, "Mô tả đề mục quiz", { maxLength: 300 });
     await category.save();
 
     await Quiz.updateMany(
@@ -322,6 +325,16 @@ router.post(
       return res.status(400).json({ error: "Invalid quiz data" });
     }
 
+    await cleanAndValidatePublicText(title, "Tên quiz", { maxLength: 150 });
+    await cleanAndValidatePublicText(description || "", "Mô tả quiz", { maxLength: 800 });
+    await validatePublicObject(questions, "Nội dung câu hỏi quiz");
+    await consumeDailyLimit({
+      uid: req.user.uid,
+      key: "quiz_create",
+      amount: 1,
+      message: "Bạn đã tạo đủ 3 quiz hôm nay. Nâng VIP để tạo không giới hạn.",
+    });
+
     const formattedQuestions = questions.map((q, idx) => ({
       ...q,
       id: q.id || `q_${Date.now()}_${idx}`,
@@ -331,8 +344,8 @@ router.post(
     const categoryInfo = await resolveQuizCategory(req.user.uid, categoryId);
 
     const newQuiz = await Quiz.create({
-      title,
-      description: description || "",
+      title: await cleanAndValidatePublicText(title, "Tên quiz", { maxLength: 150 }),
+      description: await cleanAndValidatePublicText(description || "", "Mô tả quiz", { maxLength: 800 }),
       difficulty: difficulty || "Medium",
       duration: duration || 15,
       questions: formattedQuestions,
@@ -363,6 +376,13 @@ router.post(
     const { prompt, numQuestions = 5, difficulty = "Medium", isPublic = true, categoryId = null } = req.body;
 
     if (!prompt) return res.status(400).json({ error: "Prompt is required" });
+    const safePrompt = await cleanAndValidatePublicText(prompt, "Yêu cầu tạo quiz", { maxLength: 1500 });
+    await consumeDailyLimit({
+      uid: req.user.uid,
+      key: "quiz_create",
+      amount: 1,
+      message: "Bạn đã tạo đủ 3 quiz hôm nay. Nâng VIP để tạo không giới hạn.",
+    });
 
     const availableKeys = [];
     for (let i = 1; i <= 10; i++) {
@@ -376,7 +396,7 @@ router.post(
 
     const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
 
-    const promptText = `Tạo một bài thi trắc nghiệm dựa trên yêu cầu sau: "${prompt}".
+    const promptText = `Tạo một bài thi trắc nghiệm dựa trên yêu cầu sau: "${safePrompt}".
 Số lượng câu hỏi cần tạo: đúng ${numQuestions} câu.
 Độ khó: ${difficulty}.
 Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
@@ -440,6 +460,10 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
       return res.status(500).json({ error: "All AI API keys failed to generate content." });
     }
 
+    await cleanAndValidatePublicText(quizData.title, "Tên quiz do AI tạo", { maxLength: 150 });
+    await cleanAndValidatePublicText(quizData.description || "", "Mô tả quiz do AI tạo", { maxLength: 800 });
+    await validatePublicObject(quizData.questions, "Nội dung quiz do AI tạo");
+
     const formattedQuestions = quizData.questions.map((q, idx) => ({
       id: `q_${Date.now()}_${idx}`,
       ...q,
@@ -449,8 +473,8 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
     const categoryInfo = await resolveQuizCategory(req.user.uid, categoryId);
 
     const newQuiz = await Quiz.create({
-      title: quizData.title,
-      description: quizData.description,
+      title: await cleanAndValidatePublicText(quizData.title, "Tên quiz do AI tạo", { maxLength: 150 }),
+      description: await cleanAndValidatePublicText(quizData.description || "", "Mô tả quiz do AI tạo", { maxLength: 800 }),
       difficulty,
       duration: numQuestions * 1.5,
       questions: formattedQuestions,

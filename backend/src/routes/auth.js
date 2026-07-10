@@ -1,5 +1,9 @@
 import { Router } from "express";
 import User from "../models/User.js";
+import { IpSignupCounter } from "../models/Schemas.js";
+import { getClientIp, hashIp, DEFAULT_LIMITS } from "../utils/usageLimits.js";
+import { cleanAndValidatePublicText } from "../utils/moderation.js";
+import { verifyRecaptchaFromRequest } from "../utils/recaptcha.js";
 import { DailyTask, UserDailyStat, Notification, FlashcardProgress, Flashcard, LeaderboardWeekly, GrammarTest, TensesTest } from "../models/Schemas.js";
 import jwt from "jsonwebtoken";
 import { SYSTEM_LEVELS, SYSTEM_BADGES } from "../config/system.js";
@@ -12,6 +16,33 @@ dotenv.config();
 const router = Router();
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, process.env.BACKEND_URL + "/api/auth/google/callback");
+
+const enforceAccountLimitForNewUser = async (req, email) => {
+  const ipHash = hashIp(getClientIp(req));
+  const current = await IpSignupCounter.findOne({ ipHash }).lean();
+  const maxAccounts = DEFAULT_LIMITS.accounts_per_ip;
+  if (current && Number(current.count || 0) >= maxAccounts) {
+    const error = new Error(`IP này đã tạo tối đa ${maxAccounts} tài khoản. Vui lòng liên hệ admin nếu đây là nhầm lẫn.`);
+    error.status = 429;
+    error.code = "IP_SIGNUP_LIMIT_REACHED";
+    throw error;
+  }
+  return ipHash;
+};
+
+const recordAccountSignup = async (ipHash, email) => {
+  if (!ipHash) return;
+  await IpSignupCounter.findOneAndUpdate(
+    { ipHash },
+    {
+      $inc: { count: 1 },
+      $addToSet: { emails: String(email || "").toLowerCase() },
+      $set: { lastSignupAt: new Date() },
+    },
+    { upsert: true, new: true },
+  );
+};
+
 
 // Helper to generate JWT and set cookie
 const generateTokenAndSetCookie = (res, user) => {
@@ -60,14 +91,17 @@ router.get("/google/callback", async (req, res) => {
       return res.redirect(`${process.env.FRONTEND_URL}/auth?error=NoEmail`);
     }
 
-    // Find or create user in MongoDB
+    // Find or create user in MongoDB. New Google accounts also count toward IP anti-spam limit.
     let user = await User.findOne({ email });
     if (!user) {
+      const ipHash = await enforceAccountLimitForNewUser(req, email);
+      const safeName = await cleanAndValidatePublicText(name || "Học viên", "Tên người dùng", { maxLength: 60 });
       user = await User.create({
         email: email,
-        displayName: name || "Học viên",
+        displayName: safeName || "Học viên",
         photoURL: picture || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
       });
+      await recordAccountSignup(ipHash, email);
     }
 
     generateTokenAndSetCookie(res, user);
@@ -86,6 +120,8 @@ router.post("/login", async (req, res) => {
   }
 
   try {
+    await verifyRecaptchaFromRequest(req);
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ error: "Tài khoản không tồn tại" });
@@ -100,7 +136,7 @@ router.post("/login", async (req, res) => {
     res.status(200).json({ status: "success", uid: user._id });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
+    res.status(error.status || 500).json({ error: error.message || "Internal Server Error", code: error.code });
   }
 });
 
@@ -112,18 +148,23 @@ router.post("/register", async (req, res) => {
   }
 
   try {
-    const existingUser = await User.findOne({ email });
+    await verifyRecaptchaFromRequest(req);
+
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ error: "Email already exists" });
     }
 
-    const user = await User.create({ email, password });
+    const ipHash = await enforceAccountLimitForNewUser(req, normalizedEmail);
+    const user = await User.create({ email: normalizedEmail, password });
+    await recordAccountSignup(ipHash, normalizedEmail);
 
     generateTokenAndSetCookie(res, user);
     res.status(200).json({ status: "success", uid: user._id });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ error: error.message || "Error creating user" });
+    res.status(error.status || 400).json({ error: error.message || "Error creating user", code: error.code });
   }
 });
 

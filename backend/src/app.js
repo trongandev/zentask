@@ -23,6 +23,7 @@ import { BUILTIN_FLASHCARD_SETS } from "./data/builtinLearning/index.js";
 dotenv.config();
 
 const app = express();
+app.set("trust proxy", 1);
 const port = process.env.PORT || 3001;
 
 // Connect to MongoDB

@@ -22,10 +22,32 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg',
     },
+    username: {
+      type: String,
+      trim: true,
+      maxlength: 40,
+    },
+    bio: {
+      type: String,
+      default: '',
+      maxlength: 500,
+    },
     role: {
       type: String,
       enum: ['user', 'admin'],
       default: 'user',
+    },
+    isVip: {
+      type: Boolean,
+      default: false,
+    },
+    vipUntil: {
+      type: Date,
+      default: null,
+    },
+    subscription: {
+      plan: { type: String, default: 'free' },
+      status: { type: String, default: 'inactive' },
     },
     level: {
       type: Number,

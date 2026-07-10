@@ -26,7 +26,10 @@
     "mongoose": "^9.7.4",
     "morgan": "^1.11.0",
     "multer": "^2.0.2",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "bad-words": "^4.0.0",
+    "leo-profanity": "^1.7.0",
+    "vietnamese-badwords": "latest"
   },
   "overrides": {
     "jwks-rsa": {

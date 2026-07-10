@@ -4,6 +4,8 @@ import { GrammarTest } from "../models/Schemas.js";
 import { GoogleGenAI, Type } from "@google/genai";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
+import { consumeDailyLimit } from "../utils/usageLimits.js";
+import { cleanAndValidatePublicText, validatePublicObject } from "../utils/moderation.js";
 
 const router = Router();
 router.use(verifyToken);
@@ -52,6 +54,13 @@ router.post("/progress", asyncHandler(async (req, res) => {
 router.post("/generate", asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.uid).lean();
   if (!user) return res.status(404).json({ error: "User not found" });
+
+  await consumeDailyLimit({
+    uid: req.user.uid,
+    key: "grammar_generate",
+    amount: 1,
+    message: "Bạn đã tạo đủ 2 bài grammar hôm nay. Nâng VIP để tạo không giới hạn.",
+  });
 
   const grammarProgress = user.grammarProgress || { maxStage: 1, totalCorrect: 0, totalWrong: 0, completedStages: [], recentLogs: [] };
 
@@ -138,6 +147,8 @@ Nội dung bằng tiếng Việt, hướng dẫn rõ ràng.`;
   if (!testData) {
     return res.status(500).json({ error: "Failed to generate custom grammar test." });
   }
+
+  await validatePublicObject(testData, "Nội dung bài luyện tập AI");
 
   const newTest = await GrammarTest.create({
     userId: req.user.uid,

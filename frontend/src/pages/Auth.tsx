@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   BookOpenCheck,
@@ -10,11 +10,14 @@ import {
   Mail,
   ShieldCheck,
   Sparkles,
+  UserCheck,
   Trophy,
   UserPlus,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuthStore } from "../services/authService";
+import toast from "react-hot-toast";
+import { hasRecaptchaSiteKey, RecaptchaBox, type RecaptchaBoxHandle } from "../components/security/RecaptchaBox";
 
 const MASCOT_SRC = "/mascot/Lopy%20(16).png";
 
@@ -36,13 +39,17 @@ const featureCards = [
   },
 ];
 
-const loginTips = ["Học từ vựng", "Luyện nghe nói", "Thi đấu Arena", "Theo dõi XP"];
+const loginTips = ["Học từ vựng", "Luyện nghe nói", "Thi đấu Arena", "Theo dõi XP", "Chống spam"];
 
 export function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState("");
+  const [recaptchaReady, setRecaptchaReady] = useState(!hasRecaptchaSiteKey);
+  const [recaptchaFormKey, setRecaptchaFormKey] = useState(() => `login-${Date.now()}`);
+  const recaptchaRef = useRef<RecaptchaBoxHandle | null>(null);
 
   const { loading, login, register, loginWithGoogle } = useAuthStore();
 
@@ -59,15 +66,36 @@ export function Auth() {
     [isLogin],
   );
 
+  const handleRecaptchaChange = useCallback((token: string) => {
+    setRecaptchaToken(token);
+  }, []);
+
+  const switchMode = (nextIsLogin: boolean) => {
+    if (nextIsLogin === isLogin) return;
+    setIsLogin(nextIsLogin);
+    setRecaptchaToken("");
+    setRecaptchaReady(!hasRecaptchaSiteKey);
+    setRecaptchaFormKey(`${nextIsLogin ? "login" : "register"}-${Date.now()}`);
+    window.setTimeout(() => recaptchaRef.current?.reset(), 0);
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const normalizedEmail = email.trim();
-    if (isLogin) {
-      await login(normalizedEmail, password);
-    } else {
-      await register(normalizedEmail, password);
+    if (hasRecaptchaSiteKey && !recaptchaToken) {
+      toast.error("Vui lòng xác minh reCAPTCHA trước khi tiếp tục.");
+      return;
     }
+
+    if (isLogin) {
+      await login(normalizedEmail, password, recaptchaToken);
+    } else {
+      await register(normalizedEmail, password, recaptchaToken);
+    }
+
+    setRecaptchaToken("");
+    recaptchaRef.current?.reset();
   };
 
   return (
@@ -179,10 +207,31 @@ export function Auth() {
                 <p className="mt-3 text-base leading-7 text-slate-600">{authDescription}</p>
               </div>
 
+              <div className="mb-7 grid grid-cols-2 gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-3">
+                <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-wide text-slate-400">Bảo vệ</p>
+                    <p className="text-sm font-extrabold text-slate-800">reCAPTCHA</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                    <UserCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-wide text-slate-400">Giới hạn</p>
+                    <p className="text-sm font-extrabold text-slate-800">Chống tài khoản ảo</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="mb-7 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1.5 ring-1 ring-slate-200">
                 <button
                   type="button"
-                  onClick={() => setIsLogin(true)}
+                  onClick={() => switchMode(true)}
                   className={cn(
                     "rounded-xl px-4 py-3 text-sm font-extrabold transition-all",
                     isLogin
@@ -194,7 +243,7 @@ export function Auth() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setIsLogin(false)}
+                  onClick={() => switchMode(false)}
                   className={cn(
                     "rounded-xl px-4 py-3 text-sm font-extrabold transition-all",
                     !isLogin
@@ -259,9 +308,18 @@ export function Auth() {
                   </div>
                 </div>
 
+                <RecaptchaBox
+                  key={recaptchaFormKey}
+                  ref={recaptchaRef}
+                  value={recaptchaToken}
+                  resetKey={recaptchaFormKey}
+                  onChange={handleRecaptchaChange}
+                  onReady={setRecaptchaReady}
+                />
+
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || (hasRecaptchaSiteKey && (!recaptchaReady || !recaptchaToken))}
                   className="group mt-2 flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-4 font-black text-white shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-600/30 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {loading ? (

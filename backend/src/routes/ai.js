@@ -1,8 +1,12 @@
 import express from "express";
 import multer from "multer";
 import { GoogleGenAI } from "@google/genai";
+import { verifyToken } from "../middleware/auth.js";
+import { consumeDailyLimit } from "../utils/usageLimits.js";
+import { cleanAndValidatePublicText } from "../utils/moderation.js";
 
 const router = express.Router();
+router.use(verifyToken);
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -376,7 +380,13 @@ router.get("/health", (req, res) => {
 router.post("/chat", upload.array("images", 6), async (req, res) => {
   try {
     const messages = JSON.parse(req.body.messages || "[]");
-    const prompt = String(req.body.prompt || "").trim();
+    const prompt = await cleanAndValidatePublicText(req.body.prompt || "", "Nội dung chat AI", { maxLength: 6000 });
+    await consumeDailyLimit({
+      uid: req.user.uid,
+      key: "ai_chat",
+      amount: 1,
+      message: "Bạn đã dùng hết lượt chat AI hôm nay. Nâng VIP để chat không giới hạn.",
+    });
     const contents = buildGeminiContents(messages, req.files || [], prompt);
 
     if (!contents.length) {
@@ -410,8 +420,14 @@ router.post("/chat", upload.array("images", 6), async (req, res) => {
 
 router.post("/image", async (req, res) => {
   try {
-    const prompt = String(req.body.prompt || "").trim();
+    const prompt = await cleanAndValidatePublicText(req.body.prompt || "", "Mô tả ảnh AI", { maxLength: 2000 });
     if (!prompt) return res.status(400).json({ error: "Bạn chưa nhập mô tả ảnh." });
+    await consumeDailyLimit({
+      uid: req.user.uid,
+      key: "ai_image",
+      amount: 1,
+      message: "Bạn đã dùng hết lượt tạo ảnh AI hôm nay. Nâng VIP để tạo ảnh không giới hạn.",
+    });
 
     const preparedPrompts = await prepareImagePrompts({
       prompt,

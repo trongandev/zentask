@@ -80,7 +80,7 @@ function MainLayout() {
   }, [isRightSidebarOpen]);
 
   return (
-    <div className="flex min-h-[100dvh] bg-[#F4F7FE] font-sans text-slate-900 overflow-hidden relative">
+    <div className="flex min-h-screen bg-[#F4F7FE] font-sans text-slate-900 overflow-hidden relative">
       {/* Mobile Left Sidebar Overlay */}
       {isMobileMenuOpen && <div className="fixed inset-0 bg-gray-900/50 z-[60] lg:hidden animate-in fade-in" onClick={() => setIsMobileMenuOpen(false)} />}
 
@@ -92,7 +92,7 @@ function MainLayout() {
         className={`
         fixed lg:static inset-y-0 left-0 z-[70] lg:z-50
         transition-all duration-300 ease-in-out flex-shrink-0 bg-white border-r border-gray-100
-        ${isMobileMenuOpen ? "translate-x-0 w-[86vw] max-w-[320px]" : "-translate-x-full lg:translate-x-0"}
+        ${isMobileMenuOpen ? "translate-x-0 w-[80%] max-w-[300px]" : "-translate-x-full lg:translate-x-0"}
         ${isLeftSidebarOpen ? "lg:w-64" : "lg:w-[88px]"}
       `}
       >
@@ -110,10 +110,10 @@ function MainLayout() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         <Header isLeftSidebarOpen={isLeftSidebarOpen} onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-8 flex flex-col mobile-page-shell">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col">
           <div className="flex-1">
             <Outlet />
           </div>
@@ -147,7 +147,7 @@ function MainLayout() {
           className={`
           fixed inset-y-0 right-0 z-[70] lg:hidden
           transition-all duration-300 ease-in-out flex-shrink-0 bg-white border-l border-gray-100
-          ${isRightMobileMenuOpen ? "translate-x-0 w-[86vw] max-w-[340px]" : "translate-x-full w-[86vw] max-w-[340px]"}
+          ${isRightMobileMenuOpen ? "translate-x-0 w-[80%] max-w-[320px]" : "translate-x-full w-[80%] max-w-[320px]"}
         `}
         >
           <div className="h-full w-full">

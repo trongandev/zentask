@@ -3,8 +3,8 @@ import toast from "react-hot-toast";
 
 interface AuthState {
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, recaptchaToken?: string) => Promise<void>;
+  register: (email: string, password: string, recaptchaToken?: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
 }
 
@@ -13,14 +13,14 @@ const API_URL = import.meta.env.VITE_API_BACKEND;
 export const useAuthStore = create<AuthState>((set) => ({
   loading: false,
 
-  login: async (email, password) => {
+  login: async (email, password, recaptchaToken) => {
     set({ loading: true });
     try {
       const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, recaptchaToken }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -35,14 +35,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  register: async (email, password) => {
+  register: async (email, password, recaptchaToken) => {
     set({ loading: true });
     try {
       const res = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, recaptchaToken }),
       });
       const data = await res.json();
       if (!res.ok) {

@@ -129,7 +129,7 @@ export function AIChat() {
     {
       id: uid(),
       role: "assistant",
-      content: "Chào bạn, mình là trợ lý AI của ZenTask. Bạn có thể đặt câu hỏi, gửi hình ảnh để mình xem nội dung, hoặc tạo ảnh minh họa ở khung bên phải.",
+      content: "Chào Khải, mình là trợ lý AI của ZenTask. Bạn có thể đặt câu hỏi, gửi hình ảnh để mình xem nội dung, hoặc tạo ảnh minh họa ở khung bên phải.",
       meta: "Trợ lý ZenTask",
     },
   ]);

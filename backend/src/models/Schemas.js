@@ -19,6 +19,23 @@ export const UserDailyStatSchema = new Schema({
   tasks: { type: Map, of: Schema.Types.Mixed, default: {} },
 }, { timestamps: true });
 
+
+export const DailyUsageSchema = new Schema({
+  uid: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  date: { type: String, required: true }, // YYYY-MM-DD
+  key: { type: String, required: true },
+  count: { type: Number, default: 0 },
+}, { timestamps: true });
+DailyUsageSchema.index({ uid: 1, date: 1, key: 1 }, { unique: true });
+DailyUsageSchema.index({ date: 1, key: 1 });
+
+export const IpSignupCounterSchema = new Schema({
+  ipHash: { type: String, required: true, unique: true },
+  count: { type: Number, default: 0 },
+  emails: [{ type: String }],
+  lastSignupAt: { type: Date },
+}, { timestamps: true });
+
 export const NotificationSchema = new Schema({
   receiverId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   title: { type: String, required: true },
@@ -277,6 +294,8 @@ export const UserFollowSchema = new Schema({
   followingId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 }, { timestamps: true });
 
+export const DailyUsage = mongoose.models.DailyUsage || mongoose.model('DailyUsage', DailyUsageSchema);
+export const IpSignupCounter = mongoose.models.IpSignupCounter || mongoose.model('IpSignupCounter', IpSignupCounterSchema);
 export const DailyTask = mongoose.models.DailyTask || mongoose.model('DailyTask', DailyTaskSchema);
 export const UserDailyStat = mongoose.models.UserDailyStat || mongoose.model('UserDailyStat', UserDailyStatSchema);
 export const Notification = mongoose.models.Notification || mongoose.model('Notification', NotificationSchema);

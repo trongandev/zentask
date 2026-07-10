@@ -13,6 +13,7 @@ import { createNotification } from "../utils/notifications.js";
 import { checkAchievements } from "../utils/achievements.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
+import { cleanAndValidatePublicText } from "../utils/moderation.js";
 
 const router = Router();
 
@@ -241,10 +242,10 @@ router.put("/profile", asyncHandler(async (req, res) => {
   const { displayName, photoURL, bio, username } = req.body;
 
   const updates = {};
-  if (displayName !== undefined) updates.displayName = displayName;
-  if (photoURL !== undefined) updates.photoURL = photoURL;
-  if (bio !== undefined) updates.bio = bio;
-  if (username !== undefined) updates.username = username;
+  if (displayName !== undefined) updates.displayName = await cleanAndValidatePublicText(displayName, "Tên người dùng", { maxLength: 60 });
+  if (photoURL !== undefined) updates.photoURL = String(photoURL || "").trim().slice(0, 1000);
+  if (bio !== undefined) updates.bio = await cleanAndValidatePublicText(bio, "Tiểu sử", { maxLength: 500 });
+  if (username !== undefined) updates.username = await cleanAndValidatePublicText(username, "Username", { maxLength: 40 });
 
   const user = await User.findByIdAndUpdate(req.user.uid, updates, { new: true });
   if (!user) return res.status(404).json({ error: "User not found" });

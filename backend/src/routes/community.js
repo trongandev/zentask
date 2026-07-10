@@ -5,6 +5,8 @@ import { createNotification } from "../utils/notifications.js";
 import { addXpToUser, incrementDailyTask } from "./user.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
+import { consumeDailyLimit } from "../utils/usageLimits.js";
+import { cleanAndValidateCommunityHtml, cleanAndValidateCommunityText } from "../utils/moderation.js";
 
 const router = Router();
 router.use(verifyToken);
@@ -54,12 +56,23 @@ router.post("/posts", asyncHandler(async (req, res) => {
   const { content, tags } = req.body;
   if (!content) return res.status(400).json({ error: "Content is required" });
 
-  const cleanContent = content.replace(/#[\wÀ-ỹ]+/g, "").trim();
+  const cleanContent = await cleanAndValidateCommunityHtml(content.replace(/#[\wÀ-ỹ]+/g, "").trim(), "Bài viết cộng đồng", { maxLength: 20000 });
+  const cleanTags = [];
+  for (const tag of tags || []) {
+    const safeTag = await cleanAndValidateCommunityText(tag, "Hashtag", { maxLength: 40 });
+    if (safeTag) cleanTags.push(safeTag.replace(/^#/, ""));
+  }
+  await consumeDailyLimit({
+    uid: req.user.uid,
+    key: "community_post",
+    amount: 1,
+    message: "Bạn đã tạo đủ 2 bài viết cộng đồng hôm nay. Nâng VIP để đăng không giới hạn.",
+  });
 
   const newPost = await CommunityPost.create({
     uid: req.user.uid,
     content: cleanContent,
-    tags: tags || [],
+    tags: cleanTags,
     likes: [],
     commentsCount: 0,
   });
@@ -86,10 +99,15 @@ router.put("/posts/:id", asyncHandler(async (req, res) => {
   if (!post) return res.status(404).json({ error: "Post not found" });
   if (post.uid.toString() !== req.user.uid) return res.status(403).json({ error: "Forbidden" });
 
-  const cleanContent = content.replace(/#[\wÀ-ỹ]+/g, "").trim();
+  const cleanContent = await cleanAndValidateCommunityHtml(content.replace(/#[\wÀ-ỹ]+/g, "").trim(), "Bài viết cộng đồng", { maxLength: 20000 });
+  const cleanTags = [];
+  for (const tag of tags || []) {
+    const safeTag = await cleanAndValidateCommunityText(tag, "Hashtag", { maxLength: 40 });
+    if (safeTag) cleanTags.push(safeTag.replace(/^#/, ""));
+  }
 
   post.content = cleanContent;
-  if (tags) post.tags = tags;
+  if (tags) post.tags = cleanTags;
   await post.save();
 
   res.json({ status: "success" });
@@ -173,10 +191,12 @@ router.post("/posts/:id/comments", asyncHandler(async (req, res) => {
   const post = await CommunityPost.findById(req.params.id);
   if (!post) return res.status(404).json({ error: "Post not found" });
 
+  const cleanContent = await cleanAndValidateCommunityHtml(content, "Bình luận", { maxLength: 8000 });
+
   const newComment = await CommunityComment.create({
     postId: req.params.id,
     uid: req.user.uid,
-    content,
+    content: cleanContent,
     parentId: parentId || null,
     likes: [],
   });
@@ -246,7 +266,7 @@ router.put("/comments/:id", asyncHandler(async (req, res) => {
   if (!comment) return res.status(404).json({ error: "Comment not found" });
   if (comment.uid.toString() !== req.user.uid) return res.status(403).json({ error: "Unauthorized" });
 
-  comment.content = content;
+  comment.content = await cleanAndValidateCommunityHtml(content, "Bình luận", { maxLength: 8000 });
   await comment.save();
 
   res.json({ status: "success" });

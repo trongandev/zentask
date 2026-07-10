@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+  
+  /* TipTap & Prose List Styles */
+  .prose ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+  .prose ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+  .prose li p {
+    margin: 0;
+  }
+
+  /* Global Scrollbar Styles */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+  }
+}
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 10px;
+  }
+}
+/* ZenTask appearance saved from Settings */
+@layer base {
+  :root {
+    --zt-accent: #2563eb;
+    color-scheme: light;
+  }
+
+  html.theme-dark {
+    color-scheme: dark;
+    background: #020617;
+  }
+
+  html.theme-dark body {
+    background: #020617;
+    color: #e5e7eb;
+  }
+}
+
+@layer utilities {
+  html.theme-dark .bg-\[\#F4F7FE\],
+  html.theme-dark .bg-\[\#F8FAFF\],
+  html.theme-dark .bg-\[\#f4f7fe\] {
+    background-color: #020617 !important;
+  }
+
+  html.theme-dark .bg-white,
+  html.theme-dark .bg-gray-50,
+  html.theme-dark .bg-slate-50,
+  html.theme-dark .bg-white\/70,
+  html.theme-dark .bg-white\/80,
+  html.theme-dark .bg-white\/90 {
+    background-color: #0f172a !important;
+  }
+
+  html.theme-dark .bg-gray-100,
+  html.theme-dark .bg-slate-100,
+  html.theme-dark .bg-blue-50,
+  html.theme-dark .bg-indigo-50,
+  html.theme-dark .bg-purple-50,
+  html.theme-dark .bg-red-50,
+  html.theme-dark .bg-green-50,
+  html.theme-dark .bg-yellow-50,
+  html.theme-dark .bg-orange-50,
+  html.theme-dark .bg-pink-50,
+  html.theme-dark .bg-teal-50 {
+    background-color: #111827 !important;
+  }
+
+  html.theme-dark .text-gray-900,
+  html.theme-dark .text-slate-900,
+  html.theme-dark .text-gray-800,
+  html.theme-dark .text-slate-800,
+  html.theme-dark .text-gray-700,
+  html.theme-dark .text-slate-700 {
+    color: #f8fafc !important;
+  }
+
+  html.theme-dark .text-gray-600,
+  html.theme-dark .text-slate-600,
+  html.theme-dark .text-gray-500,
+  html.theme-dark .text-slate-500,
+  html.theme-dark .text-gray-400,
+  html.theme-dark .text-slate-400 {
+    color: #cbd5e1 !important;
+  }
+
+  html.theme-dark .border-gray-100,
+  html.theme-dark .border-gray-200,
+  html.theme-dark .border-slate-100,
+  html.theme-dark .border-slate-200,
+  html.theme-dark .border-blue-100,
+  html.theme-dark .border-indigo-100 {
+    border-color: #1f2937 !important;
+  }
+
+  html.theme-dark input,
+  html.theme-dark textarea,
+  html.theme-dark select {
+    background-color: #111827 !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+  }
+
+  html.theme-dark input::placeholder,
+  html.theme-dark textarea::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  html.theme-dark .shadow-sm,
+  html.theme-dark .shadow-md,
+  html.theme-dark .shadow-lg,
+  html.theme-dark .shadow-xl,
+  html.theme-dark .shadow-2xl {
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  html[data-accent="purple"] .bg-blue-600,
+  html[data-accent="purple"] .hover\:bg-blue-700:hover { background-color: #7c3aed !important; }
+  html[data-accent="green"] .bg-blue-600,
+  html[data-accent="green"] .hover\:bg-blue-700:hover { background-color: #16a34a !important; }
+  html[data-accent="orange"] .bg-blue-600,
+  html[data-accent="orange"] .hover\:bg-blue-700:hover { background-color: #f97316 !important; }
+  html[data-accent="pink"] .bg-blue-600,
+  html[data-accent="pink"] .hover\:bg-blue-700:hover { background-color: #db2777 !important; }
+  html[data-accent="slate"] .bg-blue-600,
+  html[data-accent="slate"] .hover\:bg-blue-700:hover { background-color: #334155 !important; }
+}

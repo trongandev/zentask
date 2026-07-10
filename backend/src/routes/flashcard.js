@@ -14,6 +14,8 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { checkAchievements } from "../utils/achievements.js";
 import { verifyToken, requireRole } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
+import { consumeDailyLimit } from "../utils/usageLimits.js";
+import { cleanAndValidatePublicText, validatePublicObject } from "../utils/moderation.js";
 
 const router = Router();
 
@@ -46,6 +48,34 @@ const normalizePublicFlag = async (uid, requestedValue = true) => {
     throw err;
   }
   return false;
+};
+
+
+const normalizeLearningTerm = (value = "") => {
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, 120);
+};
+
+const normalizeGeneratedFlashcard = (data = {}, fallbackTerm = "") => {
+  const examples = Array.isArray(data.examples) ? data.examples.slice(0, 3).map((ex) => ({
+    en: String(ex?.en || "").trim().slice(0, 500),
+    vi: String(ex?.vi || "").trim().slice(0, 500),
+  })).filter((ex) => ex.en || ex.vi) : [];
+
+  return {
+    term: String(data.term || fallbackTerm || "").trim().replace(/\s+/g, " ").slice(0, 120),
+    phonetic: String(data.phonetic || "").trim().slice(0, 120),
+    translation: String(data.translation || "").trim().slice(0, 500),
+    notes: String(data.notes || "").trim().slice(0, 1200),
+    examples,
+  };
+};
+
+const validateFlashcardOnlyWhenPublic = async (vocabData, set) => {
+  if (!set?.isPublic) return;
+  await validatePublicObject(vocabData, "Flashcard công khai");
 };
 
 
@@ -86,10 +116,11 @@ router.get("/folders", asyncHandler(async (req, res) => {
 router.post("/folder", asyncHandler(async (req, res) => {
   const { name, color } = req.body;
   if (!name) return res.status(400).json({ error: "Folder name is required" });
+  const safeName = await cleanAndValidatePublicText(name, "Tên thư mục flashcard", { maxLength: 80 });
 
   const newFolder = await FlashcardFolder.create({
     userId: req.user.uid,
-    name,
+    name: safeName,
     color: color || "bg-blue-500",
   });
 
@@ -107,7 +138,7 @@ router.patch("/folder/:folderId", asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Folder not found" });
   }
   
-  if (name) folder.name = name;
+  if (name) folder.name = await cleanAndValidatePublicText(name, "Tên thư mục flashcard", { maxLength: 80 });
   if (color) folder.color = color;
   await folder.save();
   
@@ -167,15 +198,17 @@ router.get("/categories", asyncHandler(async (req, res) => {
 router.post("/category", asyncHandler(async (req, res) => {
   const { name, color = "bg-slate-500", description = "" } = req.body;
   if (!name || !String(name).trim()) return res.status(400).json({ error: "Tên đề mục là bắt buộc" });
+  const safeName = await cleanAndValidatePublicText(name, "Tên đề mục flashcard", { maxLength: 80 });
+  const safeDescription = await cleanAndValidatePublicText(description, "Mô tả đề mục flashcard", { maxLength: 300 });
 
-  const existing = await FlashcardCategory.findOne({ userId: req.user.uid, name: String(name).trim() });
+  const existing = await FlashcardCategory.findOne({ userId: req.user.uid, name: safeName });
   if (existing) return res.json(formatCategory(existing.toObject()));
 
   const category = await FlashcardCategory.create({
     userId: req.user.uid,
-    name: String(name).trim(),
+    name: safeName,
     color,
-    description,
+    description: safeDescription,
   });
   res.json(formatCategory(category.toObject()));
 }));
@@ -186,9 +219,9 @@ router.patch("/category/:categoryId", asyncHandler(async (req, res) => {
   const category = await FlashcardCategory.findById(categoryId);
   if (!category || category.userId.toString() !== req.user.uid) return res.status(404).json({ error: "Không tìm thấy đề mục" });
 
-  if (name !== undefined) category.name = String(name).trim();
+  if (name !== undefined) category.name = await cleanAndValidatePublicText(name, "Tên đề mục flashcard", { maxLength: 80 });
   if (color !== undefined) category.color = color;
-  if (description !== undefined) category.description = description;
+  if (description !== undefined) category.description = await cleanAndValidatePublicText(description, "Mô tả đề mục flashcard", { maxLength: 300 });
   await category.save();
 
   res.json(formatCategory(category.toObject()));
@@ -309,6 +342,8 @@ router.post("/set", asyncHandler(async (req, res) => {
   const { title, description = "", color = "bg-blue-500", isPublic = true, categoryId = null } = req.body;
   if (!title) return res.status(400).json({ error: "Title is required" });
 
+  const safeTitle = await cleanAndValidatePublicText(title, "Tên bộ flashcard", { maxLength: 120 });
+  const safeDescription = await cleanAndValidatePublicText(description || "", "Mô tả bộ flashcard", { maxLength: 600 });
   const publicFlag = await normalizePublicFlag(req.user.uid, isPublic);
   let categoryName = "";
   let safeCategoryId = null;
@@ -322,8 +357,8 @@ router.post("/set", asyncHandler(async (req, res) => {
 
   const newSet = await FlashcardSet.create({
     userId: req.user.uid,
-    title,
-    description,
+    title: safeTitle,
+    description: safeDescription,
     color,
     categoryId: safeCategoryId,
     categoryName,
@@ -344,8 +379,8 @@ router.patch("/set/:setId", asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Flashcard set not found" });
   }
   
-  if (title) set.title = title;
-  if (description !== undefined) set.description = description;
+  if (title) set.title = await cleanAndValidatePublicText(title, "Tên bộ flashcard", { maxLength: 120 });
+  if (description !== undefined) set.description = await cleanAndValidatePublicText(description, "Mô tả bộ flashcard", { maxLength: 600 });
   if (color) set.color = color;
   if (folderId !== undefined) set.folderId = folderId;
   if (categoryId !== undefined) {
@@ -403,12 +438,20 @@ router.post("/set/:setId/card", asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Flashcard set not found" });
   }
 
+  await validatePublicObject({ term, translation, examples, notes }, "Nội dung flashcard");
+  await consumeDailyLimit({
+    uid: req.user.uid,
+    key: "flashcard_words",
+    amount: 1,
+    message: "Bạn đã tạo đủ 30 từ flashcard hôm nay. Nâng VIP để tạo không giới hạn.",
+  });
+
   const newCard = await Flashcard.create({
     setId,
     userId: req.user.uid,
-    term,
+    term: String(term || "").trim(),
     phonetic: phonetic || "",
-    translation,
+    translation: String(translation || "").trim(),
     examples: examples || [],
     notes: notes || "",
   });
@@ -467,8 +510,16 @@ router.post("/generate-ai", asyncHandler(async (req, res) => {
   const { term, setId, list_flashcard_id } = req.body;
   const targetSetId = setId || list_flashcard_id;
   if (!term) return res.status(400).json({ error: "Term is required" });
+  const safeTerm = normalizeLearningTerm(term);
+  if (!safeTerm) return res.status(400).json({ error: "Term is required" });
+  await consumeDailyLimit({
+    uid: req.user.uid,
+    key: "flashcard_words",
+    amount: 1,
+    message: "Bạn đã tạo đủ 30 từ flashcard hôm nay. Nâng VIP để tạo không giới hạn.",
+  });
 
-  const lowercaseTerm = term.trim().toLowerCase();
+  const lowercaseTerm = safeTerm.trim().toLowerCase();
 
   const saveToUserSet = async (vocabData) => {
     if (!targetSetId) return;
@@ -476,6 +527,7 @@ router.post("/generate-ai", asyncHandler(async (req, res) => {
     if (set && set.userId.toString() === req.user.uid) {
       const existingCard = await Flashcard.findOne({ setId: targetSetId, term: vocabData.term });
       if (!existingCard) {
+        await validateFlashcardOnlyWhenPublic(vocabData, set);
         await Flashcard.create({
           setId: targetSetId,
           userId: req.user.uid,
@@ -509,7 +561,7 @@ router.post("/generate-ai", asyncHandler(async (req, res) => {
   }
 
   const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
-  const prompt = `Hãy đóng vai một từ điển Anh-Việt. Từ cần tra cứu là: "${term}".
+  const prompt = `Hãy đóng vai một từ điển Anh-Việt. Từ cần tra cứu là: "${safeTerm}".
 Vui lòng trả về kết quả với các thông tin sau:
 - term: nếu là tiếng việt thì chuyển nó về tiếng anh (viết hoa chữ cái đầu tiên nhé)
 - phonetic: Phiên âm quốc tế (IPA) của từ tiếng Anh này.
@@ -562,17 +614,22 @@ Vui lòng trả về kết quả với các thông tin sau:
     return res.status(500).json({ error: "All AI API keys failed to generate content or parse response." });
   }
 
-  if (!generatedData.notes) generatedData.notes = "";
+  const newVocab = normalizeGeneratedFlashcard(generatedData, safeTerm);
+  if (!newVocab.term || !newVocab.translation) {
+    return res.status(502).json({
+      error: "AI trả dữ liệu flashcard chưa đủ thông tin. Vui lòng thử lại.",
+      code: "AI_FLASHCARD_INCOMPLETE",
+    });
+  }
 
-  const newVocab = {
-    term: generatedData.term,
-    phonetic: generatedData.phonetic,
-    translation: generatedData.translation,
-    notes: generatedData.notes,
-    examples: generatedData.examples,
-  };
-
-  await Vocabulary.create(newVocab);
+  // AI generation itself is not a public post. Do not block normal learning words here,
+  // because profanity libraries can easily create false positives for vocabulary prompts.
+  // If the target set is public, saveToUserSet() will run public-content validation before writing.
+  await Vocabulary.findOneAndUpdate(
+    { term: lowercaseTerm },
+    { $setOnInsert: newVocab },
+    { upsert: true, new: true }
+  );
   await saveToUserSet(newVocab);
 
   res.json({ source: "ai", ...newVocab, ok: true, message: "Lưu thành công!" });

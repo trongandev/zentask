@@ -1,0 +1,1382 @@
+export const builtinToeicQuizzes = [
+  {
+    "id": "builtin_quiz_toeic_toeic_300_essential_words",
+    "title": "TOEIC 300 Essential Words",
+    "description": "Bài trắc nghiệm TOEIC có sẵn dựa trên bộ từ vựng TOEIC 300 Essential Words.",
+    "category": "TOEIC",
+    "categoryName": "TOEIC",
+    "difficulty": "Dễ",
+    "duration": 10,
+    "questions": [
+      {
+        "id": "builtin_toeic_toeic_300_essential_words_q1",
+        "text": "Từ/cụm từ nào có nghĩa là: \"tuân thủ, chấp hành\"?",
+        "options": [
+          "accidents",
+          "semiretired",
+          "abide by",
+          "periodically"
+        ],
+        "correctAnswer": "abide by",
+        "explanation": "\"abide by\" nghĩa là \"tuân thủ, chấp hành\". The two parties agreed to abide by the judge's decision"
+      },
+      {
+        "id": "builtin_toeic_toeic_300_essential_words_q2",
+        "text": "Từ/cụm từ nào có nghĩa là: \"ngụ ý; ám chỉ bằng suy luận\"?",
+        "options": [
+          "ship",
+          "optician",
+          "imply",
+          "Broad knowledge"
+        ],
+        "correctAnswer": "imply",
+        "explanation": "\"imply\" nghĩa là \"ngụ ý; ám chỉ bằng suy luận\". The guarantee on the iPod implied that all damages were covered under warrant..."
+      },
+      {
+        "id": "builtin_toeic_toeic_300_essential_words_q3",
+        "text": "Từ/cụm từ nào có nghĩa là: \"quyền truy cập (n); truy cập (v)\"?",
+        "options": [
+          "code",
+          "numerous",
+          "access",
+          "Review a contract"
+        ],
+        "correctAnswer": "access",
+        "explanation": "\"access\" nghĩa là \"quyền truy cập (n); truy cập (v)\". We accessed the information on the company's web site."
+      },
+      {
+        "id": "builtin_toeic_toeic_300_essential_words_q4",
+        "text": "Từ/cụm từ nào có nghĩa là: \"cái nhìn thoáng qua\"?",
+        "options": [
+          "Consumer",
+          "reach out",
+          "glimpse",
+          "focus on"
+        ],
+        "correctAnswer": "glimpse",
+        "explanation": "\"glimpse\" nghĩa là \"cái nhìn thoáng qua\". After one year with the company, he still felt as though he had only a glimps..."
+      },
+      {
+        "id": "builtin_toeic_toeic_300_essential_words_q5",
+        "text": "Từ/cụm từ nào có nghĩa là: \"dồi dào; có với số lượng lớn\"?",
+        "options": [
+          "hire",
+          "duplicate",
+          "abundant",
+          "fulfill"
+        ],
+        "correctAnswer": "abundant",
+        "explanation": "\"abundant\" nghĩa là \"dồi dào; có với số lượng lớn\". The recruiter was surprised by the abundant number of qualified applicants."
+      },
+      {
+        "id": "builtin_toeic_toeic_300_essential_words_q6",
+        "text": "Từ/cụm từ nào có nghĩa là: \"đúng tiến độ; tập trung\"?",
+        "options": [
+          "wholesale price",
+          "Porch",
+          "on track",
+          "assemble"
+        ],
+        "correctAnswer": "on track",
+        "explanation": "\"on track\" nghĩa là \"đúng tiến độ; tập trung\". If we stay on track, the meeting should be finished at 9:30."
+      },
+      {
+        "id": "builtin_toeic_toeic_300_essential_words_q7",
+        "text": "Từ/cụm từ nào có nghĩa là: \"món hời (n); mặc cả (v)\"?",
+        "options": [
+          "bargain",
+          "service",
+          "Pour water",
+          "operate"
+        ],
+        "correctAnswer": "bargain",
+        "explanation": "\"bargain\" nghĩa là \"món hời (n); mặc cả (v)\". Lois compared the sweaters carefully to determine which was a better bargain"
+      },
+      {
+        "id": "builtin_toeic_toeic_300_essential_words_q8",
+        "text": "Từ/cụm từ nào có nghĩa là: \"giảm thiểu; giảm tầm quan trọng\"?",
+        "options": [
+          "minimize",
+          "throw out",
+          "drop ... of at the post office",
+          "expenses"
+        ],
+        "correctAnswer": "minimize",
+        "explanation": "\"minimize\" nghĩa là \"giảm thiểu; giảm tầm quan trọng\". The shipping staff minimized customer complaints by working overtime to deliv..."
+      },
+      {
+        "id": "builtin_toeic_toeic_300_essential_words_q9",
+        "text": "Từ/cụm từ nào có nghĩa là: \"chấp nhận; tiếp nhận\"?",
+        "options": [
+          "Prerequisite",
+          "illuminate",
+          "accept",
+          "Exceptional contributions"
+        ],
+        "correctAnswer": "accept",
+        "explanation": "\"accept\" nghĩa là \"chấp nhận; tiếp nhận\". Without hesitating, she accepted the job of teller."
+      },
+      {
+        "id": "builtin_toeic_toeic_300_essential_words_q10",
+        "text": "Từ/cụm từ nào có nghĩa là: \"dài hạn; kéo dài trong thời gian dài\"?",
+        "options": [
+          "Hold on",
+          "willingness to",
+          "long-term",
+          "thickly"
+        ],
+        "correctAnswer": "long-term",
+        "explanation": "\"long-term\" nghĩa là \"dài hạn; kéo dài trong thời gian dài\". The CEO's long-term goal was to increase the return on investment."
+      }
+    ],
+    "creatorId": "system",
+    "isPublic": true,
+    "isFeatured": true,
+    "isDefault": true,
+    "isBuiltIn": true,
+    "source": "builtin_learning",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "builtin_quiz_toeic_toeic_part4_500plus_200words",
+    "title": "TOEIC Part4 500Plus 200Words",
+    "description": "Bài trắc nghiệm TOEIC có sẵn dựa trên bộ từ vựng TOEIC Part4 500Plus 200Words.",
+    "category": "TOEIC",
+    "categoryName": "TOEIC",
+    "difficulty": "Dễ",
+    "duration": 10,
+    "questions": [
+      {
+        "id": "builtin_toeic_toeic_part4_500plus_200words_q1",
+        "text": "Từ/cụm từ nào có nghĩa là: \"lên tàu/lên xe/ lên máy bay)\"?",
+        "options": [
+          "board",
+          "room layout plan",
+          "debt",
+          "supplement"
+        ],
+        "correctAnswer": "board",
+        "explanation": "\"board\" nghĩa là \"lên tàu/lên xe/ lên máy bay)\". Passengers must board the train before 9 a.m."
+      },
+      {
+        "id": "builtin_toeic_toeic_part4_500plus_200words_q2",
+        "text": "Từ/cụm từ nào có nghĩa là: \"điều phối / tạo điều kiện\"?",
+        "options": [
+          "Dedicated team",
+          "facilitate",
+          "Work vest",
+          "get advance notice"
+        ],
+        "correctAnswer": "facilitate",
+        "explanation": "\"facilitate\" nghĩa là \"điều phối / tạo điều kiện\". The manager will facilitate the training session."
+      },
+      {
+        "id": "builtin_toeic_toeic_part4_500plus_200words_q3",
+        "text": "Từ/cụm từ nào có nghĩa là: \"vị trí còn trống\"?",
+        "options": [
+          "Operate a computer",
+          "loyalty",
+          "internship",
+          "vacancy"
+        ],
+        "correctAnswer": "vacancy",
+        "explanation": "\"vacancy\" nghĩa là \"vị trí còn trống\". There is a vacancy in the accounting department."
+      },
+      {
+        "id": "builtin_toeic_toeic_part4_500plus_200words_q4",
+        "text": "Từ/cụm từ nào có nghĩa là: \"tiện ích\"?",
+        "options": [
+          "amenity",
+          "reserve",
+          "stop by",
+          "expand"
+        ],
+        "correctAnswer": "amenity",
+        "explanation": "\"amenity\" nghĩa là \"tiện ích\". The building offers many amenities, including a gym."
+      },
+      {
+        "id": "builtin_toeic_toeic_part4_500plus_200words_q5",
+        "text": "Từ/cụm từ nào có nghĩa là: \"hàng hóa\"?",
+        "options": [
+          "merchandise",
+          "Pharmaceutical",
+          "usually",
+          "reconcile"
+        ],
+        "correctAnswer": "merchandise",
+        "explanation": "\"merchandise\" nghĩa là \"hàng hóa\". New merchandise will arrive at the store on Friday."
+      },
+      {
+        "id": "builtin_toeic_toeic_part4_500plus_200words_q6",
+        "text": "Từ/cụm từ nào có nghĩa là: \"đơn thuốc\"?",
+        "options": [
+          "strategy",
+          "reason",
+          "prescription",
+          "contact"
+        ],
+        "correctAnswer": "prescription",
+        "explanation": "\"prescription\" nghĩa là \"đơn thuốc\". You need a prescription from a doctor to buy this medicine."
+      },
+      {
+        "id": "builtin_toeic_toeic_part4_500plus_200words_q7",
+        "text": "Từ/cụm từ nào có nghĩa là: \"nền tảng\"?",
+        "options": [
+          "dessert",
+          "solve",
+          "Accessible to",
+          "platform"
+        ],
+        "correctAnswer": "platform",
+        "explanation": "\"platform\" nghĩa là \"nền tảng\". The app is available on both mobile and desktop platforms."
+      },
+      {
+        "id": "builtin_toeic_toeic_part4_500plus_200words_q8",
+        "text": "Từ/cụm từ nào có nghĩa là: \"hội thảo\"?",
+        "options": [
+          "Turn down",
+          "seek",
+          "optional",
+          "seminar"
+        ],
+        "correctAnswer": "seminar",
+        "explanation": "\"seminar\" nghĩa là \"hội thảo\". The seminar on leadership skills starts at 9 a.m."
+      },
+      {
+        "id": "builtin_toeic_toeic_part4_500plus_200words_q9",
+        "text": "Từ/cụm từ nào có nghĩa là: \"tài sản thế chấp\"?",
+        "options": [
+          "minutes",
+          "secret",
+          "medical service",
+          "collateral"
+        ],
+        "correctAnswer": "collateral",
+        "explanation": "\"collateral\" nghĩa là \"tài sản thế chấp\". The bank requires collateral for large loans."
+      },
+      {
+        "id": "builtin_toeic_toeic_part4_500plus_200words_q10",
+        "text": "Từ/cụm từ nào có nghĩa là: \"tùy thuộc vào / có thể bị\"?",
+        "options": [
+          "Known",
+          "aware",
+          "Reward program",
+          "be subject to"
+        ],
+        "correctAnswer": "be subject to",
+        "explanation": "\"be subject to\" nghĩa là \"tùy thuộc vào / có thể bị\". All prices are subject to change without notice."
+      }
+    ],
+    "creatorId": "system",
+    "isPublic": true,
+    "isFeatured": true,
+    "isDefault": true,
+    "isBuiltIn": true,
+    "source": "builtin_learning",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "builtin_quiz_toeic_toeic_vocab_part_1",
+    "title": "TOEIC Vocab Part 1",
+    "description": "Bài trắc nghiệm TOEIC có sẵn dựa trên bộ từ vựng TOEIC Vocab Part 1.",
+    "category": "TOEIC",
+    "categoryName": "TOEIC",
+    "difficulty": "Dễ",
+    "duration": 10,
+    "questions": [
+      {
+        "id": "builtin_toeic_toeic_vocab_part_1_q1",
+        "text": "Từ/cụm từ nào có nghĩa là: \"bảng hiệu, biển báo\"?",
+        "options": [
+          "Sign",
+          "Suitcase",
+          "supervisor",
+          "Analyze application"
+        ],
+        "correctAnswer": "Sign",
+        "explanation": "\"Sign\" nghĩa là \"bảng hiệu, biển báo\". A man is reading a sign by the water."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_1_q2",
+        "text": "Từ/cụm từ nào có nghĩa là: \"ngắm nhìn bức tranh\"?",
+        "options": [
+          "Minor task",
+          "available time slot",
+          "Gaze at a painting",
+          "repel"
+        ],
+        "correctAnswer": "Gaze at a painting",
+        "explanation": "\"Gaze at a painting\" nghĩa là \"ngắm nhìn bức tranh\". A visitor is gazing at a painting."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_1_q3",
+        "text": "Từ/cụm từ nào có nghĩa là: \"bước lên cầu thang\"?",
+        "options": [
+          "annually",
+          "Walk up a stairway",
+          "pull out",
+          "Measure"
+        ],
+        "correctAnswer": "Walk up a stairway",
+        "explanation": "\"Walk up a stairway\" nghĩa là \"bước lên cầu thang\". A man is walking up a stairway."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_1_q4",
+        "text": "Từ/cụm từ nào có nghĩa là: \"bưu kiện, hành lý\"?",
+        "options": [
+          "accommodate",
+          "Package",
+          "enroll",
+          "foot traffic"
+        ],
+        "correctAnswer": "Package",
+        "explanation": "\"Package\" nghĩa là \"bưu kiện, hành lý\". A man is opening a package."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_1_q5",
+        "text": "Từ/cụm từ nào có nghĩa là: \"mang vài cái cây\"?",
+        "options": [
+          "secure",
+          "Carry some plants",
+          "outdated",
+          "Reduce energy usage"
+        ],
+        "correctAnswer": "Carry some plants",
+        "explanation": "\"Carry some plants\" nghĩa là \"mang vài cái cây\". He is carrying some plants."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_1_q6",
+        "text": "Từ/cụm từ nào có nghĩa là: \"ký giấy tờ\"?",
+        "options": [
+          "Sign a paper",
+          "qualifications",
+          "Evaluate success",
+          "statement"
+        ],
+        "correctAnswer": "Sign a paper",
+        "explanation": "\"Sign a paper\" nghĩa là \"ký giấy tờ\". A man is signing a paper."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_1_q7",
+        "text": "Từ/cụm từ nào có nghĩa là: \"vận hành máy móc\"?",
+        "options": [
+          "Appointment",
+          "Brochure",
+          "instead of",
+          "Operate machinery"
+        ],
+        "correctAnswer": "Operate machinery",
+        "explanation": "\"Operate machinery\" nghĩa là \"vận hành máy móc\". He is operating machinery."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_1_q8",
+        "text": "Từ/cụm từ nào có nghĩa là: \"tưới cây\"?",
+        "options": [
+          "durable",
+          "Water the plants",
+          "Reduce consumption",
+          "Rapid service"
+        ],
+        "correctAnswer": "Water the plants",
+        "explanation": "\"Water the plants\" nghĩa là \"tưới cây\". She is watering the plants."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_1_q9",
+        "text": "Từ/cụm từ nào có nghĩa là: \"khăn trải bàn\"?",
+        "options": [
+          "Tablecloth",
+          "enthusiastic",
+          "Unpaid leave",
+          "Sales initiatives"
+        ],
+        "correctAnswer": "Tablecloth",
+        "explanation": "\"Tablecloth\" nghĩa là \"khăn trải bàn\". She is changing the tablecloth."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_1_q10",
+        "text": "Từ/cụm từ nào có nghĩa là: \"đóng gói thức ăn\"?",
+        "options": [
+          "Advantage",
+          "alternatives",
+          "Pack food",
+          "Familiar with"
+        ],
+        "correctAnswer": "Pack food",
+        "explanation": "\"Pack food\" nghĩa là \"đóng gói thức ăn\". They are packing food into boxes."
+      }
+    ],
+    "creatorId": "system",
+    "isPublic": true,
+    "isFeatured": true,
+    "isDefault": true,
+    "isBuiltIn": true,
+    "source": "builtin_learning",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "builtin_quiz_toeic_toeic_vocab_part_2",
+    "title": "TOEIC Vocab Part 2",
+    "description": "Bài trắc nghiệm TOEIC có sẵn dựa trên bộ từ vựng TOEIC Vocab Part 2.",
+    "category": "TOEIC",
+    "categoryName": "TOEIC",
+    "difficulty": "Dễ",
+    "duration": 10,
+    "questions": [
+      {
+        "id": "builtin_toeic_toeic_vocab_part_2_q1",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Chịu trách nhiệm\"?",
+        "options": [
+          "international SIM card",
+          "appointment",
+          "Landscape",
+          "In charge of"
+        ],
+        "correctAnswer": "In charge of",
+        "explanation": "\"In charge of\" nghĩa là \"Chịu trách nhiệm\". Who is in charge of the marketing department?"
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_2_q2",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Hết, cạn kiệt\"?",
+        "options": [
+          "Screen luggage",
+          "Run out of",
+          "policies",
+          "obtain"
+        ],
+        "correctAnswer": "Run out of",
+        "explanation": "\"Run out of\" nghĩa là \"Hết, cạn kiệt\". We have run out of printer paper."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_2_q3",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Bộ phận kế toán\"?",
+        "options": [
+          "escort",
+          "Accounting",
+          "propose",
+          "Gaze out at scenery"
+        ],
+        "correctAnswer": "Accounting",
+        "explanation": "\"Accounting\" nghĩa là \"Bộ phận kế toán\". All billing questions go to accounting."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_2_q4",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Có sẵn/Rảnh\"?",
+        "options": [
+          "Departure",
+          "Available",
+          "itinerary",
+          "Catch up with"
+        ],
+        "correctAnswer": "Available",
+        "explanation": "\"Available\" nghĩa là \"Có sẵn/Rảnh\". Is the conference room available now?"
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_2_q5",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Hàng quý\"?",
+        "options": [
+          "variety",
+          "limit",
+          "deluxe",
+          "Quarterly"
+        ],
+        "correctAnswer": "Quarterly",
+        "explanation": "\"Quarterly\" nghĩa là \"Hàng quý\". We have a quarterly budget review."
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_2_q6",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Chương trình nghị sự\"?",
+        "options": [
+          "Take on",
+          "Agenda",
+          "sense",
+          "distribution center"
+        ],
+        "correctAnswer": "Agenda",
+        "explanation": "\"Agenda\" nghĩa là \"Chương trình nghị sự\". What's the first item on the agenda?"
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_2_q7",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Tham gia\"?",
+        "options": [
+          "Recommend",
+          "require",
+          "Participate",
+          "efficient"
+        ],
+        "correctAnswer": "Participate",
+        "explanation": "\"Participate\" nghĩa là \"Tham gia\". How many people will participate? +1"
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_2_q8",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Kỳ nghỉ\"?",
+        "options": [
+          "Representative",
+          "mock interview",
+          "intend",
+          "Vacation"
+        ],
+        "correctAnswer": "Vacation",
+        "explanation": "\"Vacation\" nghĩa là \"Kỳ nghỉ\". Is he still away on vacation?"
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_2_q9",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Đặc điểm, tính năng\"?",
+        "options": [
+          "Feature",
+          "Adversely affect",
+          "Demanding",
+          "Verify"
+        ],
+        "correctAnswer": "Feature",
+        "explanation": "\"Feature\" nghĩa là \"Đặc điểm, tính năng\". What is the best feature of this phone?"
+      },
+      {
+        "id": "builtin_toeic_toeic_vocab_part_2_q10",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Chữ ký\"?",
+        "options": [
+          "Signature",
+          "insurance",
+          "elegance",
+          "service your bicycle"
+        ],
+        "correctAnswer": "Signature",
+        "explanation": "\"Signature\" nghĩa là \"Chữ ký\". I need your signature on this form."
+      }
+    ],
+    "creatorId": "system",
+    "isPublic": true,
+    "isFeatured": true,
+    "isDefault": true,
+    "isBuiltIn": true,
+    "source": "builtin_learning",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "builtin_quiz_toeic_toeic_words_301_600",
+    "title": "TOEIC Words 301 600",
+    "description": "Bài trắc nghiệm TOEIC có sẵn dựa trên bộ từ vựng TOEIC Words 301 600.",
+    "category": "TOEIC",
+    "categoryName": "TOEIC",
+    "difficulty": "Dễ",
+    "duration": 10,
+    "questions": [
+      {
+        "id": "builtin_toeic_toeic_words_301_600_q1",
+        "text": "Từ/cụm từ nào có nghĩa là: \"liền kề, ở ngay cạnh\"?",
+        "options": [
+          "raise",
+          "adjacent",
+          "Temporary replacement",
+          "On the other hand"
+        ],
+        "correctAnswer": "adjacent",
+        "explanation": "\"adjacent\" nghĩa là \"liền kề, ở ngay cạnh\". My office is adjacent to the receptionist area on the third floor."
+      },
+      {
+        "id": "builtin_toeic_toeic_words_301_600_q2",
+        "text": "Từ/cụm từ nào có nghĩa là: \"tinh tế, có khả năng nhận thức sâu sắc\"?",
+        "options": [
+          "pertinent",
+          "Safety helmet",
+          "perceptive",
+          "optional"
+        ],
+        "correctAnswer": "perceptive",
+        "explanation": "\"perceptive\" nghĩa là \"tinh tế, có khả năng nhận thức sâu sắc\". Dora always hires good workers because she is very perceptive about people's ..."
+      },
+      {
+        "id": "builtin_toeic_toeic_words_301_600_q3",
+        "text": "Từ/cụm từ nào có nghĩa là: \"sức hút, khả năng thu hút\"?",
+        "options": [
+          "durable , light, comfortable",
+          "radius",
+          "Raise money",
+          "appeal"
+        ],
+        "correctAnswer": "appeal",
+        "explanation": "\"appeal\" nghĩa là \"sức hút, khả năng thu hút\". A restaurant with good food and reasonable prices has a lot of appeal."
+      },
+      {
+        "id": "builtin_toeic_toeic_words_301_600_q4",
+        "text": "Từ/cụm từ nào có nghĩa là: \"cá nhân, riêng từng người\"?",
+        "options": [
+          "impact",
+          "enhance",
+          "individual",
+          "historic value"
+        ],
+        "correctAnswer": "individual",
+        "explanation": "\"individual\" nghĩa là \"cá nhân, riêng từng người\". We had the delivery man mark the contents of each individual order."
+      },
+      {
+        "id": "builtin_toeic_toeic_words_301_600_q5",
+        "text": "Từ/cụm từ nào có nghĩa là: \"đại lý, người đại diện cho công ty\"?",
+        "options": [
+          "cover",
+          "agent",
+          "item",
+          "Urgent"
+        ],
+        "correctAnswer": "agent",
+        "explanation": "\"agent\" nghĩa là \"đại lý, người đại diện cho công ty\". A travel agent can usually find you the best deals on tickets and hotels."
+      },
+      {
+        "id": "builtin_toeic_toeic_words_301_600_q6",
+        "text": "Từ/cụm từ nào có nghĩa là: \"bù đắp, cân bằng\"?",
+        "options": [
+          "merit",
+          "display sample",
+          "offset",
+          "Policy"
+        ],
+        "correctAnswer": "offset",
+        "explanation": "\"offset\" nghĩa là \"bù đắp, cân bằng\". The high cost of the hotel room offset the savings we made by taking the train"
+      },
+      {
+        "id": "builtin_toeic_toeic_words_301_600_q7",
+        "text": "Từ/cụm từ nào có nghĩa là: \"sự đạt được, thành tựu\"?",
+        "options": [
+          "attainment",
+          "give up",
+          "flavor",
+          "predict"
+        ],
+        "correctAnswer": "attainment",
+        "explanation": "\"attainment\" nghĩa là \"sự đạt được, thành tựu\". The attainment of an Academy Award validates a performer's career."
+      },
+      {
+        "id": "builtin_toeic_toeic_words_301_600_q8",
+        "text": "Từ/cụm từ nào có nghĩa là: \"bản năng, khuynh hướng bẩm sinh\"?",
+        "options": [
+          "instrument",
+          "instinct",
+          "Expand the number",
+          "dedication"
+        ],
+        "correctAnswer": "instinct",
+        "explanation": "\"instinct\" nghĩa là \"bản năng, khuynh hướng bẩm sinh\". The student's ability to play the cello was so natural, it seemed an instinct."
+      },
+      {
+        "id": "builtin_toeic_toeic_words_301_600_q9",
+        "text": "Từ/cụm từ nào có nghĩa là: \"hàng năm, một lần mỗi năm\"?",
+        "options": [
+          "annually",
+          "dessert",
+          "Unexpected expenses",
+          "Shift"
+        ],
+        "correctAnswer": "annually",
+        "explanation": "\"annually\" nghĩa là \"hàng năm, một lần mỗi năm\". Everyone should get a physical exam annually."
+      },
+      {
+        "id": "builtin_toeic_toeic_words_301_600_q10",
+        "text": "Từ/cụm từ nào có nghĩa là: \"nhân sự, nhóm nhân viên\"?",
+        "options": [
+          "On the other hand",
+          "personnel",
+          "limit",
+          "Complete assignment"
+        ],
+        "correctAnswer": "personnel",
+        "explanation": "\"personnel\" nghĩa là \"nhân sự, nhóm nhân viên\". The office manager insisted that she needed more personnel to finish the proj..."
+      }
+    ],
+    "creatorId": "system",
+    "isPublic": true,
+    "isFeatured": true,
+    "isDefault": true,
+    "isBuiltIn": true,
+    "source": "builtin_learning",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "builtin_quiz_toeic_toeic_reading_test_1_test_5",
+    "title": "TOEIC Reading Test 1 - Test 5",
+    "description": "Bài trắc nghiệm TOEIC có sẵn dựa trên bộ từ vựng TOEIC Reading Test 1 - Test 5.",
+    "category": "TOEIC",
+    "categoryName": "TOEIC",
+    "difficulty": "Dễ",
+    "duration": 10,
+    "questions": [
+      {
+        "id": "builtin_toeic_toeic_reading_test_1_test_5_q1",
+        "text": "Từ/cụm từ nào có nghĩa là: \"liên tục, không ngừng\"?",
+        "options": [
+          "room layout plan",
+          "complimentary",
+          "Watch a performance",
+          "continuously"
+        ],
+        "correctAnswer": "continuously",
+        "explanation": "\"continuously\" nghĩa là \"liên tục, không ngừng\". The machine has been running continuously for 24 hours."
+      },
+      {
+        "id": "builtin_toeic_toeic_reading_test_1_test_5_q2",
+        "text": "Từ/cụm từ nào có nghĩa là: \"tích lũy, tích góp\"?",
+        "options": [
+          "electronics manufacturer",
+          "destination",
+          "accumulate",
+          "penalty"
+        ],
+        "correctAnswer": "accumulate",
+        "explanation": "\"accumulate\" nghĩa là \"tích lũy, tích góp\". He accumulated years of experience in the logistics industry."
+      },
+      {
+        "id": "builtin_toeic_toeic_reading_test_1_test_5_q3",
+        "text": "Từ/cụm từ nào có nghĩa là: \"chẩn đoán\"?",
+        "options": [
+          "Present a problem",
+          "consider",
+          "novice",
+          "diagnose"
+        ],
+        "correctAnswer": "diagnose",
+        "explanation": "\"diagnose\" nghĩa là \"chẩn đoán\". The technician ran a diagnostic test to identify the problem."
+      },
+      {
+        "id": "builtin_toeic_toeic_reading_test_1_test_5_q4",
+        "text": "Từ/cụm từ nào có nghĩa là: \"độc quyền\"?",
+        "options": [
+          "settle",
+          "proprietary",
+          "On display",
+          "Serve customers"
+        ],
+        "correctAnswer": "proprietary",
+        "explanation": "\"proprietary\" nghĩa là \"độc quyền\". The company uses proprietary software for data management."
+      },
+      {
+        "id": "builtin_toeic_toeic_reading_test_1_test_5_q5",
+        "text": "Từ/cụm từ nào có nghĩa là: \"không lường trước\"?",
+        "options": [
+          "unforeseen",
+          "address",
+          "Protective packaging",
+          "complimentary"
+        ],
+        "correctAnswer": "unforeseen",
+        "explanation": "\"unforeseen\" nghĩa là \"không lường trước\". The project was delayed due to unforeseen circumstances."
+      },
+      {
+        "id": "builtin_toeic_toeic_reading_test_1_test_5_q6",
+        "text": "Từ/cụm từ nào có nghĩa là: \"chẳng bao lâu nữa\"?",
+        "options": [
+          "eventually",
+          "before long",
+          "Quote",
+          "Chop up vegetables"
+        ],
+        "correctAnswer": "before long",
+        "explanation": "\"before long\" nghĩa là \"chẳng bao lâu nữa\". Before long, the new branch will be fully operational."
+      },
+      {
+        "id": "builtin_toeic_toeic_reading_test_1_test_5_q7",
+        "text": "Từ/cụm từ nào có nghĩa là: \"vội vàng, hấp tấp\"?",
+        "options": [
+          "Option",
+          "establish",
+          "hastily",
+          "predict"
+        ],
+        "correctAnswer": "hastily",
+        "explanation": "\"hastily\" nghĩa là \"vội vàng, hấp tấp\". The report was hastily prepared and contained several errors."
+      },
+      {
+        "id": "builtin_toeic_toeic_reading_test_1_test_5_q8",
+        "text": "Từ/cụm từ nào có nghĩa là: \"hầu như không\"?",
+        "options": [
+          "Shop for groceries",
+          "scarcely",
+          "own",
+          "photo ID"
+        ],
+        "correctAnswer": "scarcely",
+        "explanation": "\"scarcely\" nghĩa là \"hầu như không\". There was scarcely enough time to review all the proposals."
+      },
+      {
+        "id": "builtin_toeic_toeic_reading_test_1_test_5_q9",
+        "text": "Từ/cụm từ nào có nghĩa là: \"theo thứ tự tương ứng\"?",
+        "options": [
+          "professional coaching",
+          "desire",
+          "respectively",
+          "complete"
+        ],
+        "correctAnswer": "respectively",
+        "explanation": "\"respectively\" nghĩa là \"theo thứ tự tương ứng\". John and Mary received first and second prizes, respectively."
+      },
+      {
+        "id": "builtin_toeic_toeic_reading_test_1_test_5_q10",
+        "text": "Từ/cụm từ nào có nghĩa là: \"cây phong, gỗ phong\"?",
+        "options": [
+          "office complex",
+          "maple",
+          "rewarding",
+          "achievement"
+        ],
+        "correctAnswer": "maple",
+        "explanation": "\"maple\" nghĩa là \"cây phong, gỗ phong\". The furniture was crafted from high-quality maple wood."
+      }
+    ],
+    "creatorId": "system",
+    "isPublic": true,
+    "isFeatured": true,
+    "isDefault": true,
+    "isBuiltIn": true,
+    "source": "builtin_learning",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "builtin_quiz_toeic_tu_vung_part7_ets2024_test5_10_fixed",
+    "title": "Tu Vung Part7 ETS2024 Test5 10 Fixed",
+    "description": "Bài trắc nghiệm TOEIC có sẵn dựa trên bộ từ vựng Tu Vung Part7 ETS2024 Test5 10 Fixed.",
+    "category": "TOEIC",
+    "categoryName": "TOEIC",
+    "difficulty": "Dễ",
+    "duration": 10,
+    "questions": [
+      {
+        "id": "builtin_toeic_tu_vung_part7_ets2024_test5_10_fixed_q1",
+        "text": "Từ/cụm từ nào có nghĩa là: \"nệm\"?",
+        "options": [
+          "mattress",
+          "Sincere thanks",
+          "Ride a bicycle",
+          "In contrast to"
+        ],
+        "correctAnswer": "mattress",
+        "explanation": "\"mattress\" nghĩa là \"nệm\". The hotel replaced every mattress before the summer season."
+      },
+      {
+        "id": "builtin_toeic_tu_vung_part7_ets2024_test5_10_fixed_q2",
+        "text": "Từ/cụm từ nào có nghĩa là: \"ngôi nhà được thiết kế cảnh quan\"?",
+        "options": [
+          "In working order",
+          "display",
+          "Backpack",
+          "landscaped house"
+        ],
+        "correctAnswer": "landscaped house",
+        "explanation": "\"landscaped house\" nghĩa là \"ngôi nhà được thiết kế cảnh quan\". The architect designed a beautifully landscaped house with a garden and outdo..."
+      },
+      {
+        "id": "builtin_toeic_tu_vung_part7_ets2024_test5_10_fixed_q3",
+        "text": "Từ/cụm từ nào có nghĩa là: \"hồ sơ thầu\"?",
+        "options": [
+          "engage",
+          "reduce",
+          "figure out",
+          "bid"
+        ],
+        "correctAnswer": "bid",
+        "explanation": "\"bid\" nghĩa là \"hồ sơ thầu\". The supplier submitted the lowest bid and won the contract for the renovation..."
+      },
+      {
+        "id": "builtin_toeic_tu_vung_part7_ets2024_test5_10_fixed_q4",
+        "text": "Từ/cụm từ nào có nghĩa là: \"còn hàng\"?",
+        "options": [
+          "in stock",
+          "run",
+          "remainder",
+          "sharp"
+        ],
+        "correctAnswer": "in stock",
+        "explanation": "\"in stock\" nghĩa là \"còn hàng\". The sales associate confirmed that the limited-edition item is still in stock..."
+      },
+      {
+        "id": "builtin_toeic_tu_vung_part7_ets2024_test5_10_fixed_q5",
+        "text": "Từ/cụm từ nào có nghĩa là: \"trước đây\"?",
+        "options": [
+          "stand",
+          "assembly",
+          "minutes",
+          "previous"
+        ],
+        "correctAnswer": "previous",
+        "explanation": "\"previous\" nghĩa là \"trước đây\". The previous manager introduced a flexible work-from-home policy for all depa..."
+      },
+      {
+        "id": "builtin_toeic_tu_vung_part7_ets2024_test5_10_fixed_q6",
+        "text": "Từ/cụm từ nào có nghĩa là: \"câu hỏi mở\"?",
+        "options": [
+          "initiative",
+          "open-ended question",
+          "Increase progressively",
+          "mandatory"
+        ],
+        "correctAnswer": "open-ended question",
+        "explanation": "\"open-ended question\" nghĩa là \"câu hỏi mở\". The feedback form includes one open-ended question asking customers to descri..."
+      },
+      {
+        "id": "builtin_toeic_tu_vung_part7_ets2024_test5_10_fixed_q7",
+        "text": "Từ/cụm từ nào có nghĩa là: \"tiện ích, công cụ hữu ích\"?",
+        "options": [
+          "indefinite",
+          "reach out to ....",
+          "Utility",
+          "probationary"
+        ],
+        "correctAnswer": "Utility",
+        "explanation": "\"Utility\" nghĩa là \"tiện ích, công cụ hữu ích\". The landlord confirmed that utility bills are included in the monthly rental ..."
+      },
+      {
+        "id": "builtin_toeic_tu_vung_part7_ets2024_test5_10_fixed_q8",
+        "text": "Từ/cụm từ nào có nghĩa là: \"nhà máy điện\"?",
+        "options": [
+          "power plant",
+          "Neither",
+          "deposit",
+          "statement"
+        ],
+        "correctAnswer": "power plant",
+        "explanation": "\"power plant\" nghĩa là \"nhà máy điện\". The power plant supplies electricity to the city."
+      },
+      {
+        "id": "builtin_toeic_tu_vung_part7_ets2024_test5_10_fixed_q9",
+        "text": "Từ/cụm từ nào có nghĩa là: \"ổn định\"?",
+        "options": [
+          "Try out",
+          "Settle into",
+          "abide by",
+          "switch"
+        ],
+        "correctAnswer": "Settle into",
+        "explanation": "\"Settle into\" nghĩa là \"ổn định\". New employees quickly settled into the office routine."
+      },
+      {
+        "id": "builtin_toeic_tu_vung_part7_ets2024_test5_10_fixed_q10",
+        "text": "Từ/cụm từ nào có nghĩa là: \"ngay lập tức\"?",
+        "options": [
+          "Temporary sign",
+          "immediate",
+          "gain",
+          "Prerequisite"
+        ],
+        "correctAnswer": "immediate",
+        "explanation": "\"immediate\" nghĩa là \"ngay lập tức\". The flooding in the storage area requires immediate attention from the mainte..."
+      }
+    ],
+    "creatorId": "system",
+    "isPublic": true,
+    "isFeatured": true,
+    "isDefault": true,
+    "isBuiltIn": true,
+    "source": "builtin_learning",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "builtin_quiz_toeic_toeic_ets_2023",
+    "title": "TOEIC ETS 2023",
+    "description": "Bài trắc nghiệm TOEIC có sẵn dựa trên bộ từ vựng TOEIC ETS 2023.",
+    "category": "TOEIC",
+    "categoryName": "TOEIC",
+    "difficulty": "Dễ",
+    "duration": 10,
+    "questions": [
+      {
+        "id": "builtin_toeic_toeic_ets_2023_q1",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Tổ chức một buổi họp\"?",
+        "options": [
+          "Hold a meeting",
+          "site",
+          "Headquarters",
+          "Protective glasses"
+        ],
+        "correctAnswer": "Hold a meeting",
+        "explanation": "\"Hold a meeting\" nghĩa là \"Tổ chức một buổi họp\". The manager decided to hold a meeting to discuss the new project next week."
+      },
+      {
+        "id": "builtin_toeic_toeic_ets_2023_q2",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Theo đuổi sở thích\"?",
+        "options": [
+          "Pursue an interest",
+          "In advance",
+          "supply closet",
+          "Pass out"
+        ],
+        "correctAnswer": "Pursue an interest",
+        "explanation": "\"Pursue an interest\" nghĩa là \"Theo đuổi sở thích\". After retiring, he finally had time to pursue an interest in gardening."
+      },
+      {
+        "id": "builtin_toeic_toeic_ets_2023_q3",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Hoãn lại việc bắt đầu\"?",
+        "options": [
+          "Run out of",
+          "Considerable efforts",
+          "Delay the start",
+          "fill out"
+        ],
+        "correctAnswer": "Delay the start",
+        "explanation": "\"Delay the start\" nghĩa là \"Hoãn lại việc bắt đầu\". Heavy rain forced the organizers to delay the start of the match."
+      },
+      {
+        "id": "builtin_toeic_toeic_ets_2023_q4",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Khoản tiết kiệm lớn\"?",
+        "options": [
+          "Lean on the railing",
+          "Board a bus",
+          "Wide range of",
+          "Substantial savings"
+        ],
+        "correctAnswer": "Substantial savings",
+        "explanation": "\"Substantial savings\" nghĩa là \"Khoản tiết kiệm lớn\". Buying in bulk can lead to substantial savings over time."
+      },
+      {
+        "id": "builtin_toeic_toeic_ets_2023_q5",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Lực lượng lao động ổn định\"?",
+        "options": [
+          "Stable workforce",
+          "It doesn't matter",
+          "assemble",
+          "Remarkable decrease"
+        ],
+        "correctAnswer": "Stable workforce",
+        "explanation": "\"Stable workforce\" nghĩa là \"Lực lượng lao động ổn định\". A stable workforce is essential for the long-term success of any company."
+      },
+      {
+        "id": "builtin_toeic_toeic_ets_2023_q6",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Tu sửa lớn\"?",
+        "options": [
+          "Extensive renovation",
+          "In charge of",
+          "remind",
+          "Conflict in schedule"
+        ],
+        "correctAnswer": "Extensive renovation",
+        "explanation": "\"Extensive renovation\" nghĩa là \"Tu sửa lớn\". The hotel is undergoing extensive renovation to upgrade its facilities."
+      },
+      {
+        "id": "builtin_toeic_toeic_ets_2023_q7",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Hoàn toàn phù hợp\"?",
+        "options": [
+          "Carry a briefcase",
+          "Perfectly suited for",
+          "Worth",
+          "supply"
+        ],
+        "correctAnswer": "Perfectly suited for",
+        "explanation": "\"Perfectly suited for\" nghĩa là \"Hoàn toàn phù hợp\". Her skills and experience make her perfectly suited for this role."
+      },
+      {
+        "id": "builtin_toeic_toeic_ets_2023_q8",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Lấy giấy phép\"?",
+        "options": [
+          "Pitcher",
+          "retail management",
+          "Obtain a permit",
+          "wage"
+        ],
+        "correctAnswer": "Obtain a permit",
+        "explanation": "\"Obtain a permit\" nghĩa là \"Lấy giấy phép\". You need to obtain a permit before you can start building the deck."
+      },
+      {
+        "id": "builtin_toeic_toeic_ets_2023_q9",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Đại diện bán hàng\"?",
+        "options": [
+          "Solve",
+          "anticipated growth",
+          "Sales representatives",
+          "accounting director"
+        ],
+        "correctAnswer": "Sales representatives",
+        "explanation": "\"Sales representatives\" nghĩa là \"Đại diện bán hàng\". Our sales representatives will visit your office next week."
+      },
+      {
+        "id": "builtin_toeic_toeic_ets_2023_q10",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Đội ngũ tận tâm\"?",
+        "options": [
+          "Free admission",
+          "Dedicated team",
+          "wellness",
+          "workouts"
+        ],
+        "correctAnswer": "Dedicated team",
+        "explanation": "\"Dedicated team\" nghĩa là \"Đội ngũ tận tâm\". We have a dedicated team of professionals working on this project."
+      }
+    ],
+    "creatorId": "system",
+    "isPublic": true,
+    "isFeatured": true,
+    "isDefault": true,
+    "isBuiltIn": true,
+    "source": "builtin_learning",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "builtin_quiz_toeic_conjunctions_prepositions_v2",
+    "title": "Conjunctions Prepositions V2",
+    "description": "Bài trắc nghiệm TOEIC có sẵn dựa trên bộ từ vựng Conjunctions Prepositions V2.",
+    "category": "TOEIC",
+    "categoryName": "TOEIC",
+    "difficulty": "Dễ",
+    "duration": 10,
+    "questions": [
+      {
+        "id": "builtin_toeic_conjunctions_prepositions_v2_q1",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Ngoài ra, Thêm vào đó (+ Cụm danh từ)\"?",
+        "options": [
+          "Departure",
+          "Sit around fountain",
+          "In addition to",
+          "honor"
+        ],
+        "correctAnswer": "In addition to",
+        "explanation": "\"In addition to\" nghĩa là \"Ngoài ra, Thêm vào đó (+ Cụm danh từ)\". In addition to the salary, the company offers a bonus."
+      },
+      {
+        "id": "builtin_toeic_conjunctions_prepositions_v2_q2",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Trong khi đó, Mặc dù (+ Mệnh đề S+V)\"?",
+        "options": [
+          "Draw up",
+          "Shore",
+          "Whereas",
+          "draw"
+        ],
+        "correctAnswer": "Whereas",
+        "explanation": "\"Whereas\" nghĩa là \"Trong khi đó, Mặc dù (+ Mệnh đề S+V)\". Sales increased in Asia, whereas they fell in Europe."
+      },
+      {
+        "id": "builtin_toeic_conjunctions_prepositions_v2_q3",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Thêm vào đó (Đứng đầu câu hoặc sau dấu ,)\"?",
+        "options": [
+          "In addition",
+          "Abandon",
+          "perspective",
+          "Seaside"
+        ],
+        "correctAnswer": "In addition",
+        "explanation": "\"In addition\" nghĩa là \"Thêm vào đó (Đứng đầu câu hoặc sau dấu ,)\". In addition, all employees will receive a year-end bonus."
+      },
+      {
+        "id": "builtin_toeic_conjunctions_prepositions_v2_q4",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Như thể là (+ Mệnh đề giả định)\"?",
+        "options": [
+          "a entire bin of",
+          "list",
+          "As though",
+          "perform"
+        ],
+        "correctAnswer": "As though",
+        "explanation": "\"As though\" nghĩa là \"Như thể là (+ Mệnh đề giả định)\". She spoke as though she had never heard the news."
+      },
+      {
+        "id": "builtin_toeic_conjunctions_prepositions_v2_q5",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Bằng cách, Thông qua (+ Cụm danh từ/V-ing)\"?",
+        "options": [
+          "Make a payment",
+          "deficit",
+          "Respondent",
+          "By means of"
+        ],
+        "correctAnswer": "By means of",
+        "explanation": "\"By means of\" nghĩa là \"Bằng cách, Thông qua (+ Cụm danh từ/V-ing)\". We solved the issue by means of a joint meeting."
+      },
+      {
+        "id": "builtin_toeic_conjunctions_prepositions_v2_q6",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Để đáp lại, Phản hồi (+ Cụm danh từ)\"?",
+        "options": [
+          "In response to",
+          "appraisal",
+          "callout",
+          "Lead"
+        ],
+        "correctAnswer": "In response to",
+        "explanation": "\"In response to\" nghĩa là \"Để đáp lại, Phản hồi (+ Cụm danh từ)\". In response to complaints, the policy was changed."
+      },
+      {
+        "id": "builtin_toeic_conjunctions_prepositions_v2_q7",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Mặc dù (+ Mệnh đề S+V – nhấn mạnh hơn although)\"?",
+        "options": [
+          "inconsiderately",
+          "Even though",
+          "Either is fine",
+          "Demonstrate"
+        ],
+        "correctAnswer": "Even though",
+        "explanation": "\"Even though\" nghĩa là \"Mặc dù (+ Mệnh đề S+V – nhấn mạnh hơn although)\". Even though it was expensive, we bought the new equipment."
+      },
+      {
+        "id": "builtin_toeic_conjunctions_prepositions_v2_q8",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Suốt, Khắp (+ Cụm danh từ/Khoảng thời gian)\"?",
+        "options": [
+          "garment",
+          "Throughout",
+          "optional",
+          "at no charge"
+        ],
+        "correctAnswer": "Throughout",
+        "explanation": "\"Throughout\" nghĩa là \"Suốt, Khắp (+ Cụm danh từ/Khoảng thời gian)\". Sales figures rose throughout the entire fiscal year."
+      },
+      {
+        "id": "builtin_toeic_conjunctions_prepositions_v2_q9",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Mỗi, Theo (+ Cụm danh từ – số liệu/tần suất)\"?",
+        "options": [
+          "Comprehensive effort",
+          "Per",
+          "initiate",
+          "diesel fuel"
+        ],
+        "correctAnswer": "Per",
+        "explanation": "\"Per\" nghĩa là \"Mỗi, Theo (+ Cụm danh từ – số liệu/tần suất)\". Employees are paid $20 per hour for overtime work."
+      },
+      {
+        "id": "builtin_toeic_conjunctions_prepositions_v2_q10",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Không... cũng không (khi đứng một mình ở đầu câu)\"?",
+        "options": [
+          "Minor error",
+          "Make room for",
+          "last for generations",
+          "Neither"
+        ],
+        "correctAnswer": "Neither",
+        "explanation": "\"Neither\" nghĩa là \"Không... cũng không (khi đứng một mình ở đầu câu)\". Neither the manager nor the staff attended the seminar."
+      }
+    ],
+    "creatorId": "system",
+    "isPublic": true,
+    "isFeatured": true,
+    "isDefault": true,
+    "isBuiltIn": true,
+    "source": "builtin_learning",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "builtin_quiz_toeic_phrasal_verbs",
+    "title": "Phrasal Verbs",
+    "description": "Bài trắc nghiệm TOEIC có sẵn dựa trên bộ từ vựng Phrasal Verbs.",
+    "category": "TOEIC",
+    "categoryName": "TOEIC",
+    "difficulty": "Dễ",
+    "duration": 10,
+    "questions": [
+      {
+        "id": "builtin_toeic_phrasal_verbs_q1",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Hủy bỏ\"?",
+        "options": [
+          "Lead designer",
+          "Protective gear",
+          "Call off",
+          "Curator"
+        ],
+        "correctAnswer": "Call off",
+        "explanation": "\"Call off\" nghĩa là \"Hủy bỏ\". The board decided to call off the meeting due to the storm."
+      },
+      {
+        "id": "builtin_toeic_phrasal_verbs_q2",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Tiếp quản, Đảm nhận\"?",
+        "options": [
+          "promotional",
+          "In response to",
+          "Take over",
+          "panel"
+        ],
+        "correctAnswer": "Take over",
+        "explanation": "\"Take over\" nghĩa là \"Tiếp quản, Đảm nhận\". Mr. Smith will take over the position of CEO next month."
+      },
+      {
+        "id": "builtin_toeic_phrasal_verbs_q3",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Hiểu ra, Tính toán\"?",
+        "options": [
+          "Watch out",
+          "Figure out",
+          "Even if",
+          "View"
+        ],
+        "correctAnswer": "Figure out",
+        "explanation": "\"Figure out\" nghĩa là \"Hiểu ra, Tính toán\". It took me a while to figure out how to use the new software."
+      },
+      {
+        "id": "builtin_toeic_phrasal_verbs_q4",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Xem qua, Kiểm tra nhanh\"?",
+        "options": [
+          "Considerable efforts",
+          "Put aside",
+          "remind",
+          "Look over"
+        ],
+        "correctAnswer": "Look over",
+        "explanation": "\"Look over\" nghĩa là \"Xem qua, Kiểm tra nhanh\". Could you look over this draft before I send it to the client?"
+      },
+      {
+        "id": "builtin_toeic_phrasal_verbs_q5",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Hóa ra, Tham gia\"?",
+        "options": [
+          "Turn out",
+          "Prerequisite",
+          "spend a bit more",
+          "immediately"
+        ],
+        "correctAnswer": "Turn out",
+        "explanation": "\"Turn out\" nghĩa là \"Hóa ra, Tham gia\". The product launch turned out to be more successful than expected."
+      },
+      {
+        "id": "builtin_toeic_phrasal_verbs_q6",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Làm thủ tục trả phòng, Kiểm tra\"?",
+        "options": [
+          "fashion",
+          "Check out",
+          "reason",
+          "attend"
+        ],
+        "correctAnswer": "Check out",
+        "explanation": "\"Check out\" nghĩa là \"Làm thủ tục trả phòng, Kiểm tra\". Please check out of the hotel before noon."
+      },
+      {
+        "id": "builtin_toeic_phrasal_verbs_q7",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Tụt lại phía sau\"?",
+        "options": [
+          "Fall behind",
+          "disruption",
+          "responsibility",
+          "Vulnerable"
+        ],
+        "correctAnswer": "Fall behind",
+        "explanation": "\"Fall behind\" nghĩa là \"Tụt lại phía sau\". If you miss too many meetings you will fall behind on the project."
+      },
+      {
+        "id": "builtin_toeic_phrasal_verbs_q8",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Tiếp tục\"?",
+        "options": [
+          "method",
+          "submit",
+          "Keep on",
+          "new hires"
+        ],
+        "correctAnswer": "Keep on",
+        "explanation": "\"Keep on\" nghĩa là \"Tiếp tục\". The team kept on working despite the power outage."
+      },
+      {
+        "id": "builtin_toeic_phrasal_verbs_q9",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Cất đi\"?",
+        "options": [
+          "disturb",
+          "Put away",
+          "Present a problem",
+          "renewable"
+        ],
+        "correctAnswer": "Put away",
+        "explanation": "\"Put away\" nghĩa là \"Cất đi\". Please put away the equipment after you finish using it."
+      },
+      {
+        "id": "builtin_toeic_phrasal_verbs_q10",
+        "text": "Từ/cụm từ nào có nghĩa là: \"Cất cánh, Cởi bỏ, Nghỉ phép\"?",
+        "options": [
+          "Take off",
+          "maple",
+          "infinitely",
+          "disruption"
+        ],
+        "correctAnswer": "Take off",
+        "explanation": "\"Take off\" nghĩa là \"Cất cánh, Cởi bỏ, Nghỉ phép\". The plane is scheduled to take off at 10 AM."
+      }
+    ],
+    "creatorId": "system",
+    "isPublic": true,
+    "isFeatured": true,
+    "isDefault": true,
+    "isBuiltIn": true,
+    "source": "builtin_learning",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
+];

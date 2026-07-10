@@ -8,6 +8,7 @@ import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { Bold, Italic, Strikethrough, List, ListOrdered, Palette, Type } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { containsForbiddenPublicContent } from '../utils/publicContentGuard';
 
 // Custom Extension for Font Size
 const FontSize = Extension.create({
@@ -114,6 +115,7 @@ const FONT_SIZES = [
 export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội dung...', minHeight = '100px' }: RichTextEditorProps) {
   const [showColors, setShowColors] = useState(false);
   const [showFontSizes, setShowFontSizes] = useState(false);
+  const [contentWarning, setContentWarning] = useState("");
 
   const editor = useEditor({
     extensions: [
@@ -128,11 +130,19 @@ export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội 
     ],
     content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      setContentWarning(containsForbiddenPublicContent(html) ? "Nội dung có từ ngữ không phù hợp. Hãy chỉnh sửa trước khi đăng." : "");
+      onChange(html);
     },
     editorProps: {
       attributes: {
         class: `prose prose-sm max-w-none focus:outline-none w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-b-2xl text-gray-700 min-h-[${minHeight}] resize-none`,
+      },
+      handlePaste() {
+        // Do not block paste on the client. We only show a soft warning in onUpdate,
+        // and the backend verifies once more before saving. This avoids false positives
+        // in normal Vietnamese text.
+        return false;
       },
     },
   });
@@ -257,6 +267,11 @@ export function RichTextEditor({ content, onChange, placeholder = 'Nhập nội 
         </div>
       </div>
       <EditorContent editor={editor} className="flex-1 cursor-text" />
+      {contentWarning && (
+        <div className="px-4 py-2 text-xs font-semibold text-red-700 bg-red-50 border-t border-red-100 rounded-b-2xl">
+          {contentWarning}
+        </div>
+      )}
     </div>
   );
 }
