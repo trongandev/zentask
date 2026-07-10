@@ -331,89 +331,89 @@ export default function FirstLoginOnboarding() {
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/70 p-3 md:p-6 backdrop-blur-sm">
-      <div className="relative grid w-full max-w-6xl overflow-hidden rounded-[2rem] bg-white shadow-2xl md:grid-cols-[0.9fr_1.35fr]">
+      <div className="relative flex max-h-[calc(100vh-24px)] w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl md:max-h-[calc(100vh-48px)] md:grid md:grid-cols-[0.9fr_1.35fr]">
         <button
           type="button"
           onClick={remindLater}
-          className="absolute right-4 top-4 z-20 rounded-full bg-white/90 p-2 text-slate-500 shadow-sm transition hover:bg-slate-100 hover:text-slate-900"
+          className="absolute right-3 top-3 z-20 rounded-full bg-white/90 p-2 text-slate-500 shadow-sm transition hover:bg-slate-100 hover:text-slate-900 md:right-4 md:top-4"
           aria-label="Đóng hướng dẫn"
         >
-          <X className="h-5 w-5" />
+          <X className="h-4 w-4 md:h-5 md:w-5" />
         </button>
 
-        <div className={`relative min-h-[260px] overflow-hidden bg-gradient-to-br ${current.color} p-6 text-white md:min-h-[640px] md:p-8`}>
+        <div className={`relative flex min-h-[160px] shrink-0 flex-col overflow-hidden bg-gradient-to-br ${current.color} p-5 text-white sm:min-h-[220px] md:h-full md:min-h-[640px] md:p-8`}>
           <div className="absolute -left-16 -top-16 h-52 w-52 rounded-full bg-white/10" />
           <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-white/10" />
           <div className="relative z-10 flex h-full flex-col">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold ring-1 ring-white/20">
-              <Wand2 className="h-4 w-4" />
+            <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold ring-1 ring-white/20 md:text-sm">
+              <Wand2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
               Hướng dẫn lần đầu
             </div>
 
-            <div className="mt-6 flex flex-1 flex-col items-center justify-center text-center">
+            <div className="mt-3 flex flex-1 flex-col items-center justify-center text-center md:mt-6">
               <div className="relative">
                 <div className="absolute inset-x-8 bottom-1 h-10 rounded-full bg-black/15 blur-xl" />
-                <img src={current.mascot} alt="Lopy mascot" className="relative mx-auto max-h-52 w-auto object-contain drop-shadow-2xl md:max-h-72" />
+                <img src={current.mascot} alt="Lopy mascot" className="relative mx-auto max-h-24 w-auto object-contain drop-shadow-2xl sm:max-h-36 md:max-h-72" />
               </div>
-              <div className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-white/15 px-4 py-3 text-left ring-1 ring-white/15">
-                <Icon className="h-7 w-7 shrink-0" />
+              <div className="mt-3 inline-flex w-full items-center gap-2 rounded-2xl bg-white/15 p-3 text-left ring-1 ring-white/15 sm:w-auto md:mt-6 md:px-4 md:py-3">
+                <Icon className="hidden h-6 w-6 shrink-0 sm:block md:h-7 md:w-7" />
                 <div>
-                  <p className="text-xs uppercase tracking-[0.22em] text-white/70">Lopy gợi ý</p>
-                  <p className="text-sm font-semibold leading-snug">{current.tip}</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/70 md:text-xs">Lopy gợi ý</p>
+                  <p className="text-xs font-semibold leading-snug md:text-sm">{current.tip}</p>
                 </div>
               </div>
             </div>
 
-            <div className="mt-6">
-              <div className="mb-2 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-white/80">
+            <div className="mt-3 md:mt-6">
+              <div className="mb-1.5 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-white/80 md:mb-2 md:text-xs">
                 <span>
                   Bước {stepIndex + 1}/{steps.length}
                 </span>
                 <span>{progress}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-white/20">
+              <div className="h-1.5 overflow-hidden rounded-full bg-white/20 md:h-2">
                 <div className="h-full rounded-full bg-white transition-all duration-300" style={{ width: `${progress}%` }} />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex max-h-[88vh] flex-col overflow-y-auto p-5 md:p-8">
-          <div className="pr-10">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-700">
-              <Sparkles className="h-4 w-4" />
+        <div className="flex flex-1 flex-col overflow-y-auto p-5 md:p-8">
+          <div className="pr-8 md:pr-10">
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 md:mb-4 md:gap-2 md:px-3 md:py-1.5 md:text-sm">
+              <Sparkles className="h-3.5 w-3.5 md:h-4 md:w-4" />
               Dành cho tài khoản mới
             </div>
-            <h2 className="text-2xl font-black tracking-tight text-slate-950 md:text-4xl">{current.title}</h2>
-            <p className="mt-3 text-base leading-relaxed text-slate-600 md:text-lg">{current.subtitle}</p>
+            <h2 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl md:text-4xl">{current.title}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base md:mt-3 md:text-lg">{current.subtitle}</p>
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
-              <div className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-wider text-slate-500">
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 md:rounded-3xl md:p-5">
+              <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-500 md:mb-4 md:text-sm">
                 <BookOpen className="h-4 w-4" />
                 Bạn cần biết
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2.5 md:space-y-3">
                 {current.bullets.map((item, idx) => (
-                  <div key={idx} className="flex gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
-                    <p className="text-sm font-medium leading-relaxed text-slate-700">{item}</p>
+                  <div key={idx} className="flex gap-2.5 rounded-xl bg-white p-2.5 shadow-sm ring-1 ring-slate-100 md:rounded-2xl md:p-3">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 md:h-5 md:w-5" />
+                    <p className="text-xs font-medium leading-relaxed text-slate-700 md:text-sm">{item}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-3xl border border-blue-100 bg-blue-50/70 p-5">
-              <div className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-wider text-blue-600">
+            <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4 md:rounded-3xl md:p-5">
+              <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-wider text-blue-600 md:mb-4 md:text-sm">
                 <BrainCircuit className="h-4 w-4" />
                 Nên làm thử
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2.5 md:space-y-3">
                 {current.actions.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-blue-100">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-black text-white">{idx + 1}</div>
-                    <p className="text-sm font-bold leading-relaxed text-slate-800">{item}</p>
+                  <div key={idx} className="flex items-center gap-2.5 rounded-xl bg-white p-2.5 shadow-sm ring-1 ring-blue-100 md:rounded-2xl md:p-3">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-black text-white md:h-7 md:w-7 md:text-xs">{idx + 1}</div>
+                    <p className="text-xs font-bold leading-relaxed text-slate-800 md:text-sm">{item}</p>
                   </div>
                 ))}
               </div>
@@ -421,7 +421,7 @@ export default function FirstLoginOnboarding() {
                 <button
                   type="button"
                   onClick={openFeature}
-                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 md:mt-5 md:rounded-2xl md:py-3 md:text-sm"
                 >
                   Đến trang này
                   <ChevronRight className="h-4 w-4" />
@@ -430,7 +430,7 @@ export default function FirstLoginOnboarding() {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-2">
+          <div className="mt-5 flex flex-wrap items-center gap-1.5 md:mt-6 md:gap-2">
             {steps.map((step, idx) => {
               const DotIcon = step.icon;
               const active = idx === stepIndex;
@@ -442,44 +442,46 @@ export default function FirstLoginOnboarding() {
                     setStepIndex(idx);
                     saveProgress(idx);
                   }}
-                  className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition ${active ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
+                  className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[10px] font-bold transition md:px-3 md:py-2 md:text-xs ${active ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
                 >
-                  <DotIcon className="h-3.5 w-3.5" />
+                  <DotIcon className="h-3 w-3 md:h-3.5 md:w-3.5" />
                   <span className="hidden sm:inline">{idx + 1}</span>
                 </button>
               );
             })}
           </div>
 
-          <div className="mt-6 flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={skipTour} disabled={saving} className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:opacity-60">
-                Bỏ qua hướng dẫn
-              </button>
-              <button type="button" onClick={remindLater} className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
-                Nhắc lại sau
-              </button>
-            </div>
+          <div className="mt-auto pt-5">
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between md:pt-5">
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={skipTour} disabled={saving} className="flex-1 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:opacity-60 sm:flex-none md:rounded-2xl md:px-4 md:py-3 md:text-sm">
+                  Bỏ qua
+                </button>
+                <button type="button" onClick={remindLater} className="flex-1 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 sm:flex-none md:rounded-2xl md:px-4 md:py-3 md:text-sm">
+                  Nhắc lại sau
+                </button>
+              </div>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={goBack}
-                disabled={stepIndex === 0}
-                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Lùi
-              </button>
-              <button
-                type="button"
-                onClick={goNext}
-                disabled={saving}
-                className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-xl shadow-slate-950/20 transition hover:bg-slate-800 disabled:opacity-60"
-              >
-                {stepIndex >= steps.length - 1 ? "Hoàn tất" : "Tiếp"}
-                <ArrowRight className="h-4 w-4" />
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={goBack}
+                  disabled={stepIndex === 0}
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none md:rounded-2xl md:gap-2 md:px-4 md:py-3 md:text-sm"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                  Lùi
+                </button>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  disabled={saving}
+                  className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white shadow-xl shadow-slate-950/20 transition hover:bg-slate-800 disabled:opacity-60 sm:flex-none md:rounded-2xl md:gap-2 md:px-5 md:py-3 md:text-sm"
+                >
+                  {stepIndex >= steps.length - 1 ? "Hoàn tất" : "Tiếp"}
+                  <ArrowRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
