@@ -44,8 +44,8 @@ const app = express();
 app.set("trust proxy", 1);
 
 const limiter = rateLimit({
-    windowMs: 10 * 60 * 1000, // 15 phút
-    max: 100, // Giới hạn mỗi IP 100 requests mỗi 15 phút
+    windowMs: 5 * 60 * 1000, // 5 phút
+    max: 100, // Giới hạn mỗi IP 100 requests mỗi 5 phút
     message: "Bạn đang thao tác quá nhanh, vui lòng thử lại sau ít phút.",
     standardHeaders: true,
     legacyHeaders: false,
