@@ -117,6 +117,34 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       });
     });
     return true;
+  } else if (request.action === "ENHANCE_WITH_AI") {
+    const { text, target_language } = request.payload;
+    chrome.storage.local.get(["token"]).then(({ token }) => {
+      if (!token) {
+        sendResponse({ ok: false, message: "Vui lòng đăng nhập" });
+        return;
+      }
+      fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/ai/translate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ word: text, language: target_language })
+      })
+      .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok && data.ok !== false) {
+           sendResponse({ ok: true, ...data });
+        } else {
+           sendResponse({ ok: false, message: data.error || data.message || "Có lỗi từ server" });
+        }
+      })
+      .catch(e => {
+        sendResponse({ ok: false, message: e.message || "Kết nối API thất bại" });
+      });
+    });
+    return true;
   } else if (request.action === "POPUP_OPENED") {
     fetchTokens().then((result) => {
       sendResponse(result);

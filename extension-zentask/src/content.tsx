@@ -229,37 +229,43 @@ const ContentApp = () => {
     setToast({ show: true, message: "Đang dịch bằng AI...", type: "waiting" });
 
     try {
-      const aiResult = await etcService.enhanceWithAI(selectedText, "tiếng việt", userToken);
+      chrome.runtime.sendMessage(
+        {
+          action: "ENHANCE_WITH_AI",
+          payload: { text: selectedText, target_language: "tiếng việt" },
+        },
+        (aiResult) => {
+          if (aiResult && aiResult.ok) {
+            setToast({
+              show: true,
+              message: aiResult.message || "Dịch thuật thành công!",
+              type: "success",
+            });
+            setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);
 
-      if (aiResult && aiResult.ok) {
-        setToast({
-          show: true,
-          message: aiResult.message || "Dịch thuật thành công!",
-          type: "success",
-        });
-        setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);
-
-        // Cập nhật kết quả AI vào giao diện nếu cần
-        if (aiResult.parse) {
-          setResult((prev) => {
-            if (!prev) return prev;
-            const newSentences = [...(prev.sentences || [])];
-            if (newSentences.length > 0) {
-              newSentences[0] = { ...newSentences[0], trans: aiResult.parse };
-            } else {
-              newSentences.push({ trans: aiResult.parse });
+            if (aiResult.parse) {
+              setResult((prev) => {
+                if (!prev) return prev;
+                const newSentences = [...(prev.sentences || [])];
+                if (newSentences.length > 0) {
+                  newSentences[0] = { ...newSentences[0], trans: aiResult.parse };
+                } else {
+                  newSentences.push({ trans: aiResult.parse });
+                }
+                return { ...prev, sentences: newSentences };
+              });
             }
-            return { ...prev, sentences: newSentences };
-          });
+          } else {
+            setToast({
+              show: true,
+              message: aiResult?.message || "Có lỗi từ server",
+              type: "error",
+            });
+            setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 4000);
+          }
+          setIsEnhancingAI(false);
         }
-      } else {
-        setToast({
-          show: true,
-          message: aiResult?.message || "Có lỗi từ server",
-          type: "error",
-        });
-        setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 4000);
-      }
+      );
     } catch (e: any) {
       console.error("AI Enhance failed", e);
       setToast({
@@ -268,7 +274,6 @@ const ContentApp = () => {
         type: "error",
       });
       setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 4000);
-    } finally {
       setIsEnhancingAI(false);
     }
   };

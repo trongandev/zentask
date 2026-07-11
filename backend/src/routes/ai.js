@@ -457,4 +457,43 @@ router.post("/image", async (req, res) => {
   }
 });
 
+router.post("/translate", async (req, res) => {
+  try {
+    const { word, language } = req.body;
+    if (!word) return res.status(400).json({ error: "Thiếu nội dung cần dịch." });
+
+    const targetLang = language || "Tiếng Việt";
+    const contents = [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `Dịch nội dung sau sang ${targetLang}. Chỉ trả về kết quả dịch, không giải thích hay phân tích thêm:\n\n${word}`
+          }
+        ]
+      }
+    ];
+
+    const result = await callGeminiWithFailover({
+      contents,
+      systemInstruction: "Bạn là một từ điển và máy dịch thuật chuyên nghiệp. Chỉ trả kết quả dịch, không nói các câu như 'Dưới đây là...', không định dạng markdown.",
+      model: DEFAULT_GEMINI_MODEL,
+      temperature: 0.2,
+      maxOutputTokens: 500,
+    });
+
+    res.json({
+      ok: true,
+      parse: result.text,
+      message: "Dịch thuật thành công!"
+    });
+  } catch (error) {
+    console.error("AI translate error:", error);
+    res.status(error?.status || 500).json({
+      error: error?.message || "Dịch thuật bằng AI thất bại.",
+      details: error?.details,
+    });
+  }
+});
+
 export default router;
