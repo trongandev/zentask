@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
-export const verifyToken = (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
   try {
     let token = req.headers.authorization;
     if (token && token.startsWith('Bearer ')) {
@@ -15,6 +16,13 @@ export const verifyToken = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     req.user = decoded; // { uid, email, role, ... }
+
+    // Check if user is banned
+    const user = await User.findById(decoded.uid).lean();
+    if (user && user.isBanned) {
+      return res.status(403).json({ success: false, message: 'Account has been banned' });
+    }
+
     next();
   } catch (error) {
     return res.status(403).json({ success: false, message: 'Invalid or expired token', error: error.message });

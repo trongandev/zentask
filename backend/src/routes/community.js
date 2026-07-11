@@ -50,12 +50,29 @@ router.get(
   }),
 );
 
+// Middleware bảo trì: Chỉ cho phép method GET (đọc bài/đọc comment), chặn tất cả thao tác Ghi (POST, PUT, DELETE)
+// router.use((req, res, next) => {
+//   if (req.method !== "GET") {
+//     return res.status(400).json({ error: "Tính năng này đang bảo trì" });
+//   }
+//   next();
+// });
+
 // POST /posts
 router.post(
   "/posts",
   asyncHandler(async (req, res) => {
     const { content, tags } = req.body;
     if (!content) return res.status(400).json({ error: "Content is required" });
+
+    // Validate length >= 50 chars (ignore HTML tags)
+    const plainText = String(content)
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim();
+    if (plainText.length < 50) {
+      return res.status(400).json({ error: "Bài viết phải có ít nhất 50 ký tự" });
+    }
 
     const cleanContent = await cleanAndValidateCommunityHtml(content.replace(/#[\wÀ-ỹ]+/g, "").trim(), "Bài viết cộng đồng", { maxLength: 20000 });
     const cleanTags = [];
@@ -89,7 +106,7 @@ router.post(
       action: "Đăng bài cộng đồng",
       target: "Chia sẻ kiến thức",
       type: "other",
-      xpEarned: taskResult.success ? taskResult.xpToAdd : 0
+      xpEarned: taskResult.success ? taskResult.xpToAdd : 0,
     });
 
     res.json({

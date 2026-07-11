@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet, Navigate, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Shield, Users, ListTodo, LogOut, ArrowLeft, BookOpen, Type, HelpCircle, History, Bot } from "lucide-react";
+import { Shield, Users, ListTodo, LogOut, ArrowLeft, BookOpen, Type, HelpCircle, History, Bot, Activity, LayoutDashboard, MessageSquare } from "lucide-react";
 
 export function AdminLayout() {
   const { user } = useAuth();
@@ -20,19 +20,22 @@ export function AdminLayout() {
     );
   }
 
-  // Redirect /admin to /admin/daily-task
+  // Redirect /admin to /admin/dashboard
   if (location.pathname === "/admin" || location.pathname === "/admin/") {
-    return <Navigate to="/admin/daily-task" replace />;
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
-const ADMIN_NAV_LINKS = [
+  const ADMIN_NAV_LINKS = [
+    { path: "/admin/dashboard", label: "Tổng quan", icon: LayoutDashboard },
     { path: "/admin/daily-task", label: "Nhiệm vụ", icon: ListTodo },
     { path: "/admin/users", label: "Người dùng", icon: Users },
     { path: "/admin/vocab-sets", label: "Bộ từ vựng", icon: BookOpen },
     { path: "/admin/vocab", label: "Từ vựng", icon: Type },
     { path: "/admin/quizzes", label: "Quiz", icon: HelpCircle },
     { path: "/admin/quiz-history", label: "Lịch sử Quiz", icon: History },
+    { path: "/admin/community-posts", label: "Bài cộng đồng", icon: MessageSquare },
     { path: "/admin/bot-config", label: "Cấu hình Bot", icon: Bot },
+    { path: "/admin/system-logs", label: "System Logs", icon: Activity },
   ];
 
   return (

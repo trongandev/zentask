@@ -21,20 +21,38 @@ export function AdminUsers() {
     if (success) fetchUsers(page, true);
   };
 
+  const handleBanUser = async (uid: string, currentBanStatus: boolean) => {
+    const confirmMessage = currentBanStatus
+      ? "Bạn có chắc chắn muốn MỞ KHOÁ tài khoản này không?"
+      : "Bạn có chắc chắn muốn KHOÁ tài khoản này không?";
+    
+    if (window.confirm(confirmMessage)) {
+      const success = await adminService.banUser(uid, !currentBanStatus);
+      if (success) fetchUsers(page, true);
+    }
+  };
+
   const columns = [
     {
       header: "Người dùng",
       render: (u: any) => (
         <div className="flex items-center gap-3">
-          <UserAvatar
-            src={u.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
-            alt={u.displayName || "User"}
-            level={u.level || 1}
-            uid={u.id || u.uid}
-            className="w-12 h-12"
-          />
+          <div className="relative">
+            <UserAvatar
+              src={u.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
+              alt={u.displayName || "User"}
+              level={u.level || 1}
+              uid={u.id || u.uid}
+              className={`w-12 h-12 ${u.isBanned ? "opacity-50 grayscale" : ""}`}
+            />
+            {u.isBanned && (
+              <div className="absolute -top-1 -right-1 bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center border-2 border-white" title="Banned">
+                <span className="text-[10px] font-bold">B</span>
+              </div>
+            )}
+          </div>
           <div>
-            <p className="font-bold text-gray-900">{u.displayName || "Người dùng"}</p>
+            <p className={`font-bold ${u.isBanned ? "text-gray-400 line-through" : "text-gray-900"}`}>{u.displayName || "Người dùng"}</p>
             <p className="text-xs text-gray-500">{u.email}</p>
           </div>
         </div>
@@ -49,6 +67,7 @@ export function AdminUsers() {
           }`}
           value={u.role || "user"}
           onChange={(e) => handleUpdateRole(u.id, e.target.value)}
+          disabled={u.isBanned}
         >
           <option value="user">USER</option>
           <option value="admin">ADMIN</option>
@@ -60,14 +79,39 @@ export function AdminUsers() {
       render: (u: any) => <UserLevelBadge level={u.level || 1} size="md" />,
     },
     {
-      header: "Kinh nghiệm",
-      render: (u: any) => <span className="font-extrabold text-blue-600">{u.xp?.toLocaleString() || 0} XP</span>,
+      header: "Trạng thái",
+      render: (u: any) => (
+        u.isBanned ? (
+          <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-lg uppercase">Bị khoá</span>
+        ) : (
+          <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-lg uppercase">Hoạt động</span>
+        )
+      )
     },
     {
       header: "Ngày tham gia",
       align: "right" as const,
       render: (u: any) => <span className="text-sm text-gray-500">{u.createdAt ? new Date(u.createdAt).toLocaleDateString("vi-VN") : "Không rõ"}</span>,
     },
+    {
+      header: "Hành động",
+      align: "right" as const,
+      render: (u: any) => (
+        <button
+          onClick={() => handleBanUser(u.id, u.isBanned)}
+          disabled={u.role === "admin"}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${
+            u.role === "admin" 
+              ? "bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed" 
+              : u.isBanned 
+                ? "bg-white text-green-600 border-green-200 hover:bg-green-50"
+                : "bg-white text-red-600 border-red-200 hover:bg-red-50"
+          }`}
+        >
+          {u.isBanned ? "MỞ KHOÁ" : "KHOÁ"}
+        </button>
+      )
+    }
   ];
 
   const totalUsers = users.totalItems || 0;

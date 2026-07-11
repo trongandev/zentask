@@ -78,6 +78,14 @@ export function Community() {
 
   const handlePostSubmit = async () => {
     if (!newPostContent.trim()) return;
+    
+    // Validate length >= 50 chars (ignore HTML tags)
+    const plainText = newPostContent.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim();
+    if (plainText.length < 50) {
+      toast.error("Bài viết phải có ít nhất 50 ký tự (không tính hình ảnh/định dạng).");
+      return;
+    }
+
     const tags = extractTags(newPostContent);
     const res = await createPost(newPostContent, tags);
     if (res) {

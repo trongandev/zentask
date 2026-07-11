@@ -20,6 +20,11 @@ const RAW_EXPLICIT_WORDS = [
   "cặc",
   "lồn",
   "buồi",
+  "vl",
+  "vcl",
+  "ngu",
+  "đần",
+  "cút",
 ];
 
 const RAW_EXPLICIT_PHRASES = [
@@ -33,6 +38,12 @@ const RAW_EXPLICIT_PHRASES = [
   "địt mày",
   "mẹ mày",
   "con mẹ mày",
+  "vãi lồn",
+  "óc chó",
+  "óc con chó",
+  "sửa mãi vẫn ngu",
+  "ngu như chó",
+  "ngu học",
 ];
 
 const RAW_EXPLICIT_ACRONYMS = [
@@ -267,6 +278,10 @@ export function sanitizePublicHtml(input = "", { maxLength = 20000 } = {}) {
     .replace(/data\s*:/gi, "");
 
   html = html.replace(/<(?!\/?(?:p|br|strong|b|em|i|s|strike|ul|ol|li|span)\b)[^>]*>/gi, "");
+  
+  // Strip all attributes from allowed tags EXCEPT span
+  html = html.replace(/<(\/?)(p|br|strong|b|em|i|s|strike|ul|ol|li)\b[^>]*>/gi, "<$1$2>");
+
   html = html.replace(/<span([^>]*)>/gi, (_m, attrs) => {
     const color = attrs.match(/color\s*:\s*(#[0-9a-fA-F]{3,8}|rgb\([^)]{1,60}\))/i)?.[0];
     const fontSize = attrs.match(/font-size\s*:\s*(12px|16px|20px|24px)/i)?.[0];

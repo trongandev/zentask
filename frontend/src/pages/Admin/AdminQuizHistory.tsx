@@ -5,6 +5,8 @@ import { DataTable } from "@/src/components/Admin/DataTable";
 import { AdminStatCards } from "@/src/components/Admin/AdminStatCards";
 import { useAdminStore } from "@/src/store/useAdminStore";
 
+import { UserAvatar } from "@/src/components/UserAvatar";
+
 export function AdminQuizHistory() {
   const { quizHistory, fetchQuizHistory } = useAdminStore();
   const page = quizHistory.currentPage;
@@ -17,12 +19,44 @@ export function AdminQuizHistory() {
 
   const columns = [
     {
-      header: "Mã người chơi",
-      render: (item: any) => <span className="font-mono text-sm text-gray-700">{item.uid}</span>,
+      header: "Người chơi",
+      render: (item: any) => {
+        const u = item.uid;
+        if (!u || typeof u === "string") {
+          return <span className="font-mono text-sm text-gray-700">{typeof u === "string" ? u : "Không rõ"}</span>;
+        }
+
+        return (
+          <div className="flex items-center gap-3">
+            <UserAvatar
+              src={u.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
+              alt={u.displayName || "User"}
+              level={u.level || 1}
+              uid={u.uid || u._id}
+              className="w-10 h-10"
+            />
+            <div>
+              <p className="font-bold text-gray-900">{u.displayName || "Người dùng"}</p>
+              <p className="text-xs text-gray-500">{u.email}</p>
+            </div>
+          </div>
+        );
+      },
     },
     {
-      header: "Mã Quiz",
-      render: (item: any) => <span className="font-mono text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">{item.quizId}</span>,
+      header: "Bài Quiz",
+      render: (item: any) => {
+        const q = item.quizId;
+        if (!q || typeof q === "string") {
+          return <span className="font-mono text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">{typeof q === "string" ? q : "Không rõ"}</span>;
+        }
+        return (
+          <div>
+            <p className="font-bold text-gray-900 max-w-[200px] truncate" title={q.title}>{q.title}</p>
+            <p className="text-xs text-gray-500">Độ khó: {q.difficulty}</p>
+          </div>
+        );
+      },
     },
     {
       header: "Điểm số",

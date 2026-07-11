@@ -1,6 +1,6 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { DailyTask, FlashcardSet, Flashcard, Quiz, QuizResult, BotConfig } from "../models/Schemas.js";
+import { DailyTask, FlashcardSet, Flashcard, Quiz, QuizResult, BotConfig, SystemLog, CommunityPost } from "../models/Schemas.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 
@@ -21,6 +21,40 @@ const authenticateAdmin = asyncHandler(async (req, res, next) => {
 
 router.use(verifyToken);
 router.use(authenticateAdmin);
+
+// ANALYTICS OVERVIEW
+router.get(
+  "/analytics/overview",
+  asyncHandler(async (req, res) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [
+      totalUsers,
+      newUsersToday,
+      totalQuizzes,
+      totalFlashcards,
+      totalPosts,
+      totalSystemLogs,
+    ] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ createdAt: { $gte: today } }),
+      Quiz.countDocuments(),
+      Flashcard.countDocuments(),
+      CommunityPost.countDocuments(),
+      SystemLog.countDocuments({ createdAt: { $gte: today } }),
+    ]);
+
+    res.json({
+      totalUsers,
+      newUsersToday,
+      totalQuizzes,
+      totalFlashcards,
+      totalPosts,
+      systemLogsToday: totalSystemLogs,
+    });
+  }),
+);
 
 // USERS CRUD
 router.get(
@@ -60,6 +94,72 @@ router.put(
     const { role } = req.body;
 
     await User.findByIdAndUpdate(uid, { role });
+    res.json({ status: "success" });
+  }),
+);
+
+router.put(
+  "/users/:uid/ban",
+  asyncHandler(async (req, res) => {
+    const { uid } = req.params;
+    const { isBanned } = req.body;
+
+    const user = await User.findById(uid);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Admin cannot ban another admin
+    if (user.role === "admin") {
+      return res.status(403).json({ error: "Cannot ban an admin account" });
+    }
+
+    user.isBanned = isBanned;
+    await user.save();
+    
+    res.json({ status: "success", isBanned });
+  }),
+);
+
+
+// COMMUNITY POSTS CRUD
+router.get(
+  "/community-posts",
+  asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const total = await CommunityPost.countDocuments();
+    const totalPages = Math.ceil(total / limit);
+
+    const posts = await CommunityPost.find()
+      .populate("uid", "displayName photoURL email uid level")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    const formattedPosts = posts.map((post) => ({
+      id: post._id,
+      ...post,
+      authorId: post.uid, // Map populated uid to authorId for frontend
+      createdAt: post.createdAt ? post.createdAt.toISOString() : null,
+    }));
+
+    res.json({
+      items: formattedPosts,
+      total,
+      page,
+      totalPages,
+    });
+  }),
+);
+
+router.delete(
+  "/community-posts/:id",
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    await CommunityPost.findByIdAndDelete(id);
     res.json({ status: "success" });
   }),
 );
@@ -206,17 +306,25 @@ router.get(
     const totalPages = Math.ceil(total / limit);
 
     const quizzes = await Quiz.find()
-      .populate("creatorId", "displayName photoURL email uid level")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
 
+    const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(id);
+    const userIds = quizzes.map((q) => q.creatorId).filter((id) => id && isValidObjectId(id));
+    const users = await User.find({ _id: { $in: userIds } }, "displayName photoURL email uid level").lean();
+    
+    const userMap = {};
+    users.forEach((u) => {
+      userMap[u._id.toString()] = u;
+    });
+
     const formattedQuizzes = quizzes.map((q) => ({
       id: q._id,
       title: q.title,
       difficulty: q.difficulty,
-      creatorId: q.creatorId,
+      creatorId: (q.creatorId && isValidObjectId(q.creatorId)) ? (userMap[q.creatorId] || q.creatorId) : q.creatorId,
       questionCount: q.questions?.length || 0,
       createdAt: q.createdAt ? q.createdAt.toISOString() : null,
     }));
@@ -250,6 +358,8 @@ router.get(
     const totalPages = Math.ceil(total / limit);
 
     const historyDocs = await QuizResult.find()
+      .populate("uid", "displayName photoURL email uid level")
+      .populate("quizId", "title difficulty")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -314,6 +424,38 @@ router.delete(
     const { id } = req.params;
     await BotConfig.findByIdAndDelete(id);
     res.json({ status: "success" });
+  }),
+);
+
+// SYSTEM LOGS CRUD
+router.get(
+  "/system-logs",
+  asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const total = await SystemLog.countDocuments();
+    const totalPages = Math.ceil(total / limit);
+
+    const logs = await SystemLog.find()
+      .populate("uid", "displayName email photoURL")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    const formattedLogs = logs.map(log => ({
+      ...log,
+      id: log._id,
+      createdAt: log.createdAt ? log.createdAt.toISOString() : null,
+    }));
+
+    res.json({
+      items: formattedLogs,
+      total,
+      page,
+      totalPages,
+    });
   }),
 );
 

@@ -23,12 +23,15 @@ import { Notifications } from "./pages/Notifications";
 import { Auth } from "./pages/Auth";
 import { Arena } from "./pages/Arena";
 import { AdminLayout } from "./components/AdminLayout";
+import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 import { AdminTasks } from "./pages/Admin/AdminTasks";
 import { AdminUsers } from "./pages/Admin/AdminUsers";
 import { AdminVocabSets } from "./pages/Admin/AdminVocabSets";
 import { AdminVocab } from "./pages/Admin/AdminVocab";
 import { AdminQuizzes } from "./pages/Admin/AdminQuizzes";
 import { AdminQuizHistory } from "./pages/Admin/AdminQuizHistory";
+import { SystemLogs } from "./pages/admin/SystemLogs";
+import { AdminCommunityPosts } from "./pages/Admin/AdminCommunityPosts";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { TermsOfService } from "./pages/TermsOfService";
 import { useAuth } from "./contexts/AuthContext";
@@ -215,7 +218,8 @@ function AppContent() {
     <>
       <Routes>
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/admin/daily-task" replace />} />
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="daily-task" element={<AdminTasks />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="vocab-sets" element={<AdminVocabSets />} />
@@ -223,6 +227,8 @@ function AppContent() {
           <Route path="quizzes" element={<AdminQuizzes />} />
           <Route path="quiz-history" element={<AdminQuizHistory />} />
           <Route path="bot-config" element={<BotConfigPage />} />
+          <Route path="system-logs" element={<SystemLogs />} />
+          <Route path="community-posts" element={<AdminCommunityPosts />} />
         </Route>
         <Route path="arena" element={<Arena />} />
 

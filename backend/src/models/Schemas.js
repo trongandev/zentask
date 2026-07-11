@@ -312,6 +312,14 @@ export const BotConfigSchema = new Schema({
   slowResponseRate: { type: Number, required: true }, // > 10s
 }, { timestamps: true });
 
+export const SystemLogSchema = new Schema({
+  method: { type: String, required: true },
+  url: { type: String, required: true },
+  body: { type: Schema.Types.Mixed, default: {} },
+  ip: { type: String },
+  uid: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+}, { timestamps: true });
+
 export const DailyUsage = mongoose.models.DailyUsage || mongoose.model('DailyUsage', DailyUsageSchema);
 export const IpSignupCounter = mongoose.models.IpSignupCounter || mongoose.model('IpSignupCounter', IpSignupCounterSchema);
 export const DailyTask = mongoose.models.DailyTask || mongoose.model('DailyTask', DailyTaskSchema);
@@ -348,3 +356,4 @@ export const SkillPracticeDaily = mongoose.models.SkillPracticeDaily || mongoose
 export const SkillPracticeCache = mongoose.models.SkillPracticeCache || mongoose.model('SkillPracticeCache', SkillPracticeCacheSchema);
 export const BotConfig = mongoose.models.BotConfig || mongoose.model('BotConfig', BotConfigSchema);
 export const UserActivity = mongoose.models.UserActivity || mongoose.model('UserActivity', UserActivitySchema);
+export const SystemLog = mongoose.models.SystemLog || mongoose.model('SystemLog', SystemLogSchema);

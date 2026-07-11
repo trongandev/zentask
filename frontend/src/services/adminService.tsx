@@ -34,6 +34,24 @@ export const adminService = {
     }
   },
 
+  banUser: async (uid: string, isBanned: boolean) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/users/${uid}/ban`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isBanned }),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update ban status");
+      toast.success(isBanned ? "Đã khoá tài khoản!" : "Đã mở khoá tài khoản!");
+      return true;
+    } catch (error: any) {
+      toast.error(error.message);
+      return false;
+    }
+  },
+
   // Tasks
   getTasks: async () => {
     try {
@@ -214,6 +232,57 @@ export const adminService = {
       return true;
     } catch (error: any) {
       throw error;
+    }
+  },
+
+  // System Logs
+  getSystemLogs: async (page = 1, limit = 20) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/system-logs?page=${page}&limit=${limit}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch system logs");
+      return await res.json();
+    } catch (error: any) {
+      toast.error(error.message);
+      return { items: [], total: 0, page: 1, totalPages: 1 };
+    }
+  },
+
+  // Analytics
+  getAnalyticsOverview: async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/analytics/overview`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch analytics");
+      return await res.json();
+    } catch (error: any) {
+      toast.error(error.message);
+      return null;
+    }
+  },
+
+  // Community Posts
+  getCommunityPosts: async (page = 1, limit = 10) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/community-posts?page=${page}&limit=${limit}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch posts");
+      return await res.json();
+    } catch (error: any) {
+      toast.error(error.message);
+      return { items: [], total: 0, page: 1, totalPages: 1 };
+    }
+  },
+
+  deleteCommunityPost: async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/community-posts/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to delete post");
+      toast.success("Xoá bài viết thành công!");
+      return true;
+    } catch (error: any) {
+      toast.error(error.message);
+      return false;
     }
   }
 };

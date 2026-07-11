@@ -10,8 +10,10 @@ import dotenv from "dotenv";
 import compression from "compression";
 import morgan from "morgan";
 import http from "http";
+import jwt from "jsonwebtoken";
 
 import connectDB from "./config/db.js";
+import { SystemLog } from "./models/Schemas.js";
 import { initializeSocket } from "./socket/index.js";
 
 // Route imports
@@ -67,6 +69,36 @@ app.use((req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     req.cookies.session = authHeader.split(" ")[1];
+  }
+  next();
+});
+
+// System logs middleware
+app.use((req, res, next) => {
+  if (req.method !== "GET") {
+    let uid = null;
+    try {
+      const token = req.cookies.session;
+      if (token) {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        uid = decoded.uid;
+      }
+    } catch (e) {
+      // ignore token errors for logging
+    }
+
+    const bodyClone = { ...req.body };
+    if (bodyClone.password) delete bodyClone.password;
+    if (bodyClone.oldPassword) delete bodyClone.oldPassword;
+    if (bodyClone.newPassword) delete bodyClone.newPassword;
+
+    SystemLog.create({
+      method: req.method,
+      url: req.originalUrl || req.url,
+      body: bodyClone,
+      ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+      uid: uid || null,
+    }).catch((err) => console.error("Error saving SystemLog:", err));
   }
   next();
 });
