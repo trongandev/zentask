@@ -3,22 +3,16 @@ import User from '../models/User.js';
 
 export const verifyToken = async (req, res, next) => {
   try {
-    let token = req.headers.authorization;
-    if (token && token.startsWith('Bearer ')) {
-      token = token.split(' ')[1];
-    } else if (req.cookies && req.cookies.session) {
-      token = req.cookies.session;
+    if (req.tokenError) {
+      return res.status(403).json({ success: false, message: 'Invalid or expired token', error: req.tokenError.message });
     }
-
-    if (!token) {
+    
+    if (!req.user) {
       return res.status(401).json({ success: false, message: 'Authentication required' });
     }
 
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    req.user = decoded; // { uid, email, role, ... }
-
     // Check if user is banned
-    const user = await User.findById(decoded.uid).lean();
+    const user = await User.findById(req.user.uid).lean();
     if (user && user.isBanned) {
       return res.status(403).json({ success: false, message: 'Account has been banned' });
     }
