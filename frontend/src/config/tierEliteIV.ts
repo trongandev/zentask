@@ -1,7 +1,7 @@
 export const tierEliteIV = [
   {
     id: "topic_recruitment_ta4",
-    title: "Chủ đề: Việc làm & Tuyển dụng",
+    title: "Việc làm & Tuyển dụng",
     category: "topic",
     description: "Từ vựng nâng cao chuyên sâu về thủ tục săn đầu người, phúc lợi nhân sự và ký kết hợp đồng.",
     color: "bg-indigo-700",
@@ -250,7 +250,7 @@ export const tierEliteIV = [
   },
   {
     id: "topic_urban_rural_ta4",
-    title: "Chủ đề: Đời sống đô thị & Nông thôn",
+    title: "Đời sống đô thị & Nông thôn",
     category: "topic",
     description: "Các vấn đề cơ sở hạ tầng đô thị, nhịp sống náo nhiệt, kẹt xe khói bụi và sự thanh bình vùng nông thôn.",
     color: "bg-indigo-700",
@@ -499,7 +499,7 @@ export const tierEliteIV = [
   },
   {
     id: "topic_general_science_ta4",
-    title: "Chủ đề: Khoa học thường thức",
+    title: "Khoa học thường thức",
     category: "topic",
     description: "Các học thuyết khoa học cơ bản, thí nghiệm trong phòng nghiên cứu, hiện tượng tự nhiên và phát minh.",
     color: "bg-indigo-700",

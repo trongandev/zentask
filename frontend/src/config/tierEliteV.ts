@@ -1,7 +1,7 @@
 export const tierEliteV = [
   {
     id: "topic_education_ta5",
-    title: "Chủ đề: Giáo dục & Trường học",
+    title: "Giáo dục & Trường học",
     category: "topic",
     description: "Các thuật ngữ học thuật, quy trình tuyển sinh, chương trình đào tạo và đời sống sinh viên.",
     color: "bg-indigo-600",
@@ -250,7 +250,7 @@ export const tierEliteV = [
   },
   {
     id: "topic_environment_ta5",
-    title: "Chủ đề: Môi trường & Thiên nhiên",
+    title: "Môi trường & Thiên nhiên",
     category: "topic",
     description: "Các vấn đề biến đổi khí hậu toàn cầu, bảo tồn đa dạng sinh học và phát triển bền vững.",
     color: "bg-indigo-600",
@@ -499,7 +499,7 @@ export const tierEliteV = [
   },
   {
     id: "topic_it_ta5",
-    title: "Chủ đề: Công nghệ thông tin",
+    title: "Công nghệ thông tin",
     category: "topic",
     description: "Các thiết bị số, phần mềm, cơ sở dữ liệu và các vấn đề an ninh mạng thời đại số.",
     color: "bg-indigo-600",

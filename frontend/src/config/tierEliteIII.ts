@@ -1,7 +1,7 @@
 export const tierEliteIII = [
   {
     id: "topic_art_cinema_ta3",
-    title: "Chủ đề: Nghệ thuật & Điện ảnh",
+    title: "Nghệ thuật & Điện ảnh",
     category: "topic",
     description: "Các thuật ngữ phê bình nghệ thuật, kỹ thuật hội họa, sản xuất điện ảnh và trường phái thẩm mỹ.",
     color: "bg-indigo-800",
@@ -256,7 +256,7 @@ export const tierEliteIII = [
   },
   {
     id: "topic_history_events_ta3",
-    title: "Chủ đề: Lịch sử & Sự kiện quốc tế",
+    title: "Lịch sử & Sự kiện quốc tế",
     category: "topic",
     description: "Các sự kiện cột mốc, khảo cổ học cổ vật, chính sách ngoại giao và chế độ chính trị lịch sử.",
     color: "bg-indigo-800",
@@ -505,7 +505,7 @@ export const tierEliteIII = [
   },
   {
     id: "topic_cuisine_ta3",
-    title: "Chủ đề: Ẩm thực thế giới",
+    title: "Ẩm thực thế giới",
     category: "topic",
     description: "Các khái niệm ẩm thực cao cấp, phong cách ẩm thực đặc thù, nguyên liệu dinh dưỡng và nghệ thuật nấu nướng tinh tế.",
     color: "bg-indigo-800",

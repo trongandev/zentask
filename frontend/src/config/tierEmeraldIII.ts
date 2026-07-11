@@ -1,7 +1,7 @@
 export const tierEmeraldIII = [
   {
     id: "topic_shopping_e3",
-    title: "Chủ đề: Mua sắm & Giá cả",
+    title: "Mua sắm & Giá cả",
     category: "topic",
     description: "Từ vựng về hoạt động mua sắm, các phương thức thanh toán và mặc cả giá cả.",
     color: "bg-emerald-500",
@@ -250,7 +250,7 @@ export const tierEmeraldIII = [
   },
   {
     id: "topic_appearance_e3",
-    title: "Chủ đề: Mô tả ngoại hình & Tính cách",
+    title: "Mô tả ngoại hình & Tính cách",
     category: "topic",
     description: "Từ vựng nâng cao dùng để phác họa ngoại hình bên ngoài và tính cách nội tâm của con người.",
     color: "bg-emerald-500",
@@ -499,7 +499,7 @@ export const tierEmeraldIII = [
   },
   {
     id: "topic_sports_e3",
-    title: "Chủ đề: Thể thao",
+    title: "Thể thao",
     category: "topic",
     description: "Các môn thể thao đồng đội và cá nhân, dụng cụ thể chất và từ vựng thi đấu.",
     color: "bg-emerald-500",

@@ -1,7 +1,7 @@
 export const tierDiamondIII = [
   {
     id: "topic_scientific_research",
-    title: "Chủ đề: Nghiên cứu khoa học",
+    title: "Nghiên cứu khoa học",
     category: "topic",
     description: "Từ vựng nâng cao chuyên sâu C1 về phương pháp luận, giả thuyết, quy trình thực nghiệm và phân tích số liệu học thuật.",
     color: "bg-indigo-700",
@@ -430,7 +430,7 @@ export const tierDiamondIII = [
   },
   {
     id: "topic_behavioral_psychology",
-    title: "Chủ đề: Tâm lý học hành vi",
+    title: "Tâm lý học hành vi",
     category: "topic",
     description: "Từ vựng học thuật C1 về hành vi con người, cơ chế học tập, phản xạ kích thích và nhận thức.",
     color: "bg-pink-700",
@@ -859,7 +859,7 @@ export const tierDiamondIII = [
   },
   {
     id: "topic_international_law",
-    title: "Chủ đề: Luật pháp quốc tế",
+    title: "Luật pháp quốc tế",
     category: "topic",
     description: "Từ vựng thuật ngữ pháp lý C1 về tranh chấp quốc gia, luật hàng hải, hiệp ước và quyền tài phán.",
     color: "bg-blue-900",

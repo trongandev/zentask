@@ -1,7 +1,7 @@
 export const tierEliteII = [
   {
     id: "topic_basic_law_ta2",
-    title: "Chủ đề: Luật pháp cơ bản",
+    title: "Luật pháp cơ bản",
     category: "topic",
     description: "Các quy tắc hiến pháp, hành vi vi phạm pháp luật, quy trình tố tụng hình sự và phán quyết tại tòa án.",
     color: "bg-indigo-900",
@@ -250,7 +250,7 @@ export const tierEliteII = [
   },
   {
     id: "topic_business_startups_ta2",
-    title: "Chủ đề: Kinh doanh & Khởi nghiệp",
+    title: "Kinh doanh & Khởi nghiệp",
     category: "topic",
     description: "Các mô hình khởi nghiệp, nguồn vốn đầu tư đầu tư thiên thần, chiến lược tiếp thị thị trường và phá sản.",
     color: "bg-indigo-900",
@@ -499,7 +499,7 @@ export const tierEliteII = [
   },
   {
     id: "topic_general_medicine_ta2",
-    title: "Chủ đề: Y học phổ thông",
+    title: "Y học phổ thông",
     category: "topic",
     description: "Các phương pháp điều trị y sinh chuyên biệt, phẫu thuật ngoại khoa, vắc-xin và chẩn đoán lâm sàng.",
     color: "bg-indigo-900",

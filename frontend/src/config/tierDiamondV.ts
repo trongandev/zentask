@@ -1,7 +1,7 @@
 export const tierDiamondV = [
   {
     id: "topic_politics_society",
-    title: "Chủ đề: Chính trị & Xã hội",
+    title: "Chính trị & Xã hội",
     category: "topic",
     description: "Từ vựng nâng cao chuyên sâu về thể chế nhà nước, chính sách công và các vấn đề xã hội.",
     color: "bg-red-700",
@@ -430,7 +430,7 @@ export const tierDiamondV = [
   },
   {
     id: "topic_high_tech_ai_bigdata",
-    title: "Chủ đề: Công nghệ cao (AI & Big Data)",
+    title: "Công nghệ cao (AI & Big Data)",
     category: "topic",
     description: "Từ vựng cấp độ chuyên gia về Trí tuệ nhân tạo, Học máy, Khai phá dữ liệu và Cơ sở hạ tầng số.",
     color: "bg-violet-700",
@@ -859,7 +859,7 @@ export const tierDiamondV = [
   },
   {
     id: "topic_globalization",
-    title: "Chủ đề: Toàn cầu hóa",
+    title: "Toàn cầu hóa",
     category: "topic",
     description: "Từ vựng cấp độ C1 về sự tương tác kinh tế, hội nhập văn hóa và các tập đoàn xuyên quốc gia.",
     color: "bg-amber-600",

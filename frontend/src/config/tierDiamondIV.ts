@@ -1,7 +1,7 @@
 export const tierDiamondIV = [
   {
     id: "topic_macroeconomics",
-    title: "Chủ đề: Kinh tế vĩ mô",
+    title: "Kinh tế vĩ mô",
     category: "topic",
     description: "Từ vựng tài chính và học thuật cao cấp về chu kỳ kinh tế, chính sách quốc gia và thị trường tài chính.",
     color: "bg-cyan-800",
@@ -430,7 +430,7 @@ export const tierDiamondIV = [
   },
   {
     id: "topic_literature_philosophy",
-    title: "Chủ đề: Văn học & Triết học cơ bản",
+    title: "Văn học & Triết học cơ bản",
     category: "topic",
     description: "Từ vựng tri thức học thuật C1 về các trường phái triết học, biện pháp tu từ nghệ thuật và phân tích văn học.",
     color: "bg-amber-800",
@@ -859,7 +859,7 @@ export const tierDiamondIV = [
   },
   {
     id: "topic_climate_change",
-    title: "Chủ đề: Biến đổi khí hậu",
+    title: "Biến đổi khí hậu",
     category: "topic",
     description: "Từ vựng cấp độ C1 về các hiện tượng sinh thái học, phát thải nhà kính, tác động môi trường và giải pháp bảo vệ hành tinh.",
     color: "bg-emerald-700",

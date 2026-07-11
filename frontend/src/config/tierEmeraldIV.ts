@@ -1,7 +1,7 @@
 export const tierEmeraldIV = [
   {
     id: "topic_transport_e4",
-    title: "Chủ đề: Phương tiện giao thông",
+    title: "Phương tiện giao thông",
     category: "topic",
     description: "Các phương tiện đi lại thông dụng và từ vựng liên quan đến hệ thống giao thông.",
     color: "bg-teal-500",
@@ -250,7 +250,7 @@ export const tierEmeraldIV = [
   },
   {
     id: "topic_city_places_e4",
-    title: "Chủ đề: Địa điểm trong thành phố",
+    title: "Địa điểm trong thành phố",
     category: "topic",
     description: "Các tòa nhà công cộng, dịch vụ xã hội và địa điểm quen thuộc trong đô thị.",
     color: "bg-blue-500",
@@ -499,7 +499,7 @@ export const tierEmeraldIV = [
   },
   {
     id: "topic_hobbies_e4",
-    title: "Chủ đề: Sở thích & Giải trí",
+    title: "Sở thích & Giải trí",
     category: "topic",
     description: "Từ vựng về các thói quen cá nhân, hoạt động giải trí và nghệ thuật phổ biến.",
     color: "bg-yellow-500",

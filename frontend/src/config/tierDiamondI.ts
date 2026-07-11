@@ -1,7 +1,7 @@
 export const tierDiamondI = [
   {
     id: "topic_phrasal_verbs_c1",
-    title: "Chủ đề: Cụm động từ (Phrasal Verbs)",
+    title: "Cụm động từ (Phrasal Verbs)",
     category: "topic",
     description: "Từ vựng cấp độ C1-C2 về những cụm động từ ghép phức tạp, có tính biểu cảm cao, được dùng nhiều trong học thuật và đời sống.",
     color: "bg-indigo-600",
@@ -430,7 +430,7 @@ export const tierDiamondI = [
   },
   {
     id: "topic_idioms_c1",
-    title: "Chủ đề: Thành ngữ (Idioms)",
+    title: "Thành ngữ (Idioms)",
     category: "topic",
     description: "Các thành ngữ tiếng Anh tự nhiên cấp độ cao, phản ánh tư duy ngôn ngữ sâu sắc và bản xứ.",
     color: "bg-violet-700",
@@ -859,7 +859,7 @@ export const tierDiamondI = [
   },
   {
     id: "topic_collocations_advanced",
-    title: "Chủ đề: Từ ghép cố định (Collocations)",
+    title: "Từ ghép cố định (Collocations)",
     category: "topic",
     description: "Các cặp từ thường đi chung với nhau một cách tự nhiên theo quy ước bản xứ của người nói tiếng Anh ở trình độ C1-C2.",
     color: "bg-violet-600",

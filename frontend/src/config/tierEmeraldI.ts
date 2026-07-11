@@ -1,7 +1,7 @@
 export const tierEmeraldI = [
   {
     id: "topic_culture_e1",
-    title: "Chủ đề: Lễ hội & Văn hóa",
+    title: "Lễ hội & Văn hóa",
     category: "topic",
     description: "Các sự kiện văn hóa, phong tục truyền thống và nghi lễ của các quốc gia trên thế giới.",
     color: "bg-teal-700",
@@ -250,7 +250,7 @@ export const tierEmeraldI = [
   },
   {
     id: "topic_jobs_e1",
-    title: "Chủ đề: Công việc cơ bản",
+    title: "Công việc cơ bản",
     category: "topic",
     description: "Các khía cạnh của nghề nghiệp, hồ sơ tuyển dụng, môi trường công sở và thăng tiến.",
     color: "bg-teal-700",
@@ -499,7 +499,7 @@ export const tierEmeraldI = [
   },
   {
     id: "topic_media_e1",
-    title: "Chủ đề: Phương tiện truyền thông",
+    title: "Phương tiện truyền thông",
     category: "topic",
     description: "Các kênh báo chí, truyền hình, quảng cáo và phương thức giao tiếp số hóa hiện đại.",
     color: "bg-teal-700",

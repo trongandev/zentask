@@ -1,7 +1,7 @@
 export const tierEliteI = [
   {
     id: "topic_personal_finance",
-    title: "Chủ đề: Tài chính cá nhân",
+    title: "Tài chính cá nhân",
     category: "topic",
     description: "Từ vựng trung cao cấp về quản lý tiền bạc, đầu tư và chi tiêu cá nhân.",
     color: "bg-emerald-600",
@@ -430,7 +430,7 @@ export const tierEliteI = [
   },
   {
     id: "topic_workplace_comm",
-    title: "Chủ đề: Giao tiếp công sở",
+    title: "Giao tiếp công sở",
     category: "topic",
     description: "Từ vựng nâng cao phục vụ cho hội họp, đàm phán, cộng tác và trao đổi thông tin tại nơi làm việc.",
     color: "bg-indigo-600",
@@ -859,7 +859,7 @@ export const tierEliteI = [
   },
   {
     id: "topic_media_advertising",
-    title: "Chủ đề: Truyền thông & Quảng cáo",
+    title: "Truyền thông & Quảng cáo",
     category: "topic",
     description: "Từ vựng trung cao cấp về chiến dịch tiếp thị, các kênh truyền thông đại chúng và hành vi người tiêu dùng.",
     color: "bg-sky-600",

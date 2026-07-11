@@ -44,7 +44,7 @@ export function Beginner() {
       setSelectedUserSetId(savedDefault);
       setRememberSet(true);
     }
-    
+
     const fetchLearnedWords = async () => {
       try {
         const res = await fetch(`${API_URL}/api/user/beginner-progress`, { credentials: "include" });
@@ -133,19 +133,28 @@ export function Beginner() {
                 <div className="flex flex-wrap md:flex-nowrap bg-gray-100 p-1 rounded-xl w-full md:w-fit mb-6 gap-1 md:gap-0">
                   <button
                     onClick={() => setActiveTab("now")}
-                    className={cn("flex-1 md:flex-none px-3 md:px-6 py-2 rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap", activeTab === "now" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+                    className={cn(
+                      "flex-1 md:flex-none px-3 md:px-6 py-2 rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap",
+                      activeTab === "now" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700",
+                    )}
                   >
                     Theo rank
                   </button>
                   <button
                     onClick={() => setActiveTab("topic")}
-                    className={cn("flex-1 md:flex-none px-3 md:px-6 py-2 rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap", activeTab === "topic" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+                    className={cn(
+                      "flex-1 md:flex-none px-3 md:px-6 py-2 rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap",
+                      activeTab === "topic" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700",
+                    )}
                   >
                     Theo chủ đề
                   </button>
                   <button
                     onClick={() => setActiveTab("difficulty")}
-                    className={cn("flex-1 md:flex-none px-3 md:px-6 py-2 rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap", activeTab === "difficulty" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+                    className={cn(
+                      "flex-1 md:flex-none px-3 md:px-6 py-2 rounded-lg font-bold text-xs md:text-sm transition-all whitespace-nowrap",
+                      activeTab === "difficulty" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700",
+                    )}
                   >
                     Trình độ
                   </button>
@@ -209,13 +218,13 @@ export function Beginner() {
                   const uncompletedSets: any[] = [];
                   const completedSets: any[] = [];
 
-                  renderedSets.forEach(set => {
+                  renderedSets.forEach((set) => {
                     const total = set.words?.length || 0;
                     const learned = set.words?.filter((w: any) => learnedWords.includes(w.id)).length || 0;
                     const progress = total === 0 ? 0 : Math.round((learned / total) * 100);
-                    
+
                     const setWithProgress = { ...set, progress, learned, total };
-                    
+
                     if (progress >= 100 && total > 0) {
                       completedSets.push(setWithProgress);
                     } else {
@@ -225,7 +234,7 @@ export function Beginner() {
 
                   let finalCompletedSets = completedSets;
                   if (activeTab === "now" && !showPreviousRanks) {
-                    finalCompletedSets = completedSets.filter(s => s._rankId === currentRankInfo.rankId);
+                    finalCompletedSets = completedSets.filter((s) => s._rankId === currentRankInfo.rankId);
                   }
 
                   const renderSetCard = (set: any) => (
@@ -241,11 +250,13 @@ export function Beginner() {
                         <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{set.title}</h3>
                       </div>
                       <p className="text-sm text-gray-500 font-medium">{set.description}</p>
-                      
+
                       {set.progress < 100 && (
                         <div className="mt-4">
                           <div className="flex justify-between text-xs font-bold text-gray-500 mb-1">
-                            <span>Đã học: {set.learned}/{set.total}</span>
+                            <span>
+                              Đã học: {set.learned}/{set.total}
+                            </span>
                             <span>{set.progress}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -272,11 +283,11 @@ export function Beginner() {
                       {activeTab === "now" && (
                         <div className="flex justify-end mb-2">
                           <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border border-gray-100 shadow-sm hover:bg-gray-50 transition-colors">
-                            <input 
-                              type="checkbox" 
+                            <input
+                              type="checkbox"
                               className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
-                              checked={showPreviousRanks} 
-                              onChange={(e) => setShowPreviousRanks(e.target.checked)} 
+                              checked={showPreviousRanks}
+                              onChange={(e) => setShowPreviousRanks(e.target.checked)}
                             />
                             <span className="text-sm font-semibold text-gray-700">Hiện bộ đã học ở rank trước</span>
                           </label>
@@ -288,9 +299,7 @@ export function Beginner() {
                           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <Target className="w-5 h-5 text-blue-600" /> Chủ đề chưa học
                           </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {uncompletedSets.map(renderSetCard)}
-                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{uncompletedSets.map(renderSetCard)}</div>
                         </div>
                       )}
 
@@ -299,17 +308,11 @@ export function Beginner() {
                           <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                             <Medal className="w-5 h-5 text-yellow-500" /> Chủ đề đã hoàn thành
                           </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-80 hover:opacity-100 transition-opacity">
-                            {finalCompletedSets.map(renderSetCard)}
-                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-80 hover:opacity-100 transition-opacity">{finalCompletedSets.map(renderSetCard)}</div>
                         </div>
                       )}
-                      
-                      {uncompletedSets.length === 0 && finalCompletedSets.length === 0 && (
-                        <div className="text-center py-12 text-gray-500">
-                          Không có chủ đề nào.
-                        </div>
-                      )}
+
+                      {uncompletedSets.length === 0 && finalCompletedSets.length === 0 && <div className="text-center py-12 text-gray-500">Không có chủ đề nào.</div>}
                     </div>
                   );
                 })()}

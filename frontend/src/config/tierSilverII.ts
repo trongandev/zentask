@@ -1,7 +1,7 @@
 export const tierSilverII = [
   {
     id: "topic_family_b2",
-    title: "Chủ đề: Gia đình",
+    title: "Gia đình",
     category: "topic",
     description: "Từ vựng về các thành viên và các mối quan hệ cơ bản trong gia đình.",
     color: "bg-blue-500",
@@ -250,7 +250,7 @@ export const tierSilverII = [
   },
   {
     id: "topic_pets_b2",
-    title: "Chủ đề: Động vật nuôi",
+    title: "Động vật nuôi",
     category: "topic",
     description: "Các loại thú cưng và động vật nuôi quen thuộc xung quanh con người.",
     color: "bg-yellow-500",
@@ -499,7 +499,7 @@ export const tierSilverII = [
   },
   {
     id: "topic_food_b2",
-    title: "Chủ đề: Đồ ăn & Thức uống",
+    title: "Đồ ăn & Thức uống",
     category: "topic",
     description: "Các món ăn, thức uống và gia vị thông thường hàng ngày.",
     color: "bg-green-500",
@@ -748,7 +748,7 @@ export const tierSilverII = [
   },
   {
     id: "topic_weather_b2",
-    title: "Chủ đề: Thời tiết",
+    title: "Thời tiết",
     category: "topic",
     description: "Các hiện tượng thời tiết phổ biến và cách miêu tả khí hậu cơ bản.",
     color: "bg-blue-500",

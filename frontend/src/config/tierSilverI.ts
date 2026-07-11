@@ -1,7 +1,7 @@
 export const tierSilverI = [
   {
     id: "topic_clothing_b1",
-    title: "Chủ đề: Trang phục",
+    title: "Trang phục",
     category: "topic",
     description: "Các loại trang phục, phụ kiện thông dụng và các hành động liên quan.",
     color: "bg-purple-500",
@@ -250,7 +250,7 @@ export const tierSilverI = [
   },
   {
     id: "topic_home_rooms_b1",
-    title: "Chủ đề: Nhà cửa & Phòng ốc",
+    title: "Nhà cửa & Phòng ốc",
     category: "topic",
     description: "Các phòng trong ngôi nhà, cấu trúc xây dựng cơ bản và đồ nội thất.",
     color: "bg-blue-500",
@@ -499,7 +499,7 @@ export const tierSilverI = [
   },
   {
     id: "topic_daily_activities_b1",
-    title: "Chủ đề: Hoạt động hàng ngày",
+    title: "Hoạt động hàng ngày",
     category: "topic",
     description: "Các thói quen sinh hoạt và hoạt động thường nhật từ sáng đến tối.",
     color: "bg-green-500",
@@ -748,7 +748,7 @@ export const tierSilverI = [
   },
   {
     id: "topic_wild_animals_b1",
-    title: "Chủ đề: Động vật hoang dã",
+    title: "Động vật hoang dã",
     category: "topic",
     description: "Các loài động vật hoang dã sống ngoài tự nhiên và môi trường sống của chúng.",
     color: "bg-yellow-500",

@@ -1,7 +1,7 @@
 export const tierEmeraldII = [
   {
     id: "topic_travel_e2",
-    title: "Chủ đề: Du lịch & Khách sạn",
+    title: "Du lịch & Khách sạn",
     category: "topic",
     description: "Các thủ tục đặt phòng khách sạn, hành lý và hoạt động trải nghiệm văn hóa du lịch.",
     color: "bg-teal-600",
@@ -250,7 +250,7 @@ export const tierEmeraldII = [
   },
   {
     id: "topic_health_e2",
-    title: "Chủ đề: Sức khỏe & Lối sống",
+    title: "Sức khỏe & Lối sống",
     category: "topic",
     description: "Các thói quen lành mạnh, thuật ngữ y tế cơ bản và lối sống cân bằng.",
     color: "bg-teal-600",
@@ -499,7 +499,7 @@ export const tierEmeraldII = [
   },
   {
     id: "topic_emotions_e2",
-    title: "Chủ đề: Cảm xúc & Tâm trạng",
+    title: "Cảm xúc & Tâm trạng",
     category: "topic",
     description: "Các trạng thái tâm lý từ tiêu cực đến tích cực và cách diễn đạt cảm xúc.",
     color: "bg-teal-600",

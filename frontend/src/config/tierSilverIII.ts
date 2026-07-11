@@ -1,7 +1,7 @@
 export const tierSilverIII = [
   {
     id: "topic_greetings",
-    title: "Chủ đề: Chào hỏi & Giới thiệu",
+    title: "Chào hỏi & Giới thiệu",
     category: "topic",
     description: "Các từ vựng cơ bản dùng để chào hỏi và giới thiệu bản thân hàng ngày.",
     color: "bg-green-500",
@@ -250,7 +250,7 @@ export const tierSilverIII = [
   },
   {
     id: "topic_numbers_colors",
-    title: "Chủ đề: Số đếm & Màu sắc",
+    title: "Số đếm & Màu sắc",
     category: "topic",
     description: "Các số đếm cơ bản và những màu sắc thông dụng nhất trong tiếng Anh.",
     color: "bg-yellow-500",
@@ -499,7 +499,7 @@ export const tierSilverIII = [
   },
   {
     id: "topic_body_parts",
-    title: "Chủ đề: Các bộ phận cơ thể",
+    title: "Các bộ phận cơ thể",
     category: "topic",
     description: "Các bộ phận cơ bản bên ngoài cơ thể con người.",
     color: "bg-blue-500",
@@ -748,7 +748,7 @@ export const tierSilverIII = [
   },
   {
     id: "topic_school_supplies",
-    title: "Chủ đề: Đồ dùng học tập",
+    title: "Đồ dùng học tập",
     category: "topic",
     description: "Từ vựng cơ bản về các đồ dùng, dụng cụ học tập trong lớp học hàng ngày.",
     color: "bg-pink-500",

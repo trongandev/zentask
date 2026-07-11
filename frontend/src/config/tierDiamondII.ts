@@ -1,7 +1,7 @@
 export const tierDiamondII = [
   {
     id: "topic_corporate_finance",
-    title: "Chủ đề: Tài chính doanh nghiệp",
+    title: "Tài chính doanh nghiệp",
     category: "topic",
     description: "Từ vựng tài chính C1 chuyên sâu về quản lý vốn, định giá doanh nghiệp, sáp nhập và phân bổ tài sản.",
     color: "bg-blue-800",
@@ -430,7 +430,7 @@ export const tierDiamondII = [
   },
   {
     id: "topic_energy_resources",
-    title: "Chủ đề: Năng lượng & Tài nguyên",
+    title: "Năng lượng & Tài nguyên",
     category: "topic",
     description: "Từ vựng cấp độ C1 về các công nghệ địa nhiệt, khai thác nguyên liệu, lưới điện và bảo tồn tài nguyên thiên nhiên.",
     color: "bg-cyan-700",
@@ -859,7 +859,7 @@ export const tierDiamondII = [
   },
   {
     id: "topic_specialized_medicine",
-    title: "Chủ đề: Y học chuyên sâu",
+    title: "Y học chuyên sâu",
     category: "topic",
     description: "Từ vựng thuật ngữ C1 chuyên ngành y học, bệnh lý học, các liệu pháp điều trị lâm sàng và chẩn đoán.",
     color: "bg-rose-800",

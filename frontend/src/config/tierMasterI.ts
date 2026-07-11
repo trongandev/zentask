@@ -1,7 +1,7 @@
 export const tierMasterI = [
   {
     id: "topic_academic_c2",
-    title: "Chủ đề: Từ vựng học thuật chuyên sâu",
+    title: "Từ vựng học thuật chuyên sâu",
     category: "topic",
     description: "Từ vựng cấp độ C2 đặc biệt chuyên sâu phục vụ nghiên cứu, nghị luận xã hội và các bài thi IELTS/TOEFL mức điểm tuyệt đối.",
     color: "bg-purple-900",
@@ -490,7 +490,7 @@ export const tierMasterI = [
   },
   {
     id: "topic_idioms_complex_c2",
-    title: "Chủ đề: Thành ngữ cổ & Tiếng lóng phức tạp",
+    title: "Thành ngữ cổ & Tiếng lóng phức tạp",
     category: "topic",
     description: "Các thành ngữ cổ tinh tế và tiếng lóng phức tạp bậc cao nhất (C2) để người học làm chủ hoàn toàn giao tiếp bản xứ.",
     color: "bg-violet-900",
@@ -979,7 +979,7 @@ export const tierMasterI = [
   },
   {
     id: "topic_synonyms_nuances",
-    title: "Chủ đề: Từ đồng nghĩa phân biệt sắc thái",
+    title: "Từ đồng nghĩa phân biệt sắc thái",
     category: "topic",
     description: "Phân biệt những từ đồng nghĩa có sắc thái biểu cảm vô cùng tinh tế ở cấp độ C2 để sử dụng từ ngữ chính xác tuyệt đối.",
     color: "bg-purple-900",
@@ -1468,7 +1468,7 @@ export const tierMasterI = [
   },
   {
     id: "topic_highly_specialized_terms",
-    title: "Chủ đề: Thuật ngữ chuyên ngành chuyên sâu",
+    title: "Thuật ngữ chuyên ngành chuyên sâu",
     category: "topic",
     description: "Thuật ngữ tiếng Anh bậc thầy (C2) phục vụ ba nhóm ngành then chốt: Y học sinh học, Kỹ thuật cơ điện tử và Luật thương mại quốc tế.",
     color: "bg-sky-900",
