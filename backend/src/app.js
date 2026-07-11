@@ -1,9 +1,10 @@
 import crypto from "crypto";
 if (!global.crypto) {
-  global.crypto = crypto.webcrypto || crypto;
+    global.crypto = crypto.webcrypto || crypto;
 }
 
 import express from "express";
+import rateLimit from "express-rate-limit";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
@@ -43,6 +44,16 @@ dotenv.config();
 
 const app = express();
 app.set("trust proxy", 1);
+
+const limiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 phút
+    max: 100, // Giới hạn mỗi IP 100 requests mỗi 5 phút
+    message: "Bạn đang thao tác quá nhanh, vui lòng thử lại sau ít phút.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+app.use(limiter);
+
 const port = process.env.PORT || 3001;
 
 // Connect to MongoDB
@@ -54,10 +65,10 @@ const server = http.createServer(app);
 initializeSocket(server, app);
 
 app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  }),
+    cors({
+        origin: true,
+        credentials: true,
+    }),
 );
 app.use(compression());
 app.use(morgan("dev"));
@@ -66,11 +77,11 @@ app.use(cookieParser());
 
 // Support Bearer token from Extension (map to req.cookies.session)
 app.use((req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    req.cookies.session = authHeader.split(" ")[1];
-  }
-  next();
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+        req.cookies.session = authHeader.split(" ")[1];
+    }
+    next();
 });
 
 // System logs middleware
@@ -127,5 +138,5 @@ app.use("/api/skill-practice", skillPracticeRoutes);
 app.use(errorHandler);
 
 server.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+    console.log(`Server listening on port ${port}`);
 });
