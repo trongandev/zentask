@@ -11,7 +11,8 @@ export function Honeypot() {
       return;
     }
     try {
-      const res = await fetch("/api/public/banned-feedback", {
+      const API_URL = import.meta.env.VITE_API_BACKEND || "";
+      const res = await fetch(`${API_URL}/api/public/banned-feedback`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message })
