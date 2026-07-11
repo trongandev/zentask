@@ -62,7 +62,9 @@ router.get(
 router.post(
   "/posts",
   asyncHandler(async (req, res) => {
+    return res.status(400).json({ error: "Tính năng này đang bảo trì, vui lòng thử lại sau!" });
     const { content, tags } = req.body;
+
     if (!content) return res.status(400).json({ error: "Content is required" });
 
     // Validate length >= 50 chars (ignore HTML tags)
