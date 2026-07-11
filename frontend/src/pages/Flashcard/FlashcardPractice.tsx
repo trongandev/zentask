@@ -17,6 +17,7 @@ import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useAuth } from "../../contexts/AuthContext";
 import { ModeTyping } from "@/src/components/practice/ModeTyping";
 import { VoiceSelectorModal } from "@/src/components/practice/VoiceSelectorModal";
+import { getVoiceForLanguage } from "@/src/lib/ttsVoiceStorage";
 import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
@@ -30,7 +31,7 @@ export function FlashcardPractice() {
   const isBeginner = location.pathname.includes("/beginner/");
   const { user, updateUser } = useAuth();
 
-  const { fetchCards, fetchProgress, currentSet: storeSet, cards: storeCards, loading: storeLoading } = useFlashcardStore();
+  const { fetchCards, fetchProgress, currentSet: storeSet, cards: storeCards, loading: storeLoading, cardProgress, isReviewAll, setIsReviewAll } = useFlashcardStore();
 
   const [beginnerSet, setBeginnerSet] = useState<any>(null);
   const [beginnerCards, setBeginnerCards] = useState<any[]>([]);
@@ -44,14 +45,39 @@ export function FlashcardPractice() {
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentVoiceId, setCurrentVoiceId] = useState(() => {
-    return localStorage.getItem("tts_voice") || "en-GB-SoniaNeural";
+    return getVoiceForLanguage();
   });
 
   const { preloadAudio } = useTTSAudio();
 
+  useEffect(() => {
+    setIsReviewAll(false);
+  }, [setIsReviewAll, id]);
+
   const currentSet = isBeginner ? beginnerSet : storeSet;
-  const cards = isBeginner ? beginnerCards : storeCards;
+  const allCards = isBeginner ? beginnerCards : storeCards;
   const loading = isBeginner ? false : storeLoading;
+
+  const getDueCards = (cardsList: any[]) => {
+    if (isBeginner) return cardsList;
+    const now = new Date().getTime();
+    return cardsList.filter((card) => {
+      const progress = cardProgress[card.id];
+      if (!progress) return true; // new card is due
+      if (!progress.dueDate) return true;
+      return new Date(progress.dueDate).getTime() <= now;
+    });
+  };
+
+  const dueCards = getDueCards(allCards);
+  const cards = isReviewAll ? allCards : dueCards;
+
+  // Update voice when set language is known
+  useEffect(() => {
+    if ((currentSet as any)?.language) {
+      setCurrentVoiceId(getVoiceForLanguage((currentSet as any).language));
+    }
+  }, [(currentSet as any)?.language]);
 
   useEffect(() => {
     if (cards.length > 0) {
@@ -153,6 +179,33 @@ export function FlashcardPractice() {
     );
   }
 
+  if (!isBeginner && !loading && !isReviewAll && dueCards.length === 0 && allCards.length > 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-[#F4F7FE] px-4 animate-in zoom-in duration-500">
+        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+          <Check className="w-12 h-12 text-green-500" />
+        </div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">Xin chúc mừng!</h2>
+        <p className="text-gray-500 mb-3 text-center max-w-md">Bạn đã học hết các từ cần ôn tập hôm nay.</p>
+        <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row mt-6">
+          <button 
+            onClick={() => {
+              setIsReviewAll(true);
+              setPracticeSessionKey(k => k + 1);
+            }} 
+            className="flex-1 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition-colors hover:bg-blue-700 flex justify-center items-center gap-2"
+          >
+            <RotateCw className="w-5 h-5" />
+            Ôn tập lại tất cả
+          </button>
+        </div>
+        <button onClick={() => navigate(-1)} className="mt-4 text-sm font-bold text-gray-500 hover:text-gray-700">
+          Quay lại danh sách
+        </button>
+      </div>
+    );
+  }
+
   if (isBeginner && beginnerCards.length === 0 && beginnerSet) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#F4F7FE] px-4">
@@ -184,10 +237,14 @@ export function FlashcardPractice() {
     const count = cards.length;
     if (mode === "quiz") return count >= 4;
     if (mode === "match" || mode === "bubble") return count >= 5;
+    if (mode === "pronunciation") {
+      const lang = (currentSet as any)?.language || "en";
+      return lang === "en";
+    }
     return true;
   };
 
-  // If active mode becomes invalid due to card deletion (edge case)
+  // If active mode becomes invalid due to card deletion or language restriction (edge case)
   if (!hasEnoughCards(activeMode)) {
     setActiveMode("flashcard");
   }
@@ -206,6 +263,18 @@ export function FlashcardPractice() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {!isBeginner && (
+            isReviewAll ? (
+              <span className="hidden sm:inline-flex px-3 py-2 bg-purple-50 text-purple-600 font-semibold rounded-xl text-sm items-center gap-1">
+                Đang ôn tất cả (không lưu điểm)
+              </span>
+            ) : allCards.length > dueCards.length ? (
+              <button onClick={() => { setIsReviewAll(true); setPracticeSessionKey(k => k + 1); }} className="hidden sm:inline-flex px-3 py-2 bg-purple-50 text-purple-600 font-semibold rounded-xl hover:bg-purple-100 transition-colors text-sm items-center gap-1">
+                <RotateCw className="w-4 h-4" />
+                Ôn tất cả ({allCards.length})
+              </button>
+            ) : null
+          )}
           <button onClick={() => setIsVoiceModalOpen(true)} className="px-3 py-2 md:px-4 md:py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors text-sm">
             Thay đổi giọng nói
           </button>
@@ -255,11 +324,12 @@ export function FlashcardPractice() {
               setIsSidebarOpen(false); // Auto close on mobile when selecting
             }}
             cardCount={cards.length}
+            language={(currentSet as any)?.language || "en"}
           />
         </div>
       </div>
 
-      <VoiceSelectorModal isOpen={isVoiceModalOpen} onClose={() => setIsVoiceModalOpen(false)} currentVoiceId={currentVoiceId} onSelectVoice={setCurrentVoiceId} />
+      <VoiceSelectorModal isOpen={isVoiceModalOpen} onClose={() => setIsVoiceModalOpen(false)} currentVoiceId={currentVoiceId} onSelectVoice={setCurrentVoiceId} language={(currentSet as any)?.language} />
     </div>
   );
 }

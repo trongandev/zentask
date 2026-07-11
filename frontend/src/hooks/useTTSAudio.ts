@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useEtcStore } from "@/src/services/etcService";
+import { getVoiceForLanguage } from "@/src/lib/ttsVoiceStorage";
 let globalAudio: HTMLAudioElement | null = null;
 const audioCache = new Map<string, string>();
 const preloadingSet = new Set<string>();
@@ -12,10 +13,8 @@ export const useTTSAudio = () => {
   const [playingText, setPlayingText] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedVoice = localStorage.getItem("tts_voice");
-    if (!savedVoice) {
-      localStorage.setItem("tts_voice", "en-GB-SoniaNeural");
-    }
+    // Ensure default voice is set (migration handled by getVoiceForLanguage)
+    getVoiceForLanguage();
   }, []);
 
   const stopAudio = () => {
@@ -33,7 +32,7 @@ export const useTTSAudio = () => {
   };
 
   const preloadAudio = async (text: string, overrideVoice?: string) => {
-    const voice = overrideVoice || localStorage.getItem("tts_voice") || "en-GB-SoniaNeural";
+    const voice = overrideVoice || getVoiceForLanguage();
     const cacheKey = `${text}_${voice}`;
     if (audioCache.has(cacheKey) || preloadingSet.has(cacheKey)) return;
 
@@ -88,7 +87,7 @@ export const useTTSAudio = () => {
     setLoadingText(text);
 
     try {
-      const voice = overrideVoice || localStorage.getItem("tts_voice") || "en-GB-SoniaNeural";
+      const voice = overrideVoice || getVoiceForLanguage();
       const cacheKey = `${text}_${voice}`;
 
       let audioUrl = audioCache.get(cacheKey);

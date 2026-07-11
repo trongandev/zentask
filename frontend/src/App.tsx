@@ -21,7 +21,7 @@ import { Community } from "./pages/Community";
 import { Settings } from "./pages/Settings";
 import { Notifications } from "./pages/Notifications";
 import { Auth } from "./pages/Auth";
-import { Arena } from "./pages/Arena";
+import { Arena } from "./pages/Arena/Arena";
 import { AdminLayout } from "./components/AdminLayout";
 import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 import { AdminTasks } from "./pages/Admin/AdminTasks";
@@ -59,6 +59,7 @@ import SkillPracticeRoom from "./pages/SkillPracticeRoom";
 import FirstLoginOnboarding from "./components/onboarding/FirstLoginOnboarding";
 import BotConfigPage from "./pages/Admin/BotConfigPage";
 import { SystemLogs } from "./pages/Admin/SystemLogs";
+import { useScrollRestoration } from "./hooks/useScrollRestoration";
 
 function MainLayout() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(() => {
@@ -75,6 +76,8 @@ function MainLayout() {
   const [isRightMobileMenuOpen, setIsRightMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isPracticePage = location.pathname.match(/\/flashcard\/[^\/]+\/practice/);
+
+  useScrollRestoration("#main-scroll-container");
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -135,7 +138,7 @@ function MainLayout() {
           <Header isLeftSidebarOpen={isLeftSidebarOpen} onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
         </div>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col" onScroll={handleScroll}>
+        <main id="main-scroll-container" className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col" onScroll={handleScroll}>
           <div className="flex-1">
             <Outlet />
           </div>

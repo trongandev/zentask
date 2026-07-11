@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Zentask Translation Extension",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Một công cụ giúp dịch thuật cũng như lưu lại từ vựng nhanh chóng trên trang lrm.io.vn",
   "permissions": ["storage"],
   "externally_connectable": {

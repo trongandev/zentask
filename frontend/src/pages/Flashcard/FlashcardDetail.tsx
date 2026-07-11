@@ -9,6 +9,8 @@ import { cn } from "../../lib/utils";
 import toast from "react-hot-toast";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { VoiceSelectorModal } from "../../components/practice/VoiceSelectorModal";
+import { getVoiceForLanguage } from "../../lib/ttsVoiceStorage";
+import { Modal } from "../../components/shared/Modal";
 
 type ViewMode = "line" | "grid" | "compact";
 
@@ -40,7 +42,7 @@ export function FlashcardDetail() {
   const [expandedGridCardId, setExpandedGridCardId] = useState<string | null>(null);
 
   const [currentVoiceId, setCurrentVoiceId] = useState(() => {
-    return localStorage.getItem("tts_voice") || "en-GB-SoniaNeural";
+    return getVoiceForLanguage();
   });
 
   // Sticky header state
@@ -89,6 +91,13 @@ export function FlashcardDetail() {
     }
   }, [id, fetchCards, fetchProgress]);
 
+  // Update voice when set language is known
+  useEffect(() => {
+    if (currentSet?.language) {
+      setCurrentVoiceId(getVoiceForLanguage(currentSet.language));
+    }
+  }, [currentSet?.language]);
+
   // Compute memory statistics
   const memoryStats = useMemo(() => {
     let known = 0,
@@ -106,7 +115,7 @@ export function FlashcardDetail() {
   const unknownCards = useMemo(() => cards.filter((c) => getMemoryLevel(cardProgress[c.id]) === "unknown"), [cards, cardProgress]);
 
   const handlePlayAudio = (text: string) => {
-    playAudio(text);
+    playAudio(text, currentVoiceId);
   };
 
   const handleExampleChange = (index: number, field: "en" | "vi", value: string) => {
@@ -154,7 +163,7 @@ export function FlashcardDetail() {
       toast.error("Vui lòng nhập từ vựng cần tạo");
       return;
     }
-    const res = await useFlashcardStore.getState().generateAI(term);
+    const res = await useFlashcardStore.getState().generateAI(term, id);
     if (res && id) {
       const examplesToSave = res.examples?.length > 0 ? res.examples.slice(0, 3).map((ex: any) => ({ en: ex.en || "", vi: ex.vi || "" })) : [];
       const cardRes = await createCard(id, {
@@ -606,133 +615,127 @@ export function FlashcardDetail() {
         })()}
 
       {/* ── Add Word Modal ── */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Thêm từ mới</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
-                <X className="w-5 h-5" />
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        title="Thêm từ mới"
+        className="max-w-2xl"
+      >
+        <div className="flex border-b border-gray-100">
+          {(["ai", "manual"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={cn("flex-1 py-3 font-bold text-sm transition-colors", activeTab === tab ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" : "text-gray-500 hover:bg-gray-50")}
+            >
+              {tab === "ai" ? "Tạo bằng AI" : "Tạo thủ công"}
+            </button>
+          ))}
+        </div>
+
+        <div className="p-6 max-h-[70vh] overflow-y-auto">
+          {activeTab === "ai" ? (
+            <div className="space-y-4">
+              <p className="text-gray-600 text-sm">Nhập từ vựng tiếng Anh, AI sẽ tự động điền phiên âm, nghĩa tiếng Việt và các ví dụ cụ thể.</p>
+              <input
+                value={term}
+                autoFocus
+                onChange={(e) => setTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreateAI();
+                }}
+                type="text"
+                placeholder="Ví dụ: determine"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium outline-none focus:border-blue-500 focus:bg-white transition-colors"
+              />
+              <button
+                disabled={loading}
+                onClick={handleCreateAI}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
+              >
+                {loading ? "Đang tạo..." : "Tạo bằng AI ✨"}
               </button>
             </div>
-
-            <div className="flex border-b border-gray-100">
-              {(["ai", "manual"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={cn("flex-1 py-3 font-bold text-sm transition-colors", activeTab === tab ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" : "text-gray-500 hover:bg-gray-50")}
-                >
-                  {tab === "ai" ? "Tạo bằng AI" : "Tạo thủ công"}
-                </button>
-              ))}
-            </div>
-
-            <div className="p-6 overflow-y-auto">
-              {activeTab === "ai" ? (
-                <div className="space-y-4">
-                  <p className="text-gray-600 text-sm">Nhập từ vựng tiếng Anh, AI sẽ tự động điền phiên âm, nghĩa tiếng Việt và các ví dụ cụ thể.</p>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Tiêu đề (Tiếng Anh)</label>
                   <input
                     value={term}
-                    autoFocus
                     onChange={(e) => setTerm(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleCreateAI();
-                    }}
                     type="text"
-                    placeholder="Ví dụ: determine"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium outline-none focus:border-blue-500 focus:bg-white transition-colors"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500"
+                    placeholder="Hello"
                   />
-                  <button
-                    disabled={loading}
-                    onClick={handleCreateAI}
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
-                  >
-                    {loading ? "Đang tạo..." : "Tạo bằng AI ✨"}
-                  </button>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">Tiêu đề (Tiếng Anh)</label>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Phiên âm</label>
+                  <input
+                    value={phonetic}
+                    onChange={(e) => setPhonetic(e.target.value)}
+                    type="text"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500"
+                    placeholder="/həˈləʊ/"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Dịch nghĩa (Tiếng Việt)</label>
+                <input
+                  value={translation}
+                  onChange={(e) => setTranslation(e.target.value)}
+                  type="text"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500"
+                  placeholder="Xin chào"
+                />
+              </div>
+              <div className="pt-2 border-t border-gray-100">
+                <label className="block text-sm font-bold text-gray-700 mb-3">Ví dụ (3 ví dụ)</label>
+                <div className="space-y-3">
+                  {[0, 1, 2].map((idx) => (
+                    <div key={idx} className="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-2">
                       <input
-                        value={term}
-                        onChange={(e) => setTerm(e.target.value)}
+                        value={examples[idx].en}
+                        onChange={(e) => handleExampleChange(idx, "en", e.target.value)}
                         type="text"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500"
-                        placeholder="Hello"
+                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
+                        placeholder="Tiếng Anh (ví dụ: Hello there!)"
+                      />
+                      <input
+                        value={examples[idx].vi}
+                        onChange={(e) => handleExampleChange(idx, "vi", e.target.value)}
+                        type="text"
+                        className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
+                        placeholder="Tiếng Việt (ví dụ: Xin chào nhé!)"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">Phiên âm</label>
-                      <input
-                        value={phonetic}
-                        onChange={(e) => setPhonetic(e.target.value)}
-                        type="text"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500"
-                        placeholder="/həˈləʊ/"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Dịch nghĩa (Tiếng Việt)</label>
-                    <input
-                      value={translation}
-                      onChange={(e) => setTranslation(e.target.value)}
-                      type="text"
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500"
-                      placeholder="Xin chào"
-                    />
-                  </div>
-                  <div className="pt-2 border-t border-gray-100">
-                    <label className="block text-sm font-bold text-gray-700 mb-3">Ví dụ (3 ví dụ)</label>
-                    <div className="space-y-3">
-                      {[0, 1, 2].map((idx) => (
-                        <div key={idx} className="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-2">
-                          <input
-                            value={examples[idx].en}
-                            onChange={(e) => handleExampleChange(idx, "en", e.target.value)}
-                            type="text"
-                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
-                            placeholder="Tiếng Anh (ví dụ: Hello there!)"
-                          />
-                          <input
-                            value={examples[idx].vi}
-                            onChange={(e) => handleExampleChange(idx, "vi", e.target.value)}
-                            type="text"
-                            className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
-                            placeholder="Tiếng Việt (ví dụ: Xin chào nhé!)"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="pt-2 border-t border-gray-100">
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Ghi chú (Tùy chọn)</label>
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      rows={2}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 resize-none"
-                      placeholder="Ghi chú thêm về từ này..."
-                    />
-                  </div>
-                  <button
-                    disabled={loading}
-                    onClick={handleCreateManual}
-                    className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
-                  >
-                    {loading ? "Đang tạo..." : "Lưu thủ công"}
-                  </button>
+                  ))}
                 </div>
-              )}
+              </div>
+              <div className="pt-2 border-t border-gray-100">
+                <label className="block text-sm font-bold text-gray-700 mb-1">Ghi chú (Tùy chọn)</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={2}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-blue-500 resize-none"
+                  placeholder="Ghi chú thêm về từ này..."
+                />
+              </div>
+              <button
+                disabled={loading}
+                onClick={handleCreateManual}
+                className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
+              >
+                {loading ? "Đang tạo..." : "Lưu thủ công"}
+              </button>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </Modal>
 
-      <VoiceSelectorModal isOpen={isVoiceModalOpen} onClose={() => setIsVoiceModalOpen(false)} currentVoiceId={currentVoiceId} onSelectVoice={setCurrentVoiceId} />
+      <VoiceSelectorModal isOpen={isVoiceModalOpen} onClose={() => setIsVoiceModalOpen(false)} currentVoiceId={currentVoiceId} onSelectVoice={setCurrentVoiceId} language={currentSet?.language} />
     </div>
   );
 }

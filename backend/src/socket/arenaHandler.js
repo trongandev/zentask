@@ -439,11 +439,12 @@ const createArenaRoom = (players, matchData, mode = "solo", io) => {
   return roomState;
 };
 
-const startSoloBotMatch = (entry, io) => {
+const startSoloBotMatch = (entry, io, botRankOverride = null) => {
   if (!entry || !isQueueEntryAlive(entry) || !isBotEligible(entry.user)) return false;
   const removed = dequeueArenaEntry(entry, "solo_bot");
   if (!removed) return false;
-  const bot = createArenaBot(removed.user, 1, "red");
+  const seedUser = botRankOverride ? { ...removed.user, rankId: botRankOverride } : removed.user;
+  const bot = createArenaBot(seedUser, 1, "red");
   createArenaRoom([{ ...removed.user, socket: removed.socket, team: "blue" }, bot], removed.matchData, "solo", io);
   return true;
 };
@@ -560,7 +561,7 @@ export function registerArenaHandlers(io, socket) {
     if (roomCode && socket.currentArenaRoom === roomCode) socket.currentArenaMode = mode || socket.currentArenaMode;
   });
 
-  socket.on("find_arena_match", async ({ user, matchData, mode, matchMode } = {}) => {
+  socket.on("find_arena_match", async ({ user, matchData, mode, matchMode, botRankOverride } = {}) => {
     if (!user || !matchData) return;
     touchArenaSocket(socket);
     cleanupArenaQueue();
@@ -592,6 +593,14 @@ export function registerArenaHandlers(io, socket) {
       stars: Number(freshProfile?.stars || user.stars || 0),
       arenaMatchesPlayed: Number(freshProfile?.arenaMatchesPlayed || user.arenaMatchesPlayed || 0),
     };
+
+    // If user explicitly chose a bot rank, create bot match immediately
+    const safeBotRankOverride = botRankOverride != null ? Number(botRankOverride) : null;
+    if (safeBotRankOverride && safeBotRankOverride >= 1 && safeBotRankOverride <= 5 && arenaMode === "solo") {
+      const entry = enqueueArenaEntry({ socket, user: entryUser, matchData, mode: arenaMode, timer: null });
+      startSoloBotMatch(entry, io, safeBotRankOverride);
+      return;
+    }
 
     const entry = enqueueArenaEntry({
       socket,
@@ -768,6 +777,139 @@ export function registerArenaHandlers(io, socket) {
       io.to(roomCode).emit("arena_next_question_sync", { index: room.currentQuestionIndex });
       scheduleArenaBots(room, io);
     }
+  });
+
+  // --- Challenge system ---
+  const pendingChallenges = socket._arenaPendingChallenges || new Map();
+  socket._arenaPendingChallenges = pendingChallenges;
+
+  socket.on("arena_challenge_invite", async ({ targetUid, challenger } = {}) => {
+    if (!targetUid || !challenger?.uid) return;
+    const targetSocketId = userSockets.get(String(targetUid));
+    if (!targetSocketId) {
+      return socket.emit("arena_challenge_declined", { name: "Người chơi", reason: "offline" });
+    }
+    const targetSocket = io.sockets.sockets.get(targetSocketId);
+    if (!targetSocket?.connected) {
+      return socket.emit("arena_challenge_declined", { name: "Người chơi", reason: "offline" });
+    }
+
+    // Check if target is already in a match
+    if (targetSocket.currentArenaRoom || isUidInActiveArenaRoom(String(targetUid))) {
+      return socket.emit("arena_challenge_declined", { name: "Người chơi", reason: "busy" });
+    }
+
+    // Store pending challenge with timeout
+    const challengeId = `challenge_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const timeout = setTimeout(() => {
+      pendingChallenges.delete(challengeId);
+      socket.emit("arena_challenge_expired", { challengeId });
+    }, 30000);
+
+    pendingChallenges.set(challengeId, { challengerUid: challenger.uid, targetUid: String(targetUid), timeout, challengerSocket: socket });
+
+    // Send challenge to target
+    targetSocket.emit("arena_challenge_received", {
+      ...challenger,
+      challengeId,
+    });
+    // Store on target socket too for response lookup
+    if (!targetSocket._arenaIncomingChallenges) targetSocket._arenaIncomingChallenges = new Map();
+    targetSocket._arenaIncomingChallenges.set(challengeId, { challengerSocket: socket, challenger, timeout });
+
+    console.log(`[Arena] Challenge sent from ${challenger.name} to uid ${targetUid}`);
+  });
+
+  socket.on("arena_challenge_response", async ({ challengerUid, accepted, challengeId: inChallengeId } = {}) => {
+    // Find the challenge — check incoming challenges on this socket
+    const incomingChallenges = socket._arenaIncomingChallenges || new Map();
+    let foundEntry = null;
+    let foundId = null;
+
+    for (const [cid, entry] of incomingChallenges.entries()) {
+      if (inChallengeId ? cid === inChallengeId : String(entry.challenger?.uid) === String(challengerUid)) {
+        foundEntry = entry;
+        foundId = cid;
+        break;
+      }
+    }
+
+    if (!foundEntry || !foundId) return;
+
+    // Clear timeout
+    clearTimeout(foundEntry.timeout);
+    incomingChallenges.delete(foundId);
+    if (foundEntry.challengerSocket?._arenaPendingChallenges) {
+      foundEntry.challengerSocket._arenaPendingChallenges.delete(foundId);
+    }
+
+    if (!accepted) {
+      // Declined
+      const responderName = socket.currentArenaUserName || "Người chơi";
+      foundEntry.challengerSocket?.emit("arena_challenge_declined", { name: responderName, challengeId: foundId });
+      console.log(`[Arena] Challenge ${foundId} declined`);
+      return;
+    }
+
+    // Accepted — create a solo room between challenger and responder
+    const challengerSocket = foundEntry.challengerSocket;
+    if (!challengerSocket?.connected) return;
+
+    // Fetch fresh profiles
+    const challengerUidStr = String(foundEntry.challenger?.uid);
+    const responderUidStr = String(socket._arenaRegisteredUid || challengerUid); // fallback
+
+    let challengerProfile = null;
+    let responderProfile = null;
+    try {
+      [challengerProfile, responderProfile] = await Promise.all([
+        User.findById(challengerUidStr).select("displayName photoURL rankId tier").lean(),
+        User.findById(responderUidStr).select("displayName photoURL rankId tier").lean(),
+      ]);
+    } catch (err) {
+      console.warn("[Arena] Challenge profile fetch failed:", err.message);
+    }
+
+    const { generateArenaDeck } = await import("../../config/rankTopicConfig.js").catch(() => ({ generateArenaDeck: null }));
+    // Use challenger's matchData or generate new deck
+    const rankId = Number(challengerProfile?.rankId || 1);
+    const tier = Number(challengerProfile?.tier || 3);
+
+    // Simple deck — use builtin words
+    const builtinWords = getBuiltinTournamentWords();
+    const selectedCards = shuffleArray(builtinWords).slice(0, 10);
+    const validModes = ["quiz", "fill_blank", "listening", "guess", "typing"];
+    const modes = Array.from({ length: 10 }, () => validModes[Math.floor(Math.random() * validModes.length)]);
+    const x2Indices = pickItems(Array.from({ length: 10 }, (_, i) => i), Math.random() > 0.5 ? 2 : 1);
+    const matchData = { cards: selectedCards, modes, x2Indices };
+
+    const playerA = {
+      uid: challengerUidStr,
+      name: foundEntry.challenger?.name || challengerProfile?.displayName || "Người chơi",
+      avatar: foundEntry.challenger?.avatar || challengerProfile?.photoURL || "",
+      rankId,
+      tier,
+      rankInfo: foundEntry.challenger?.rankInfo || "",
+      socket: challengerSocket,
+      team: "blue",
+    };
+    const playerB = {
+      uid: responderUidStr,
+      name: responderProfile?.displayName || "Người chơi",
+      avatar: responderProfile?.photoURL || "",
+      rankId: Number(responderProfile?.rankId || 1),
+      tier: Number(responderProfile?.tier || 3),
+      rankInfo: "",
+      socket,
+      team: "red",
+    };
+
+    // Remove both from any queue
+    removeArenaUidFromQueue(challengerUidStr);
+    removeArenaUidFromQueue(responderUidStr);
+
+    createArenaRoom([playerA, playerB], matchData, "solo", io);
+    console.log(`[Arena] Challenge match created: ${playerA.name} vs ${playerB.name}`);
   });
 
   socket.on("arena_leave", ({ roomCode } = {}) => {

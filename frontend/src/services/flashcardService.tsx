@@ -35,6 +35,7 @@ export interface FlashcardSet {
   order?: number;
   title: string;
   description: string;
+  language?: string; // en, zh, ko, ja, de, fr, es, th
   cardCount: number;
   learnedCount: number;
   lastStudied: string | null;
@@ -45,6 +46,9 @@ export interface FlashcardSet {
   isSystem?: boolean;
   source?: string;
   creator?: { uid: string; displayName: string; photoURL?: string } | null;
+  knownCount?: number;
+  almostCount?: number;
+  unknownCount?: number;
   createdAt: any;
   updatedAt: any;
 }
@@ -115,7 +119,7 @@ interface FlashcardState {
   fetchPublicSets: () => Promise<void>;
   fetchBuiltinSets: () => Promise<void>;
   cloneBuiltinSet: (setId: string) => Promise<FlashcardSet | null>;
-  createSet: (title: string, description?: string, color?: string, isPublic?: boolean, categoryId?: string | null) => Promise<FlashcardSet | null>;
+  createSet: (title: string, description?: string, color?: string, isPublic?: boolean, categoryId?: string | null, language?: string) => Promise<FlashcardSet | null>;
   updateSet: (setId: string, data: Partial<FlashcardSet>) => Promise<FlashcardSet | null>;
   deleteSet: (setId: string) => Promise<void>;
 
@@ -133,12 +137,14 @@ interface FlashcardState {
   
   setManualProgress: (cardId: string, setId: string, level: MemoryLevel) => Promise<void>;
 
-  generateAI: (term: string) => Promise<any>;
+  generateAI: (term: string, setId?: string) => Promise<any>;
   cloneSet: (setId: string) => Promise<FlashcardSet | null>;
   updateSetPrivacy: (setId: string, isPublic: boolean) => Promise<void>;
   getDueCards: () => Promise<any[]>;
   preloadedDueCards: any[] | null;
   setPreloadedDueCards: (cards: any[]) => void;
+  isReviewAll: boolean;
+  setIsReviewAll: (v: boolean) => void;
 }
 
 export const useFlashcardStore = create<FlashcardState>((set, get) => ({
@@ -154,7 +160,9 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   pendingUpdates: [],
   pendingBeginnerUpdates: [],
   preloadedDueCards: null,
+  isReviewAll: false,
 
+  setIsReviewAll: (v) => set({ isReviewAll: v }),
   setPreloadedDueCards: (cards) => set({ preloadedDueCards: cards }),
 
   fetchFolders: async () => {
@@ -369,14 +377,14 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     }
   },
 
-  createSet: async (title, description = "", color = "bg-blue-500", isPublic = true, categoryId = null) => {
+  createSet: async (title, description = "", color = "bg-blue-500", isPublic = true, categoryId = null, language = "en") => {
     set({ loading: true });
     try {
       const res = await fetch(`${API_URL}/api/flashcard/set`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ title, description, color, isPublic, categoryId }),
+        body: JSON.stringify({ title, description, color, isPublic, categoryId, language }),
       });
       if (!res.ok) throw new Error(await readApiError(res, "Failed to create set"));
       const data = await res.json();
@@ -511,14 +519,14 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     }
   },
 
-  generateAI: async (term) => {
+  generateAI: async (term, setId) => {
     set({ loading: true });
     try {
       const res = await fetch(`${API_URL}/api/flashcard/generate-ai`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ term }),
+        body: JSON.stringify({ term, setId }),
       });
       if (!res.ok) throw new Error("Lỗi khi gọi AI");
       return await res.json();
@@ -570,6 +578,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   },
 
   recordAnswer: (cardId, setId, quality, mode) => {
+    if (get().isReviewAll) return;
     if (String(setId).startsWith("builtin_") || String(cardId).startsWith("builtin_")) return;
     const newUpdate: PendingUpdate = { cardId, setId, quality, mode };
     set((state) => {

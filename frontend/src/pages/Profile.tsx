@@ -342,7 +342,7 @@ export function Profile() {
                   <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Background" className="w-40 h-40 object-contain drop-shadow-2xl" />
                 </div>
 
-                <RankCard />
+                <RankCard user={user} />
               </div>
 
               {/* Level Card Preview */}

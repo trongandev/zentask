@@ -2,9 +2,11 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
-import { CheckCircle, RotateCw, Volume2 } from "lucide-react";
+import { CheckCircle, RotateCw, Volume2, ArrowLeft } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
+import { getVoiceForLanguage } from "@/src/lib/ttsVoiceStorage";
+import { useNavigate } from "react-router-dom";
 
 interface ModeQuizProps {
   cards: Flashcard[];
@@ -13,7 +15,6 @@ interface ModeQuizProps {
   completionActions?: React.ReactNode;
 }
 
-
 export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQuizProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
@@ -21,11 +22,13 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
   const wrongCardIdsRef = React.useRef<string[]>([]);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const cardStartTime = useRef<number>(Date.now());
-  
+  const navigate = useNavigate();
   const { playAudio, playSoundEffect, isLoading, loadingText } = useTTSAudio();
   const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
 
-  
+  const [currentVoiceId] = useState(() => {
+    return getVoiceForLanguage();
+  });
   const currentCard = cards[currentIndex];
 
   // Reset timer on card change
@@ -36,7 +39,10 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
   // Generate options (1 correct, 3 random wrong)
   const options = useMemo(() => {
     if (!currentCard || cards.length < 4) return [];
-    const wrongCards = [...cards].filter(c => c.id !== currentCard.id).sort(() => 0.5 - Math.random()).slice(0, 3);
+    const wrongCards = [...cards]
+      .filter((c) => c.id !== currentCard.id)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 3);
     const allOptions = [currentCard, ...wrongCards].sort(() => 0.5 - Math.random());
     return allOptions;
   }, [currentCard, cards]);
@@ -45,22 +51,26 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
     if (selectedOptionId) return; // Prevent double click
     setSelectedOptionId(optionId);
     const responseMs = Date.now() - cardStartTime.current;
-    
+
     // Check if correct
     const isCorrect = optionId === currentCard.id;
     if (isCorrect) {
       reportCorrect(currentCard.id, "quiz", currentCard.term, responseMs);
-      playAudio(currentCard.term, undefined, 'correct');
+      playAudio(currentCard.term, undefined, "correct");
     } else {
       reportWrong(currentCard.id, "quiz");
-      setWrongCardIds((prev) => { const next = prev.includes(currentCard.id) ? prev : [...prev, currentCard.id]; wrongCardIdsRef.current = next; return next; });
-      playSoundEffect('wrong');
+      setWrongCardIds((prev) => {
+        const next = prev.includes(currentCard.id) ? prev : [...prev, currentCard.id];
+        wrongCardIdsRef.current = next;
+        return next;
+      });
+      playSoundEffect("wrong");
     }
-    
+
     setTimeout(() => {
       setSelectedOptionId(null);
       if (currentIndex < cards.length - 1) {
-        setCurrentIndex(curr => curr + 1);
+        setCurrentIndex((curr) => curr + 1);
       } else {
         flushProgress();
         onComplete?.(wrongCardIdsRef.current);
@@ -69,10 +79,9 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
     }, 1500); // Wait 1.5s to show result
   };
 
-
   const handlePlayAudio = (e: React.MouseEvent, text: string) => {
     e.stopPropagation();
-    playAudio(text);
+    playAudio(text, currentVoiceId);
   };
 
   if (cards.length < 4) {
@@ -87,12 +96,25 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Tuyệt vời!</h2>
         <p className="text-gray-500 mb-8">Bạn đã hoàn thành bài Trắc nghiệm.</p>
-        <button 
-          onClick={() => { setCompleted(false); setCurrentIndex(0); setWrongCardIds([]); wrongCardIdsRef.current = []; }}
+        <button
+          onClick={() => {
+            setCompleted(false);
+            setCurrentIndex(0);
+            setWrongCardIds([]);
+            wrongCardIdsRef.current = [];
+          }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Làm lại
+        </button>
+        {/* button quay về */}
+        <button 
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 rounded-xl bg-gray-100 px-6 py-3 font-bold text-gray-700 transition-colors hover:bg-gray-200"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Quay về
         </button>
         {completionActions}
       </div>
@@ -114,23 +136,19 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
 
       <div className="w-full bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-8 relative flex flex-col items-center text-center">
         <h2 className="text-5xl font-extrabold text-gray-900 mb-4">{currentCard.term}</h2>
-        <button 
+        <button
           onClick={(e) => handlePlayAudio(e, currentCard.term)}
           disabled={isLoading && loadingText === currentCard.term}
           className="p-3 rounded-full bg-gray-50 text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors disabled:opacity-50"
         >
-          {isLoading && loadingText === currentCard.term ? (
-             <div className="w-6 h-6 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
-          ) : (
-             <Volume2 className="w-6 h-6" />
-          )}
+          {isLoading && loadingText === currentCard.term ? <div className="w-6 h-6 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-6 h-6" />}
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         {options.map((opt, idx) => {
           let stateClass = "bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-700";
-          
+
           if (selectedOptionId) {
             if (opt.id === currentCard.id) {
               stateClass = "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/30 transform scale-[1.02]"; // Correct answer always highlights green
@@ -146,10 +164,7 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
               key={idx}
               onClick={() => handleSelect(opt.id)}
               disabled={selectedOptionId !== null}
-              className={cn(
-                "p-5 rounded-2xl border-2 text-lg font-bold transition-all duration-300 shadow-sm text-left relative overflow-hidden",
-                stateClass
-              )}
+              className={cn("p-5 rounded-2xl border-2 text-lg font-bold transition-all duration-300 shadow-sm text-left relative overflow-hidden", stateClass)}
             >
               {opt.translation}
               {selectedOptionId && opt.id === currentCard.id && (

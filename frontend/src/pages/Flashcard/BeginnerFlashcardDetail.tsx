@@ -7,6 +7,7 @@ import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useAuth } from "../../contexts/AuthContext";
 import { Check } from "lucide-react";
 import { VoiceSelectorModal } from "../../components/practice/VoiceSelectorModal";
+import { getVoiceForLanguage } from "../../lib/ttsVoiceStorage";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
@@ -21,7 +22,7 @@ export function BeginnerFlashcardDetail() {
   const [viewMode, setViewMode] = useState<ViewMode>("line");
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [currentVoiceId, setCurrentVoiceId] = useState(() => {
-    return localStorage.getItem("tts_voice") || "en-GB-SoniaNeural";
+    return getVoiceForLanguage((currentSet as any)?.language);
   });
   const [expandedGridCardId, setExpandedGridCardId] = useState<string | null>(null);
   const [learnedWords, setLearnedWords] = useState<string[]>([]);
@@ -30,8 +31,8 @@ export function BeginnerFlashcardDetail() {
   React.useEffect(() => {
     if (user) {
       fetch(`${API_URL}/api/user/beginner-progress`, { credentials: "include" })
-        .then(res => res.ok ? res.json() : { learnedWords: [] })
-        .then(data => setLearnedWords(data.learnedWords || []))
+        .then((res) => (res.ok ? res.json() : { learnedWords: [] }))
+        .then((data) => setLearnedWords(data.learnedWords || []))
         .catch(console.error);
     }
   }, [user]);
@@ -50,7 +51,7 @@ export function BeginnerFlashcardDetail() {
   const cards = currentSet.words || [];
 
   const handlePlayAudio = (text: string) => {
-    playAudio(text);
+    playAudio(text, currentVoiceId);
   };
 
   // LINE VIEW
@@ -189,7 +190,10 @@ export function BeginnerFlashcardDetail() {
       </div>
 
       <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-        <button onClick={() => navigate(`/beginner/flashcard/${id}/practice`)} className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-colors">
+        <button
+          onClick={() => navigate(`/beginner/flashcard/${id}/practice`)}
+          className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-colors"
+        >
           <Play className="w-5 h-5 fill-current" /> Ôn tập ngay
         </button>
         <div className="flex items-center gap-2">
@@ -227,8 +231,13 @@ export function BeginnerFlashcardDetail() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">{cards.map(renderCompactCard)}</div>
       )}
 
-      <VoiceSelectorModal isOpen={isVoiceModalOpen} onClose={() => setIsVoiceModalOpen(false)} currentVoiceId={currentVoiceId} onSelectVoice={setCurrentVoiceId} />
+      <VoiceSelectorModal
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
+        currentVoiceId={currentVoiceId}
+        onSelectVoice={setCurrentVoiceId}
+        language={(currentSet as any)?.language}
+      />
     </div>
   );
 }
-

@@ -8,6 +8,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import toast from "react-hot-toast";
 import { SEO } from "../../components/SEO";
+import { Modal } from "../../components/shared/Modal";
+import { CreateEditFolderModal, DeleteFolderModal, CreateEditSetModal, DeleteSetModal, COLORS } from "./components/FlashcardModals";
 
 import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay, useDroppable, pointerWithin, rectIntersection } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
@@ -21,45 +23,21 @@ const RANK_CONFIG: any = {
   5: { name: "Cao Thủ", maxTiers: 1, starsPerTier: 99 },
 };
 const TIER_NAMES: Record<number, string> = { 1: "I", 2: "II", 3: "III", 4: "IV", 5: "V" };
-
-const COLORS = [
-  "bg-blue-500",
-  "bg-blue-600",
-  "bg-blue-700",
-  "bg-blue-800",
-  "bg-red-500",
-  "bg-red-600",
-  "bg-red-700",
-  "bg-red-800",
-  "bg-yellow-500",
-  "bg-yellow-600",
-  "bg-yellow-700",
-  "bg-yellow-800",
-  "bg-green-500",
-  "bg-green-600",
-  "bg-green-700",
-  "bg-green-800",
-  "bg-purple-500",
-  "bg-purple-600",
-  "bg-purple-700",
-  "bg-purple-800",
-  "bg-pink-500",
-  "bg-pink-600",
-  "bg-pink-700",
-  "bg-pink-800",
-  "bg-orange-500",
-  "bg-orange-600",
-  "bg-orange-700",
-  "bg-orange-800",
-  "bg-teal-500",
-  "bg-teal-600",
-  "bg-teal-700",
-  "bg-teal-800",
-];
-
 const timeAgo = (date: any) => {
   if (!date) return "Chưa học";
   return "Gần đây";
+};
+
+const LANG_MAP: Record<string, string> = {
+  en: "Anh",
+  zh: "Trung",
+  ja: "Nhật",
+  ko: "Hàn",
+  fr: "Pháp",
+  de: "Đức",
+  es: "Tây Ban Nha",
+  th: "Thái",
+  vi: "Việt",
 };
 
 // SORTABLE SET ITEM
@@ -73,7 +51,12 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
     zIndex: isDragging ? 99 : 1,
   };
 
-  const progress = set.cardCount > 0 ? (set.learnedCount / set.cardCount) * 100 : 0;
+  const cardCount = set.cardCount || 0;
+  const knownCount = set.knownCount || 0;
+  const almostCount = set.almostCount || 0;
+  const knownPct = cardCount > 0 ? (knownCount / cardCount) * 100 : 0;
+  const almostPct = cardCount > 0 ? (almostCount / cardCount) * 100 : 0;
+  const progress = cardCount > 0 ? (set.learnedCount / cardCount) * 100 : 0;
 
   return (
     <div
@@ -134,6 +117,9 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
           {set.isPublic === false ? "Riêng tư" : "Công khai"}
         </span>
         {set.categoryName && <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-600">{set.categoryName}</span>}
+        {set.language && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-600">{LANG_MAP[set.language || "en"] || set.language.toUpperCase()}</span>
+        )}
       </div>
 
       <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 font-medium">
@@ -152,12 +138,18 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
           <span>Tiến độ</span>
           <span>{Math.round(progress)}%</span>
         </div>
-        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden mb-4">
-          <div className={`h-full rounded-full transition-all ${progress === 100 && set.cardCount > 0 ? "bg-teal-500" : "bg-blue-500"}`} style={{ width: `${progress}%` }}></div>
+        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden mb-3 flex">
+          <div className="bg-green-500 h-full transition-all" style={{ width: `${knownPct}%` }} title={`Đã nhớ: ${knownCount}`}></div>
+          <div className="bg-yellow-400 h-full transition-all" style={{ width: `${almostPct}%` }} title={`Gần nhớ: ${almostCount}`}></div>
+        </div>
+        <div className="flex justify-between text-[10px] font-semibold text-gray-500 mb-4 px-1">
+          <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-500"></div> Đã nhớ ({knownCount})</div>
+          <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-yellow-400"></div> Gần nhớ ({almostCount})</div>
+          <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-gray-200"></div> Chưa nhớ ({Math.max(0, cardCount - knownCount - almostCount)})</div>
         </div>
         <button className="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors pointer-events-none">
           <Play className="w-4 h-4 fill-current" />
-          {set.cardCount === 0 ? "Thêm thẻ" : progress === 0 ? "Bắt đầu học" : progress === 100 ? "Ôn tập lại" : "Tiếp tục học"}
+          {cardCount === 0 ? "Thêm thẻ" : progress === 0 ? "Bắt đầu học" : progress === 100 ? "Ôn tập lại" : "Tiếp tục học"}
         </button>
       </div>
 
@@ -266,6 +258,7 @@ export function Flashcards() {
   const [newDesc, setNewDesc] = useState("");
   const [selectedColor, setSelectedColor] = useState("bg-blue-500");
   const [setIsPublic, setSetIsPublic] = useState(true);
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
 
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get("tab") as "mine" | "builtin" | "public") || "mine";
@@ -479,6 +472,7 @@ export function Flashcards() {
     setNewTitle("");
     setNewDesc("");
     setSetIsPublic(true);
+    setSelectedLanguage("en");
     setSelectedCategoryId(activeCategoryId !== "all" ? activeCategoryId : "");
     setTargetFolderIdForNewSet(folderId);
     setSelectedColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
@@ -498,9 +492,9 @@ export function Flashcards() {
 
     let res;
     if (editingSet) {
-      res = await updateSet(editingSet.id, { title: newTitle, description: newDesc, color: selectedColor, isPublic: setIsPublic, categoryId: selectedCategoryId || null });
+      res = await updateSet(editingSet.id, { title: newTitle, description: newDesc, color: selectedColor, isPublic: setIsPublic, categoryId: selectedCategoryId || null, language: selectedLanguage });
     } else {
-      res = await createSet(newTitle, newDesc, selectedColor, setIsPublic, selectedCategoryId || null);
+      res = await createSet(newTitle, newDesc, selectedColor, setIsPublic, selectedCategoryId || null, selectedLanguage);
       if (res && targetFolderIdForNewSet) {
         await updateSet(res.id, { folderId: targetFolderIdForNewSet });
       }
@@ -875,6 +869,9 @@ export function Flashcards() {
                     </span>
                     <span className="rounded-full bg-gray-50 px-2.5 py-1 text-gray-600">{set.cardCount || 0} thẻ</span>
                     {set.categoryName && <span className="rounded-full bg-blue-50 px-2.5 py-1 text-blue-600">{set.categoryName}</span>}
+                    {set.language && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 text-orange-600">{LANG_MAP[set.language || "en"] || set.language.toUpperCase()}</span>
+                    )}
                   </div>
                   {set.creator?.displayName && <p className="mb-5 text-xs font-semibold text-gray-400">Tác giả: {set.creator.displayName}</p>}
                   <div className="mt-auto grid grid-cols-2 gap-3">
@@ -926,6 +923,7 @@ export function Flashcards() {
                     setSelectedColor(s.color || "bg-blue-500");
                     setSetIsPublic(s.isPublic !== false);
                     setSelectedCategoryId(s.categoryId || "");
+                    setSelectedLanguage(s.language || "en");
                     setIsModalOpen(true);
                   }}
                   onDeleteSet={(s: any) => setSetToDelete(s)}
@@ -983,6 +981,7 @@ export function Flashcards() {
                             setSelectedColor(s.color || "bg-blue-500");
                             setSetIsPublic(s.isPublic !== false);
                             setSelectedCategoryId(s.categoryId || "");
+                            setSelectedLanguage(s.language || "en");
                             setIsModalOpen(true);
                           }}
                           onDelete={(s: any) => setSetToDelete(s)}
@@ -1102,6 +1101,7 @@ export function Flashcards() {
                   setNewDesc(contextMenu.item.description || "");
                   setSelectedColor(contextMenu.item.color || "bg-blue-500");
                   setSetIsPublic(contextMenu.item.isPublic !== false);
+                  setSelectedLanguage(contextMenu.item.language || "en");
                   setIsModalOpen(true);
                   setContextMenu(null);
                 }}
@@ -1122,223 +1122,52 @@ export function Flashcards() {
           )}
         </div>
       )}
+      {/* --- Modals --- */}
+      <CreateEditFolderModal
+        isOpen={isFolderModalOpen}
+        onClose={() => setIsFolderModalOpen(false)}
+        editingFolder={editingFolder}
+        newFolderName={newFolderName}
+        setNewFolderName={setNewFolderName}
+        newFolderColor={newFolderColor}
+        setNewFolderColor={setNewFolderColor}
+        handleCreateOrUpdateFolder={handleCreateOrUpdateFolder}
+        loading={loading}
+      />
 
-      {isFolderModalOpen && (
-        <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">{editingFolder ? "Sửa thư mục" : "Tạo Folder mới"}</h2>
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Tên thư mục</label>
-                <input
-                  type="text"
-                  autoFocus
-                  value={newFolderName}
-                  onChange={(e) => setNewFolderName(e.target.value)}
-                  placeholder="VD: Tiếng Anh giao tiếp"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
-                  onKeyDown={(e) => {
-                    e.key === "Enter" && handleCreateOrUpdateFolder();
-                  }}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Màu sắc</label>
-                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
-                  {COLORS.map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => setNewFolderColor(c)}
-                      className={cn("w-6 h-6 rounded-full shadow-sm transition-transform flex-shrink-0", c, newFolderColor === c ? "ring-2 ring-offset-2 ring-blue-500 scale-125" : "hover:scale-110")}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => setIsFolderModalOpen(false)} className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl transition-colors">
-                Hủy
-              </button>
-              <button onClick={handleCreateOrUpdateFolder} disabled={loading} className="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl transition-colors shadow-md">
-                Hoàn tất
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteFolderModal folderToDelete={folderToDelete} onClose={() => setFolderToDelete(null)} handleDeleteFolderConfirmed={handleDeleteFolderConfirmed} loading={loading} />
 
-      {/* --- Delete Folder Modal --- */}
-      {folderToDelete && (
-        <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
-              <Trash2 className="w-8 h-8" />
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Xóa Folder này?</h2>
+      <CreateEditSetModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        editingSet={editingSet}
+        newTitle={newTitle}
+        setNewTitle={setNewTitle}
+        newDesc={newDesc}
+        setNewDesc={setNewDesc}
+        selectedCategoryId={selectedCategoryId}
+        setSelectedCategoryId={setSelectedCategoryId}
+        categories={categories}
+        setIsPublic={setIsPublic}
+        setSetIsPublic={setSetIsPublic}
+        isVip={isVip}
+        selectedColor={selectedColor}
+        setSelectedColor={setSelectedColor}
+        selectedLanguage={selectedLanguage}
+        setSelectedLanguage={setSelectedLanguage}
+        handleCreateOrUpdateSet={handleCreateOrUpdateSet}
+        loading={loading}
+      />
 
-            {folderToDelete.step === 1 ? (
-              <p className="text-gray-500 text-sm mb-6">
-                Bạn đang xóa folder <strong className="text-gray-700">{folderToDelete.folder.name}</strong>.<br />
-                Các bộ thẻ bên trong sẽ được chuyển ra ngoài (không bị xóa).
-              </p>
-            ) : (
-              <p className="text-gray-500 text-sm mb-6">
-                Xóa folder <strong className="text-gray-700">{folderToDelete.folder.name}</strong> và <strong className="text-red-600">TẤT CẢ</strong> bộ thẻ bên trong.
-                <br />
-                Hành động này không thể hoàn tác!
-              </p>
-            )}
-
-            <div className="flex gap-3">
-              <button onClick={() => setFolderToDelete(null)} className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl transition-colors">
-                Hủy
-              </button>
-              <button
-                onClick={() => handleDeleteFolderConfirmed(folderToDelete.folder.id, folderToDelete.step === 2)}
-                disabled={loading}
-                className="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl transition-colors"
-              >
-                Xóa vĩnh viễn
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- Set Create/Edit Modal --- */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">{editingSet ? "Sửa bộ thẻ" : "Tạo bộ thẻ mới"}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
-                ✕
-              </button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Tên bộ thẻ</label>
-                <input
-                  type="text"
-                  value={newTitle}
-                  autoFocus
-                  onKeyDown={(e) => e.key === "Enter" && handleCreateOrUpdateSet()}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Ví dụ: Từ vựng IELTS..."
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Mô tả (Tùy chọn)</label>
-                <textarea
-                  value={newDesc}
-                  onChange={(e) => setNewDesc(e.target.value)}
-                  placeholder="Mô tả về bộ thẻ này..."
-                  rows={3}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors resize-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Đề mục</label>
-                <select
-                  value={selectedCategoryId}
-                  onChange={(e) => setSelectedCategoryId(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
-                >
-                  <option value="">Không chọn đề mục</option>
-                  {categories.map((category: any) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Quyền riêng tư</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setSetIsPublic(true)}
-                    className={`rounded-2xl border p-4 text-left transition-all ${setIsPublic ? "border-emerald-400 bg-emerald-50 ring-4 ring-emerald-100" : "border-gray-200 bg-gray-50 hover:bg-white"}`}
-                  >
-                    <div className="flex items-center gap-2 font-extrabold text-gray-900">
-                      <Globe2 className="w-5 h-5 text-emerald-600" /> Công khai
-                    </div>
-                    <p className="mt-1 text-xs font-medium text-gray-500">Mặc định. Mọi người có thể xem và lưu bộ thẻ này.</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!isVip) {
-                        toast.error("Bộ thẻ riêng tư chỉ dành cho tài khoản VIP.");
-                        return;
-                      }
-                      setSetIsPublic(false);
-                    }}
-                    className={`rounded-2xl border p-4 text-left transition-all ${!setIsPublic ? "border-slate-400 bg-slate-100 ring-4 ring-slate-100" : "border-gray-200 bg-gray-50 hover:bg-white"} ${!isVip ? "opacity-75" : ""}`}
-                  >
-                    <div className="flex items-center gap-2 font-extrabold text-gray-900">
-                      <Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}
-                    </div>
-                    <p className="mt-1 text-xs font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo bộ thẻ riêng tư.</p>
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Màu sắc</label>
-                <div className="flex flex-wrap gap-2">
-                  {COLORS.map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => setSelectedColor(c)}
-                      className={cn("w-6 h-6 rounded-full shadow-sm transition-transform", c, selectedColor === c ? "ring-2 ring-offset-2 ring-blue-500 scale-125" : "hover:scale-110")}
-                    />
-                  ))}
-                </div>
-              </div>
-              <button
-                onClick={handleCreateOrUpdateSet}
-                disabled={loading}
-                className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
-              >
-                {loading ? "Đang xử lý..." : "Hoàn tất"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Set Confirmation Modal */}
-      {setToDelete && (
-        <div className="fixed inset-0 bg-gray-900/50 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
-              <Trash2 className="w-8 h-8" />
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Xóa bộ thẻ này?</h2>
-            <p className="text-gray-500 text-sm mb-6">
-              Bạn có chắc chắn muốn xóa bộ thẻ <strong className="text-gray-700">{setToDelete.title}</strong>?<br />
-              <br />
-              <span className="text-red-500 font-medium">Lưu ý: Tất cả từ vựng bên trong bộ thẻ này cũng sẽ bị xóa vĩnh viễn.</span>
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setSetToDelete(null)} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">
-                Hủy
-              </button>
-              <button
-                onClick={async () => {
-                  await deleteSet(setToDelete.id);
-                  setSetToDelete(null);
-                }}
-                disabled={loading}
-                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors shadow-sm disabled:opacity-50"
-              >
-                {loading ? "Đang xóa..." : "Xóa vĩnh viễn"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteSetModal
+        setToDelete={setToDelete}
+        onClose={() => setSetToDelete(null)}
+        handleDeleteSet={async (id: string) => {
+          await deleteSet(id);
+          setSetToDelete(null);
+        }}
+        loading={loading}
+      />
     </div>
   );
 }

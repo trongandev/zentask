@@ -357,7 +357,38 @@ router.get(
   "/list",
   asyncHandler(async (req, res) => {
     const sets = await FlashcardSet.find({ userId: req.user.uid }).sort({ createdAt: -1 }).lean();
-    res.json(sets.map((s) => ({ id: s._id, ...s })));
+    
+    const setIds = sets.map((s) => s._id);
+    const progressDocs = await FlashcardProgress.find({
+      userId: req.user.uid,
+      setId: { $in: setIds },
+    }).lean();
+
+    const progressBySet = {};
+    for (const doc of progressDocs) {
+      if (!progressBySet[doc.setId]) {
+        progressBySet[doc.setId] = { known: 0, almost: 0 };
+      }
+      if (doc.easeFactor >= 2.5 && doc.repetitions >= 2) {
+        progressBySet[doc.setId].known += 1;
+      } else if (doc.repetitions >= 1 || doc.easeFactor >= 1.8) {
+        progressBySet[doc.setId].almost += 1;
+      }
+    }
+
+    const enhancedSets = sets.map((s) => {
+      const p = progressBySet[s._id] || { known: 0, almost: 0 };
+      const unknownCount = Math.max(0, (s.cardCount || 0) - p.known - p.almost);
+      return {
+        id: s._id,
+        ...s,
+        knownCount: p.known,
+        almostCount: p.almost,
+        unknownCount,
+      };
+    });
+
+    res.json(enhancedSets);
   }),
 );
 
@@ -386,8 +417,11 @@ router.get(
 router.post(
   "/set",
   asyncHandler(async (req, res) => {
-    const { title, description = "", color = "bg-blue-500", isPublic = true, categoryId = null } = req.body;
+    const { title, description = "", color = "bg-blue-500", isPublic = true, categoryId = null, language = "en" } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required" });
+
+    const VALID_LANGUAGES = ["en", "zh", "ko", "ja", "de", "fr", "es", "th"];
+    const safeLanguage = VALID_LANGUAGES.includes(language) ? language : "en";
 
     const safeTitle = await cleanAndValidatePublicText(title, "Tên bộ flashcard", { maxLength: 120 });
     const safeDescription = await cleanAndValidatePublicText(description || "", "Mô tả bộ flashcard", { maxLength: 600 });
@@ -407,6 +441,7 @@ router.post(
       title: safeTitle,
       description: safeDescription,
       color,
+      language: safeLanguage,
       categoryId: safeCategoryId,
       categoryName,
       isPublic: publicFlag,
@@ -430,7 +465,7 @@ router.patch(
   "/set/:setId",
   asyncHandler(async (req, res) => {
     const { setId } = req.params;
-    const { title, description, color, folderId, categoryId, order, isPublic } = req.body;
+    const { title, description, color, folderId, categoryId, order, isPublic, language } = req.body;
 
     const set = await FlashcardSet.findById(setId);
     if (!set || set.userId.toString() !== req.user.uid) {
@@ -455,6 +490,10 @@ router.patch(
     }
     if (order !== undefined) set.order = order;
     if (isPublic !== undefined) set.isPublic = await normalizePublicFlag(req.user.uid, isPublic);
+    if (language !== undefined) {
+      const VALID_LANGUAGES = ["en", "zh", "ko", "ja", "de", "fr", "es", "th"];
+      if (VALID_LANGUAGES.includes(language)) set.language = language;
+    }
 
     await set.save();
     res.json({
@@ -468,6 +507,7 @@ router.patch(
         categoryName: set.categoryName,
         order: set.order,
         isPublic: set.isPublic,
+        language: set.language,
       },
     });
   }),
@@ -604,6 +644,14 @@ router.post(
       message: "Bạn đã tạo đủ 30 từ flashcard hôm nay. Nâng VIP để tạo không giới hạn.",
     });
 
+    // Detect language from the target set (default: English)
+    let targetLang = "en";
+    let targetSet = null;
+    if (targetSetId) {
+      targetSet = await FlashcardSet.findById(targetSetId).lean();
+      if (targetSet && targetSet.language) targetLang = targetSet.language;
+    }
+
     const lowercaseTerm = safeTerm.trim().toLowerCase();
 
     const saveToUserSet = async (vocabData) => {
@@ -616,6 +664,7 @@ router.post(
           await Flashcard.create({
             setId: targetSetId,
             userId: req.user.uid,
+            language: targetLang,
             term: vocabData.term,
             phonetic: vocabData.phonetic || "",
             translation: vocabData.translation,
@@ -628,7 +677,8 @@ router.post(
       }
     };
 
-    const vocabDoc = await Vocabulary.findOne({ term: lowercaseTerm }).lean();
+    // Search cache by term AND language to prevent cross-language collision
+    const vocabDoc = await Vocabulary.findOne({ term: lowercaseTerm, language: targetLang }).lean();
 
     if (vocabDoc) {
       await saveToUserSet(vocabDoc);
@@ -645,14 +695,84 @@ router.post(
       return res.status(500).json({ error: "No AI API Keys configured" });
     }
 
+    // Build language-specific AI prompt
+    const LANGUAGE_PROMPTS = {
+      en: {
+        name: "tiếng Anh",
+        dict: "Anh-Việt",
+        termInstruction: "nếu là tiếng việt thì chuyển nó về tiếng anh (viết hoa chữ cái đầu tiên nhé)",
+        phoneticInstruction: "Phiên âm quốc tế (IPA) của từ tiếng Anh này.",
+        notesInstruction: "Ghi chú ngữ pháp hoặc cách dùng từ (viết bằng tiếng Việt).",
+        exampleInstruction: 'Mảng gồm đúng 3 câu ví dụ. Mỗi ví dụ có "en" (câu tiếng Anh chứa từ đó) và "vi" (câu dịch sang tiếng Việt).',
+      },
+      zh: {
+        name: "tiếng Trung",
+        dict: "Trung-Việt",
+        termInstruction: "từ/cụm từ tiếng Trung (chữ Hán Giản thể, bao gồm cả Pinyin nếu cần)",
+        phoneticInstruction: "Phiên âm Pinyin của từ tiếng Trung này.",
+        notesInstruction: "Ghi chú ngữ pháp hoặc cách dùng từ (viết bằng tiếng Việt).",
+        exampleInstruction: 'Mảng gồm đúng 3 câu ví dụ. Mỗi ví dụ có "en" (câu tiếng Trung chứa từ đó) và "vi" (câu dịch sang tiếng Việt).',
+      },
+      ko: {
+        name: "tiếng Hàn",
+        dict: "Hàn-Việt",
+        termInstruction: "từ/cụm từ tiếng Hàn (chữ Hangul)",
+        phoneticInstruction: "Phiên âm La-tinh hóa (Romanization) của từ tiếng Hàn này.",
+        notesInstruction: "Ghi chú ngữ pháp hoặc cách dùng từ (viết bằng tiếng Việt).",
+        exampleInstruction: 'Mảng gồm đúng 3 câu ví dụ. Mỗi ví dụ có "en" (câu tiếng Hàn chứa từ đó) và "vi" (câu dịch sang tiếng Việt).',
+      },
+      ja: {
+        name: "tiếng Nhật",
+        dict: "Nhật-Việt",
+        termInstruction: "từ/cụm từ tiếng Nhật (có thể dùng cả Kanji, Hiragana/Katakana)",
+        phoneticInstruction: "Cách đọc Romaji (phiên âm La-tinh hóa) của từ tiếng Nhật này.",
+        notesInstruction: "Ghi chú ngữ pháp hoặc cách dùng từ (viết bằng tiếng Việt).",
+        exampleInstruction: 'Mảng gồm đúng 3 câu ví dụ. Mỗi ví dụ có "en" (câu tiếng Nhật chứa từ đó) và "vi" (câu dịch sang tiếng Việt).',
+      },
+      de: {
+        name: "tiếng Đức",
+        dict: "Đức-Việt",
+        termInstruction: "từ/cụm từ tiếng Đức (nếu là danh từ thì viết hoa chữ cái đầu)",
+        phoneticInstruction: "Phiên âm IPA của từ tiếng Đức này.",
+        notesInstruction: "Ghi chú ngữ pháp hoặc cách dùng từ (viết bằng tiếng Việt).",
+        exampleInstruction: 'Mảng gồm đúng 3 câu ví dụ. Mỗi ví dụ có "en" (câu tiếng Đức chứa từ đó) và "vi" (câu dịch sang tiếng Việt).',
+      },
+      fr: {
+        name: "tiếng Pháp",
+        dict: "Pháp-Việt",
+        termInstruction: "từ/cụm từ tiếng Pháp",
+        phoneticInstruction: "Phiên âm IPA của từ tiếng Pháp này.",
+        notesInstruction: "Ghi chú ngữ pháp hoặc cách dùng từ (viết bằng tiếng Việt).",
+        exampleInstruction: 'Mảng gồm đúng 3 câu ví dụ. Mỗi ví dụ có "en" (câu tiếng Pháp chứa từ đó) và "vi" (câu dịch sang tiếng Việt).',
+      },
+      es: {
+        name: "tiếng Tây Ban Nha",
+        dict: "Tây Ban Nha-Việt",
+        termInstruction: "từ/cụm từ tiếng Tây Ban Nha",
+        phoneticInstruction: "Phiên âm IPA của từ tiếng Tây Ban Nha này.",
+        notesInstruction: "Ghi chú ngữ pháp hoặc cách dùng từ (viết bằng tiếng Việt).",
+        exampleInstruction: 'Mảng gồm đúng 3 câu ví dụ. Mỗi ví dụ có "en" (câu tiếng Tây Ban Nha chứa từ đó) và "vi" (câu dịch sang tiếng Việt).',
+      },
+      th: {
+        name: "tiếng Thái",
+        dict: "Thái-Việt",
+        termInstruction: "từ/cụm từ tiếng Thái (chữ Thái)",
+        phoneticInstruction: "Phiên âm La-tinh hóa của từ tiếng Thái này.",
+        notesInstruction: "Ghi chú ngữ pháp hoặc cách dùng từ (viết bằng tiếng Việt).",
+        exampleInstruction: 'Mảng gồm đúng 3 câu ví dụ. Mỗi ví dụ có "en" (câu tiếng Thái chứa từ đó) và "vi" (câu dịch sang tiếng Việt).',
+      },
+    };
+
+    const langConfig = LANGUAGE_PROMPTS[targetLang] || LANGUAGE_PROMPTS.en;
+
     const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
-    const prompt = `Hãy đóng vai một từ điển Anh-Việt. Từ cần tra cứu là: "${safeTerm}".
+    const prompt = `Hãy đóng vai một từ điển ${langConfig.dict}. Từ/cụm từ cần tra cứu là: "${safeTerm}".
 Vui lòng trả về kết quả với các thông tin sau:
-- term: nếu là tiếng việt thì chuyển nó về tiếng anh (viết hoa chữ cái đầu tiên nhé)
-- phonetic: Phiên âm quốc tế (IPA) của từ tiếng Anh này.
+- term: ${langConfig.termInstruction}
+- phonetic: ${langConfig.phoneticInstruction}
 - translation: Nghĩa tiếng Việt của từ này.
-- notes: Ghi chú ngữ pháp hoặc cách dùng từ (viết bằng tiếng Việt).
-- examples: Mảng gồm đúng 3 câu ví dụ. Mỗi ví dụ có "en" (câu tiếng Anh chứa từ đó) và "vi" (câu dịch sang tiếng Việt).`;
+- notes: ${langConfig.notesInstruction}
+- examples: ${langConfig.exampleInstruction}`;
 
     let generatedData = null;
     for (const { index, key } of shuffledKeys) {
@@ -710,7 +830,12 @@ Vui lòng trả về kết quả với các thông tin sau:
     // AI generation itself is not a public post. Do not block normal learning words here,
     // because profanity libraries can easily create false positives for vocabulary prompts.
     // If the target set is public, saveToUserSet() will run public-content validation before writing.
-    await Vocabulary.findOneAndUpdate({ term: lowercaseTerm }, { $setOnInsert: newVocab }, { upsert: true, new: true });
+    // Use findOneAndUpdate with { term, language } as the unique key to avoid cross-language collision
+    await Vocabulary.findOneAndUpdate(
+      { term: lowercaseTerm, language: targetLang },
+      { $setOnInsert: { ...newVocab, language: targetLang } },
+      { upsert: true, new: true }
+    );
     await saveToUserSet(newVocab);
 
     res.json({ source: "ai", ...newVocab, ok: true, message: "Lưu thành công!" });
@@ -862,7 +987,7 @@ router.post(
       results.push({ cardId, ...progressData });
     }
 
-    const taskResult = await incrementDailyTask(req.user.uid, "learn_flashcards", updates.length);
+    const taskResult = await incrementDailyTask(req.user.uid, "learn_past", updates.length);
     let xpResult = null;
     if (taskResult.success && taskResult.xpToAdd > 0) {
       xpResult = await addXpToUser(req.user.uid, taskResult.xpToAdd);
@@ -882,7 +1007,7 @@ router.post(
       success: true,
       results,
       xpResult,
-      taskProgress: taskResult.success ? { learn_flashcards: taskResult.progress } : {},
+      taskProgress: taskResult.success ? { learn_past: taskResult.progress } : {},
     });
   }),
 );

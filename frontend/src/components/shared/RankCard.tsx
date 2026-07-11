@@ -9,15 +9,18 @@ interface RankCardProps {
   showButton?: boolean;
   buttonText?: string;
   className?: string;
+  user?: any;
 }
 
-export function RankCard({ showButton = false, buttonText = "Bắt đầu đấu hạng", className }: RankCardProps) {
-  const { user } = useAuth();
+export function RankCard({ showButton = false, buttonText = "Bắt đầu đấu hạng", className, user: propUser }: RankCardProps) {
+  const { user: authUser } = useAuth();
   const navigate = useNavigate();
 
-  const rankId = user?.rankId || 1;
-  const tier = user?.tier || 3;
-  const stars = user?.stars || 0;
+  const rankUser = propUser || authUser;
+
+  const rankId = rankUser?.rankId || 1;
+  const tier = rankUser?.tier || 3;
+  const stars = rankUser?.stars || 0;
 
   const rankConfig = RANK_TOPIC_CONFIG[rankId as keyof typeof RANK_TOPIC_CONFIG];
   

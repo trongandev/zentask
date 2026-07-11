@@ -7,9 +7,10 @@ interface PracticeSidebarProps {
   activeMode: PracticeMode;
   onChangeMode: (mode: PracticeMode) => void;
   cardCount: number;
+  language?: string;
 }
 
-export function PracticeSidebar({ activeMode, onChangeMode, cardCount }: PracticeSidebarProps) {
+export function PracticeSidebar({ activeMode, onChangeMode, cardCount, language = "en" }: PracticeSidebarProps) {
   const MODES = [
     { id: "flashcard", title: "Thẻ lật", icon: Layers, desc: "Ôn tập qua thẻ lật truyền thống", minCards: 1 },
     { id: "quiz", title: "Trắc nghiệm", icon: HelpCircle, desc: "Chọn 1 đáp án đúng trong 4", minCards: 4 },
@@ -31,12 +32,19 @@ export function PracticeSidebar({ activeMode, onChangeMode, cardCount }: Practic
 
       <div className="p-4 flex-1 overflow-y-auto space-y-3">
         {MODES.map((mode) => {
-          const isLocked = cardCount < mode.minCards;
+          let isLocked = cardCount < mode.minCards;
+          let lockReason = `Cần ít nhất ${mode.minCards} từ để mở khóa`;
+
+          if (mode.id === "pronunciation" && language !== "en") {
+            isLocked = true;
+            lockReason = "Tính năng Phát âm hiện tại chỉ hỗ trợ bộ thẻ Tiếng Anh";
+          }
+
           const isActive = activeMode === mode.id;
           const Icon = mode.icon;
 
           return (
-            <div key={mode.id} title={isLocked ? `Cần ít nhất ${mode.minCards} từ để mở khóa` : undefined} className="w-full">
+            <div key={mode.id} title={isLocked ? lockReason : undefined} className="w-full">
               <button
                 disabled={isLocked}
                 onClick={() => onChangeMode(mode.id as PracticeMode)}

@@ -61,6 +61,7 @@ export const FlashcardSchema = new Schema({
   setId: { type: Schema.Types.ObjectId, ref: 'FlashcardSet', required: true },
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   term: { type: String, required: true },
+  language: { type: String, default: 'en' }, // en, zh, ko, ja, de, fr, es, th
   phonetic: { type: String, default: "" },
   translation: { type: String, required: true },
   examples: { type: Schema.Types.Mixed, default: [] },
@@ -95,6 +96,7 @@ export const FlashcardSetSchema = new Schema({
   categoryName: { type: String, default: "" },
   title: { type: String, required: true },
   description: { type: String, default: "" },
+  language: { type: String, default: 'en' }, // en, zh, ko, ja, de, fr, es, th
   cardCount: { type: Number, default: 0 },
   learnedCount: { type: Number, default: 0 },
   lastStudied: { type: Date },
@@ -107,11 +109,13 @@ export const FlashcardSetSchema = new Schema({
 
 export const VocabularySchema = new Schema({
   term: { type: String, required: true, lowercase: true },
+  language: { type: String, default: 'en' }, // en, zh, ko, ja, de, fr, es, th
   phonetic: { type: String, default: "" },
   translation: { type: String, required: true },
   notes: { type: String, default: "" },
   examples: { type: Schema.Types.Mixed, default: [] },
 }, { timestamps: true });
+VocabularySchema.index({ term: 1, language: 1 }, { unique: true });
 
 export const LeaderboardWeeklySchema = new Schema({
   uid: { type: Schema.Types.ObjectId, ref: 'User', required: true },
