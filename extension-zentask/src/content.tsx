@@ -583,3 +583,38 @@ const init = () => {
 };
 
 init();
+
+// Lắng nghe sự kiện từ trang web Zentask (không cần Extension ID cố định)
+window.addEventListener("message", (event) => {
+  if (event.source !== window) return;
+
+  if (event.data && event.data.type === "ZENTASK_SYNC_AUTH") {
+    chrome.runtime.sendMessage(
+      {
+        action: "SYNC_FIREBASE_AUTH_FROM_CONTENT",
+        token: event.data.token,
+        user: event.data.user,
+      },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          console.error("Lỗi khi đồng bộ auth sang background:", chrome.runtime.lastError);
+        } else {
+          console.log("Đã đồng bộ auth thành công sang background!", response);
+        }
+      }
+    );
+  } else if (event.data && event.data.type === "ZENTASK_SYNC_LOGOUT") {
+    chrome.runtime.sendMessage(
+      {
+        action: "SYNC_FIREBASE_LOGOUT_FROM_CONTENT",
+      },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          console.error("Lỗi khi đồng bộ logout sang background:", chrome.runtime.lastError);
+        } else {
+          console.log("Đã đồng bộ logout thành công sang background!", response);
+        }
+      }
+    );
+  }
+});

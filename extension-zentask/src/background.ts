@@ -82,6 +82,13 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       });
       return true;
     }
+  } else if (request.action === "SYNC_FIREBASE_LOGOUT_FROM_CONTENT") {
+    console.log("Received logout request from content script");
+    chrome.storage.local.clear().then(() => {
+      console.log("Local storage cleared for logout via content script");
+      sendResponse({ success: true });
+    });
+    return true;
   } else if (request.action === "POPUP_OPENED") {
     fetchTokens().then((result) => {
       sendResponse(result);
