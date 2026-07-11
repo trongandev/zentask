@@ -103,7 +103,13 @@ app.use((req, res, next) => {
     if (bodyClone.oldPassword) delete bodyClone.oldPassword;
     if (bodyClone.newPassword) delete bodyClone.newPassword;
 
-    let clientIp = req.headers["x-forwarded-for"] || req.ip || req.socket.remoteAddress || "";
+    let clientIp = 
+      req.headers["cf-connecting-ip"] || 
+      req.headers["x-real-ip"] || 
+      req.headers["x-forwarded-for"] || 
+      req.ip || 
+      req.socket.remoteAddress || 
+      "";
     if (typeof clientIp === "string") {
       clientIp = clientIp.split(",")[0].trim();
       if (clientIp.startsWith("::ffff:")) {
