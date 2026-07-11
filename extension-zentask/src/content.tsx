@@ -294,29 +294,32 @@ const ContentApp = () => {
     });
 
     try {
-      const res = await etcService.createFlashcardWithAI(
-        "/api/flashcard/generate-ai",
+      chrome.runtime.sendMessage(
         {
-          term: selectedText,
-          setId: listFlashcardId.id,
+          action: "GENERATE_FLASHCARD_AI",
+          payload: {
+            term: selectedText,
+            setId: listFlashcardId.id || listFlashcardId._id || listFlashcardId,
+          },
         },
-        userToken,
+        (res) => {
+          if (res && res.ok !== false) {
+            setToast({
+              show: true,
+              message: `Lưu thành công từ ${selectedText} vào thư mục ${listFlashcardId.title || "đã chọn"}`,
+              type: "success",
+            });
+          } else {
+            setToast({
+              show: true,
+              message: res?.message || "Có lỗi từ server",
+              type: "error",
+            });
+          }
+          setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);
+          setIsSaving(false);
+        }
       );
-
-      if (res && res.ok !== false) {
-        setToast({
-          show: true,
-          message: `Lưu thành công từ ${selectedText} vào thư mục ${listFlashcardId.title}`,
-          type: "success",
-        });
-      } else {
-        setToast({
-          show: true,
-          message: res?.message || "Có lỗi từ server",
-          type: "error",
-        });
-      }
-      setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);
     } catch (e: any) {
       console.error("Save to flashcard failed", e);
       setToast({
@@ -325,7 +328,6 @@ const ContentApp = () => {
         type: "error",
       });
       setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 4000);
-    } finally {
       setIsSaving(false);
     }
   };
@@ -543,7 +545,7 @@ const ContentApp = () => {
                 <div>
                   <div className="font-semibold text-gray-700 text-xs">{userInfo.displayName || "User"}</div>
                   <div className="text-xs text-gray-500 flex items-center gap-1 line-clamp-1">
-                    <FolderHeart size={14} /> {listFlashcardId.title}
+                    <FolderHeart size={14} /> {listFlashcardId?.title}
                   </div>
                 </div>
               </div>
@@ -601,7 +603,7 @@ window.addEventListener("message", (event) => {
         } else {
           console.log("Đã đồng bộ auth thành công sang background!", response);
         }
-      }
+      },
     );
   } else if (event.data && event.data.type === "ZENTASK_SYNC_LOGOUT") {
     chrome.runtime.sendMessage(
@@ -614,7 +616,7 @@ window.addEventListener("message", (event) => {
         } else {
           console.log("Đã đồng bộ logout thành công sang background!", response);
         }
-      }
+      },
     );
   }
 });

@@ -306,25 +306,28 @@ const YoutubeDualSub = () => {
       }
       showToast("Đang lưu...", "waiting");
 
-      const res = await etcService.createFlashcardWithAI(
-        "/flashcards/create-ai",
+      chrome.runtime.sendMessage(
         {
-          word: selectedWordInfo?.word,
-          list_flashcard_id: list_flashcard_id?._id,
-          language: list_flashcard_id?.language || "english",
+          action: "GENERATE_FLASHCARD_AI",
+          payload: {
+            term: selectedWordInfo?.word,
+            setId: list_flashcard_id?._id || list_flashcard_id?.id || list_flashcard_id,
+          },
         },
-        token,
+        (res) => {
+          if (res && res.ok !== false) {
+            showToast("Lưu Flashcard thành công!", "success");
+          } else {
+            showToast(res?.message || "Lưu thất bại", "error");
+          }
+          setIsSavingWord(false);
+        }
       );
-      if (res && res.ok !== false) {
-        showToast("Lưu Flashcard thành công!", "success");
-      } else {
-        showToast("Lưu thất bại", "error");
-      }
     } catch (e: any) {
       console.error(e);
       showToast(e.message, "error");
+      setIsSavingWord(false);
     }
-    setIsSavingWord(false);
   };
 
   const handleSaveBookmark = async (e: React.MouseEvent) => {

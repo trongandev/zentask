@@ -70,8 +70,8 @@ export default function App() {
         setListFlashcardId("");
         setUser(null);
         setBookmarks([]);
-        setFrom("vi");
-        setTo("en");
+        setFrom("auto");
+        setTo("vi");
       } else {
         setUserToken(response.result.token);
         setListFlashcard(response.result.list_flashcard);
@@ -148,34 +148,35 @@ export default function App() {
     });
 
     try {
-      const res = await etcService.createFlashcardWithAI(
-        "/flashcards/create-ai",
+      chrome.runtime.sendMessage(
         {
-          word: inputFrom,
-          list_flashcard_id: listFlashcardId._id,
-          language: listFlashcardId?.language,
+          action: "GENERATE_FLASHCARD_AI",
+          payload: {
+            term: inputFrom,
+            setId: listFlashcardId?._id || listFlashcardId?.id || listFlashcardId,
+          },
         },
-        userToken,
+        (res) => {
+          if (res && res.ok !== false) {
+            toast.success(`Lưu thành công từ "${inputFrom}"`, {
+              id: toastId,
+              position: "bottom-center",
+            });
+          } else {
+            toast.error(res?.message || "Có lỗi từ server", {
+              id: toastId,
+              position: "bottom-center",
+            });
+          }
+          setIsSaving(false);
+        },
       );
-
-      if (res && res.ok !== false) {
-        toast.success(`Lưu thành công từ "${inputFrom}"`, {
-          id: toastId,
-          position: "bottom-center",
-        });
-      } else {
-        toast.error(res?.message || "Có lỗi từ server", {
-          id: toastId,
-          position: "bottom-center",
-        });
-      }
     } catch (e: any) {
       console.error("Save to flashcard failed", e);
       toast.error(e.message || "Kết nối API thất bại", {
         id: toastId,
         position: "bottom-center",
       });
-    } finally {
       setIsSaving(false);
     }
   };
