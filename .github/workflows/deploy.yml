@@ -1,23 +1,23 @@
-name: Deploy to Server
-on:
-    push:
-        branches:
-            - main
+# name: Deploy to Server
+# on:
+#     push:
+#         branches:
+#             - main
 
-jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Deploy via SSH
-              uses: appleboy/ssh-action@v1.0.3
-              with:
-                  host: 52.76.109.226
-                  username: ec2-user
-                  key: ${{ secrets.SSH_PRIVATE_KEY }} # Lưu nội dung file .pem vào GitHub Secret
-                  script: |
-                      set -e
-                      cd /home/quizzet-project
-                      git fetch origin main
-                      git reset --hard origin/main 
-                      npm install --prefix backend
-                      pm2 restart --update-env backend
+# jobs:
+#     deploy:
+#         runs-on: ubuntu-latest
+#         steps:
+#             - name: Deploy via SSH
+#               uses: appleboy/ssh-action@v1.0.3
+#               with:
+#                   host: 52.76.109.226
+#                   username: ec2-user
+#                   key: ${{ secrets.SSH_PRIVATE_KEY }} # Lưu nội dung file .pem vào GitHub Secret
+#                   script: |
+#                       set -e
+#                       cd /home/quizzet-project
+#                       git fetch origin main
+#                       git reset --hard origin/main
+#                       npm install --prefix backend
+#                       pm2 restart --update-env backend
