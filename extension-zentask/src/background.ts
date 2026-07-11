@@ -72,6 +72,16 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       sendResponse({ result });
     });
     return true;
+  } else if (request.action === "SYNC_FIREBASE_AUTH_FROM_CONTENT") {
+    const { token, user } = request;
+    if (token) {
+      chrome.storage.local.set({ token, user }).then(() => {
+        fetchTokens().then((result) => {
+          sendResponse({ success: true, result });
+        });
+      });
+      return true;
+    }
   } else if (request.action === "POPUP_OPENED") {
     fetchTokens().then((result) => {
       sendResponse(result);
@@ -94,7 +104,6 @@ const fetchTokens = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-
     if (response.ok) {
       const listFlashCards = await response.json();
       let list_flashcard_id = null;
@@ -137,6 +146,13 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
       });
       return true; // Báo hiệu async response
     }
+  } else if (request.action === "SYNC_FIREBASE_LOGOUT") {
+    console.log("Received logout request from web app");
+    chrome.storage.local.clear().then(() => {
+      console.log("Local storage cleared for logout");
+      sendResponse({ success: true });
+    });
+    return true; // Báo hiệu async response
   }
 });
 

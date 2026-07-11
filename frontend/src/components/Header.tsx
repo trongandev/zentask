@@ -59,6 +59,18 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
   const handleLogout = async () => {
     try {
       await syncStudyTime();
+      
+      const extensionId = import.meta.env.VITE_EXTENSION_ID;
+      if (extensionId && window.chrome && window.chrome.runtime) {
+        try {
+          window.chrome.runtime.sendMessage(extensionId, {
+            action: "SYNC_FIREBASE_LOGOUT"
+          });
+        } catch (e) {
+          console.error("Extension logout sync error", e);
+        }
+      }
+
       await fetch(`${import.meta.env.VITE_API_BACKEND}/api/auth/logout`, {
         method: "POST",
         credentials: "include",

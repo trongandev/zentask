@@ -151,6 +151,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      // Phát sự kiện postMessage để content script của extension có thể tự bắt (không phụ thuộc ID)
+      if (data.extensionToken) {
+        window.postMessage(
+          {
+            type: "ZENTASK_SYNC_AUTH",
+            token: data.extensionToken,
+            user: data.user,
+          },
+          "*"
+        );
+      }
+
       useConfigStore.getState().setConfigs({
         levels: data.config?.levels || [],
         dailyTasks: data.config?.dailyTasks || [],
