@@ -1,10 +1,12 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { DailyTask, FlashcardSet, Flashcard, Quiz, QuizResult, BotConfig, SystemLog, CommunityPost } from "../models/Schemas.js";
+import { DailyTask, FlashcardSet, Flashcard, Quiz, QuizResult, BotConfig, SystemLog, CommunityPost, BannedIP, AttackerFeedback } from "../models/Schemas.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
+
+
 
 const authenticateAdmin = asyncHandler(async (req, res, next) => {
   const token = req.cookies.session;
@@ -21,6 +23,39 @@ const authenticateAdmin = asyncHandler(async (req, res, next) => {
 
 router.use(verifyToken);
 router.use(authenticateAdmin);
+
+// BANNED IPS CRUD
+router.get("/banned-ips", asyncHandler(async (req, res) => {
+  const ips = await BannedIP.find().sort({ createdAt: -1 }).lean();
+  res.json(ips);
+}));
+
+router.post("/banned-ips", asyncHandler(async (req, res) => {
+  const { ip, reason, isHoneypot } = req.body;
+  if (!ip) return res.status(400).json({ success: false, message: "IP is required." });
+  
+  const existing = await BannedIP.findOne({ ip });
+  if (existing) return res.status(400).json({ success: false, message: "IP already exists." });
+  
+  const newBan = await BannedIP.create({ ip, reason, isHoneypot: isHoneypot ?? true });
+  res.json({ success: true, data: newBan });
+}));
+
+router.delete("/banned-ips/:id", asyncHandler(async (req, res) => {
+  await BannedIP.findByIdAndDelete(req.params.id);
+  res.json({ success: true });
+}));
+
+// ATTACKER FEEDBACKS
+router.get("/attacker-feedbacks", asyncHandler(async (req, res) => {
+  const feedbacks = await AttackerFeedback.find().sort({ createdAt: -1 }).lean();
+  res.json(feedbacks);
+}));
+
+router.delete("/attacker-feedbacks/:id", asyncHandler(async (req, res) => {
+  await AttackerFeedback.findByIdAndDelete(req.params.id);
+  res.json({ success: true });
+}));
 
 // ANALYTICS OVERVIEW
 router.get(

@@ -30,8 +30,9 @@ import { AdminVocabSets } from "./pages/Admin/AdminVocabSets";
 import { AdminVocab } from "./pages/Admin/AdminVocab";
 import { AdminQuizzes } from "./pages/Admin/AdminQuizzes";
 import { AdminQuizHistory } from "./pages/Admin/AdminQuizHistory";
-import { SystemLogs } from "./pages/admin/SystemLogs";
 import { AdminCommunityPosts } from "./pages/Admin/AdminCommunityPosts";
+import { AdminBannedIPs } from "./pages/Admin/AdminBannedIPs";
+import { Honeypot } from "./components/Honeypot";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { TermsOfService } from "./pages/TermsOfService";
 import { useAuth } from "./contexts/AuthContext";
@@ -57,6 +58,7 @@ import Friends from "./pages/Friends";
 import SkillPracticeRoom from "./pages/SkillPracticeRoom";
 import FirstLoginOnboarding from "./components/onboarding/FirstLoginOnboarding";
 import BotConfigPage from "./pages/Admin/BotConfigPage";
+import { SystemLogs } from "./pages/Admin/SystemLogs";
 
 function MainLayout() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(() => {
@@ -192,8 +194,12 @@ function MainLayout() {
 }
 
 function AppContent() {
-  const { user, loading } = useAuth();
+  const { user, loading, isIpBanned } = useAuth();
   const { levelUpData, clearLevelUp } = useUserStore();
+
+  if (isIpBanned) {
+    return <Honeypot />;
+  }
 
   if (loading) {
     return (
@@ -229,6 +235,7 @@ function AppContent() {
           <Route path="bot-config" element={<BotConfigPage />} />
           <Route path="system-logs" element={<SystemLogs />} />
           <Route path="community-posts" element={<AdminCommunityPosts />} />
+          <Route path="banned-ips" element={<AdminBannedIPs />} />
         </Route>
         <Route path="arena" element={<Arena />} />
 

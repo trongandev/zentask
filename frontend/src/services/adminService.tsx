@@ -284,5 +284,76 @@ export const adminService = {
       toast.error(error.message);
       return false;
     }
+  },
+
+  // Banned IPs
+  getBannedIps: async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/banned-ips`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch banned IPs");
+      return await res.json();
+    } catch (error: any) {
+      toast.error(error.message);
+      return [];
+    }
+  },
+
+  addBannedIp: async (ip: string, reason: string, isHoneypot: boolean) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/banned-ips`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ ip, reason, isHoneypot })
+      });
+      if (!res.ok) throw new Error("Failed to ban IP");
+      toast.success("Đã cấm IP thành công!");
+      return true;
+    } catch (error: any) {
+      toast.error(error.message);
+      return false;
+    }
+  },
+
+  deleteBannedIp: async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/banned-ips/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to unban IP");
+      toast.success("Đã gỡ cấm IP thành công!");
+      return true;
+    } catch (error: any) {
+      toast.error(error.message);
+      return false;
+    }
+  },
+
+  // Attacker Feedbacks
+  getAttackerFeedbacks: async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/attacker-feedbacks`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch feedbacks");
+      return await res.json();
+    } catch (error: any) {
+      toast.error(error.message);
+      return [];
+    }
+  },
+
+  deleteAttackerFeedback: async (id: string) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/attacker-feedbacks/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to delete feedback");
+      toast.success("Xoá feedback thành công!");
+      return true;
+    } catch (error: any) {
+      toast.error(error.message);
+      return false;
+    }
   }
 };

@@ -14,7 +14,7 @@ import http from "http";
 import jwt from "jsonwebtoken";
 
 import connectDB from "./config/db.js";
-import { SystemLog } from "./models/Schemas.js";
+import { SystemLog, BannedIP } from "./models/Schemas.js";
 import { initializeSocket } from "./socket/index.js";
 
 // Route imports
@@ -37,6 +37,7 @@ import utilitiesRoutes from "./routes/utilities.js";
 import friendsRoutes from "./routes/friends.js";
 import pronunciationRoutes from "./routes/pronunciation.js";
 import skillPracticeRoutes from "./routes/skillPractice.js";
+import publicRoutes from "./routes/public.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 
@@ -88,6 +89,38 @@ app.use((req, res, next) => {
   next();
 });
 
+// Honeypot Middleware
+app.use(async (req, res, next) => {
+  // Bỏ qua đường dẫn gửi feedback
+  if (req.path === "/api/public/banned-feedback") {
+    return next();
+  }
+
+  let clientIp = req.headers["cf-connecting-ip"] || req.headers["x-real-ip"] || req.headers["x-forwarded-for"] || req.ip || req.socket.remoteAddress || "";
+  if (typeof clientIp === "string") {
+    clientIp = clientIp.split(",")[0].trim();
+    if (clientIp.startsWith("::ffff:")) {
+      clientIp = clientIp.substring(7);
+    }
+  }
+
+  try {
+    const banned = await BannedIP.findOne({ ip: clientIp }).lean();
+    if (banned && banned.isHoneypot) {
+      return res.status(403).json({
+        success: false,
+        error: "IP_BANNED_HONEYPOT",
+        message: "Hệ thống nhận thấy một số truy cập bất thường từ địa chỉ IP của bạn. Có vẻ như bạn đang cố gắng tìm hiểu cách hệ thống hoạt động hoặc kiểm tra các lỗ hổng bảo mật. Thay vì mất thời gian để tấn công một hệ thống học tập dành cho cộng đồng, tại sao chúng ta không hợp tác? Nếu bạn tìm thấy bất kỳ lỗi hoặc lỗ hổng nào, xin vui lòng đóng góp ý kiến để chúng tôi cải thiện."
+      });
+    } else if (banned) {
+      return res.status(403).json({ success: false, error: "IP_BANNED", message: "IP has been blocked." });
+    }
+  } catch (e) {
+    console.error("Honeypot middleware error:", e);
+  }
+  next();
+});
+
 const limiter = rateLimit({
   windowMs: 2 * 60 * 1000, // 2 phút
   max: 100, // Giới hạn mỗi IP 100 requests mỗi 2 phút
@@ -128,6 +161,7 @@ app.use((req, res, next) => {
 });
 
 // API Routes
+app.use("/api/public", publicRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/rank", rankRoutes);
 app.use("/api/flashcard", flashcardRoutes);

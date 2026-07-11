@@ -60,12 +60,13 @@ interface UserProfile {
 interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
+  isIpBanned: boolean;
   initialNotifications: any[];
   logout: () => Promise<void>;
   updateUser: (updates: Partial<UserProfile>) => void;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true, initialNotifications: [], logout: async () => {}, updateUser: () => {} });
+const AuthContext = createContext<AuthContextType>({ user: null, loading: true, isIpBanned: false, initialNotifications: [], logout: async () => {}, updateUser: () => {} });
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -101,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [initialNotifications, setInitialNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isIpBanned, setIsIpBanned] = useState(false);
 
   const checkAuth = async () => {
     try {
@@ -112,6 +114,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!res.ok) {
+        if (res.status === 403) {
+          try {
+            const errorData = await res.clone().json();
+            if (errorData.error === "IP_BANNED_HONEYPOT" || errorData.error === "IP_BANNED") {
+              setIsIpBanned(true);
+            }
+          } catch (e) {
+            console.error("Failed to parse 403 response", e);
+          }
+        }
         setUser(null);
         applyAppAppearance(null);
         setLoading(false);
@@ -215,5 +227,5 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  return <AuthContext.Provider value={{ user, loading, initialNotifications, logout, updateUser }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, isIpBanned, initialNotifications, logout, updateUser }}>{children}</AuthContext.Provider>;
 }

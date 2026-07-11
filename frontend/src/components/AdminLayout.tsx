@@ -34,6 +34,7 @@ export function AdminLayout() {
     { path: "/admin/quizzes", label: "Quiz", icon: HelpCircle },
     { path: "/admin/quiz-history", label: "Lịch sử Quiz", icon: History },
     { path: "/admin/community-posts", label: "Bài cộng đồng", icon: MessageSquare },
+    { path: "/admin/banned-ips", label: "Honeypot", icon: Shield },
     { path: "/admin/bot-config", label: "Cấu hình Bot", icon: Bot },
     { path: "/admin/system-logs", label: "System Logs", icon: Activity },
   ];

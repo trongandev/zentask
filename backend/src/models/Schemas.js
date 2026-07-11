@@ -320,6 +320,18 @@ export const SystemLogSchema = new Schema({
   uid: { type: Schema.Types.ObjectId, ref: 'User', default: null },
 }, { timestamps: true });
 
+export const BannedIPSchema = new Schema({
+  ip: { type: String, required: true, unique: true },
+  reason: { type: String, default: "Hành vi đáng ngờ" },
+  isHoneypot: { type: Boolean, default: true },
+}, { timestamps: true });
+
+export const AttackerFeedbackSchema = new Schema({
+  ip: { type: String, required: true },
+  message: { type: String, required: true },
+  userAgent: { type: String, default: "" },
+}, { timestamps: true });
+
 export const DailyUsage = mongoose.models.DailyUsage || mongoose.model('DailyUsage', DailyUsageSchema);
 export const IpSignupCounter = mongoose.models.IpSignupCounter || mongoose.model('IpSignupCounter', IpSignupCounterSchema);
 export const DailyTask = mongoose.models.DailyTask || mongoose.model('DailyTask', DailyTaskSchema);
@@ -357,3 +369,5 @@ export const SkillPracticeCache = mongoose.models.SkillPracticeCache || mongoose
 export const BotConfig = mongoose.models.BotConfig || mongoose.model('BotConfig', BotConfigSchema);
 export const UserActivity = mongoose.models.UserActivity || mongoose.model('UserActivity', UserActivitySchema);
 export const SystemLog = mongoose.models.SystemLog || mongoose.model('SystemLog', SystemLogSchema);
+export const BannedIP = mongoose.models.BannedIP || mongoose.model('BannedIP', BannedIPSchema);
+export const AttackerFeedback = mongoose.models.AttackerFeedback || mongoose.model('AttackerFeedback', AttackerFeedbackSchema);
