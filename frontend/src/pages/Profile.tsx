@@ -644,20 +644,32 @@ export function Profile() {
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
-                { name: "Khung Tân binh", src: "/level-frame/frame-lv1-5.png", level: "Lv 1 - 5" },
-                { name: "Khung Triển vọng", src: "/level-frame/frame-lv6-10.png", level: "Lv 6 - 10" },
-                { name: "Khung Chuyên gia", src: "/level-frame/frame-lv11-15.png", level: "Lv 11 - 15" },
-                { name: "Khung Huyền thoại", src: "/level-frame/frame-lv16-20.png", level: "Lv 16 - 20" },
-              ].map((frame, index) => (
-                <div key={index} className="flex flex-col items-center bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:border-purple-200 hover:bg-purple-50/50 transition-colors">
-                  <div className="w-24 h-24 mb-4 relative flex items-center justify-center drop-shadow-sm">
-                    <img src={user.avatar || "https://ui-avatars.com/api/?name=User"} className="w-14 h-14 rounded-full object-cover" />
-                    <img src={frame.src} alt={frame.name} className="absolute inset-0 w-full h-full object-contain pointer-events-none" />
+                { name: "Khung Tân binh", src: "/level-frame/frame-lv1-5.png", level: "Lv 1 - 5", minLevel: 1, maxLevel: 5 },
+                { name: "Khung Triển vọng", src: "/level-frame/frame-lv6-10.png", level: "Lv 6 - 10", minLevel: 6, maxLevel: 10 },
+                { name: "Khung Chuyên gia", src: "/level-frame/frame-lv11-15.png", level: "Lv 11 - 15", minLevel: 11, maxLevel: 15 },
+                { name: "Khung Huyền thoại", src: "/level-frame/frame-lv16-20.png", level: "Lv 16 - 20", minLevel: 16, maxLevel: 20 },
+              ].map((frame, index) => {
+                const isCurrentFrame = user.level >= frame.minLevel && user.level <= frame.maxLevel;
+                return (
+                  <div 
+                    key={index} 
+                    className={cn(
+                      "flex flex-col items-center rounded-2xl p-6 border transition-all",
+                      isCurrentFrame 
+                        ? "bg-purple-50 border-purple-400 ring-2 ring-purple-200 shadow-md" 
+                        : "bg-gray-50 border-gray-100 hover:border-purple-200 hover:bg-purple-50/50"
+                    )}
+                  >
+                    <div className="w-24 h-24 mb-4 relative flex items-center justify-center drop-shadow-sm">
+                      <img src={user.avatar || "https://ui-avatars.com/api/?name=User"} className="w-14 h-14 rounded-full object-cover" />
+                      <img src={frame.src} alt={frame.name} className="absolute inset-0 w-full h-full object-contain pointer-events-none" />
+                    </div>
+                    <h4 className="font-bold text-gray-900 text-center">{frame.name}</h4>
+                    <p className="text-sm font-medium text-purple-600 mt-1">{frame.level}</p>
+                    {isCurrentFrame && <div className="mt-3 px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full">Đang dùng</div>}
                   </div>
-                  <h4 className="font-bold text-gray-900 text-center">{frame.name}</h4>
-                  <p className="text-sm font-medium text-purple-600 mt-1">{frame.level}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -675,26 +687,36 @@ export function Profile() {
               <div className="absolute left-[39px] md:left-[55px] top-4 bottom-4 w-1 bg-gray-100 rounded-full z-0 hidden sm:block"></div>
 
               {[
-                { id: 1, name: "Bạc", src: "/rank/1.png", color: "text-gray-400", border: "border-gray-300", bg: "bg-gray-50" },
-                { id: 2, name: "Lục bảo", src: "/rank/2.png", color: "text-emerald-500", border: "border-emerald-300", bg: "bg-emerald-50" },
-                { id: 3, name: "Tinh Anh", src: "/rank/3.png", color: "text-blue-500", border: "border-blue-300", bg: "bg-blue-50" },
-                { id: 4, name: "Kim Cương", src: "/rank/4.png", color: "text-indigo-500", border: "border-indigo-300", bg: "bg-indigo-50" },
-                { id: 5, name: "Cao Thủ", src: "/rank/5.png", color: "text-rose-500", border: "border-rose-300", bg: "bg-rose-50" },
+                { id: 1, name: "Bạc", src: "/rank/1.png", color: "text-gray-500", border: "border-gray-400", bg: "bg-gray-50", ring: "ring-gray-200", badge: "bg-gray-100 text-gray-700" },
+                { id: 2, name: "Lục bảo", src: "/rank/2.png", color: "text-emerald-600", border: "border-emerald-400", bg: "bg-emerald-50", ring: "ring-emerald-200", badge: "bg-emerald-100 text-emerald-700" },
+                { id: 3, name: "Tinh Anh", src: "/rank/3.png", color: "text-blue-600", border: "border-blue-400", bg: "bg-blue-50", ring: "ring-blue-200", badge: "bg-blue-100 text-blue-700" },
+                { id: 4, name: "Kim Cương", src: "/rank/4.png", color: "text-indigo-600", border: "border-indigo-400", bg: "bg-indigo-50", ring: "ring-indigo-200", badge: "bg-indigo-100 text-indigo-700" },
+                { id: 5, name: "Cao Thủ", src: "/rank/5.png", color: "text-rose-600", border: "border-rose-400", bg: "bg-rose-50", ring: "ring-rose-200", badge: "bg-rose-100 text-rose-700" },
               ].map((rankInfo, index) => {
                 const rankData = RANK_TOPIC_CONFIG[rankInfo.id as keyof typeof RANK_TOPIC_CONFIG];
                 // Sort tiers from lowest (highest number) to highest (lowest number)
                 const tiersKeys = Object.keys(rankData.tiers).sort((a, b) => Number(b) - Number(a));
+                const isCurrentRank = user.rankId === rankInfo.id;
 
                 return (
                   <div key={index} className="relative z-10 flex flex-col sm:flex-row gap-6 md:gap-8 items-start">
-                    <div className={`w-20 h-20 md:w-28 md:h-28 shrink-0 rounded-2xl ${rankInfo.bg} border-2 ${rankInfo.border} p-3 flex items-center justify-center drop-shadow-sm bg-white`}>
+                    <div className={cn(
+                      "w-20 h-20 md:w-28 md:h-28 shrink-0 rounded-2xl border-2 p-3 flex items-center justify-center drop-shadow-sm transition-all",
+                      isCurrentRank ? `${rankInfo.bg} ${rankInfo.border} ring-4 ${rankInfo.ring} md:scale-110` : "bg-white border-gray-200"
+                    )}>
                       <img src={rankInfo.src} alt={rankInfo.name} className="w-full h-full object-contain drop-shadow-md hover:scale-110 transition-transform" />
                     </div>
 
-                    <div className="flex-1 bg-white rounded-2xl p-5 md:p-6 border border-gray-100 shadow-sm w-full hover:border-gray-300 transition-colors">
+                    <div className={cn(
+                      "flex-1 rounded-2xl p-5 md:p-6 border shadow-sm w-full transition-colors",
+                      isCurrentRank ? `bg-white ${rankInfo.border} shadow-md ring-1 ${rankInfo.ring}` : "bg-white border-gray-100 hover:border-gray-300"
+                    )}>
                       <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 pb-4 border-b border-gray-100">
                         <div>
-                          <h4 className={`text-xl font-bold ${rankInfo.color}`}>{rankInfo.name}</h4>
+                          <div className="flex items-center gap-3">
+                            <h4 className={`text-xl font-bold ${rankInfo.color}`}>{rankInfo.name}</h4>
+                            {isCurrentRank && <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold rounded ${rankInfo.badge}`}>Hiện tại</span>}
+                          </div>
                           <p className="text-sm text-gray-500 mt-1">Gồm {tiersKeys.length} bậc</p>
                         </div>
                       </div>
@@ -702,11 +724,23 @@ export function Profile() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {tiersKeys.map((tierKey) => {
                           const tier = rankData.tiers[Number(tierKey) as keyof typeof rankData.tiers];
+                          const isCurrentTier = isCurrentRank && user.tier === Number(tierKey);
+                          
                           return (
-                            <div key={tierKey} className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col hover:shadow-md transition-shadow">
+                            <div key={tierKey} className={cn(
+                              "rounded-xl p-4 border flex flex-col transition-all",
+                              isCurrentTier 
+                                ? `${rankInfo.bg} ${rankInfo.border} ring-2 ${rankInfo.ring} shadow-md` 
+                                : "bg-gray-50 border-gray-100 hover:shadow-md hover:border-gray-300"
+                            )}>
                               <div className="flex justify-between items-center mb-2">
-                                <span className="font-bold text-gray-800 text-sm">{rankInfo.name} {tierKey}</span>
-                                <span className="px-2 py-1 bg-white rounded-md text-xs font-bold text-blue-600 border border-blue-100 shadow-sm">
+                                <span className={cn("font-bold text-sm", isCurrentTier ? rankInfo.color : "text-gray-800")}>
+                                  {rankInfo.name} {tierKey}
+                                </span>
+                                <span className={cn(
+                                  "px-2 py-1 rounded-md text-xs font-bold border shadow-sm",
+                                  isCurrentTier ? "bg-white text-gray-900 border-gray-200" : "bg-white text-blue-600 border-blue-100"
+                                )}>
                                   {tier.cefr}
                                 </span>
                               </div>
@@ -718,6 +752,11 @@ export function Profile() {
                                   ))}
                                 </ul>
                               </div>
+                              {isCurrentTier && (
+                                <div className={`mt-3 self-start px-2 py-1 rounded text-xs font-bold ${rankInfo.badge}`}>
+                                  Đang ở bậc này
+                                </div>
+                              )}
                             </div>
                           );
                         })}
