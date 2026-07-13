@@ -529,10 +529,17 @@ const tryCreateTeam2v2Room = (forceEntry = null, io) => {
     if (!picked.length) return false;
 
     const seed = picked[0];
-    const players = picked.map((entry, index) => ({ ...entry.user, socket: entry.socket, team: index < 2 ? "blue" : "red" }));
-    while (players.length < 4) {
-      const team = players.length < 2 ? "blue" : "red";
-      players.push(createArenaBot(seed.user, players.length + 1, team));
+    const players = picked.map((entry, index) => ({ ...entry.user, socket: entry.socket, team: entry.user.team || (index < 2 ? "blue" : "red") }));
+    if (forceEntry.targetSlotIndex !== undefined) {
+      const botTeam = forceEntry.targetSlotIndex < 2 ? "blue" : "red";
+      const bot = createArenaBot(seed.user, players.length + 1, botTeam);
+      bot.slotIndex = forceEntry.targetSlotIndex;
+      players.push(bot);
+    } else {
+      while (players.length < 4) {
+        const team = players.length < 2 ? "blue" : "red";
+        players.push(createArenaBot(seed.user, players.length + 1, team));
+      }
     }
     createArenaRoom(players, seed.matchData, "team2v2", io);
     return true;
@@ -630,6 +637,7 @@ export function registerArenaHandlers(io, socket) {
       user: entryUser,
       matchData,
       mode: arenaMode,
+      targetSlotIndex,
       timer: null,
     });
 

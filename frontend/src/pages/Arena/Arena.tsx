@@ -510,7 +510,7 @@ export function Arena() {
   }, [socket, user, opponent, arenaMode, myTeam, arenaPlayers]);
 
   // --- Actions ---
-  const startSearch = (selectedMode: "solo" | "team2v2" = "solo", botRankOverride?: number | null) => {
+  const startSearch = (selectedMode: "solo" | "team2v2" = "solo", botRankOverride?: number | null, targetSlotIndex?: number) => {
     if (!socket || !user) return;
     const rankId = user.rankId || 1;
     const tierNum = user.tier || 3;
@@ -526,6 +526,7 @@ export function Arena() {
     socket.emit("find_arena_match", {
       mode: selectedMode,
       botRankOverride: botRankOverride !== undefined ? botRankOverride : undefined,
+      targetSlotIndex,
       user: {
         uid: user.uid,
         name: user.displayName || "User",
@@ -534,6 +535,8 @@ export function Arena() {
         rankId,
         tier: tierNum,
         arenaMatchesPlayed: (user as any).arenaMatchesPlayed || 0,
+        slotIndex: arenaPlayers.find((p) => p.uid === user.uid)?.slotIndex,
+        team: arenaPlayers.find((p) => p.uid === user.uid)?.team,
       },
       matchData: deck,
     });
@@ -605,13 +608,25 @@ export function Arena() {
     if (socket && roomCode && matchState === "found") {
       socket.emit("arena_add_bot", { roomCode, botRankId, targetSlotIndex });
     } else {
-      startSearch(arenaMode as "solo" | "team2v2", botRankId);
+      startSearch(arenaMode as "solo" | "team2v2", botRankId, targetSlotIndex);
     }
   };
 
   const handleMoveSlot = (targetSlotIndex: number) => {
     if (socket && roomCode && matchState === "found") {
       socket.emit("arena_move_slot", { roomCode, targetSlotIndex });
+    } else {
+      setArenaPlayers((prev) => {
+        const newPlayers = prev.length > 0 ? [...prev] : [
+          { uid: user?.uid, name: user?.displayName, avatar: user?.photoURL, rankInfo: (user as any)?.rankInfo || "", level: user?.level }
+        ];
+        const me = newPlayers.find((p) => p.uid === user?.uid);
+        if (me) {
+          me.slotIndex = targetSlotIndex;
+          me.team = targetSlotIndex < 2 ? "blue" : "red";
+        }
+        return [...newPlayers];
+      });
     }
   };
 
@@ -741,6 +756,8 @@ export function Arena() {
         rankId: user.rankId || 1,
         tier: user.tier || 3,
         level: user.level || 1,
+        slotIndex: arenaPlayers.find((p) => p.uid === user.uid)?.slotIndex,
+        team: arenaPlayers.find((p) => p.uid === user.uid)?.team,
       },
       mode: arenaMode,
       matchData: deck,

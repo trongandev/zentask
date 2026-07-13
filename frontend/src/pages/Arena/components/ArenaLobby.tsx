@@ -123,7 +123,9 @@ function OpponentPicker({
   onAutoMatch,
   onMoveSlot,
   onSwapSlot,
+  onKickPlayer,
   isHost,
+  showAutoMatch,
   onClose,
 }: {
   friends: any[];
@@ -133,7 +135,9 @@ function OpponentPicker({
   onAutoMatch: () => void;
   onMoveSlot?: () => void;
   onSwapSlot?: () => void;
+  onKickPlayer?: () => void;
   isHost?: boolean;
+  showAutoMatch?: boolean;
   onClose: () => void;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -163,7 +167,16 @@ function OpponentPicker({
               <span className="text-[10px] text-gray-500">Đổi vị trí của bạn với người chơi này</span>
             </button>
           )}
-          {onMoveSlot && !onSwapSlot && (
+          {onKickPlayer && (
+            <button
+              onClick={onKickPlayer}
+              className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 transition-all hover:scale-[1.02] col-span-2"
+            >
+              <span className="text-sm font-bold text-red-300">Đuổi khỏi phòng</span>
+              <span className="text-[10px] text-gray-500">Xóa người chơi này khỏi vị trí</span>
+            </button>
+          )}
+          {!onSwapSlot && onMoveSlot && (
             <button
               onClick={onMoveSlot}
               className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all hover:scale-[1.02] col-span-2"
@@ -172,12 +185,14 @@ function OpponentPicker({
               <span className="text-[10px] text-gray-500">Chuyển slot của bạn sang vị trí này</span>
             </button>
           )}
-          <button onClick={onAutoMatch} className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 transition-all hover:scale-[1.02]">
-            <Search className="w-6 h-6 text-blue-400" />
-            <span className="text-sm font-bold text-blue-300">Tự động ghép</span>
-            <span className="text-[10px] text-gray-500">Hệ thống tìm đối thủ</span>
-          </button>
-          {isHost && (
+          {!onSwapSlot && showAutoMatch && (
+            <button onClick={onAutoMatch} className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 transition-all hover:scale-[1.02]">
+              <Search className="w-6 h-6 text-blue-400" />
+              <span className="text-sm font-bold text-blue-300">Tự động ghép</span>
+              <span className="text-[10px] text-gray-500">Hệ thống tìm đối thủ</span>
+            </button>
+          )}
+          {!onSwapSlot && isHost && (
             <button
               onClick={onSelectBot}
               className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/20 transition-all hover:scale-[1.02]"
@@ -190,44 +205,46 @@ function OpponentPicker({
         </div>
 
         {/* Friend list */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <UserPlus className="w-4 h-4 text-yellow-400" />
-            <span className="text-sm font-bold text-yellow-300">Mời bạn bè Solo</span>
-          </div>
+        {!onSwapSlot && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <UserPlus className="w-4 h-4 text-yellow-400" />
+              <span className="text-sm font-bold text-yellow-300">Mời bạn bè Solo</span>
+            </div>
 
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Tìm bạn bè..."
-            className="w-full rounded-xl bg-white/10 px-4 py-2.5 text-sm outline-none placeholder:text-white/30 mb-3"
-          />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Tìm bạn bè..."
+              className="w-full rounded-xl bg-white/10 px-4 py-2.5 text-sm outline-none placeholder:text-white/30 mb-3"
+            />
 
-          <div className="max-h-48 overflow-y-auto space-y-1.5 custom-scrollbar">
-            {friendsLoading ? (
-              <div className="flex justify-center py-6">
-                <Loader2 className="w-6 h-6 text-white/30 animate-spin" />
-              </div>
-            ) : filteredFriends.length === 0 ? (
-              <p className="text-center text-sm text-white/30 py-4">{searchQuery ? "Không tìm thấy bạn bè" : "Chưa có bạn bè nào đang online"}</p>
-            ) : (
-              filteredFriends.map((friend: any) => (
-                <button
-                  key={friend.uid}
-                  onClick={() => onInviteFriend(friend.uid)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all text-left group"
-                >
-                  <img src={friend.photoURL || "/mascot/Lopy (1).png"} className="w-9 h-9 rounded-full object-cover border-2 border-white/10" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-bold text-white truncate">{friend.displayName || friend.email || "Bạn bè"}</div>
-                    {friend.rankInfo && <div className="text-[11px] text-gray-500">{friend.rankInfo}</div>}
-                  </div>
-                  <Swords className="w-4 h-4 text-yellow-500/50 group-hover:text-yellow-400 transition-colors" />
-                </button>
-              ))
-            )}
+            <div className="max-h-48 overflow-y-auto space-y-1.5 custom-scrollbar">
+              {friendsLoading ? (
+                <div className="flex justify-center py-6">
+                  <Loader2 className="w-6 h-6 text-white/30 animate-spin" />
+                </div>
+              ) : filteredFriends.length === 0 ? (
+                <p className="text-center text-sm text-white/30 py-4">{searchQuery ? "Không tìm thấy bạn bè" : "Chưa có bạn bè nào đang online"}</p>
+              ) : (
+                filteredFriends.map((friend: any) => (
+                  <button
+                    key={friend.uid}
+                    onClick={() => onInviteFriend(friend.uid)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all text-left group"
+                  >
+                    <img src={friend.photoURL || "/mascot/Lopy (1).png"} className="w-9 h-9 rounded-full object-cover border-2 border-white/10" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-bold text-white truncate">{friend.displayName || friend.email || "Bạn bè"}</div>
+                      {friend.rankInfo && <div className="text-[11px] text-gray-500">{friend.rankInfo}</div>}
+                    </div>
+                    <Swords className="w-4 h-4 text-yellow-500/50 group-hover:text-yellow-400 transition-colors" />
+                  </button>
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -355,7 +372,8 @@ export function ArenaLobby({
   const blueTeam = arenaPlayers.filter((p) => p.team === "blue");
   const redTeam = arenaPlayers.filter((p) => p.team === "red");
 
-  const p0 = blueTeam.find((p) => p.slotIndex === 0) || (blueTeam.length > 0 && blueTeam[0].slotIndex === undefined ? blueTeam[0] : undefined);
+  const isUserInArena = arenaPlayers.some((p) => p.uid === user?.uid);
+  const p0 = blueTeam.find((p) => p.slotIndex === 0) || (!isUserInArena ? user : undefined);
   const p1 = blueTeam.find((p) => p.slotIndex === 1) || (blueTeam.length > 1 && blueTeam[1].slotIndex === undefined ? blueTeam[1] : undefined);
   const p2 = redTeam.find((p) => p.slotIndex === 2) || (redTeam.length > 0 && redTeam[0].slotIndex === undefined ? redTeam[0] : undefined);
   const p3 = redTeam.find((p) => p.slotIndex === 3) || (redTeam.length > 1 && redTeam[1].slotIndex === undefined ? redTeam[1] : undefined);
@@ -383,7 +401,7 @@ export function ArenaLobby({
         />
       );
     }
-    if (isSearching) {
+    if (isSearching && mode === "solo") {
       return <PlayerSlot side={side} showAnimation />;
     }
     return <PlayerSlot side={side} isEmpty onClickEmpty={() => handleOpenPicker(slotIdx)} />;
@@ -395,7 +413,7 @@ export function ArenaLobby({
         {/* Title */}
         <div className="mb-6 md:mb-8 text-center">
           <h2 className="text-3xl md:text-4xl font-black text-white mb-2 tracking-wider uppercase">{isFound ? "TRẬN ĐẤU SẮP BẮT ĐẦU!" : modeTitle}</h2>
-          <p className={cn("font-bold text-lg", modeColor)}>{titleOverride ? titleOverride : isFound ? "" : isSearching ? "Đang tìm đối thủ..." : "Phòng chờ"}</p>
+          <p className={cn("font-bold text-lg", modeColor)}>{titleOverride ? titleOverride : isFound ? "" : isSearching && mode === "solo" ? "Đang tìm đối thủ..." : "Phòng chờ"}</p>
         </div>
 
         {/* Tip */}
@@ -514,7 +532,7 @@ export function ArenaLobby({
         )}
 
         {/* Search timer */}
-        {isSearching && (
+        {isSearching && mode === "solo" && (
           <div className="mt-8 flex flex-col items-center animate-in fade-in duration-300">
             <div className="text-xl font-mono text-yellow-300">
               {Math.floor(searchElapsed / 60)
@@ -522,9 +540,7 @@ export function ArenaLobby({
                 .padStart(2, "0")}
               :{(searchElapsed % 60).toString().padStart(2, "0")}
             </div>
-            <p className="text-sm text-blue-200/60 mt-2 max-w-md text-center">
-              {mode === "team2v2" ? "Đang tìm đồng đội và đối thủ. Sau 15 giây có thể ghép bot nếu rank phù hợp." : "Hệ thống đang ghép cặp bạn với người chơi cùng Rank"}
-            </p>
+            <p className="text-sm text-blue-200/60 mt-2 max-w-md text-center">Hệ thống đang ghép cặp bạn với người chơi cùng Rank</p>
           </div>
         )}
 
@@ -567,6 +583,14 @@ export function ArenaLobby({
                 }
               : undefined
           }
+          onKickPlayer={
+            onKickPlayer && isHost && targetSwapUid && targetSwapUid !== user?.uid
+              ? () => {
+                  onKickPlayer(targetSwapUid);
+                  setShowPicker(false);
+                }
+              : undefined
+          }
           onMoveSlot={
             onMoveSlot && targetSlotIndex !== undefined
               ? () => {
@@ -576,6 +600,7 @@ export function ArenaLobby({
               : undefined
           }
           isHost={isHost}
+          showAutoMatch={mode === "solo"}
           onClose={() => setShowPicker(false)}
         />
       )}
