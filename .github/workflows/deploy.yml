@@ -16,8 +16,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }} # Lưu nội dung file .pem vào GitHub Secret
           script: |
             set -e
-            cd /home/zentask
+            cd /home/zentask/backend
             git fetch origin main
             git reset --hard origin/main
-            npm install --prefix backend
+            npm install
             pm2 restart --update-env backend
