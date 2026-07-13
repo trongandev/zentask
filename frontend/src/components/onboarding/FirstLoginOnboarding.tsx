@@ -1,7 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { ArrowLeft, ArrowRight, BookOpen, Bot, BrainCircuit, CheckCircle2, ChevronRight, Compass, Copy, Headphones, HelpCircle, MessageCircle, NotebookPen, Rocket, ShieldCheck, Sparkles, Trophy, Users, Wand2, X } from "lucide-react";
+import toastService from "@/src/services/toastService";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  Bot,
+  BrainCircuit,
+  CheckCircle2,
+  ChevronRight,
+  Compass,
+  Copy,
+  Headphones,
+  HelpCircle,
+  MessageCircle,
+  NotebookPen,
+  Rocket,
+  ShieldCheck,
+  Sparkles,
+  Trophy,
+  Users,
+  Wand2,
+  X,
+} from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { onboardingService } from "../../services/onboardingService";
 
@@ -291,11 +312,11 @@ export default function FirstLoginOnboarding() {
     try {
       const onboarding = await onboardingService.save({ completed: true, lastStep: steps.length - 1 });
       updateUser({ onboarding: { ...(user.onboarding || {}), ...(onboarding || {}), completed: true, lastStep: steps.length - 1 } as any });
-      toast.success("Đã hoàn tất hướng dẫn. Chúc bạn học tốt!");
+      toastService.success("Đã hoàn tất hướng dẫn. Chúc bạn học tốt!");
       setIsOpen(false);
       removeTourQuery();
     } catch (err) {
-      toast.error("Chưa lưu được trạng thái hướng dẫn. Hãy thử lại.");
+      toastService.error("Chưa lưu được trạng thái hướng dẫn. Hãy thử lại.");
     } finally {
       setSaving(false);
     }
@@ -306,11 +327,11 @@ export default function FirstLoginOnboarding() {
     try {
       const onboarding = await onboardingService.save({ skipped: true, lastStep: stepIndex });
       updateUser({ onboarding: { ...(user.onboarding || {}), ...(onboarding || {}), completed: true, skipped: true, lastStep: stepIndex } as any });
-      toast.success("Đã ẩn hướng dẫn lần đầu.");
+      toastService.success("Đã ẩn hướng dẫn lần đầu.");
       setIsOpen(false);
       removeTourQuery();
     } catch (err) {
-      toast.error("Chưa lưu được. Hãy thử lại.");
+      toastService.error("Chưa lưu được. Hãy thử lại.");
     } finally {
       setSaving(false);
     }
@@ -319,7 +340,7 @@ export default function FirstLoginOnboarding() {
   function remindLater() {
     setIsOpen(false);
     saveProgress(stepIndex);
-    toast("Mình sẽ nhắc lại hướng dẫn ở lần đăng nhập sau.");
+    toastService.info("Mình sẽ nhắc lại hướng dẫn ở lần đăng nhập sau.");
     removeTourQuery();
   }
 
@@ -454,10 +475,19 @@ export default function FirstLoginOnboarding() {
           <div className="mt-auto pt-5">
             <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between md:pt-5">
               <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={skipTour} disabled={saving} className="flex-1 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:opacity-60 sm:flex-none md:rounded-2xl md:px-4 md:py-3 md:text-sm">
+                <button
+                  type="button"
+                  onClick={skipTour}
+                  disabled={saving}
+                  className="flex-1 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:opacity-60 sm:flex-none md:rounded-2xl md:px-4 md:py-3 md:text-sm"
+                >
                   Bỏ qua
                 </button>
-                <button type="button" onClick={remindLater} className="flex-1 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 sm:flex-none md:rounded-2xl md:px-4 md:py-3 md:text-sm">
+                <button
+                  type="button"
+                  onClick={remindLater}
+                  className="flex-1 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 sm:flex-none md:rounded-2xl md:px-4 md:py-3 md:text-sm"
+                >
                   Nhắc lại sau
                 </button>
               </div>

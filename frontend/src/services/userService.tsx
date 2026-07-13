@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 import { useConfigStore } from "./configService";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
@@ -65,9 +65,9 @@ export const useUserStore = create<UserState>((set, get) => ({
   },
 
   incrementLocalMinutes: (mins: number) => {
-    set((state) => ({ 
+    set((state) => ({
       todayMinutes: state.todayMinutes + mins,
-      unsyncedMinutes: state.unsyncedMinutes + mins
+      unsyncedMinutes: state.unsyncedMinutes + mins,
     }));
   },
 
@@ -80,7 +80,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ minutes: mins }),
-      keepalive: true
+      keepalive: true,
     }).catch(console.error);
   },
 
@@ -93,35 +93,35 @@ export const useUserStore = create<UserState>((set, get) => ({
       });
       if (!res.ok) throw new Error("Lỗi khi điểm danh");
       const data = await res.json();
-      
+
       if (data.status === "already_checked_in") {
-        toast.success("Bạn đã điểm danh hôm nay rồi!");
+        toastService.success("Bạn đã điểm danh hôm nay rồi!");
       } else {
-        toast.success(`Điểm danh thành công! Chuỗi: ${data.streak} ngày`);
+        toastService.success(`Điểm danh thành công! Chuỗi: ${data.streak} ngày`);
         if (data.levelUp) {
           set({ levelUpData: { newLevel: data.level } });
         }
       }
-      
+
       if (data.taskProgress) {
         useConfigStore.getState().setTaskProgress(data.taskProgress);
       }
-      
+
       // Update the local stats array to instantly turn today's check-in dot green
       if (data.lastCheckInDate) {
         set((state) => {
           const newStats = [...state.stats];
-          const todayIndex = newStats.findIndex(s => s.date === data.lastCheckInDate);
+          const todayIndex = newStats.findIndex((s) => s.date === data.lastCheckInDate);
           if (todayIndex !== -1) {
             newStats[todayIndex].isCheckedIn = true;
           }
           return { stats: newStats };
         });
       }
-      
+
       return data;
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi điểm danh");
+      toastService.error(err.message || "Lỗi khi điểm danh");
       return null;
     } finally {
       set({ loading: false });
@@ -170,11 +170,11 @@ export const useUserStore = create<UserState>((set, get) => ({
       });
       if (!res.ok) throw new Error("Lỗi khi cộng XP");
       const data = await res.json();
-      
+
       if (data.levelUp) {
         set({ levelUpData: { newLevel: data.level } });
       }
-      
+
       return data; // { xp, level, levelUp }
     } catch (err) {
       console.error(err);
@@ -186,7 +186,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     try {
       const res = await fetch(`${API_URL}/api/user/follow/${uid}`, {
         method: "POST",
-        credentials: "include"
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Error toggling follow");
       const data = await res.json();
@@ -200,7 +200,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   checkFollow: async (uid: string) => {
     try {
       const res = await fetch(`${API_URL}/api/user/follow/${uid}`, {
-        credentials: "include"
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Error checking follow");
       const data = await res.json();
@@ -209,5 +209,5 @@ export const useUserStore = create<UserState>((set, get) => ({
       console.error(err);
       return null;
     }
-  }
+  },
 }));

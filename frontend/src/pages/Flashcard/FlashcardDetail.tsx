@@ -6,7 +6,7 @@ import { useConfigStore } from "../../services/configService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUserStore } from "../../services/userService";
 import { cn } from "../../lib/utils";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { VoiceSelectorModal } from "../../components/practice/VoiceSelectorModal";
 import { getVoiceForLanguage } from "../../lib/ttsVoiceStorage";
@@ -55,7 +55,7 @@ export function FlashcardDetail() {
       ([entry]) => {
         setIsHeaderVisible(entry.isIntersecting);
       },
-      { threshold: 0, rootMargin: "-1px 0px 0px 0px" }
+      { threshold: 0, rootMargin: "-1px 0px 0px 0px" },
     );
     observer.observe(headerSentinelRef.current);
     return () => observer.disconnect();
@@ -138,7 +138,7 @@ export function FlashcardDetail() {
 
   const handleCreateManual = async () => {
     if (!term.trim() || !translation.trim()) {
-      toast.error("Vui lòng điền tiêu đề và dịch nghĩa");
+      toastService.error("Vui lòng điền tiêu đề và dịch nghĩa");
       return;
     }
     const filteredExamples = examples.filter((ex) => ex.en.trim() !== "");
@@ -160,7 +160,7 @@ export function FlashcardDetail() {
 
   const handleCreateAI = async () => {
     if (!term.trim()) {
-      toast.error("Vui lòng nhập từ vựng cần tạo");
+      toastService.error("Vui lòng nhập từ vựng cần tạo");
       return;
     }
     const res = await useFlashcardStore.getState().generateAI(term, id);
@@ -223,7 +223,7 @@ export function FlashcardDetail() {
             <button
               onClick={() => {
                 setOpenPopoverId(null);
-                toast("Tính năng chỉnh sửa đang phát triển");
+                toastService.info("Tính năng chỉnh sửa đang phát triển");
               }}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             >
@@ -386,13 +386,13 @@ export function FlashcardDetail() {
     <div className="max-w-5xl mx-auto space-y-6 relative">
       {/* Sentinel for sticky header */}
       <div ref={headerSentinelRef} className="absolute top-0 w-full h-px pointer-events-none" />
-      
+
       {/* Sticky Header */}
       <div className="sticky top-0 z-50 h-0 overflow-visible">
-        <div 
+        <div
           className={cn(
             "absolute top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300 flex items-center justify-between px-4 sm:px-6 py-3 rounded-b-2xl -mx-4 sm:-mx-6",
-            !isHeaderVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-full opacity-0 pointer-events-none"
+            !isHeaderVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-full opacity-0 pointer-events-none",
           )}
         >
           <div className="flex items-center gap-3 min-w-0">
@@ -408,7 +408,10 @@ export function FlashcardDetail() {
             <button onClick={() => setIsVoiceModalOpen(true)} className="px-3 py-1.5 bg-gray-100 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors hidden sm:block">
               Đổi giọng
             </button>
-            <button onClick={() => navigate(`/flashcard/${id}/practice`)} className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-blue-100 transition-colors">
+            <button
+              onClick={() => navigate(`/flashcard/${id}/practice`)}
+              className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-blue-100 transition-colors"
+            >
               <Play className="w-4 h-4 fill-current" /> Học
             </button>
           </div>
@@ -615,12 +618,7 @@ export function FlashcardDetail() {
         })()}
 
       {/* ── Add Word Modal ── */}
-      <Modal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-        title="Thêm từ mới"
-        className="max-w-2xl"
-      >
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Thêm từ mới" className="max-w-2xl">
         <div className="flex border-b border-gray-100">
           {(["ai", "manual"] as const).map((tab) => (
             <button

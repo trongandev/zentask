@@ -7,6 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useUserStore } from "../services/userService";
 import { useSocket } from "../contexts/SocketContext";
 import { timeAgo } from "../lib/utils";
+import { getNotificationStyles, getNotificationLink } from "../config/notificationConfig";
 
 interface HeaderProps {
   isLeftSidebarOpen: boolean;
@@ -167,32 +168,8 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
                   <div className="text-center text-sm text-gray-500 py-6">Không có thông báo mới</div>
                 ) : (
                   notifications.slice(0, 5).map((n) => {
-                    let Icon = Bell;
-                    let color = "text-blue-600";
-                    let bg = "bg-blue-100";
-                    let link = "/";
-
-                    if (n.type === "follow") {
-                      Icon = User;
-                      color = "text-purple-600";
-                      bg = "bg-purple-100";
-                      link = `/profile/${n.referenceId}`;
-                    } else if (n.type === "leaderboard") {
-                      Icon = Star;
-                      color = "text-yellow-600";
-                      bg = "bg-yellow-100";
-                      link = "/leaderboard";
-                    } else if (n.type?.startsWith("community")) {
-                      Icon = BookOpen;
-                      color = "text-green-600";
-                      bg = "bg-green-100";
-                      link = "/community";
-                    } else if (n.type === "learning_reminder") {
-                      Icon = Flame;
-                      color = "text-orange-600";
-                      bg = "bg-orange-100";
-                      link = "/flashcards";
-                    }
+                    const { Icon, color, bg } = getNotificationStyles(n.type);
+                    const link = getNotificationLink(n);
 
                     return (
                       <div

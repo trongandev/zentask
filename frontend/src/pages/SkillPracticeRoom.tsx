@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Headphones, Mic, Edit3, Zap, RefreshCw, Volume2, CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 import { useAuth } from "../contexts/AuthContext";
 import { pronunciationService } from "../services/pronunciationService";
 import { useTTSAudio } from "../hooks/useTTSAudio";
@@ -18,7 +18,9 @@ const MODE_META: Record<Mode, { title: string; icon: any; color: string }> = {
 };
 
 function normalizeWebmDataUrl(value: string) {
-  const raw = String(value || "").trim().replace(/\s+/g, "");
+  const raw = String(value || "")
+    .trim()
+    .replace(/\s+/g, "");
   const commaIndex = raw.indexOf(",");
   if (commaIndex === -1) return raw;
   return `data:audio/webm;base64,${raw.slice(commaIndex + 1)}`;
@@ -87,7 +89,7 @@ export default function SkillPracticeRoom() {
       setExercise({ ...data, _renderKey: `${mode}_${data.id || data.variantId || "exercise"}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}` });
       setStartedAt(Date.now());
     } catch (err: any) {
-      toast.error(err.message || "Lỗi tải bài");
+      toastService.error(err.message || "Lỗi tải bài");
     } finally {
       setLoading(false);
     }
@@ -119,10 +121,10 @@ export default function SkillPracticeRoom() {
       setResult({ isCorrect, responseMs, correctAnswer: correctAnswerOf(exercise), ...extra, ...data });
       setDaily({ completedModes: data.completedModes, bonusClaimed: data.bonusClaimed });
       if (data.xpResult) updateUser({ xp: data.xpResult.xp, level: data.xpResult.level });
-      if (data.awardedXp > 0) toast.success(`+${data.awardedXp} XP`);
-      else if (isCompletedToday) toast("Hôm nay bạn đã nhận thưởng cho chế độ này rồi.");
+      if (data.awardedXp > 0) toastService.success(`+${data.awardedXp} XP`);
+      else if (isCompletedToday) toastService.info("Hôm nay bạn đã nhận thưởng cho chế độ này rồi.");
     } catch (err: any) {
-      toast.error(err.message || "Lỗi nộp bài");
+      toastService.error(err.message || "Lỗi nộp bài");
     }
   };
 
@@ -151,7 +153,7 @@ export default function SkillPracticeRoom() {
           const score = scoreMatch ? Math.min(100, Number(scoreMatch[1])) : 75;
           submit(score >= 60, Date.now() - startedAt, { pronunciationScore: score });
         } catch (err: any) {
-          toast.error(err.message || "Không chấm được phát âm, hãy thử lại.");
+          toastService.error(err.message || "Không chấm được phát âm, hãy thử lại.");
         } finally {
           stream.getTracks().forEach((t) => t.stop());
           setRecording(false);
@@ -161,7 +163,7 @@ export default function SkillPracticeRoom() {
       recorder.start(250);
       setRecording(true);
     } catch (err) {
-      toast.error("Không mở được micro.");
+      toastService.error("Không mở được micro.");
     }
   };
 
@@ -201,8 +203,15 @@ export default function SkillPracticeRoom() {
               {renderTtsButton(exercise.instruction || "Listen and type the sentence.", "Nghe hướng dẫn")}
             </div>
           </div>
-          <input value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder="Gõ lại câu bạn nghe được..." className="w-full rounded-2xl border border-gray-200 p-4 font-semibold outline-none focus:border-blue-500" />
-          <button onClick={checkTextAnswer} disabled={!!result} className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white disabled:opacity-50">Nộp đáp án</button>
+          <input
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            placeholder="Gõ lại câu bạn nghe được..."
+            className="w-full rounded-2xl border border-gray-200 p-4 font-semibold outline-none focus:border-blue-500"
+          />
+          <button onClick={checkTextAnswer} disabled={!!result} className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white disabled:opacity-50">
+            Nộp đáp án
+          </button>
         </div>
       );
     }
@@ -216,9 +225,13 @@ export default function SkillPracticeRoom() {
             <div className="mt-5 flex justify-center">{renderTtsButton(exercise.sentence, "Nghe mẫu")}</div>
           </div>
           {!recording ? (
-            <button onClick={startRecording} disabled={!!result} className="w-full rounded-2xl bg-purple-600 px-6 py-4 font-black text-white hover:bg-purple-700 disabled:opacity-50">Bắt đầu ghi âm</button>
+            <button onClick={startRecording} disabled={!!result} className="w-full rounded-2xl bg-purple-600 px-6 py-4 font-black text-white hover:bg-purple-700 disabled:opacity-50">
+              Bắt đầu ghi âm
+            </button>
           ) : (
-            <button onClick={stopRecording} className="w-full rounded-2xl bg-red-600 px-6 py-4 font-black text-white hover:bg-red-700">Dừng & chấm phát âm</button>
+            <button onClick={stopRecording} className="w-full rounded-2xl bg-red-600 px-6 py-4 font-black text-white hover:bg-red-700">
+              Dừng & chấm phát âm
+            </button>
           )}
         </div>
       );
@@ -235,8 +248,15 @@ export default function SkillPracticeRoom() {
               {renderTtsButton(exercise.instruction || "Fill in the missing word.", "Nghe hướng dẫn")}
             </div>
           </div>
-          <input value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder="Nhập từ còn thiếu..." className="w-full rounded-2xl border border-gray-200 p-4 font-semibold outline-none focus:border-emerald-500" />
-          <button onClick={checkTextAnswer} disabled={!!result} className="rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white disabled:opacity-50">Nộp đáp án</button>
+          <input
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            placeholder="Nhập từ còn thiếu..."
+            className="w-full rounded-2xl border border-gray-200 p-4 font-semibold outline-none focus:border-emerald-500"
+          />
+          <button onClick={checkTextAnswer} disabled={!!result} className="rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white disabled:opacity-50">
+            Nộp đáp án
+          </button>
         </div>
       );
     }
@@ -253,11 +273,12 @@ export default function SkillPracticeRoom() {
             const isCorrect = normalizeAnswer(opt) === normalizeAnswer(exercise.correctAnswer);
             const isPicked = pickedOption === opt;
             const showState = !!result;
-            const stateClass = showState && isCorrect
-              ? "border-green-400 bg-green-50 text-green-800"
-              : showState && isPicked && !isCorrect
-                ? "border-red-400 bg-red-50 text-red-800"
-                : "border-gray-200 bg-white hover:border-orange-400 hover:bg-orange-50";
+            const stateClass =
+              showState && isCorrect
+                ? "border-green-400 bg-green-50 text-green-800"
+                : showState && isPicked && !isCorrect
+                  ? "border-red-400 bg-red-50 text-red-800"
+                  : "border-gray-200 bg-white hover:border-orange-400 hover:bg-orange-50";
             return (
               <button
                 key={`${exercise._renderKey}_${idx}_${opt}`}
@@ -268,7 +289,9 @@ export default function SkillPracticeRoom() {
                 }}
                 className={`rounded-2xl border p-4 text-left font-bold transition ${stateClass}`}
               >
-                <span>{String.fromCharCode(65 + idx)}. {opt}</span>
+                <span>
+                  {String.fromCharCode(65 + idx)}. {opt}
+                </span>
               </button>
             );
           })}
@@ -279,21 +302,33 @@ export default function SkillPracticeRoom() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <button onClick={() => navigate("/beginner")} className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900"><ArrowLeft className="h-4 w-4" /> Quay lại</button>
+      <button onClick={() => navigate("/beginner")} className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900">
+        <ArrowLeft className="h-4 w-4" /> Quay lại
+      </button>
       <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white"><Icon className="h-7 w-7" /></div>
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white">
+              <Icon className="h-7 w-7" />
+            </div>
             <div>
               <h1 className="text-2xl font-black text-gray-900">{meta.title}</h1>
               <p className="text-sm font-medium text-gray-500">Bài được AI tổng hợp ngẫu nhiên từ phong cách VOA English và British Council Learning English.</p>
             </div>
           </div>
-          <button onClick={loadExercise} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-5 py-3 font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50"><RefreshCw className="h-5 w-5" /> Đổi bài</button>
+          <button
+            onClick={loadExercise}
+            disabled={loading}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-5 py-3 font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          >
+            <RefreshCw className="h-5 w-5" /> Đổi bài
+          </button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
           {(["listening", "speaking", "fill_blank", "reflex"] as Mode[]).map((m) => (
-            <span key={m} className={`rounded-full px-3 py-1 ${daily?.completedModes?.includes(m) ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>{MODE_META[m].title}</span>
+            <span key={m} className={`rounded-full px-3 py-1 ${daily?.completedModes?.includes(m) ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+              {MODE_META[m].title}
+            </span>
           ))}
           {daily?.bonusClaimed && <span className="rounded-full bg-yellow-100 px-3 py-1 text-yellow-700">Đã nhận +50XP hôm nay</span>}
         </div>

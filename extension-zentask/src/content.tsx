@@ -264,7 +264,7 @@ const ContentApp = () => {
             setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 4000);
           }
           setIsEnhancingAI(false);
-        }
+        },
       );
     } catch (e: any) {
       console.error("AI Enhance failed", e);
@@ -323,7 +323,7 @@ const ContentApp = () => {
           }
           setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);
           setIsSaving(false);
-        }
+        },
       );
     } catch (e: any) {
       console.error("Save to flashcard failed", e);
@@ -602,11 +602,9 @@ window.addEventListener("message", (event) => {
         token: event.data.token,
         user: event.data.user,
       },
-      (response) => {
+      () => {
         if (chrome.runtime.lastError) {
           console.error("Lỗi khi đồng bộ auth sang background:", chrome.runtime.lastError);
-        } else {
-          console.log("Đã đồng bộ auth thành công sang background!", response);
         }
       },
     );
@@ -615,11 +613,9 @@ window.addEventListener("message", (event) => {
       {
         action: "SYNC_FIREBASE_LOGOUT_FROM_CONTENT",
       },
-      (response) => {
+      () => {
         if (chrome.runtime.lastError) {
           console.error("Lỗi khi đồng bộ logout sang background:", chrome.runtime.lastError);
-        } else {
-          console.log("Đã đồng bộ logout thành công sang background!", response);
         }
       },
     );

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 import { useConfigStore } from "./configService";
 import { useUserStore } from "./userService";
 
@@ -131,10 +131,10 @@ interface FlashcardState {
   fetchProgress: (setId: string) => Promise<void>;
   recordAnswer: (cardId: string, setId: string, quality: number, mode: string) => void;
   flushProgress: () => Promise<void>;
-  
+
   recordBeginnerAnswer: (wordId: string) => void;
   flushBeginnerProgress: () => Promise<void>;
-  
+
   setManualProgress: (cardId: string, setId: string, level: MemoryLevel) => Promise<void>;
 
   generateAI: (term: string, setId?: string) => Promise<any>;
@@ -177,7 +177,6 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     }
   },
 
-
   fetchCategories: async () => {
     try {
       const res = await fetch(`${API_URL}/api/flashcard/categories`, { credentials: "include" });
@@ -201,10 +200,10 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       if (!res.ok) throw new Error(await readApiError(res, "Không tạo được đề mục"));
       const data = await res.json();
       set((state) => ({ categories: [data, ...state.categories.filter((c) => c.id !== data.id)] }));
-      toast.success("Đã tạo đề mục");
+      toastService.success("Đã tạo đề mục");
       return data;
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi tạo đề mục");
+      toastService.error(err.message || "Lỗi khi tạo đề mục");
       return null;
     }
   },
@@ -219,11 +218,11 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       });
       if (!res.ok) throw new Error(await readApiError(res, "Không cập nhật được đề mục"));
       const updated = await res.json();
-      set((state) => ({ categories: state.categories.map((c) => c.id === categoryId ? updated : c) }));
-      toast.success("Đã cập nhật đề mục");
+      set((state) => ({ categories: state.categories.map((c) => (c.id === categoryId ? updated : c)) }));
+      toastService.success("Đã cập nhật đề mục");
       return updated;
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi cập nhật đề mục");
+      toastService.error(err.message || "Lỗi khi cập nhật đề mục");
       return null;
     }
   },
@@ -237,11 +236,11 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       if (!res.ok) throw new Error(await readApiError(res, "Không xóa được đề mục"));
       set((state) => ({
         categories: state.categories.filter((c) => c.id !== categoryId),
-        sets: state.sets.map((set) => set.categoryId === categoryId ? { ...set, categoryId: null, categoryName: "" } : set),
+        sets: state.sets.map((set) => (set.categoryId === categoryId ? { ...set, categoryId: null, categoryName: "" } : set)),
       }));
-      toast.success("Đã xóa đề mục");
+      toastService.success("Đã xóa đề mục");
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi xóa đề mục");
+      toastService.error(err.message || "Lỗi khi xóa đề mục");
     }
   },
 
@@ -257,10 +256,10 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       if (!res.ok) throw new Error("Failed to create folder");
       const data = await res.json();
       set((state) => ({ folders: [data, ...state.folders] }));
-      toast.success("Đã tạo thư mục");
+      toastService.success("Đã tạo thư mục");
       return data;
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi tạo thư mục");
+      toastService.error(err.message || "Lỗi khi tạo thư mục");
       return null;
     } finally {
       set({ loading: false });
@@ -279,12 +278,12 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       if (!res.ok) throw new Error("Failed to update folder");
       const resData = await res.json();
       set((state) => ({
-        folders: state.folders.map(f => f.id === folderId ? { ...f, ...resData.updates } : f)
+        folders: state.folders.map((f) => (f.id === folderId ? { ...f, ...resData.updates } : f)),
       }));
-      toast.success("Đã cập nhật thư mục");
+      toastService.success("Đã cập nhật thư mục");
       return resData;
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi cập nhật thư mục");
+      toastService.error(err.message || "Lỗi khi cập nhật thư mục");
       return null;
     } finally {
       set({ loading: false });
@@ -299,13 +298,13 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to delete folder");
-      set((state) => ({ 
+      set((state) => ({
         folders: state.folders.filter((f) => f.id !== folderId),
-        sets: deleteSets ? state.sets.filter(s => s.folderId !== folderId) : state.sets.map(s => s.folderId === folderId ? { ...s, folderId: null } : s)
+        sets: deleteSets ? state.sets.filter((s) => s.folderId !== folderId) : state.sets.map((s) => (s.folderId === folderId ? { ...s, folderId: null } : s)),
       }));
-      toast.success("Đã xóa thư mục");
+      toastService.success("Đã xóa thư mục");
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi xóa thư mục");
+      toastService.error(err.message || "Lỗi khi xóa thư mục");
     } finally {
       set({ loading: false });
     }
@@ -321,12 +320,11 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       const data = await res.json();
       set({ sets: data });
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi tải danh sách bộ thẻ");
+      toastService.error(err.message || "Lỗi khi tải danh sách bộ thẻ");
     } finally {
       set({ loading: false });
     }
   },
-
 
   fetchPublicSets: async () => {
     set({ loading: true });
@@ -338,13 +336,11 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       const data = await res.json();
       set({ publicSets: data });
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi tải bộ thẻ công khai");
+      toastService.error(err.message || "Lỗi khi tải bộ thẻ công khai");
     } finally {
       set({ loading: false });
     }
   },
-
-
 
   fetchBuiltinSets: async () => {
     set({ loading: true });
@@ -354,7 +350,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       const data = await res.json();
       set({ builtinSets: data });
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi tải bộ thẻ có sẵn");
+      toastService.error(err.message || "Lỗi khi tải bộ thẻ có sẵn");
     } finally {
       set({ loading: false });
     }
@@ -367,10 +363,10 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       if (!res.ok) throw new Error(await readApiError(res, "Không lưu được bộ thẻ có sẵn"));
       const data = await res.json();
       set((state) => ({ sets: [data, ...state.sets] }));
-      toast.success("Đã lưu vào bộ thẻ của tôi");
+      toastService.success("Đã lưu vào bộ thẻ của tôi");
       return data;
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi lưu bộ thẻ có sẵn");
+      toastService.error(err.message || "Lỗi khi lưu bộ thẻ có sẵn");
       return null;
     } finally {
       set({ loading: false });
@@ -389,10 +385,10 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       if (!res.ok) throw new Error(await readApiError(res, "Failed to create set"));
       const data = await res.json();
       set((state) => ({ sets: [data, ...state.sets] }));
-      toast.success("Tạo bộ thẻ thành công");
+      toastService.success("Tạo bộ thẻ thành công");
       return data;
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi tạo bộ thẻ");
+      toastService.error(err.message || "Lỗi khi tạo bộ thẻ");
       return null;
     } finally {
       set({ loading: false });
@@ -408,9 +404,9 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       });
       if (!res.ok) throw new Error("Failed to delete set");
       set((state) => ({ sets: state.sets.filter((s) => s.id !== setId) }));
-      toast.success("Đã xóa bộ thẻ");
+      toastService.success("Đã xóa bộ thẻ");
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi xóa bộ thẻ");
+      toastService.error(err.message || "Lỗi khi xóa bộ thẻ");
     } finally {
       set({ loading: false });
     }
@@ -427,16 +423,16 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       });
       if (!res.ok) throw new Error(await readApiError(res, "Failed to update set"));
       const resData = await res.json();
-      
+
       set((state) => ({
-        sets: state.sets.map(s => s.id === setId ? { ...s, ...resData.updates } : s),
-        currentSet: state.currentSet?.id === setId ? { ...state.currentSet, ...resData.updates } : state.currentSet
+        sets: state.sets.map((s) => (s.id === setId ? { ...s, ...resData.updates } : s)),
+        currentSet: state.currentSet?.id === setId ? { ...state.currentSet, ...resData.updates } : state.currentSet,
       }));
-      
-      toast.success("Cập nhật bộ thẻ thành công");
+
+      toastService.success("Cập nhật bộ thẻ thành công");
       return resData;
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi cập nhật bộ thẻ");
+      toastService.error(err.message || "Lỗi khi cập nhật bộ thẻ");
       return null;
     } finally {
       set({ loading: false });
@@ -446,9 +442,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   fetchCards: async (setId) => {
     set({ loading: true });
     try {
-      const endpoint = String(setId).startsWith("builtin_")
-        ? `${API_URL}/api/flashcard/builtin/${setId}/cards`
-        : `${API_URL}/api/flashcard/set/${setId}/cards`;
+      const endpoint = String(setId).startsWith("builtin_") ? `${API_URL}/api/flashcard/builtin/${setId}/cards` : `${API_URL}/api/flashcard/set/${setId}/cards`;
       const res = await fetch(endpoint, {
         credentials: "include",
       });
@@ -456,7 +450,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       const data = await res.json();
       set({ currentSet: data.set, cards: data.cards });
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi tải danh sách thẻ");
+      toastService.error(err.message || "Lỗi khi tải danh sách thẻ");
     } finally {
       set({ loading: false });
     }
@@ -489,10 +483,10 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
         }
       }
 
-      toast.success("Đã thêm từ mới");
+      toastService.success("Đã thêm từ mới");
       return data;
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi tạo từ mới");
+      toastService.error(err.message || "Lỗi khi tạo từ mới");
       return null;
     } finally {
       set({ loading: false });
@@ -511,9 +505,9 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
         cards: state.cards.filter((c) => c.id !== cardId),
         currentSet: state.currentSet ? { ...state.currentSet, cardCount: state.currentSet.cardCount - 1 } : null,
       }));
-      toast.success("Đã xóa từ");
+      toastService.success("Đã xóa từ");
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi xóa từ");
+      toastService.error(err.message || "Lỗi khi xóa từ");
     } finally {
       set({ loading: false });
     }
@@ -531,7 +525,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       if (!res.ok) throw new Error("Lỗi khi gọi AI");
       return await res.json();
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi tạo bằng AI");
+      toastService.error(err.message || "Lỗi khi tạo bằng AI");
       return null;
     } finally {
       set({ loading: false });
@@ -548,10 +542,10 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       if (!res.ok) throw new Error("Failed to clone set");
       const data = await res.json();
       set((state) => ({ sets: [data, ...state.sets] }));
-      toast.success("Đã sao chép bộ thẻ");
+      toastService.success("Đã sao chép bộ thẻ");
       return data;
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi sao chép bộ thẻ");
+      toastService.error(err.message || "Lỗi khi sao chép bộ thẻ");
       return null;
     } finally {
       set({ loading: false });
@@ -681,7 +675,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
 
   setManualProgress: async (cardId, setId, level) => {
     if (String(setId).startsWith("builtin_") || String(cardId).startsWith("builtin_")) {
-      toast("Bộ thẻ có sẵn không lưu tiến độ thủ công.");
+      toastService.info("Bộ thẻ có sẵn không lưu tiến độ thủ công.");
       return;
     }
     // Optimistic update
@@ -723,7 +717,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
         }
       }
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi cập nhật tiến trình");
+      toastService.error(err.message || "Lỗi khi cập nhật tiến trình");
     }
   },
 
@@ -737,15 +731,15 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
         body: JSON.stringify({ isPublic }),
       });
       if (!res.ok) throw new Error(await readApiError(res, "Failed to update privacy"));
-      
+
       set((state) => ({
-        sets: state.sets.map(s => s.id === setId ? { ...s, isPublic } : s),
-        currentSet: state.currentSet?.id === setId ? { ...state.currentSet, isPublic } : state.currentSet
+        sets: state.sets.map((s) => (s.id === setId ? { ...s, isPublic } : s)),
+        currentSet: state.currentSet?.id === setId ? { ...state.currentSet, isPublic } : state.currentSet,
       }));
-      
-      toast.success(isPublic ? "Đã chuyển thành Công khai" : "Đã chuyển thành Riêng tư");
+
+      toastService.success(isPublic ? "Đã chuyển thành Công khai" : "Đã chuyển thành Riêng tư");
     } catch (err: any) {
-      toast.error(err.message || "Lỗi khi cập nhật quyền riêng tư");
+      toastService.error(err.message || "Lỗi khi cập nhật quyền riêng tư");
     } finally {
       set({ loading: false });
     }
@@ -767,5 +761,5 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       console.error("Lỗi khi tải từ vựng cần học:", err);
       return [];
     }
-  }
+  },
 }));

@@ -2,26 +2,45 @@ import React from "react";
 import { Modal } from "../../../components/shared/Modal";
 import { Globe2, Lock, Crown, Trash2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 // COLORS defined in Flashcards.tsx
 export const COLORS = [
-  "bg-blue-500", "bg-blue-600", "bg-blue-700", "bg-blue-800",
-  "bg-red-500", "bg-red-600", "bg-red-700", "bg-red-800",
-  "bg-yellow-500", "bg-yellow-600", "bg-yellow-700", "bg-yellow-800",
-  "bg-green-500", "bg-green-600", "bg-green-700", "bg-green-800",
-  "bg-purple-500", "bg-purple-600", "bg-purple-700", "bg-purple-800",
-  "bg-pink-500", "bg-pink-600", "bg-pink-700", "bg-pink-800",
-  "bg-orange-500", "bg-orange-600", "bg-orange-700", "bg-orange-800",
-  "bg-teal-500", "bg-teal-600", "bg-teal-700", "bg-teal-800",
+  "bg-blue-500",
+  "bg-blue-600",
+  "bg-blue-700",
+  "bg-blue-800",
+  "bg-red-500",
+  "bg-red-600",
+  "bg-red-700",
+  "bg-red-800",
+  "bg-yellow-500",
+  "bg-yellow-600",
+  "bg-yellow-700",
+  "bg-yellow-800",
+  "bg-green-500",
+  "bg-green-600",
+  "bg-green-700",
+  "bg-green-800",
+  "bg-purple-500",
+  "bg-purple-600",
+  "bg-purple-700",
+  "bg-purple-800",
+  "bg-pink-500",
+  "bg-pink-600",
+  "bg-pink-700",
+  "bg-pink-800",
+  "bg-orange-500",
+  "bg-orange-600",
+  "bg-orange-700",
+  "bg-orange-800",
+  "bg-teal-500",
+  "bg-teal-600",
+  "bg-teal-700",
+  "bg-teal-800",
 ];
 
-export function CreateEditFolderModal({
-  isOpen, onClose, editingFolder,
-  newFolderName, setNewFolderName,
-  newFolderColor, setNewFolderColor,
-  handleCreateOrUpdateFolder, loading
-}: any) {
+export function CreateEditFolderModal({ isOpen, onClose, editingFolder, newFolderName, setNewFolderName, newFolderColor, setNewFolderColor, handleCreateOrUpdateFolder, loading }: any) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={editingFolder ? "Sửa thư mục" : "Tạo Folder mới"} className="max-w-sm">
       <div className="p-6">
@@ -66,9 +85,7 @@ export function CreateEditFolderModal({
   );
 }
 
-export function DeleteFolderModal({
-  folderToDelete, onClose, handleDeleteFolderConfirmed, loading
-}: any) {
+export function DeleteFolderModal({ folderToDelete, onClose, handleDeleteFolderConfirmed, loading }: any) {
   return (
     <Modal isOpen={!!folderToDelete} onClose={onClose} className="max-w-sm text-center" hideCloseButton>
       {folderToDelete && (
@@ -121,14 +138,25 @@ export const SUPPORTED_LANGUAGES = [
 ];
 
 export function CreateEditSetModal({
-  isOpen, onClose, editingSet,
-  newTitle, setNewTitle,
-  newDesc, setNewDesc,
-  selectedCategoryId, setSelectedCategoryId, categories,
-  setIsPublic, setSetIsPublic, isVip,
-  selectedColor, setSelectedColor,
-  selectedLanguage, setSelectedLanguage,
-  handleCreateOrUpdateSet, loading
+  isOpen,
+  onClose,
+  editingSet,
+  newTitle,
+  setNewTitle,
+  newDesc,
+  setNewDesc,
+  selectedCategoryId,
+  setSelectedCategoryId,
+  categories,
+  setIsPublic,
+  setSetIsPublic,
+  isVip,
+  selectedColor,
+  setSelectedColor,
+  selectedLanguage,
+  setSelectedLanguage,
+  handleCreateOrUpdateSet,
+  loading,
 }: any) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={editingSet ? "Sửa bộ thẻ" : "Tạo bộ thẻ mới"} className="max-w-md">
@@ -202,7 +230,7 @@ export function CreateEditSetModal({
               type="button"
               onClick={() => {
                 if (!isVip) {
-                  toast.error("Bộ thẻ riêng tư chỉ dành cho tài khoản VIP.");
+                  toastService.error("Bộ thẻ riêng tư chỉ dành cho tài khoản VIP.");
                   return;
                 }
                 setSetIsPublic(false);
@@ -240,9 +268,7 @@ export function CreateEditSetModal({
   );
 }
 
-export function DeleteSetModal({
-  setToDelete, onClose, handleDeleteSet, loading
-}: any) {
+export function DeleteSetModal({ setToDelete, onClose, handleDeleteSet, loading }: any) {
   return (
     <Modal isOpen={!!setToDelete} onClose={onClose} className="max-w-sm text-center" hideCloseButton>
       {setToDelete && (

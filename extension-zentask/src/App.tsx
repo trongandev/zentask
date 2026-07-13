@@ -129,7 +129,7 @@ export default function App() {
   const handleClearOutputs = () => {
     setInputFrom("");
     setInputTo("");
-    toast.success("Đã xóa các ô input", { position: "bottom-center" });
+    toastService.success("Đã xóa các ô input", { position: "bottom-center" });
   };
 
   const handleSaveWord = async () => {
@@ -158,7 +158,7 @@ export default function App() {
         },
         (res) => {
           if (res && res.ok !== false) {
-            toast.success(`Lưu thành công từ "${inputFrom}"`, {
+            toastService.success(`Lưu thành công từ "${inputFrom}"`, {
               id: toastId,
               position: "bottom-center",
             });
@@ -202,7 +202,7 @@ export default function App() {
         const updated = [newBookmark, ...bookmarks];
         setBookmarks(updated);
         await chrome.storage.local.set({ quizzet_bookmarks: updated });
-        toast.success("Đã lưu vào Bookmark", { position: "bottom-center" });
+        toastService.success("Đã lưu vào Bookmark", { position: "bottom-center" });
       } else {
         toast.error("Từ này đã có trong Bookmark", {
           position: "bottom-center",
@@ -250,7 +250,7 @@ export default function App() {
     await chrome.storage.local.set({ quizzet_bookmarks: updatedBookmarks });
     setSelectedBookmarks([]);
     setIsSelectingBookmarks(false);
-    toast.success("Đã xóa từ khỏi Bookmark", { position: "bottom-center" });
+    toastService.success("Đã xóa từ khỏi Bookmark", { position: "bottom-center" });
   };
 
   const handleSaveSelectedToFlashcard = async () => {
@@ -293,7 +293,7 @@ export default function App() {
         setBookmarks(updatedBookmarks);
         await chrome.storage.local.set({ quizzet_bookmarks: updatedBookmarks });
 
-        toast.success(`Đã lưu ${wordsToSave.length} từ vào Flashcard`, {
+        toastService.success(`Đã lưu ${wordsToSave.length} từ vào Flashcard`, {
           id: "save-selected",
         });
       } catch (e) {
@@ -313,7 +313,7 @@ export default function App() {
     } else {
       navigator.clipboard.writeText(inputTo);
     }
-    toast.success("Đã sao chép thành công", { position: "bottom-center" });
+    toastService.success("Đã sao chép thành công", { position: "bottom-center" });
   };
 
   const handleChangeValueOptions = (position: number, value: string) => {
@@ -668,7 +668,7 @@ export default function App() {
                   chrome.storage.local.set({
                     list_flashcard_id: e.target.value,
                   });
-                  toast.success("Đã cập nhật thư mục lưu!", {
+                  toastService.success("Đã cập nhật thư mục lưu!", {
                     position: "top-center",
                   });
                 }}

@@ -81,6 +81,9 @@ export const friendsService = {
   respondRequest(id: string, action: "accept" | "decline") {
     return request(`/request/${id}/respond`, { method: "POST", body: JSON.stringify({ action }) });
   },
+  unfriend(friendId: string) {
+    return request(`/unfriend/${friendId}`, { method: "POST" });
+  },
   getMessages(friendId: string): Promise<FriendMessage[]> {
     return request(`/messages/${friendId}`);
   },
@@ -99,4 +102,7 @@ export const friendsService = {
   saveShare(messageId: string) {
     return request(`/share/${messageId}/save`, { method: "POST" });
   },
+  getOnlineFriends(): Promise<FriendUser[]> {
+    return request("/online");
+  }
 };

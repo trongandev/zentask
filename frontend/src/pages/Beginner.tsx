@@ -6,7 +6,7 @@ import { useFlashcardStore } from "../services/flashcardService";
 import { useAuth } from "../contexts/AuthContext";
 import { RANK_TOPIC_CONFIG } from "../config/rankTopicConfig";
 import { RankCard } from "../components/shared/RankCard";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 import { SEO } from "../components/SEO";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
@@ -85,7 +85,7 @@ export function Beginner() {
 
   const handleSaveWord = async () => {
     if (!wordToSave || !selectedUserSetId) {
-      return toast.error("Vui lòng chọn bộ thẻ để lưu!");
+      return toastService.error("Vui lòng chọn bộ thẻ để lưu!");
     }
 
     setIsSaving(true);

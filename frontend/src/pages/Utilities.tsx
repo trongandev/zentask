@@ -1,24 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  AlarmClock,
-  BookOpenCheck,
-  Calculator,
-  Clock3,
-  Copy,
-  Eraser,
-  History,
-  Languages,
-  Pause,
-  Play,
-  Plus,
-  RotateCcw,
-  Save,
-  Sparkles,
-  Square,
-  Trash2,
-  Volume2,
-} from "lucide-react";
-import toast from "react-hot-toast";
+import { AlarmClock, BookOpenCheck, Calculator, Clock3, Copy, Eraser, History, Languages, Pause, Play, Plus, RotateCcw, Save, Sparkles, Square, Trash2, Volume2 } from "lucide-react";
+import toastService from "@/src/services/toastService";
 import { voiceOptions } from "../lib/voiceOptions";
 import { useEtcStore } from "../services/etcService";
 import { utilitiesService, type CalculatorHistoryItem, type StudyMethodItem, type TranslationHistoryItem } from "../services/utilitiesService";
@@ -30,13 +12,7 @@ type ClockMode = "stopwatch" | "timer" | "study";
 type TimerPhase = "idle" | "study" | "break" | "finished";
 type AdvancedSymbolButton = { label: string; insert: string; cursorOffset?: number; hint: string };
 
-const basicButtons = [
-  "C", "CE", "⌫", "÷",
-  "7", "8", "9", "×",
-  "4", "5", "6", "-",
-  "1", "2", "3", "+",
-  "±", "0", ".", "=",
-];
+const basicButtons = ["C", "CE", "⌫", "÷", "7", "8", "9", "×", "4", "5", "6", "-", "1", "2", "3", "+", "±", "0", ".", "="];
 
 const advancedSymbolGroups: Array<{ title: string; buttons: AdvancedSymbolButton[] }> = [
   {
@@ -116,11 +92,7 @@ function evaluateExpression(input: string, vars: Record<string, number> = {}) {
     if (!allowedWords.includes(word)) throw new Error(`Chưa hỗ trợ từ khóa: ${word}`);
   }
 
-  const fn = new Function(
-    "x",
-    "y",
-    `"use strict"; const { sin, cos, tan, sqrt, log, abs, asin, acos, atan, floor, ceil, round, PI, E } = Math; const ln = log; return (${expression});`,
-  );
+  const fn = new Function("x", "y", `"use strict"; const { sin, cos, tan, sqrt, log, abs, asin, acos, atan, floor, ceil, round, PI, E } = Math; const ln = log; return (${expression});`);
   const value = Number(fn(vars.x ?? 0, vars.y ?? 0));
   if (!Number.isFinite(value)) throw new Error("Kết quả không hợp lệ.");
   return value;
@@ -183,7 +155,11 @@ function solveEquation(raw: string) {
 }
 
 function solveSystem(raw: string) {
-  const lines = raw.split(/\n|;/).map((line) => line.trim()).filter(Boolean).slice(0, 2);
+  const lines = raw
+    .split(/\n|;/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 2);
   if (lines.length < 2) throw new Error("Hãy nhập 2 phương trình, mỗi phương trình một dòng.");
 
   const getLinear = (equation: string) => {
@@ -199,8 +175,8 @@ function solveSystem(raw: string) {
   const e2 = getLinear(lines[1]);
   const det = e1.a * e2.b - e2.a * e1.b;
   if (Math.abs(det) < 1e-10) return "Hệ phương trình không có nghiệm duy nhất.";
-  const x = ((-e1.c) * e2.b - (-e2.c) * e1.b) / det;
-  const y = (e1.a * (-e2.c) - e2.a * (-e1.c)) / det;
+  const x = (-e1.c * e2.b - -e2.c * e1.b) / det;
+  const y = (e1.a * -e2.c - e2.a * -e1.c) / det;
   return `x = ${formatNumber(x)}; y = ${formatNumber(y)}`;
 }
 
@@ -284,7 +260,7 @@ export function Utilities() {
       setTranslationHistory(translationItems);
       setStudyMethods(methodItems);
     } catch (error: any) {
-      toast.error(error.message || "Không tải được dữ liệu tiện ích.");
+      toastService.error(error.message || "Không tải được dữ liệu tiện ích.");
     }
   }, []);
 
@@ -344,7 +320,7 @@ export function Utilities() {
   }, [studyRunning, studySegmentIndex, studySegments]);
 
   function notifyWeb(title: string, body: string) {
-    toast.success(`${title}: ${body}`);
+    toastService.success(`${title}: ${body}`);
     if ("Notification" in window) {
       if (Notification.permission === "granted") new Notification(title, { body });
       else if (Notification.permission !== "denied") void Notification.requestPermission();
@@ -356,7 +332,7 @@ export function Utilities() {
       const item = await utilitiesService.saveCalculatorHistory({ expression: nextExpression, result: nextResult, mode, type });
       setCalcHistory((current) => [item, ...current].slice(0, 60));
     } catch (error: any) {
-      toast.error(error.message || "Không lưu được lịch sử tính.");
+      toastService.error(error.message || "Không lưu được lịch sử tính.");
     }
   }
 
@@ -369,7 +345,7 @@ export function Utilities() {
       void saveCalculation(raw, next, "basic");
     } catch (error: any) {
       setResult("Lỗi");
-      toast.error(error.message || "Phép tính chưa hợp lệ.");
+      toastService.error(error.message || "Phép tính chưa hợp lệ.");
     }
   }
 
@@ -435,7 +411,7 @@ export function Utilities() {
       void saveCalculation(advancedInput, next, "advanced", advancedMode);
     } catch (error: any) {
       setResult("Lỗi");
-      toast.error(error.message || "Chưa tính được nội dung này.");
+      toastService.error(error.message || "Chưa tính được nội dung này.");
     }
   }
 
@@ -508,13 +484,13 @@ export function Utilities() {
 
   async function saveCustomStudyMethod() {
     try {
-      if (!customMethod.name.trim()) return toast.error("Hãy nhập tên phương pháp học.");
+      if (!customMethod.name.trim()) return toastService.error("Hãy nhập tên phương pháp học.");
 
       if (editingMethodId) {
         const item = await utilitiesService.updateStudyMethod(editingMethodId, customMethod);
         setStudyMethods((current) => current.map((method) => (method.id === item.id ? item : method)));
         if (selectedMethodId === item.id) selectStudyMethod(item);
-        toast.success("Đã cập nhật phương pháp học.");
+        toastService.success("Đã cập nhật phương pháp học.");
         resetStudyMethodForm();
         return;
       }
@@ -522,15 +498,15 @@ export function Utilities() {
       const item = await utilitiesService.createStudyMethod(customMethod);
       setStudyMethods((current) => [item, ...current]);
       selectStudyMethod(item);
-      toast.success("Đã lưu phương pháp học mới.");
+      toastService.success("Đã lưu phương pháp học mới.");
       resetStudyMethodForm();
     } catch (error: any) {
-      toast.error(error.message || "Không lưu được phương pháp học.");
+      toastService.error(error.message || "Không lưu được phương pháp học.");
     }
   }
 
   async function deleteCustomStudyMethod(method: StudyMethodItem) {
-    if (!method.isCustom) return toast.error("Phương pháp có sẵn không thể xóa.");
+    if (!method.isCustom) return toastService.error("Phương pháp có sẵn không thể xóa.");
     const ok = window.confirm(`Xóa phương pháp "${method.name}"?`);
     if (!ok) return;
 
@@ -539,21 +515,21 @@ export function Utilities() {
       setStudyMethods((current) => current.filter((item) => item.id !== method.id));
       if (selectedMethodId === method.id) selectStudyMethod(builtInMethods[0]);
       if (editingMethodId === method.id) resetStudyMethodForm();
-      toast.success("Đã xóa phương pháp học.");
+      toastService.success("Đã xóa phương pháp học.");
     } catch (error: any) {
-      toast.error(error.message || "Không xóa được phương pháp học.");
+      toastService.error(error.message || "Không xóa được phương pháp học.");
     }
   }
 
   async function handleTranslate() {
-    if (!sourceText.trim()) return toast.error("Hãy nhập nội dung cần dịch.");
+    if (!sourceText.trim()) return toastService.error("Hãy nhập nội dung cần dịch.");
     setIsTranslating(true);
     try {
       const data = await utilitiesService.translate({ text: sourceText, source: sourceLang, target: targetLang, save: true });
       setTranslatedText(data.translatedText);
       if (data.item) setTranslationHistory((current) => [data.item!, ...current].slice(0, 80));
     } catch (error: any) {
-      toast.error(error.message || "Dịch thuật thất bại.");
+      toastService.error(error.message || "Dịch thuật thất bại.");
     } finally {
       setIsTranslating(false);
     }
@@ -591,7 +567,9 @@ export function Utilities() {
   return (
     <div className="mx-auto max-w-[1500px] space-y-6">
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-700 p-6 text-white shadow-xl md:p-8">
-        <div className="absolute right-8 top-8 opacity-20"><Sparkles className="h-32 w-32" /></div>
+        <div className="absolute right-8 top-8 opacity-20">
+          <Sparkles className="h-32 w-32" />
+        </div>
         <div className="relative z-10 max-w-3xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-1 text-sm font-semibold">Bộ công cụ học tập</div>
           <h1 className="mb-3 text-3xl font-extrabold tracking-tight md:text-4xl">Tiện ích ZenTask</h1>
@@ -600,12 +578,18 @@ export function Utilities() {
       </div>
 
       <div className="flex flex-wrap gap-3 rounded-[1.5rem] border border-slate-100 bg-white p-2 shadow-sm">
-        {([
-          ["calculator", Calculator, "Máy tính"],
-          ["clock", Clock3, "Đồng hồ"],
-          ["translate", Languages, "Dịch thuật"],
-        ] as const).map(([id, Icon, label]) => (
-          <button key={id} onClick={() => setActiveTab(id)} className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold transition ${activeTab === id ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50"}`}>
+        {(
+          [
+            ["calculator", Calculator, "Máy tính"],
+            ["clock", Clock3, "Đồng hồ"],
+            ["translate", Languages, "Dịch thuật"],
+          ] as const
+        ).map(([id, Icon, label]) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold transition ${activeTab === id ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50"}`}
+          >
             <Icon className="h-5 w-5" /> {label}
           </button>
         ))}
@@ -620,8 +604,12 @@ export function Utilities() {
                 <p className="text-sm text-slate-500">Tính nhanh hoặc giải các bài toán nâng cao.</p>
               </div>
               <div className="rounded-2xl bg-slate-100 p-1">
-                <button onClick={() => setCalcMode("basic")} className={`rounded-xl px-4 py-2 text-sm font-bold ${calcMode === "basic" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>Cơ bản</button>
-                <button onClick={() => setCalcMode("advanced")} className={`rounded-xl px-4 py-2 text-sm font-bold ${calcMode === "advanced" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>Nâng cao</button>
+                <button onClick={() => setCalcMode("basic")} className={`rounded-xl px-4 py-2 text-sm font-bold ${calcMode === "basic" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>
+                  Cơ bản
+                </button>
+                <button onClick={() => setCalcMode("advanced")} className={`rounded-xl px-4 py-2 text-sm font-bold ${calcMode === "advanced" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>
+                  Nâng cao
+                </button>
               </div>
             </div>
 
@@ -633,7 +621,11 @@ export function Utilities() {
                 </div>
                 <div className="grid grid-cols-4 gap-3">
                   {basicButtons.map((button) => (
-                    <button key={button} onClick={() => handleBasicButton(button)} className={`h-14 rounded-2xl text-lg font-black transition ${button === "=" ? "bg-blue-500 text-white hover:bg-blue-400" : ["C", "CE", "⌫"].includes(button) ? "bg-slate-700 text-white hover:bg-slate-600" : ["÷", "×", "-", "+"].includes(button) ? "bg-orange-500 text-white hover:bg-orange-400" : "bg-white text-slate-900 hover:bg-slate-100"}`}>
+                    <button
+                      key={button}
+                      onClick={() => handleBasicButton(button)}
+                      className={`h-14 rounded-2xl text-lg font-black transition ${button === "=" ? "bg-blue-500 text-white hover:bg-blue-400" : ["C", "CE", "⌫"].includes(button) ? "bg-slate-700 text-white hover:bg-slate-600" : ["÷", "×", "-", "+"].includes(button) ? "bg-orange-500 text-white hover:bg-orange-400" : "bg-white text-slate-900 hover:bg-slate-100"}`}
+                    >
                       {button}
                     </button>
                   ))}
@@ -642,11 +634,13 @@ export function Utilities() {
             ) : (
               <div className="space-y-5">
                 <div className="flex flex-wrap gap-2">
-                  {([
-                    ["equation", "Giải phương trình"],
-                    ["system", "Hệ phương trình"],
-                    ["expression", "Tính biểu thức"],
-                  ] as const).map(([id, label]) => (
+                  {(
+                    [
+                      ["equation", "Giải phương trình"],
+                      ["system", "Hệ phương trình"],
+                      ["expression", "Tính biểu thức"],
+                    ] as const
+                  ).map(([id, label]) => (
                     <button
                       key={id}
                       onClick={() => {
@@ -669,7 +663,11 @@ export function Utilities() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => { setAdvancedInput(""); setResult("0"); advancedInputRef.current?.focus(); }}
+                      onClick={() => {
+                        setAdvancedInput("");
+                        setResult("0");
+                        advancedInputRef.current?.focus();
+                      }}
                       className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-slate-500 shadow-sm hover:text-red-600"
                     >
                       Xóa nội dung
@@ -724,18 +722,32 @@ export function Utilities() {
                   placeholder="Bấm các nút phía trên để chèn công thức, hoặc nhập trực tiếp tại đây..."
                 />
                 <div className="flex flex-wrap items-center gap-3">
-                  <button onClick={calculateAdvanced} className="rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700">Tính kết quả</button>
+                  <button onClick={calculateAdvanced} className="rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700">
+                    Tính kết quả
+                  </button>
                   <div className="rounded-2xl bg-blue-50 px-5 py-3 text-sm font-bold text-blue-700">Kết quả: {result}</div>
                 </div>
-                <p className="text-sm text-slate-500">Gợi ý: với hệ phương trình, hãy để mỗi phương trình trên một dòng. Ví dụ: <b>2x + y = 5</b> và <b>x - y = 1</b>.</p>
+                <p className="text-sm text-slate-500">
+                  Gợi ý: với hệ phương trình, hãy để mỗi phương trình trên một dòng. Ví dụ: <b>2x + y = 5</b> và <b>x - y = 1</b>.
+                </p>
               </div>
             )}
           </section>
 
           <aside className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="flex items-center gap-2 text-lg font-extrabold text-slate-900"><History className="h-5 w-5 text-blue-600" /> Lịch sử tính</h3>
-              <button onClick={async () => { await utilitiesService.clearCalculatorHistory(); setCalcHistory([]); }} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+              <h3 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
+                <History className="h-5 w-5 text-blue-600" /> Lịch sử tính
+              </h3>
+              <button
+                onClick={async () => {
+                  await utilitiesService.clearCalculatorHistory();
+                  setCalcHistory([]);
+                }}
+                className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
             <div className="max-h-[600px] space-y-2 overflow-y-auto pr-1">
               {calcHistory.length === 0 && <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Chưa có phép tính nào.</div>}
@@ -754,12 +766,16 @@ export function Utilities() {
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
           <section className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm">
             <div className="mb-5 flex flex-wrap gap-2 rounded-2xl bg-slate-100 p-1">
-              {([
-                ["stopwatch", "Đếm xuôi"],
-                ["timer", "Đếm ngược"],
-                ["study", "Phương pháp học"],
-              ] as const).map(([id, label]) => (
-                <button key={id} onClick={() => setClockMode(id)} className={`rounded-xl px-4 py-2 text-sm font-bold ${clockMode === id ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>{label}</button>
+              {(
+                [
+                  ["stopwatch", "Đếm xuôi"],
+                  ["timer", "Đếm ngược"],
+                  ["study", "Phương pháp học"],
+                ] as const
+              ).map(([id, label]) => (
+                <button key={id} onClick={() => setClockMode(id)} className={`rounded-xl px-4 py-2 text-sm font-bold ${clockMode === id ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>
+                  {label}
+                </button>
               ))}
             </div>
 
@@ -767,9 +783,21 @@ export function Utilities() {
               <div className="flex flex-col items-center justify-center rounded-[2rem] bg-slate-950 p-8 text-white">
                 <div className="mb-8 text-6xl font-black tracking-tight md:text-7xl">{formatTime(stopwatchSeconds)}</div>
                 <div className="flex flex-wrap justify-center gap-3">
-                  <button onClick={() => setStopwatchRunning(true)} className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 font-bold text-white"><Play className="h-5 w-5" /> Bắt đầu</button>
-                  <button onClick={() => setStopwatchRunning(false)} className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white"><Pause className="h-5 w-5" /> Tạm dừng</button>
-                  <button onClick={() => { setStopwatchRunning(false); setStopwatchSeconds(0); }} className="flex items-center gap-2 rounded-2xl bg-slate-700 px-6 py-3 font-bold text-white"><RotateCcw className="h-5 w-5" /> Đặt lại</button>
+                  <button onClick={() => setStopwatchRunning(true)} className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 font-bold text-white">
+                    <Play className="h-5 w-5" /> Bắt đầu
+                  </button>
+                  <button onClick={() => setStopwatchRunning(false)} className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white">
+                    <Pause className="h-5 w-5" /> Tạm dừng
+                  </button>
+                  <button
+                    onClick={() => {
+                      setStopwatchRunning(false);
+                      setStopwatchSeconds(0);
+                    }}
+                    className="flex items-center gap-2 rounded-2xl bg-slate-700 px-6 py-3 font-bold text-white"
+                  >
+                    <RotateCcw className="h-5 w-5" /> Đặt lại
+                  </button>
                 </div>
               </div>
             )}
@@ -777,14 +805,30 @@ export function Utilities() {
             {clockMode === "timer" && (
               <div className="rounded-[2rem] bg-blue-50 p-6 text-center">
                 <div className="mb-5 flex justify-center gap-3">
-                  <input type="number" min={1} value={timerMinutes} onChange={(event) => { const next = Number(event.target.value); setTimerMinutes(next); setTimerSecondsLeft(next * 60); }} className="w-28 rounded-2xl border border-blue-100 bg-white px-4 py-3 text-center text-xl font-black text-blue-700 outline-none" />
+                  <input
+                    type="number"
+                    min={1}
+                    value={timerMinutes}
+                    onChange={(event) => {
+                      const next = Number(event.target.value);
+                      setTimerMinutes(next);
+                      setTimerSecondsLeft(next * 60);
+                    }}
+                    className="w-28 rounded-2xl border border-blue-100 bg-white px-4 py-3 text-center text-xl font-black text-blue-700 outline-none"
+                  />
                   <span className="self-center font-bold text-blue-700">phút</span>
                 </div>
                 <div className="mb-8 text-6xl font-black text-blue-700 md:text-7xl">{formatTime(timerSecondsLeft)}</div>
                 <div className="flex flex-wrap justify-center gap-3">
-                  <button onClick={startTimer} className="flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white"><Play className="h-5 w-5" /> Bắt đầu</button>
-                  <button onClick={() => setTimerRunning(false)} className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white"><Pause className="h-5 w-5" /> Tạm dừng</button>
-                  <button onClick={resetTimer} className="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 font-bold text-blue-700"><RotateCcw className="h-5 w-5" /> Đặt lại</button>
+                  <button onClick={startTimer} className="flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white">
+                    <Play className="h-5 w-5" /> Bắt đầu
+                  </button>
+                  <button onClick={() => setTimerRunning(false)} className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white">
+                    <Pause className="h-5 w-5" /> Tạm dừng
+                  </button>
+                  <button onClick={resetTimer} className="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 font-bold text-blue-700">
+                    <RotateCcw className="h-5 w-5" /> Đặt lại
+                  </button>
                 </div>
               </div>
             )}
@@ -796,9 +840,15 @@ export function Utilities() {
                   <div className="mb-2 text-6xl font-black md:text-7xl">{formatTime(studySecondsLeft)}</div>
                   <div className="mb-6 text-blue-100">{phase === "break" ? "Đang nghỉ" : phase === "finished" ? "Đã hoàn thành" : studySegments[studySegmentIndex]?.label || "Sẵn sàng học"}</div>
                   <div className="flex flex-wrap justify-center gap-3">
-                    <button onClick={startStudy} className="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 font-bold text-blue-700"><Play className="h-5 w-5" /> Bắt đầu</button>
-                    <button onClick={() => setStudyRunning(false)} className="flex items-center gap-2 rounded-2xl bg-white/15 px-6 py-3 font-bold text-white"><Pause className="h-5 w-5" /> Tạm dừng</button>
-                    <button onClick={resetStudy} className="flex items-center gap-2 rounded-2xl bg-white/15 px-6 py-3 font-bold text-white"><RotateCcw className="h-5 w-5" /> Đặt lại</button>
+                    <button onClick={startStudy} className="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 font-bold text-blue-700">
+                      <Play className="h-5 w-5" /> Bắt đầu
+                    </button>
+                    <button onClick={() => setStudyRunning(false)} className="flex items-center gap-2 rounded-2xl bg-white/15 px-6 py-3 font-bold text-white">
+                      <Pause className="h-5 w-5" /> Tạm dừng
+                    </button>
+                    <button onClick={resetStudy} className="flex items-center gap-2 rounded-2xl bg-white/15 px-6 py-3 font-bold text-white">
+                      <RotateCcw className="h-5 w-5" /> Đặt lại
+                    </button>
                   </div>
                 </div>
 
@@ -806,7 +856,9 @@ export function Utilities() {
                   {studySegments.map((segment, index) => (
                     <div key={`${segment.label}-${index}`} className={`rounded-2xl border p-3 ${index === studySegmentIndex ? "border-blue-300 bg-blue-50" : "border-slate-100 bg-slate-50"}`}>
                       <div className="text-sm font-bold text-slate-800">{segment.label}</div>
-                      <div className="text-xs text-slate-500">{segment.phase === "break" ? "Nghỉ" : "Học"} · {Math.round(segment.seconds / 60)} phút</div>
+                      <div className="text-xs text-slate-500">
+                        {segment.phase === "break" ? "Nghỉ" : "Học"} · {Math.round(segment.seconds / 60)} phút
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -816,7 +868,9 @@ export function Utilities() {
 
           <aside className="space-y-5">
             <section className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm">
-              <h3 className="mb-4 flex items-center gap-2 text-lg font-extrabold text-slate-900"><BookOpenCheck className="h-5 w-5 text-blue-600" /> Phương pháp học</h3>
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-extrabold text-slate-900">
+                <BookOpenCheck className="h-5 w-5 text-blue-600" /> Phương pháp học
+              </h3>
               <div className="space-y-2">
                 {allMethods.map((method) => (
                   <div key={method.id} className={`rounded-2xl border p-3 transition ${selectedMethodId === method.id ? "border-blue-300 bg-blue-50" : "border-slate-100 bg-slate-50 hover:bg-white"}`}>
@@ -824,7 +878,9 @@ export function Utilities() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <div className="truncate font-bold text-slate-800">{method.name}</div>
-                          <div className="text-xs text-slate-500">Học {method.studyMinutes} phút · nghỉ {method.breakMinutes} phút/lần · {method.breakCount} lần nghỉ</div>
+                          <div className="text-xs text-slate-500">
+                            Học {method.studyMinutes} phút · nghỉ {method.breakMinutes} phút/lần · {method.breakCount} lần nghỉ
+                          </div>
                         </div>
                         {!method.isCustom && <span className="shrink-0 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-400">Có sẵn</span>}
                       </div>
@@ -845,13 +901,47 @@ export function Utilities() {
             </section>
 
             <section className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm">
-              <h3 className="mb-4 flex items-center gap-2 text-lg font-extrabold text-slate-900"><Plus className="h-5 w-5 text-blue-600" /> {editingMethodId ? "Chỉnh sửa phương pháp" : "Tạo phương pháp riêng"}</h3>
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-extrabold text-slate-900">
+                <Plus className="h-5 w-5 text-blue-600" /> {editingMethodId ? "Chỉnh sửa phương pháp" : "Tạo phương pháp riêng"}
+              </h3>
               <div className="space-y-3">
-                <input value={customMethod.name} onChange={(e) => setCustomMethod((v) => ({ ...v, name: e.target.value }))} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-300" placeholder="Tên phương pháp" />
+                <input
+                  value={customMethod.name}
+                  onChange={(e) => setCustomMethod((v) => ({ ...v, name: e.target.value }))}
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-300"
+                  placeholder="Tên phương pháp"
+                />
                 <div className="grid grid-cols-3 gap-2">
-                  <label className="text-xs font-bold text-slate-500">Học<input type="number" min={1} value={customMethod.studyMinutes} onChange={(e) => setCustomMethod((v) => ({ ...v, studyMinutes: Number(e.target.value) }))} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900" /></label>
-                  <label className="text-xs font-bold text-slate-500">Nghỉ<input type="number" min={1} value={customMethod.breakMinutes} onChange={(e) => setCustomMethod((v) => ({ ...v, breakMinutes: Number(e.target.value) }))} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900" /></label>
-                  <label className="text-xs font-bold text-slate-500">Số lần<input type="number" min={0} value={customMethod.breakCount} onChange={(e) => setCustomMethod((v) => ({ ...v, breakCount: Number(e.target.value) }))} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900" /></label>
+                  <label className="text-xs font-bold text-slate-500">
+                    Học
+                    <input
+                      type="number"
+                      min={1}
+                      value={customMethod.studyMinutes}
+                      onChange={(e) => setCustomMethod((v) => ({ ...v, studyMinutes: Number(e.target.value) }))}
+                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900"
+                    />
+                  </label>
+                  <label className="text-xs font-bold text-slate-500">
+                    Nghỉ
+                    <input
+                      type="number"
+                      min={1}
+                      value={customMethod.breakMinutes}
+                      onChange={(e) => setCustomMethod((v) => ({ ...v, breakMinutes: Number(e.target.value) }))}
+                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900"
+                    />
+                  </label>
+                  <label className="text-xs font-bold text-slate-500">
+                    Số lần
+                    <input
+                      type="number"
+                      min={0}
+                      value={customMethod.breakCount}
+                      onChange={(e) => setCustomMethod((v) => ({ ...v, breakCount: Number(e.target.value) }))}
+                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900"
+                    />
+                  </label>
                 </div>
                 <div className="flex gap-2">
                   {editingMethodId && (
@@ -859,7 +949,12 @@ export function Utilities() {
                       Hủy
                     </button>
                   )}
-                  <button onClick={() => void saveCustomStudyMethod()} className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700"><Save className="h-4 w-4" /> {editingMethodId ? "Cập nhật" : "Lưu phương pháp"}</button>
+                  <button
+                    onClick={() => void saveCustomStudyMethod()}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700"
+                  >
+                    <Save className="h-4 w-4" /> {editingMethodId ? "Cập nhật" : "Lưu phương pháp"}
+                  </button>
                 </div>
               </div>
             </section>
@@ -884,32 +979,83 @@ export function Utilities() {
               <div className="space-y-3">
                 <div className="flex gap-2">
                   <select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)} className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700">
-                    {languageOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                    {languageOptions.map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
                   </select>
-                  <select value={sourceVoice} onChange={(e) => setSourceVoice(e.target.value)} className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700">
-                    {voiceOptions.map((voice) => <option key={voice.id} value={voice.id}>{voice.name} · {voice.country}</option>)}
+                  <select
+                    value={sourceVoice}
+                    onChange={(e) => setSourceVoice(e.target.value)}
+                    className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700"
+                  >
+                    {voiceOptions.map((voice) => (
+                      <option key={voice.id} value={voice.id}>
+                        {voice.name} · {voice.country}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                <textarea value={sourceText} onChange={(e) => setSourceText(e.target.value)} className="h-72 w-full resize-none rounded-3xl border border-slate-200 bg-slate-50 p-5 text-base outline-none focus:border-blue-300 focus:bg-white" placeholder="Nhập nội dung cần dịch..." />
+                <textarea
+                  value={sourceText}
+                  onChange={(e) => setSourceText(e.target.value)}
+                  className="h-72 w-full resize-none rounded-3xl border border-slate-200 bg-slate-50 p-5 text-base outline-none focus:border-blue-300 focus:bg-white"
+                  placeholder="Nhập nội dung cần dịch..."
+                />
                 <div className="flex gap-2">
-                  <button onClick={() => void playText(sourceText, sourceVoice)} className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-200"><Volume2 className="h-4 w-4" /> Đọc bên trái</button>
-                  <button onClick={() => setSourceText("")} className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-500 hover:text-red-600"><Eraser className="h-4 w-4" /></button>
+                  <button
+                    onClick={() => void playText(sourceText, sourceVoice)}
+                    className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-200"
+                  >
+                    <Volume2 className="h-4 w-4" /> Đọc bên trái
+                  </button>
+                  <button onClick={() => setSourceText("")} className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-500 hover:text-red-600">
+                    <Eraser className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <div className="flex gap-2">
                   <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)} className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700">
-                    {languageOptions.filter((item) => item.value !== "auto").map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                    {languageOptions
+                      .filter((item) => item.value !== "auto")
+                      .map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
                   </select>
-                  <select value={targetVoice} onChange={(e) => setTargetVoice(e.target.value)} className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700">
-                    {voiceOptions.map((voice) => <option key={voice.id} value={voice.id}>{voice.name} · {voice.country}</option>)}
+                  <select
+                    value={targetVoice}
+                    onChange={(e) => setTargetVoice(e.target.value)}
+                    className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700"
+                  >
+                    {voiceOptions.map((voice) => (
+                      <option key={voice.id} value={voice.id}>
+                        {voice.name} · {voice.country}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                <textarea value={translatedText} onChange={(e) => setTranslatedText(e.target.value)} className="h-72 w-full resize-none rounded-3xl border border-blue-100 bg-blue-50/70 p-5 text-base text-blue-950 outline-none focus:border-blue-300" placeholder="Bản dịch sẽ xuất hiện ở đây..." />
+                <textarea
+                  value={translatedText}
+                  onChange={(e) => setTranslatedText(e.target.value)}
+                  className="h-72 w-full resize-none rounded-3xl border border-blue-100 bg-blue-50/70 p-5 text-base text-blue-950 outline-none focus:border-blue-300"
+                  placeholder="Bản dịch sẽ xuất hiện ở đây..."
+                />
                 <div className="flex flex-wrap gap-2">
-                  <button onClick={() => void playText(translatedText, targetVoice)} disabled={playingAudio} className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"><Volume2 className="h-4 w-4" /> Đọc bản dịch</button>
-                  <button onClick={() => navigator.clipboard.writeText(translatedText)} className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700"><Copy className="h-4 w-4" /> Sao chép</button>
+                  <button
+                    onClick={() => void playText(translatedText, targetVoice)}
+                    disabled={playingAudio}
+                    className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                  >
+                    <Volume2 className="h-4 w-4" /> Đọc bản dịch
+                  </button>
+                  <button onClick={() => navigator.clipboard.writeText(translatedText)} className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700">
+                    <Copy className="h-4 w-4" /> Sao chép
+                  </button>
                 </div>
               </div>
             </div>
@@ -917,8 +1063,18 @@ export function Utilities() {
 
           <aside className="rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="flex items-center gap-2 text-lg font-extrabold text-slate-900"><History className="h-5 w-5 text-blue-600" /> Lịch sử dịch</h3>
-              <button onClick={async () => { await utilitiesService.clearTranslationHistory(); setTranslationHistory([]); }} className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+              <h3 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
+                <History className="h-5 w-5 text-blue-600" /> Lịch sử dịch
+              </h3>
+              <button
+                onClick={async () => {
+                  await utilitiesService.clearTranslationHistory();
+                  setTranslationHistory([]);
+                }}
+                className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
             <div className="max-h-[680px] space-y-2 overflow-y-auto pr-1">
               {translationHistory.length === 0 && <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Chưa có lịch sử dịch.</div>}
@@ -926,7 +1082,9 @@ export function Utilities() {
                 <button key={item.id} onClick={() => recallTranslation(item)} className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-3 text-left hover:border-blue-200 hover:bg-blue-50">
                   <div className="line-clamp-2 text-sm font-bold text-slate-800">{item.sourceText}</div>
                   <div className="mt-1 line-clamp-2 text-sm text-blue-700">{item.translatedText}</div>
-                  <div className="mt-2 text-[11px] font-bold uppercase text-slate-400">{item.source} → {item.target}</div>
+                  <div className="mt-2 text-[11px] font-bold uppercase text-slate-400">
+                    {item.source} → {item.target}
+                  </div>
                 </button>
               ))}
             </div>

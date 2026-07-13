@@ -4,7 +4,7 @@ import { Clock, Loader2, ArrowRight, Flame, Sparkles, XCircle } from "lucide-rea
 import { useSocket } from "../../contexts/SocketContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useQuizStore, Quiz, QuizRoom } from "../../services/quizService";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 export function QuizPlay() {
   const { id } = useParams<{ id: string }>();
@@ -84,7 +84,7 @@ export function QuizPlay() {
     }
 
     socket.on("room_ended", () => {
-      toast.error("Giáo viên đã kết thúc phòng thi. Hệ thống đang tự động nộp bài...");
+      toastService.error("Giáo viên đã kết thúc phòng thi. Hệ thống đang tự động nộp bài...");
 
       // Auto submit immediately
       submitQuiz(id || "", answers, false, room?.id).then((res) => {
@@ -168,7 +168,7 @@ export function QuizPlay() {
         if ((res as any).isBuiltIn) {
           sessionStorage.setItem(`builtin_quiz_result_${res.id}`, JSON.stringify({ result: res, quiz }));
         }
-        toast.success(`Nộp bài thành công! Điểm: ${res.score}/100`);
+        toastService.success(`Nộp bài thành công! Điểm: ${res.score}/100`);
         navigate(`/quiz/result/${res.id}`);
       }
     } finally {

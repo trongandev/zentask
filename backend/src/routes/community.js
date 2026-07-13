@@ -11,13 +11,25 @@ import { cleanAndValidateCommunityHtml, cleanAndValidateCommunityText } from "..
 const router = Router();
 router.use(verifyToken);
 
+const postsCache = new Map();
+const POSTS_CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
+
 // --- POSTS ---
 
 // GET /posts (with optional tag filter)
 router.get(
   "/posts",
   asyncHandler(async (req, res) => {
-    const { tags } = req.query;
+    const { tags, force } = req.query;
+    const cacheKey = tags || "all";
+
+    if (force !== "true" && postsCache.has(cacheKey)) {
+      const cached = postsCache.get(cacheKey);
+      if (Date.now() - cached.timestamp < POSTS_CACHE_TTL) {
+        return res.json(cached.data);
+      }
+    }
+
     let query = {};
 
     if (tags) {
@@ -46,6 +58,7 @@ router.get(
       };
     });
 
+    postsCache.set(cacheKey, { data: posts, timestamp: Date.now() });
     res.json(posts);
   }),
 );
@@ -62,7 +75,7 @@ router.get(
 router.post(
   "/posts",
   asyncHandler(async (req, res) => {
-    return res.status(400).json({ error: "Tính năng này đang bảo trì, vui lòng thử lại sau!" });
+    // return res.status(400).json({ error: "Tính năng này đang bảo trì, vui lòng thử lại sau!" });
     const { content, tags } = req.body;
 
     if (!content) return res.status(400).json({ error: "Content is required" });
@@ -96,6 +109,8 @@ router.post(
       likes: [],
       commentsCount: 0,
     });
+
+    postsCache.clear();
 
     const taskResult = await incrementDailyTask(req.user.uid, "community_share", 1);
     let xpResult = null;
@@ -141,6 +156,8 @@ router.put(
     if (tags) post.tags = cleanTags;
     await post.save();
 
+    postsCache.clear();
+
     res.json({ status: "success" });
   }),
 );
@@ -156,6 +173,8 @@ router.delete(
 
     await CommunityPost.findByIdAndDelete(req.params.id);
     await CommunityComment.deleteMany({ postId: req.params.id });
+
+    postsCache.clear();
 
     res.json({ status: "success" });
   }),
@@ -178,6 +197,8 @@ router.post(
       isLiking = true;
     }
     await post.save();
+    
+    postsCache.clear();
 
     const postOwnerId = post.uid.toString();
 

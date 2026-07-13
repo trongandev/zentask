@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
@@ -97,7 +97,7 @@ interface QuizState {
   builtinQuizzes: Quiz[];
   quizHistory: QuizResult[];
   quizCategories: QuizCategory[];
-  
+
   getQuizzes: () => Promise<Quiz[]>;
   getPublicQuizzes: () => Promise<Quiz[]>;
   getBuiltinQuizzes: () => Promise<Quiz[]>;
@@ -131,12 +131,11 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       set({ quizzes: data, loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return [];
     }
   },
-
 
   getPublicQuizzes: async () => {
     set({ loading: true });
@@ -145,13 +144,11 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       set({ publicQuizzes: data, loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return [];
     }
   },
-
-
 
   getBuiltinQuizzes: async () => {
     set({ loading: true });
@@ -160,7 +157,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       set({ builtinQuizzes: data, loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message || "Không tải được quiz có sẵn");
+      toastService.error(error.message || "Không tải được quiz có sẵn");
       set({ loading: false });
       return [];
     }
@@ -184,10 +181,10 @@ export const useQuizStore = create<QuizState>((set, get) => ({
         body: JSON.stringify({ name, color, description }),
       });
       set((state) => ({ quizCategories: [data, ...state.quizCategories.filter((c) => c.id !== data.id)] }));
-      toast.success("Đã tạo đề mục quiz");
+      toastService.success("Đã tạo đề mục quiz");
       return data;
     } catch (error: any) {
-      toast.error(error.message || "Không tạo được đề mục quiz");
+      toastService.error(error.message || "Không tạo được đề mục quiz");
       return null;
     }
   },
@@ -198,11 +195,11 @@ export const useQuizStore = create<QuizState>((set, get) => ({
         method: "PATCH",
         body: JSON.stringify(data),
       });
-      set((state) => ({ quizCategories: state.quizCategories.map((c) => c.id === categoryId ? updated : c) }));
-      toast.success("Đã cập nhật đề mục quiz");
+      set((state) => ({ quizCategories: state.quizCategories.map((c) => (c.id === categoryId ? updated : c)) }));
+      toastService.success("Đã cập nhật đề mục quiz");
       return updated;
     } catch (error: any) {
-      toast.error(error.message || "Không cập nhật được đề mục quiz");
+      toastService.error(error.message || "Không cập nhật được đề mục quiz");
       return null;
     }
   },
@@ -212,11 +209,11 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       await fetchApi(`/quiz/category/${categoryId}`, { method: "DELETE" });
       set((state) => ({
         quizCategories: state.quizCategories.filter((c) => c.id !== categoryId),
-        quizzes: state.quizzes.map((quiz) => quiz.categoryId === categoryId ? { ...quiz, categoryId: null, categoryName: "" } : quiz),
+        quizzes: state.quizzes.map((quiz) => (quiz.categoryId === categoryId ? { ...quiz, categoryId: null, categoryName: "" } : quiz)),
       }));
-      toast.success("Đã xóa đề mục quiz");
+      toastService.success("Đã xóa đề mục quiz");
     } catch (error: any) {
-      toast.error(error.message || "Không xóa được đề mục quiz");
+      toastService.error(error.message || "Không xóa được đề mục quiz");
     }
   },
 
@@ -227,7 +224,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       set({ quizHistory: data, loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return [];
     }
@@ -240,7 +237,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       set({ loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return null;
     }
@@ -255,11 +252,11 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       });
       // Optionally refresh quizzes
       get().getQuizzes();
-      toast.success("Tạo quiz thành công!");
+      toastService.success("Tạo quiz thành công!");
       set({ loading: false });
       return result;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return null;
     }
@@ -275,7 +272,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       set({ loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return null;
     }
@@ -292,7 +289,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       set({ loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return null;
     }
@@ -305,11 +302,11 @@ export const useQuizStore = create<QuizState>((set, get) => ({
         method: "POST",
         body: JSON.stringify({ settings }),
       });
-      toast.success("Tạo phòng chơi thành công!");
+      toastService.success("Tạo phòng chơi thành công!");
       set({ loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return null;
     }
@@ -322,7 +319,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       set({ loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return null;
     }
@@ -335,7 +332,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       set({ loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return null;
     }
@@ -351,9 +348,9 @@ export const useQuizStore = create<QuizState>((set, get) => ({
       set({ loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return null;
     }
-  }
+  },
 }));

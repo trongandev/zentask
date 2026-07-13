@@ -1,4 +1,4 @@
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
@@ -83,7 +83,7 @@ export const notebookService = {
     try {
       return await fetchApi("/notebook");
     } catch (error: any) {
-      toast.error(error.message || "Không tải được notebook.");
+      toastService.error(error.message || "Không tải được notebook.");
       return [];
     }
   },
@@ -92,7 +92,7 @@ export const notebookService = {
     try {
       return await fetchApi(`/notebook/${id}`);
     } catch (error: any) {
-      toast.error(error.message || "Không tải được notebook.");
+      toastService.error(error.message || "Không tải được notebook.");
       return null;
     }
   },
@@ -103,10 +103,10 @@ export const notebookService = {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      toast.success("Đã tạo notebook");
+      toastService.success("Đã tạo notebook");
       return notebook;
     } catch (error: any) {
-      toast.error(error.message || "Không tạo được notebook.");
+      toastService.error(error.message || "Không tạo được notebook.");
       return null;
     }
   },
@@ -117,10 +117,10 @@ export const notebookService = {
         method: "PUT",
         body: JSON.stringify(payload),
       });
-      if (showToast) toast.success("Đã lưu notebook");
+      if (showToast) toastService.success("Đã lưu notebook");
       return notebook;
     } catch (error: any) {
-      toast.error(error.message || "Không lưu được notebook.");
+      toastService.error(error.message || "Không lưu được notebook.");
       return null;
     }
   },
@@ -128,10 +128,10 @@ export const notebookService = {
   async remove(id: string): Promise<boolean> {
     try {
       await fetchApi(`/notebook/${id}`, { method: "DELETE" });
-      toast.success("Đã xóa notebook");
+      toastService.success("Đã xóa notebook");
       return true;
     } catch (error: any) {
-      toast.error(error.message || "Không xóa được notebook.");
+      toastService.error(error.message || "Không xóa được notebook.");
       return false;
     }
   },

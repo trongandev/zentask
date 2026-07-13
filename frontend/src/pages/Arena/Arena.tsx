@@ -4,7 +4,6 @@ import { X } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSocket } from "../../contexts/SocketContext";
 import { generateArenaDeck, Word, RANK_TOPIC_CONFIG } from "../../config/rankTopicConfig";
-import toast from "react-hot-toast";
 
 import { ArenaModeSelector } from "./components/ArenaModeSelector";
 import { ArenaLobby } from "./components/ArenaLobby";
@@ -13,6 +12,10 @@ import { ArenaResult } from "./components/ArenaResult";
 import { ArenaSurrenderModal } from "./components/ArenaSurrenderModal";
 import { ArenaTournamentBracket } from "./components/ArenaTournamentBracket";
 import { ArenaChallengeModal } from "./components/ArenaChallengeModal";
+import { Modal } from "../../components/shared/Modal";
+import { useEtcStore } from "../../services/etcService";
+import { toastService } from "../../services/toastService";
+import { useTTSAudio } from "../../hooks/useTTSAudio";
 
 const API = import.meta.env.VITE_API_BACKEND || "http://localhost:3001";
 
@@ -28,6 +31,8 @@ export function Arena() {
   const [arenaMode, setArenaMode] = useState<"solo" | "team2v2" | "tournament">("solo");
   const [arenaPlayers, setArenaPlayers] = useState<any[]>([]);
   const [myTeam, setMyTeam] = useState<"blue" | "red">("blue");
+  
+  const { playAudio, stopAudio, preloadAudio } = useTTSAudio();
 
   // Game play state
   const [roomCode, setRoomCode] = useState("");
@@ -39,6 +44,9 @@ export function Arena() {
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
   const [oppAnswered, setOppAnswered] = useState(false);
   const [rankUpdateStatus, setRankUpdateStatus] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
+  const [opponentReady, setOpponentReady] = useState(false);
+  const [queueTimeoutData, setQueueTimeoutData] = useState<any>(null);
 
   // Team hints
   const [teamHint, setTeamHint] = useState("");
@@ -68,6 +76,11 @@ export function Arena() {
 
   // Challenge system
   const [incomingChallenge, setIncomingChallenge] = useState<any>(null);
+  const [waitingChallenge, setWaitingChallenge] = useState<boolean>(false);
+
+  // Lobby Chat and Ready States
+  const [readyPlayers, setReadyPlayers] = useState<Record<string, boolean>>({});
+  const [lobbyMessages, setLobbyMessages] = useState<Array<{ uid: string; name: string; avatar: string; text: string; time: number }>>([]);
 
   // Refs
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -79,9 +92,15 @@ export function Arena() {
   const isLeavingArenaRef = useRef(false);
 
   // --- Ref syncs ---
-  useEffect(() => { hasAnsweredRef.current = hasAnswered; }, [hasAnswered]);
-  useEffect(() => { matchStateRef.current = matchState; }, [matchState]);
-  useEffect(() => { roomCodeRef.current = roomCode; }, [roomCode]);
+  useEffect(() => {
+    hasAnsweredRef.current = hasAnswered;
+  }, [hasAnswered]);
+  useEffect(() => {
+    matchStateRef.current = matchState;
+  }, [matchState]);
+  useEffect(() => {
+    roomCodeRef.current = roomCode;
+  }, [roomCode]);
 
   // --- Fetch tournament friends ---
   useEffect(() => {
@@ -106,7 +125,7 @@ export function Arena() {
   // --- Fetch lobby friends ---
   const fetchLobbyFriends = useCallback(() => {
     setLobbyFriendsLoading(true);
-    fetch(`${API}/api/arena/friends`, { credentials: "include" })
+    fetch(`${API}/api/friends/online`, { credentials: "include" })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setLobbyFriends(Array.isArray(data) ? data : []))
       .catch(() => setLobbyFriends([]))
@@ -142,13 +161,18 @@ export function Arena() {
   );
 
   // --- Timer ---
-  const stopTimer = () => { if (timerRef.current) clearInterval(timerRef.current); };
+  const stopTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+  };
   const startTimer = () => {
     stopTimer();
     setTimeLeft(10);
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) { stopTimer(); return 0; }
+        if (prev <= 1) {
+          stopTimer();
+          return 0;
+        }
         return prev - 1;
       });
     }, 1000);
@@ -199,20 +223,11 @@ export function Arena() {
       }
 
       setMatchState("found");
-      setPrepCountdown(7);
+      setIsReady(false);
+      setOpponentReady(false);
+      setReadyPlayers({});
+      setLobbyMessages([]);
       setCurrentTip(ARENA_TIPS[Math.floor(Math.random() * ARENA_TIPS.length)]);
-
-      let count = 7;
-      const prepInterval = setInterval(() => {
-        count--;
-        setPrepCountdown(count);
-        if (count === 4) setCurrentTip(ARENA_TIPS[Math.floor(Math.random() * ARENA_TIPS.length)]);
-        if (count <= 0) {
-          clearInterval(prepInterval);
-          setMatchState("playing");
-          startTimer();
-        }
-      }, 1000);
     };
 
     socket.on("arena_match_found", onMatchFound);
@@ -247,9 +262,11 @@ export function Arena() {
             const res = await fetch(`${API}/api/arena/tournaments/${code}/complete`, { method: "POST", credentials: "include" });
             const xpData = await res.json();
             if (res.ok && xpData.xpResult) updateUser({ xp: xpData.xpResult.xp, level: xpData.xpResult.level });
-            if (res.ok) toast.success(xpData.awardedXp ? "+10XP giải đấu" : "Giải đấu không tính rank");
+            if (res.ok) toastService.success(xpData.awardedXp ? "+10XP giải đấu" : "Giải đấu không tính rank");
           }
-        } catch (err) { console.error("Lỗi nhận XP giải đấu:", err); }
+        } catch (err) {
+          console.error("Lỗi nhận XP giải đấu:", err);
+        }
         setRankUpdateStatus("tournament");
         return;
       }
@@ -257,16 +274,26 @@ export function Arena() {
       try {
         if (myScore > oppScore) {
           const res = await fetch(`${API}/api/rank/win`, { method: "POST", credentials: "include" });
-          if (res.ok) { const d = await res.json(); setRankUpdateStatus("win"); updateUser({ rankId: d.rankId, tier: d.tier, stars: d.stars }); }
+          if (res.ok) {
+            const d = await res.json();
+            setRankUpdateStatus("win");
+            updateUser({ rankId: d.rankId, tier: d.tier, stars: d.stars });
+          }
         } else if (myScore < oppScore) {
           const res = await fetch(`${API}/api/rank/lose`, { method: "POST", credentials: "include" });
-          if (res.ok) { const d = await res.json(); setRankUpdateStatus(d.status === "protected" ? "protected" : "lose"); updateUser({ rankId: d.rankId, tier: d.tier, stars: d.stars }); }
+          if (res.ok) {
+            const d = await res.json();
+            setRankUpdateStatus(d.status === "protected" ? "protected" : "lose");
+            updateUser({ rankId: d.rankId, tier: d.tier, stars: d.stars });
+          }
         }
-      } catch (err) { console.error("Lỗi cập nhật rank:", err); }
+      } catch (err) {
+        console.error("Lỗi cập nhật rank:", err);
+      }
     });
     socket.on("arena_team_hint", (data: any) => {
       setTeamHints((prev) => [...prev.slice(-4), { from: data.from || "Đồng đội", message: data.message || "" }]);
-      toast(`${data.from || "Đồng đội"}: ${data.message || "đã gửi gợi ý"}`);
+      toastService.info(`${data.from || "Đồng đội"}: ${data.message || "đã gửi gợi ý"}`);
     });
     socket.on("arena_tournament_lobby_update", (data: any) => {
       setTournamentRoom(data.room || null);
@@ -274,39 +301,112 @@ export function Arena() {
       setTournamentParticipants(Array.isArray(data.participants) ? data.participants : []);
       setTournamentCanStart(!!data.canStart);
     });
-    socket.on("arena_tournament_error", (data: any) => toast.error(data?.message || "Lỗi phòng giải đấu"));
+    socket.on("arena_tournament_error", (data: any) => toastService.error(data?.message || "Lỗi phòng giải đấu"));
     socket.on("arena_matchmaking_error", (data: any) => {
-      toast.error(data?.message || "Không ghép được trận");
+      toastService.error(data?.message || "Không ghép được trận");
       setMatchState("lobby");
       if (searchTimerRef.current) clearInterval(searchTimerRef.current);
     });
     socket.on("arena_queue_status", (data: any) => {
-      if (data?.status === "waiting_human") toast("Rank hiện tại chỉ ghép người thật, hệ thống sẽ tiếp tục chờ đối thủ.");
+      if (data?.status === "waiting_human") toastService.info("Rank hiện tại chỉ ghép người thật, hệ thống sẽ tiếp tục chờ đối thủ.");
+    });
+    socket.on("arena_queue_timeout", (data: any) => {
+      setQueueTimeoutData(data);
+    });
+    socket.on("arena_player_kicked", (data: any) => {
+      if (data.targetUid === user.uid) {
+        toastService.info("Bạn đã bị đưa ra khỏi phòng");
+        cancelSearch();
+      } else {
+        if (arenaMode === "solo") {
+          setOpponent(null);
+        } else {
+          setArenaPlayers((prev) => prev.filter((p) => p.uid !== data.targetUid));
+          if (opponent?.uid === data.targetUid) setOpponent(null);
+        }
+        setIsReady(false);
+        setOpponentReady(false);
+      }
+    });
+    socket.on("arena_player_added", (data: any) => {
+      if (arenaMode === "solo") {
+        setOpponent(data.player);
+      } else {
+        setArenaPlayers((prev) => {
+          if (data.players) return data.players; // If backend sent full list, use it
+          const existingIdx = prev.findIndex((p) => p.uid === data.player.uid);
+          if (existingIdx !== -1) {
+            const next = [...prev];
+            next[existingIdx] = data.player;
+            return next;
+          }
+          return [...prev, data.player];
+        });
+      }
+    });
+    socket.on("arena_player_ready", (data: any) => {
+      const isReadyState = data.ready !== false; // default true for backwards compat
+      if (opponent && data.uid === opponent.uid) {
+        setOpponentReady(isReadyState);
+      }
+      setReadyPlayers((prev) => ({ ...prev, [data.uid]: isReadyState }));
+    });
+    
+    socket.on("arena_lobby_chat_received", (msg: any) => {
+      setLobbyMessages((prev) => [...prev, msg]);
+    });
+    socket.on("arena_start_match", () => {
+      setMatchState("playing");
+      startTimer();
     });
     socket.on("arena_opponent_left", async (payload: any = {}) => {
       if (payload?.mode === "tournament" || arenaMode === "tournament") {
-        alert("Đối thủ đã thoát khỏi giải đấu. Trận sẽ quay về phòng chờ, không tính rank.");
+        toastService.info("Đối thủ đã thoát");
         handleReset();
         return;
       }
-      alert("Đối thủ đã thoát trận! Bạn được cộng điểm thắng.");
-      try {
-        const res = await fetch(`${API}/api/rank/win`, { method: "POST", credentials: "include" });
-        if (res.ok) { const d = await res.json(); updateUser({ rankId: d.rankId, tier: d.tier, stars: d.stars }); }
-      } catch (err) {}
-      handleReset();
+
+      if (matchStateRef.current === "playing") {
+        toastService.info("Đối thủ đã thoát trận! Bạn được cộng điểm thắng.");
+        stopTimer();
+        setRankUpdateStatus("win");
+        setUserScore((prev) => Math.max(prev, 100));
+        setOpponentScore(0);
+        setMatchState("finished");
+        try {
+          const res = await fetch(`${API}/api/rank/win`, { method: "POST", credentials: "include" });
+          if (res.ok) {
+            const d = await res.json();
+            updateUser({ rankId: d.rankId, tier: d.tier, stars: d.stars });
+          }
+        } catch (err) {}
+      } else {
+        toastService.info("Đối thủ đã rời khỏi phòng chờ.");
+        handleReset();
+      }
     });
 
     // Challenge events
     socket.on("arena_challenge_received", (data: any) => {
       setIncomingChallenge(data);
     });
+    socket.on("arena_challenge_result", (data: any) => {
+      setWaitingChallenge(false);
+      if (data.accepted) {
+        toastService.success("Đối thủ đã chấp nhận lời thách đấu!");
+      } else {
+        toastService.error("Đối thủ đã từ chối lời thách đấu.");
+        cancelSearch();
+      }
+    });
     socket.on("arena_challenge_declined", (data: any) => {
-      toast.error(`${data?.name || "Đối thủ"} đã từ chối lời thách đấu`);
+      toastService.error(`${data?.name || "Đối thủ"} đã từ chối lời thách đấu`);
     });
     socket.on("arena_challenge_expired", () => {
-      toast("Lời thách đấu đã hết hạn");
+      toastService.info("Lời thách đấu đã hết hạn");
+      setWaitingChallenge(false);
       setIncomingChallenge(null);
+      if (matchState === "searching") setMatchState("lobby");
     });
 
     return () => {
@@ -321,10 +421,25 @@ export function Arena() {
       socket.off("arena_queue_status");
       socket.off("arena_opponent_left");
       socket.off("arena_challenge_received");
+      socket.off("arena_challenge_result");
       socket.off("arena_challenge_declined");
       socket.off("arena_challenge_expired");
+      socket.off("arena_queue_timeout");
+      socket.off("arena_player_ready");
+      socket.off("arena_start_match");
+      socket.off("arena_lobby_chat_received");
     };
   }, [socket, user, roomCode, opponent, arenaMode, myTeam, updateUser, tournamentRoom, tournamentCode]);
+
+  // Preload TTS audio for current and next question
+  useEffect(() => {
+    if (matchState === "playing" && matchData?.cards) {
+      const currentWord = matchData.cards[currentQuestionIndex];
+      if (currentWord) preloadAudio(currentWord.term);
+      const nextWord = matchData.cards[currentQuestionIndex + 1];
+      if (nextWord) preloadAudio(nextWord.term);
+    }
+  }, [currentQuestionIndex, matchState, matchData, preloadAudio]);
 
   // --- Navigation guard ---
   useEffect(() => {
@@ -389,7 +504,9 @@ export function Arena() {
       }
     };
     socket.on("arena_score_update", handleUpdate);
-    return () => { socket.off("arena_score_update", handleUpdate); };
+    return () => {
+      socket.off("arena_score_update", handleUpdate);
+    };
   }, [socket, user, opponent, arenaMode, myTeam, arenaPlayers]);
 
   // --- Actions ---
@@ -430,30 +547,90 @@ export function Arena() {
   const cancelSearch = () => {
     if (socket) socket.emit("cancel_arena_search");
     setMatchState("lobby");
+    setWaitingChallenge(false);
     if (searchTimerRef.current) clearInterval(searchTimerRef.current);
   };
 
   const handleReset = () => {
-    cleanupArenaSession("leave");
+    if (matchStateRef.current === "playing") cleanupArenaSession("cancel");
     setMatchState("selecting");
+    setRoomCode("");
+    setMatchData(null);
+    setOpponent(null);
+    setIsReady(false);
+    setOpponentReady(false);
+    setReadyPlayers({});
+    setLobbyMessages([]);
     setUserScore(0);
     setOpponentScore(0);
-    setRoomCode("");
+    setTimeLeft(10);
     setCurrentQuestionIndex(0);
     setHasAnswered(false);
     setLastAnswerCorrect(null);
     setOppAnswered(false);
-    setArenaMode("solo");
     setRankUpdateStatus(null);
+    setArenaPlayers([]);
+    setWaitingChallenge(false);
     if (searchTimerRef.current) clearInterval(searchTimerRef.current);
     stopTimer();
   };
 
-  const handleAnswer = (isCorrect: boolean, timeRem: number = timeLeft) => {
+  // Ready
+  const handleReady = () => {
+    if (!socket || !user || !roomCodeRef.current) return;
+    
+    if (isReady) {
+      setIsReady(false);
+      setReadyPlayers((prev) => ({ ...prev, [user.uid]: false }));
+      socket.emit("arena_unready", { roomCode: roomCodeRef.current });
+    } else {
+      setIsReady(true);
+      setReadyPlayers((prev) => ({ ...prev, [user.uid]: true }));
+      socket.emit("arena_ready", { roomCode: roomCodeRef.current });
+    }
+  };
+
+  const handleSendLobbyChat = (text: string) => {
+    if (!socket || !user || !roomCode) return;
+    const msg = { uid: user.uid, name: user.displayName || "Tôi", avatar: user.photoURL, text, time: Date.now() };
+    socket.emit("arena_lobby_chat", { roomCode, text });
+    setLobbyMessages((prev) => [...prev, msg]);
+  };
+
+  const handleKickPlayer = (targetUid: string) => {
+    if (socket && roomCode) socket.emit("arena_kick_player", { roomCode, targetUid });
+  };
+
+  const handleStartBotMatch = (botRankId: number | null, targetSlotIndex?: number) => {
+    if (socket && roomCode && matchState === "found") {
+      socket.emit("arena_add_bot", { roomCode, botRankId, targetSlotIndex });
+    } else {
+      startSearch(arenaMode as "solo" | "team2v2", botRankId);
+    }
+  };
+
+  const handleMoveSlot = (targetSlotIndex: number) => {
+    if (socket && roomCode && matchState === "found") {
+      socket.emit("arena_move_slot", { roomCode, targetSlotIndex });
+    }
+  };
+
+  const handleSwapSlot = (targetUid: string) => {
+    if (socket && roomCode && matchState === "found") {
+      socket.emit("arena_swap_slots", { roomCode, targetUid });
+    }
+  };
+
+  const handleAnswer = (isCorrect: boolean, timeRem?: number) => {
     if (hasAnswered) return;
     setHasAnswered(true);
     setLastAnswerCorrect(isCorrect);
     socket?.emit("arena_answer", { roomCode, uid: user?.uid, timeRemaining: timeRem, isCorrect });
+    
+    const currentWord = matchData?.cards[currentQuestionIndex];
+    if (currentWord) {
+      playAudio(currentWord.term, undefined, isCorrect ? "correct" : "wrong");
+    }
   };
 
   const handleSurrender = async () => {
@@ -474,9 +651,12 @@ export function Arena() {
   };
 
   const handleCloseClick = () => {
+    console.log(matchState);
     if (matchState === "playing") setShowSurrenderModal(true);
-    else if (!["selecting", "finished"].includes(matchState)) { cancelSearch(); handleReset(); }
-    else navigate(-1);
+    else if (!["selecting", "finished"].includes(matchState)) {
+      cancelSearch();
+      handleReset();
+    } else navigate(-1);
   };
 
   // Mode selection → lobby
@@ -487,51 +667,70 @@ export function Arena() {
   };
 
   // Tournament actions
-  const joinTournamentLobby = useCallback((room: any) => {
-    if (!socket || !user || !room?.code) return;
-    socket.emit("join_arena_tournament_lobby", {
-      code: room.code,
-      user: { uid: user.uid, name: user.displayName || "Học viên", displayName: user.displayName || "Học viên", avatar: user.photoURL || "", photoURL: user.photoURL || "", rankId: user.rankId || 1, tier: user.tier || 3 },
-    });
-  }, [socket, user]);
+  const joinTournamentLobby = useCallback(
+    (room: any) => {
+      if (!socket || !user || !room?.code) return;
+      socket.emit("join_arena_tournament_lobby", {
+        code: room.code,
+        user: {
+          uid: user.uid,
+          name: user.displayName || "Học viên",
+          displayName: user.displayName || "Học viên",
+          avatar: user.photoURL || "",
+          photoURL: user.photoURL || "",
+          rankId: user.rankId || 1,
+          tier: user.tier || 3,
+        },
+      });
+    },
+    [socket, user],
+  );
 
   const createTournamentRoom = async () => {
     const res = await fetch(`${API}/api/arena/tournaments`, {
-      method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: tournamentTitle, inviteUserIds: selectedInviteIds }),
     });
     const data = await res.json();
-    if (!res.ok) return toast.error(data.error || "Không tạo được giải đấu");
+    if (!res.ok) return toastService.error(data.error || "Không tạo được giải đấu");
     setTournamentRoom(data);
     setTournamentCode(data.code);
     setTournamentParticipants([]);
     setTournamentCanStart(false);
     joinTournamentLobby(data);
-    toast.success(`Đã tạo phòng ${data.code}. Chờ ít nhất 2 người để bắt đầu.`);
+    toastService.success(`Đã tạo phòng ${data.code}. Chờ ít nhất 2 người để bắt đầu.`);
   };
 
   const joinTournamentByCode = async () => {
     if (!tournamentCode.trim()) return;
     const res = await fetch(`${API}/api/arena/tournaments/${tournamentCode.trim()}/join`, { method: "POST", credentials: "include" });
     const data = await res.json();
-    if (!res.ok) return toast.error(data.error || "Không vào được phòng");
+    if (!res.ok) return toastService.error(data.error || "Không vào được phòng");
     setTournamentRoom(data);
     joinTournamentLobby(data);
-    toast.success("Đã vào phòng chờ giải đấu");
+    toastService.success("Đã vào phòng chờ giải đấu");
   };
 
   const startTournamentMatch = () => {
     if (!socket || !tournamentRoom?.code) return;
     if (!tournamentCanStart || tournamentParticipants.length < 2) {
-      toast.error("Cần ít nhất 2 người trong phòng chờ mới bắt đầu được");
+      toastService.error("Cần ít nhất 2 người trong phòng chờ mới bắt đầu được");
       return;
     }
     socket.emit("start_arena_tournament_match", { code: tournamentRoom.code });
   };
 
   // Challenge friend
-  const handleInviteFriend = (friendUid: string) => {
+  const handleInviteFriend = (friendUid: string, targetSlotIndex?: number) => {
     if (!socket || !user) return;
+
+    // Generate match data for the challenge
+    const rankId = Number(user.rankId) || 1;
+    const tierNum = Number(user.tier) || 3;
+    const deck = generateArenaDeck(rankId, 10, true, arenaMode);
+
     socket.emit("arena_challenge_invite", {
       targetUid: friendUid,
       challenger: {
@@ -539,10 +738,17 @@ export function Arena() {
         name: user.displayName || "User",
         avatar: user.photoURL || "",
         rankInfo: `${RANK_TOPIC_CONFIG[(user.rankId || 1) as keyof typeof RANK_TOPIC_CONFIG]?.name || "Bạc"}`,
+        rankId: user.rankId || 1,
+        tier: user.tier || 3,
         level: user.level || 1,
       },
+      mode: arenaMode,
+      matchData: deck,
+      roomCode: roomCode || undefined,
+      targetSlotIndex,
     });
-    toast.success("Đã gửi lời thách đấu! Đang chờ phản hồi...");
+    setWaitingChallenge(true);
+    toastService.success("Đã gửi lời thách đấu! Đang chờ phản hồi...");
     setMatchState("searching");
     setSearchElapsed(0);
     searchStartTimeRef.current = Date.now();
@@ -551,8 +757,22 @@ export function Arena() {
   };
 
   const handleAcceptChallenge = () => {
-    if (!socket || !incomingChallenge) return;
-    socket.emit("arena_challenge_response", { challengerUid: incomingChallenge.uid, accepted: true });
+    if (!socket || !incomingChallenge || !user) return;
+    socket.emit("arena_challenge_response", {
+      challengerUid: incomingChallenge.uid,
+      accepted: true,
+      mode: incomingChallenge.challengeMode,
+      matchData: incomingChallenge.matchData,
+      responder: {
+        uid: user.uid,
+        name: user.displayName || "Bạn",
+        avatar: user.photoURL || "",
+        rankInfo: `${(user as any)?.rankInfo || ""}`,
+        rankId: user.rankId || 1,
+        tier: user.tier || 3,
+        level: user.level,
+      }
+    });
     setIncomingChallenge(null);
   };
 
@@ -578,6 +798,7 @@ export function Arena() {
 
   // Lobby state mapping
   const lobbyState = matchState === "found" ? "found" : matchState === "searching" ? "searching" : "idle";
+  const lobbyTitleOverride = waitingChallenge ? "Đang chờ đối thủ đồng ý..." : undefined;
 
   return (
     <div className="min-h-[100vh] flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-b from-indigo-950 via-slate-900 to-black">
@@ -593,9 +814,7 @@ export function Arena() {
       </button>
 
       {/* Modals */}
-      {showSurrenderModal && (
-        <ArenaSurrenderModal onCancel={() => setShowSurrenderModal(false)} onSurrender={handleSurrender} />
-      )}
+      {showSurrenderModal && <ArenaSurrenderModal onCancel={() => setShowSurrenderModal(false)} onSurrender={handleSurrender} />}
 
       {matchState === "tournament_bracket" && (
         <ArenaTournamentBracket
@@ -616,22 +835,10 @@ export function Arena() {
         />
       )}
 
-      {incomingChallenge && (
-        <ArenaChallengeModal
-          challenger={incomingChallenge}
-          onAccept={handleAcceptChallenge}
-          onDecline={handleDeclineChallenge}
-        />
-      )}
+      {incomingChallenge && <ArenaChallengeModal challenger={incomingChallenge} onAccept={handleAcceptChallenge} onDecline={handleDeclineChallenge} />}
 
       {/* Mode selection */}
-      {matchState === "selecting" && (
-        <ArenaModeSelector
-          matchHistory={matchHistory}
-          onSelectMode={handleSelectMode}
-          onOpenTournament={() => setMatchState("tournament_bracket")}
-        />
-      )}
+      {matchState === "selecting" && <ArenaModeSelector matchHistory={matchHistory} onSelectMode={handleSelectMode} onOpenTournament={() => setMatchState("tournament_bracket")} />}
 
       {/* Lobby / Searching / Found */}
       {(matchState === "lobby" || matchState === "searching" || matchState === "found") && (
@@ -641,16 +848,32 @@ export function Arena() {
           opponent={opponent}
           arenaPlayers={arenaPlayers}
           myTeam={myTeam}
-          lobbyState={lobbyState as any}
+          lobbyState={matchState as any}
+          titleOverride={tournamentCode ? tournamentTitle : undefined}
           searchElapsed={searchElapsed}
           prepCountdown={prepCountdown}
           currentTip={currentTip}
           friends={lobbyFriends}
           friendsLoading={lobbyFriendsLoading}
-          onStartAutoMatch={() => startSearch(arenaMode as "solo" | "team2v2")}
-          onStartBotMatch={(botRankId) => startSearch(arenaMode as "solo" | "team2v2", botRankId)}
+          isReady={isReady}
+          opponentReady={opponentReady}
+          readyPlayers={readyPlayers}
+          lobbyMessages={lobbyMessages}
+          onSendChat={handleSendLobbyChat}
+          onReady={handleReady}
+          onStartAutoMatch={() => {
+            if (matchState === "found") {
+              cancelSearch();
+            }
+            startSearch(arenaMode as "solo" | "team2v2");
+          }}
+          onStartBotMatch={handleStartBotMatch}
           onInviteFriend={handleInviteFriend}
           onCancelSearch={cancelSearch}
+          onKickPlayer={handleKickPlayer}
+          onMoveSlot={handleMoveSlot}
+          onSwapSlot={handleSwapSlot}
+          isHost={arenaPlayers.length > 0 ? arenaPlayers[0].uid === user.uid : true}
           onBack={() => setMatchState("selecting")}
         />
       )}
@@ -684,15 +907,42 @@ export function Arena() {
 
       {/* Finished */}
       {matchState === "finished" && opponent && (
-        <ArenaResult
-          user={user}
-          opponent={opponent}
-          userScore={userScore}
-          opponentScore={opponentScore}
-          rankUpdateStatus={rankUpdateStatus}
-          onReset={handleReset}
-        />
+        <ArenaResult user={user} opponent={opponent} userScore={userScore} opponentScore={opponentScore} rankUpdateStatus={rankUpdateStatus} onReset={handleReset} />
       )}
+
+      {/* Queue Timeout Modal */}
+      <Modal
+        isOpen={!!queueTimeoutData}
+        onClose={() => {
+          setQueueTimeoutData(null);
+          cancelSearch();
+        }}
+        title="Không tìm thấy đối thủ"
+        desc={queueTimeoutData?.message || "Hiện tại hệ thống không có ai đang online, bạn có muốn chuyển qua đấu với bot không?"}
+      >
+        <div className="p-5 flex gap-3 justify-end border-t border-slate-100 mt-4">
+          <button
+            onClick={() => {
+              setQueueTimeoutData(null);
+              cancelSearch();
+            }}
+            className="px-6 py-2 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+          >
+            Hủy
+          </button>
+          <button
+            onClick={() => {
+              const botRank = queueTimeoutData?.botRank || user.rankId;
+              setQueueTimeoutData(null);
+              cancelSearch();
+              startSearch(arenaMode as "solo" | "team2v2", botRank);
+            }}
+            className="px-6 py-2 rounded-xl font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 transition-colors"
+          >
+            Đấu với Bot
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

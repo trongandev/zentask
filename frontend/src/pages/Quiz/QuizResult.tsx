@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Award, Flame, CheckCircle2, XCircle, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { useQuizStore, QuizResult as ResultType, Quiz } from "../../services/quizService";
 import confetti from "canvas-confetti";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 export function QuizResult() {
   const { resultId } = useParams<{ resultId: string }>();
@@ -84,10 +84,10 @@ export function QuizResult() {
 
       if (res) {
         if (res.isCorrect) {
-          toast.success(`Hồi sinh thành công! Bạn được cộng thêm điểm. Điểm mới: ${res.newScore}`);
+          toastService.success(`Hồi sinh thành công! Bạn được cộng thêm điểm. Điểm mới: ${res.newScore}`);
           triggerConfetti();
         } else {
-          toast.error(`Rất tiếc, đáp án vẫn chưa đúng. Đáp án là: ${res.correctAnswer}`);
+          toastService.error(`Rất tiếc, đáp án vẫn chưa đúng. Đáp án là: ${res.correctAnswer}`);
         }
 
         // Update local state
@@ -137,7 +137,9 @@ export function QuizResult() {
         <div className={`absolute top-0 left-0 w-full h-2 ${result.score >= 80 ? "bg-green-500" : result.score >= 50 ? "bg-orange-500" : "bg-red-500"}`} />
 
         <h1 className="text-2xl font-bold text-gray-900 mb-2">{quiz.title}</h1>
-        <p className="text-gray-500 mb-8">Hoàn thành lúc: {new Date((result as any).createdAt?._seconds ? (result as any).createdAt._seconds * 1000 : ((result as any).createdAt || Date.now())).toLocaleString("vi-VN")}</p>
+        <p className="text-gray-500 mb-8">
+          Hoàn thành lúc: {new Date((result as any).createdAt?._seconds ? (result as any).createdAt._seconds * 1000 : (result as any).createdAt || Date.now()).toLocaleString("vi-VN")}
+        </p>
 
         <div className="flex justify-center mb-8">
           <div className="relative">

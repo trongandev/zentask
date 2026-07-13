@@ -63,7 +63,9 @@ export const useTTSAudio = () => {
         resolve(currentPlayId === playId);
       };
       audio.play().catch((e) => {
-        console.error("Sound effect error:", e);
+        if (e.name !== "AbortError") {
+          console.error("Sound effect error:", e);
+        }
         if (currentPlayId === playId) globalAudio = null;
         resolve(currentPlayId === playId);
       });
@@ -121,8 +123,10 @@ export const useTTSAudio = () => {
       };
 
       await audio.play();
-    } catch (error) {
-      console.error("TTS playback error:", error);
+    } catch (error: any) {
+      if (error.name !== "AbortError") {
+        console.error("TTS playback error:", error);
+      }
       setIsPlaying(false);
       setIsLoading(false);
       setLoadingText(null);

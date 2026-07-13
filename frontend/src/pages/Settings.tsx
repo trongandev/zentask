@@ -4,7 +4,7 @@ import { User, Bell, Shield, Key, Moon, Volume2, Globe, HelpCircle, LogOut, Sett
 import { cn } from "../lib/utils";
 import { applyAppAppearance, type AppAccentColor, type AppThemeMode, useAuth } from "../contexts/AuthContext";
 import { useFlashcardStore } from "../services/flashcardService";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 export function Settings() {
   const { user, updateUser } = useAuth();
@@ -56,7 +56,6 @@ export function Settings() {
     setShowAvatarModal(false);
   };
 
-
   const handlePreviewAppearance = (nextTheme = themeMode, nextAccent = accentColor) => {
     setThemeMode(nextTheme);
     setAccentColor(nextAccent);
@@ -76,9 +75,9 @@ export function Settings() {
       if (!res.ok) throw new Error(data?.error || "Không thể lưu giao diện");
       updateUser({ appSettings: data.appSettings || { theme: themeMode, accentColor } });
       applyAppAppearance(data.appSettings || { theme: themeMode, accentColor });
-      toast.success("Đã lưu giao diện cho tài khoản của bạn!");
+      toastService.success("Đã lưu giao diện cho tài khoản của bạn!");
     } catch (error: any) {
-      toast.error(error?.message || "Lưu giao diện thất bại");
+      toastService.error(error?.message || "Lưu giao diện thất bại");
     } finally {
       setIsSavingAppearance(false);
     }
@@ -95,12 +94,12 @@ export function Settings() {
       });
       if (res.ok) {
         updateUser({ displayName, username, bio, photoURL });
-        toast.success("Đã cập nhật hồ sơ thành công!");
+        toastService.success("Đã cập nhật hồ sơ thành công!");
       } else {
-        toast.error("Lỗi khi cập nhật hồ sơ");
+        toastService.error("Lỗi khi cập nhật hồ sơ");
       }
     } catch (err) {
-      toast.error("Đã xảy ra lỗi");
+      toastService.error("Đã xảy ra lỗi");
     } finally {
       setIsSaving(false);
     }
@@ -227,7 +226,7 @@ export function Settings() {
                       setDefaultSetId(e.target.value);
                       if (e.target.value) {
                         localStorage.setItem("defaultFlashcardSetId", e.target.value);
-                        toast.success("Đã cập nhật bộ thẻ mặc định!");
+                        toastService.success("Đã cập nhật bộ thẻ mặc định!");
                       } else {
                         localStorage.removeItem("defaultFlashcardSetId");
                       }
@@ -407,14 +406,18 @@ export function Settings() {
                           active ? "border-blue-600 bg-blue-50 shadow-sm" : "border-transparent bg-gray-50 hover:border-gray-200",
                         )}
                       >
-                        <div className={cn("w-full h-24 rounded-xl shadow-sm border overflow-hidden flex flex-col", item.preview === "dark" ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200")}> 
+                        <div
+                          className={cn("w-full h-24 rounded-xl shadow-sm border overflow-hidden flex flex-col", item.preview === "dark" ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200")}
+                        >
                           <div className={cn("h-6 border-b", item.preview === "dark" ? "bg-gray-800 border-gray-700" : "bg-gray-100 border-gray-200")}></div>
                           <div className="flex-1 p-2 flex gap-2">
                             <div className={cn("w-1/3 h-full rounded", item.preview === "dark" ? "bg-gray-800" : "bg-gray-100")}></div>
                             <div className={cn("w-2/3 h-full rounded", item.preview === "dark" ? "bg-gray-800/60" : "bg-blue-50")}></div>
                           </div>
                         </div>
-                        <span className={cn("font-bold flex items-center gap-2", active ? "text-blue-700" : "text-gray-600")}><Icon className="w-4 h-4" /> {item.label}</span>
+                        <span className={cn("font-bold flex items-center gap-2", active ? "text-blue-700" : "text-gray-600")}>
+                          <Icon className="w-4 h-4" /> {item.label}
+                        </span>
                       </button>
                     );
                   })}
@@ -422,7 +425,9 @@ export function Settings() {
               </div>
 
               <div className="pt-6 border-t border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2"><Palette className="w-5 h-5 text-blue-600" /> Màu nhấn</h3>
+                <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-blue-600" /> Màu nhấn
+                </h3>
                 <div className="flex flex-wrap gap-3">
                   {[
                     { id: "blue" as AppAccentColor, label: "Xanh dương", color: "#2563eb" },

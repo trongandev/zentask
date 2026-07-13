@@ -1,6 +1,28 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Trophy, Flame, Star, BookOpen, Clock, Target, Award, Edit3, UserPlus, MapPin, Calendar, Link as LinkIcon, ChevronRight, Lock, Check, Medal, Gamepad2 } from "lucide-react";
+import {
+  Trophy,
+  Flame,
+  Star,
+  BookOpen,
+  Clock,
+  Target,
+  Award,
+  Edit3,
+  UserPlus,
+  MapPin,
+  Calendar,
+  Link as LinkIcon,
+  ChevronRight,
+  Lock,
+  Check,
+  Medal,
+  Gamepad2,
+  UserCheck,
+  Users,
+  MessageSquare,
+  UserMinus,
+} from "lucide-react";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserLevelBadge } from "../components/UserLevelBadge";
 import { RankCard } from "../components/shared/RankCard";
@@ -10,7 +32,9 @@ import { useConfigStore } from "../services/configService";
 import { useEtcStore } from "../services/etcService";
 import { useUserStore } from "../services/userService";
 import { RANK_TOPIC_CONFIG } from "../config/rankTopicConfig";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
+import { friendsService } from "../services/friendsService";
+import { Modal } from "../components/shared/Modal";
 
 const RECENT_ACTIVITIES = [
   { id: 1, action: "Đã hoàn thành bài Quiz", target: "Ngữ pháp cơ bản - Thì Hiện Tại", time: "2 giờ trước", icon: Target, color: "text-green-500" },
@@ -27,14 +51,16 @@ export function Profile() {
   const { user: authUser } = useAuth();
   const { levels: SYSTEM_LEVELS, badges: SYSTEM_BADGES } = useConfigStore();
   const { getUserProfile } = useEtcStore();
-  const isCurrentUser = !id;
+  const isCurrentUser = !id || id === authUser?.uid;
   const [activeTab, setActiveTab] = useState("overview"); // overview, badges, activities, levels
   const [profileData, setProfileData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const { toggleFollow, checkFollow } = useUserStore();
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [isFollowLoading, setIsFollowLoading] = useState(false);
+  const [friendStatus, setFriendStatus] = useState<string>("none"); // none, sent, received, friend
+  const [isFriendLoading, setIsFriendLoading] = useState(false);
+  const [showFriendMenu, setShowFriendMenu] = useState(false);
+  const [showUnfriendModal, setShowUnfriendModal] = useState(false);
+  const [friendsList, setFriendsList] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -45,8 +71,27 @@ export function Profile() {
         setProfileData(data);
 
         if (id && authUser && authUser.uid !== id) {
-          const followStatus = await checkFollow(id);
-          setIsFollowing(!!followStatus);
+          try {
+            const [friends, requests] = await Promise.all([friendsService.listFriends(), friendsService.getRequests()]);
+            if (friends.find((f) => f.friendId === id)) {
+              setFriendStatus("friend");
+            } else if (requests.outgoing.find((r) => r.toId === id)) {
+              setFriendStatus("sent");
+            } else if (requests.incoming.find((r) => r.fromId === id)) {
+              setFriendStatus("received");
+            } else {
+              setFriendStatus("none");
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+
+        if (!id || authUser?.uid === id) {
+          try {
+            const friends = await friendsService.listFriends();
+            setFriendsList(friends);
+          } catch (e) {}
         }
 
         setLoading(false);
@@ -55,22 +100,51 @@ export function Profile() {
       }
     };
     fetchProfile();
-  }, [id, authUser, checkFollow, getUserProfile]);
+  }, [id, authUser, getUserProfile]);
 
-  const handleToggleFollow = async () => {
-    if (!id || !authUser) return toast.error("Vui lòng đăng nhập!");
-    if (isFollowLoading) return;
-    setIsFollowLoading(true);
-    const newStatus = await toggleFollow(id);
-    if (newStatus !== null) {
-      setIsFollowing(newStatus);
-      // Optimistically update follower count
-      setProfileData((prev: any) => ({
-        ...prev,
-        followers: prev.followers + (newStatus ? 1 : -1),
-      }));
+  const handleToggleFriend = async () => {
+    if (!id || !authUser) return toastService.error("Vui lòng đăng nhập!");
+    if (isFriendLoading) return;
+    setIsFriendLoading(true);
+
+    try {
+      if (friendStatus === "none") {
+        await friendsService.sendRequest(id);
+        setFriendStatus("sent");
+        toastService.success("Đã gửi lời mời kết bạn");
+      } else if (friendStatus === "friend") {
+        toastService.success("Hai bạn đã là bạn bè");
+      } else if (friendStatus === "received") {
+        // Find request id
+        const requests = await friendsService.getRequests();
+        const req = requests.incoming.find((r: any) => r.fromId === id);
+        if (req) {
+          await friendsService.respondRequest(req.id, "accept");
+          setFriendStatus("friend");
+          toastService.success("Đã chấp nhận kết bạn");
+        }
+      }
+    } catch (error: any) {
+      toastService.error(error.message || "Có lỗi xảy ra");
+    } finally {
+      setIsFriendLoading(false);
     }
-    setIsFollowLoading(false);
+  };
+
+  const handleUnfriend = async () => {
+    if (!id) return;
+    setIsFriendLoading(true);
+    try {
+      await friendsService.unfriend(id);
+      setFriendStatus("none");
+      setShowUnfriendModal(false);
+      setShowFriendMenu(false);
+      toastService.success("Đã hủy kết bạn");
+    } catch (error: any) {
+      toastService.error(error.message || "Có lỗi xảy ra");
+    } finally {
+      setIsFriendLoading(false);
+    }
   };
 
   const user = profileData
@@ -145,6 +219,7 @@ export function Profile() {
     { id: "badges", label: "Danh hiệu" },
     { id: "activities", label: "Hoạt động gần đây" },
     { id: "levels", label: "Cấp độ (Level)" },
+    { id: "friends", label: "Bạn bè" },
     { id: "frames", label: "Khung Avatar" },
     { id: "ranks", label: "Cấp bậc (Ranks)" },
   ];
@@ -179,22 +254,64 @@ export function Profile() {
                   <Edit3 className="w-4 h-4" />
                   Chỉnh sửa hồ sơ
                 </button>
+              ) : friendStatus === "friend" ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowFriendMenu(!showFriendMenu)}
+                    className="px-6 py-2.5 font-semibold rounded-xl flex items-center gap-2 transition-colors shadow-sm bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  >
+                    <UserCheck className="w-4 h-4" /> Bạn bè
+                  </button>
+
+                  {showFriendMenu && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowFriendMenu(false)}></div>
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden">
+                        <button
+                          onClick={() => {
+                            setShowFriendMenu(false);
+                            // handle message (this will just open FloatingChat if we set the active chat friend somewhere, or redirect to /friends)
+                            navigate("/friends");
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors"
+                        >
+                          <MessageSquare className="w-4 h-4 text-blue-500" />
+                          Nhắn tin
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowFriendMenu(false);
+                            setShowUnfriendModal(true);
+                          }}
+                          className="w-full text-left px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors border-t border-gray-50"
+                        >
+                          <UserMinus className="w-4 h-4" />
+                          Hủy kết bạn
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               ) : (
                 <button
-                  onClick={handleToggleFollow}
-                  disabled={isFollowLoading}
+                  onClick={handleToggleFriend}
+                  disabled={isFriendLoading || friendStatus === "sent"}
                   className={cn(
                     "px-6 py-2.5 font-semibold rounded-xl flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50",
-                    isFollowing ? "bg-gray-100 hover:bg-gray-200 text-gray-700" : "bg-blue-600 hover:bg-blue-700 text-white",
+                    friendStatus !== "none" ? "bg-gray-100 hover:bg-gray-200 text-gray-700" : "bg-blue-600 hover:bg-blue-700 text-white",
                   )}
                 >
-                  {isFollowing ? (
+                  {friendStatus === "sent" ? (
                     <>
-                      <Check className="w-4 h-4" /> Đang theo dõi
+                      <Check className="w-4 h-4" /> Đã gửi lời mời
+                    </>
+                  ) : friendStatus === "received" ? (
+                    <>
+                      <Check className="w-4 h-4" /> Chấp nhận kết bạn
                     </>
                   ) : (
                     <>
-                      <UserPlus className="w-4 h-4" /> Theo dõi
+                      <UserPlus className="w-4 h-4" /> Thêm bạn bè
                     </>
                   )}
                 </button>
@@ -326,13 +443,9 @@ export function Profile() {
             <div className="space-y-6">
               {/* Follower Stats */}
               <div className="flex gap-4">
-                <div className="flex-1 bg-white shadow-sm rounded-2xl p-4 border border-gray-100 text-center cursor-pointer hover:bg-gray-50 transition-colors">
-                  <p className="text-xl font-bold text-gray-900">{user.following}</p>
-                  <p className="text-xs text-gray-500 font-medium">Đang theo dõi</p>
-                </div>
-                <div className="flex-1 bg-white shadow-sm rounded-2xl p-4 border border-gray-100 text-center cursor-pointer hover:bg-gray-50 transition-colors">
-                  <p className="text-xl font-bold text-gray-900">{user.followers}</p>
-                  <p className="text-xs text-gray-500 font-medium">Người theo dõi</p>
+                <div onClick={() => setActiveTab("friends")} className="flex-1 bg-white shadow-sm rounded-2xl p-4 border border-gray-100 text-center cursor-pointer hover:bg-gray-50 transition-colors">
+                  <p className="text-xl font-bold text-gray-900">{isCurrentUser ? friendsList.length : "---"}</p>
+                  <p className="text-xs text-gray-500 font-medium">Bạn bè</p>
                 </div>
               </div>
 
@@ -635,6 +748,36 @@ export function Profile() {
           </div>
         )}
 
+        {/* FRIENDS TAB */}
+        {activeTab === "friends" && (
+          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-8 flex items-center gap-2">
+              <Users className="w-6 h-6 text-blue-500" />
+              Bạn bè ({friendsList.length})
+            </h3>
+
+            {friendsList.length === 0 ? (
+              <div className="text-center text-gray-500 py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">Chưa có bạn bè nào.</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {friendsList.map((friend) => (
+                  <div
+                    key={friend.friendId}
+                    className="flex items-center gap-4 p-4 border border-gray-100 rounded-2xl hover:shadow-md transition-all bg-white cursor-pointer"
+                    onClick={() => navigate(`/profile/${friend.friendId}`)}
+                  >
+                    <UserAvatar src={friend.photoURL} level={friend.level} className="w-14 h-14" />
+                    <div>
+                      <h4 className="font-bold text-gray-900">{friend.displayName}</h4>
+                      <p className="text-sm text-gray-500">Level {friend.level}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* FRAMES TAB */}
         {activeTab === "frames" && (
           <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
@@ -651,13 +794,11 @@ export function Profile() {
               ].map((frame, index) => {
                 const isCurrentFrame = user.level >= frame.minLevel && user.level <= frame.maxLevel;
                 return (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className={cn(
                       "flex flex-col items-center rounded-2xl p-6 border transition-all",
-                      isCurrentFrame 
-                        ? "bg-purple-50 border-purple-400 ring-2 ring-purple-200 shadow-md" 
-                        : "bg-gray-50 border-gray-100 hover:border-purple-200 hover:bg-purple-50/50"
+                      isCurrentFrame ? "bg-purple-50 border-purple-400 ring-2 ring-purple-200 shadow-md" : "bg-gray-50 border-gray-100 hover:border-purple-200 hover:bg-purple-50/50",
                     )}
                   >
                     <div className="w-24 h-24 mb-4 relative flex items-center justify-center drop-shadow-sm">
@@ -681,16 +822,34 @@ export function Profile() {
               <Trophy className="w-6 h-6 text-yellow-500" />
               Lộ Trình Cấp Bậc (Ranks)
             </h3>
-            
+
             <div className="flex flex-col gap-8 relative">
               {/* Timeline line */}
               <div className="absolute left-[39px] md:left-[55px] top-4 bottom-4 w-1 bg-gray-100 rounded-full z-0 hidden sm:block"></div>
 
               {[
                 { id: 1, name: "Bạc", src: "/rank/1.png", color: "text-gray-500", border: "border-gray-400", bg: "bg-gray-50", ring: "ring-gray-200", badge: "bg-gray-100 text-gray-700" },
-                { id: 2, name: "Lục bảo", src: "/rank/2.png", color: "text-emerald-600", border: "border-emerald-400", bg: "bg-emerald-50", ring: "ring-emerald-200", badge: "bg-emerald-100 text-emerald-700" },
+                {
+                  id: 2,
+                  name: "Lục bảo",
+                  src: "/rank/2.png",
+                  color: "text-emerald-600",
+                  border: "border-emerald-400",
+                  bg: "bg-emerald-50",
+                  ring: "ring-emerald-200",
+                  badge: "bg-emerald-100 text-emerald-700",
+                },
                 { id: 3, name: "Tinh Anh", src: "/rank/3.png", color: "text-blue-600", border: "border-blue-400", bg: "bg-blue-50", ring: "ring-blue-200", badge: "bg-blue-100 text-blue-700" },
-                { id: 4, name: "Kim Cương", src: "/rank/4.png", color: "text-indigo-600", border: "border-indigo-400", bg: "bg-indigo-50", ring: "ring-indigo-200", badge: "bg-indigo-100 text-indigo-700" },
+                {
+                  id: 4,
+                  name: "Kim Cương",
+                  src: "/rank/4.png",
+                  color: "text-indigo-600",
+                  border: "border-indigo-400",
+                  bg: "bg-indigo-50",
+                  ring: "ring-indigo-200",
+                  badge: "bg-indigo-100 text-indigo-700",
+                },
                 { id: 5, name: "Cao Thủ", src: "/rank/5.png", color: "text-rose-600", border: "border-rose-400", bg: "bg-rose-50", ring: "ring-rose-200", badge: "bg-rose-100 text-rose-700" },
               ].map((rankInfo, index) => {
                 const rankData = RANK_TOPIC_CONFIG[rankInfo.id as keyof typeof RANK_TOPIC_CONFIG];
@@ -700,17 +859,21 @@ export function Profile() {
 
                 return (
                   <div key={index} className="relative z-10 flex flex-col sm:flex-row gap-6 md:gap-8 items-start">
-                    <div className={cn(
-                      "w-20 h-20 md:w-28 md:h-28 shrink-0 rounded-2xl border-2 p-3 flex items-center justify-center drop-shadow-sm transition-all",
-                      isCurrentRank ? `${rankInfo.bg} ${rankInfo.border} ring-4 ${rankInfo.ring} md:scale-110` : "bg-white border-gray-200"
-                    )}>
+                    <div
+                      className={cn(
+                        "w-20 h-20 md:w-28 md:h-28 shrink-0 rounded-2xl border-2 p-3 flex items-center justify-center drop-shadow-sm transition-all",
+                        isCurrentRank ? `${rankInfo.bg} ${rankInfo.border} ring-4 ${rankInfo.ring} md:scale-110` : "bg-white border-gray-200",
+                      )}
+                    >
                       <img src={rankInfo.src} alt={rankInfo.name} className="w-full h-full object-contain drop-shadow-md hover:scale-110 transition-transform" />
                     </div>
 
-                    <div className={cn(
-                      "flex-1 rounded-2xl p-5 md:p-6 border shadow-sm w-full transition-colors",
-                      isCurrentRank ? `bg-white ${rankInfo.border} shadow-md ring-1 ${rankInfo.ring}` : "bg-white border-gray-100 hover:border-gray-300"
-                    )}>
+                    <div
+                      className={cn(
+                        "flex-1 rounded-2xl p-5 md:p-6 border shadow-sm w-full transition-colors",
+                        isCurrentRank ? `bg-white ${rankInfo.border} shadow-md ring-1 ${rankInfo.ring}` : "bg-white border-gray-100 hover:border-gray-300",
+                      )}
+                    >
                       <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 pb-4 border-b border-gray-100">
                         <div>
                           <div className="flex items-center gap-3">
@@ -725,22 +888,25 @@ export function Profile() {
                         {tiersKeys.map((tierKey) => {
                           const tier = rankData.tiers[Number(tierKey) as keyof typeof rankData.tiers];
                           const isCurrentTier = isCurrentRank && user.tier === Number(tierKey);
-                          
+
                           return (
-                            <div key={tierKey} className={cn(
-                              "rounded-xl p-4 border flex flex-col transition-all",
-                              isCurrentTier 
-                                ? `${rankInfo.bg} ${rankInfo.border} ring-2 ${rankInfo.ring} shadow-md` 
-                                : "bg-gray-50 border-gray-100 hover:shadow-md hover:border-gray-300"
-                            )}>
+                            <div
+                              key={tierKey}
+                              className={cn(
+                                "rounded-xl p-4 border flex flex-col transition-all",
+                                isCurrentTier ? `${rankInfo.bg} ${rankInfo.border} ring-2 ${rankInfo.ring} shadow-md` : "bg-gray-50 border-gray-100 hover:shadow-md hover:border-gray-300",
+                              )}
+                            >
                               <div className="flex justify-between items-center mb-2">
                                 <span className={cn("font-bold text-sm", isCurrentTier ? rankInfo.color : "text-gray-800")}>
                                   {rankInfo.name} {tierKey}
                                 </span>
-                                <span className={cn(
-                                  "px-2 py-1 rounded-md text-xs font-bold border shadow-sm",
-                                  isCurrentTier ? "bg-white text-gray-900 border-gray-200" : "bg-white text-blue-600 border-blue-100"
-                                )}>
+                                <span
+                                  className={cn(
+                                    "px-2 py-1 rounded-md text-xs font-bold border shadow-sm",
+                                    isCurrentTier ? "bg-white text-gray-900 border-gray-200" : "bg-white text-blue-600 border-blue-100",
+                                  )}
+                                >
                                   {tier.cefr}
                                 </span>
                               </div>
@@ -752,11 +918,7 @@ export function Profile() {
                                   ))}
                                 </ul>
                               </div>
-                              {isCurrentTier && (
-                                <div className={`mt-3 self-start px-2 py-1 rounded text-xs font-bold ${rankInfo.badge}`}>
-                                  Đang ở bậc này
-                                </div>
-                              )}
+                              {isCurrentTier && <div className={`mt-3 self-start px-2 py-1 rounded text-xs font-bold ${rankInfo.badge}`}>Đang ở bậc này</div>}
                             </div>
                           );
                         })}
@@ -769,6 +931,26 @@ export function Profile() {
           </div>
         )}
       </div>
+      {/* Modal Hủy Kết Bạn */}
+      <Modal isOpen={showUnfriendModal} onClose={() => setShowUnfriendModal(false)} title="Hủy kết bạn">
+        <div className="p-6">
+          <p className="text-gray-600 font-medium mb-6">
+            Bạn có chắc chắn muốn hủy kết bạn với <strong className="text-gray-900">{user.name}</strong> không? Hai bạn sẽ không thể nhắn tin hay chia sẻ với nhau nữa.
+          </p>
+          <div className="flex gap-3">
+            <button onClick={() => setShowUnfriendModal(false)} className="flex-1 px-4 py-2.5 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">
+              Hủy
+            </button>
+            <button
+              onClick={handleUnfriend}
+              disabled={isFriendLoading}
+              className="flex-1 px-4 py-2.5 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isFriendLoading ? "Đang xử lý..." : "Xóa bạn bè"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

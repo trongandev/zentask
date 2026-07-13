@@ -9,6 +9,13 @@ import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
 
+const leaderboardCache = {
+  week: { data: null, timestamp: 0 },
+  month: { data: null, timestamp: 0 },
+  all: { data: null, timestamp: 0 }
+};
+const LEADERBOARD_CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
+
 // Middleware to authenticate for rewards (leaderboard GET is public but we extract user if possible)
 const optionalAuth = (req, res, next) => {
   const token = req.cookies.session;
@@ -32,48 +39,62 @@ router.get(
   optionalAuth,
   asyncHandler(async (req, res) => {
     const type = req.query.type || "all";
-    let docs = [];
+    const force = req.query.force === "true";
 
-    if (type === "week") {
-      const weekString = getWeekString();
-      docs = await LeaderboardWeekly.find({ period: weekString }).sort({ xp: -1 }).limit(100).populate("uid", "displayName username email photoURL level rankId tier").lean();
-    } else if (type === "month") {
-      const monthString = getMonthString();
-      docs = await LeaderboardMonthly.find({ period: monthString }).sort({ xp: -1 }).limit(100).populate("uid", "displayName username email photoURL level rankId tier").lean();
+    let leaderboardData;
+
+    if (!force && leaderboardCache[type] && leaderboardCache[type].data && Date.now() - leaderboardCache[type].timestamp < LEADERBOARD_CACHE_TTL) {
+      leaderboardData = leaderboardCache[type].data;
     } else {
-      docs = await User.find().sort({ xp: -1 }).limit(100).lean();
-    }
+      let docs = [];
 
-    const leaderboard = [];
-    let currentRank = 1;
+      if (type === "week") {
+        const weekString = getWeekString();
+        docs = await LeaderboardWeekly.find({ period: weekString }).sort({ xp: -1 }).limit(100).populate("uid", "displayName username email photoURL level rankId tier").lean();
+      } else if (type === "month") {
+        const monthString = getMonthString();
+        docs = await LeaderboardMonthly.find({ period: monthString }).sort({ xp: -1 }).limit(100).populate("uid", "displayName username email photoURL level rankId tier").lean();
+      } else {
+        docs = await User.find().sort({ xp: -1 }).limit(100).lean();
+      }
 
-    docs.forEach((doc) => {
-      let userData = type === "all" ? doc : doc.uid;
-      if (!userData) return; // Ignore if user was deleted but leaderboard entry remains
+      const leaderboard = [];
+      let currentRank = 1;
 
-      leaderboard.push({
-        id: userData._id,
-        rank: currentRank++,
-        name: userData.displayName || "Học viên",
-        username: userData.username || "@" + (userData.email ? userData.email.split("@")[0] : "user"),
-        level: userData.level || 1,
-        xp: type === "all" ? doc.xp : doc.xp,
-        avatar: userData.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
-        rankId: userData.rankId || 1,
-        tier: userData.tier || 3,
-        trend: "same",
+      docs.forEach((doc) => {
+        let userData = type === "all" ? doc : doc.uid;
+        if (!userData) return; // Ignore if user was deleted but leaderboard entry remains
+
+        leaderboard.push({
+          id: userData._id,
+          rank: currentRank++,
+          name: userData.displayName || "Học viên",
+          username: userData.username || "@" + (userData.email ? userData.email.split("@")[0] : "user"),
+          level: userData.level || 1,
+          xp: type === "all" ? doc.xp : doc.xp,
+          avatar: userData.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
+          rankId: userData.rankId || 1,
+          tier: userData.tier || 3,
+          trend: "same",
+        });
       });
-    });
+
+      leaderboardData = leaderboard;
+      leaderboardCache[type] = {
+        data: leaderboardData,
+        timestamp: Date.now(),
+      };
+    }
 
     // Trigger LEADERBOARD achievements for the current user if they are in top 3
     if (type === "week" && req.user) {
-      const userEntry = leaderboard.find((entry) => entry.id.toString() === req.user.uid);
+      const userEntry = leaderboardData.find((entry) => entry.id.toString() === req.user.uid);
       if (userEntry && userEntry.rank <= 3) {
         checkAchievements(req.user.uid, "LEADERBOARD", { rank: userEntry.rank }, req.app);
       }
     }
 
-    res.json(leaderboard);
+    res.json(leaderboardData);
   }),
 );
 
@@ -146,7 +167,7 @@ router.post(
       xpReward,
     });
 
-    const { xp, level, levelUp } = await addXpToUser(req.user.uid, xpReward);
+    const { xp, level, levelUp } = await addXpToUser(req.user.uid, xpReward, true);
     res.json({ success: true, xp, level, levelUp });
   }),
 );

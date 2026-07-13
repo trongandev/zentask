@@ -1,7 +1,8 @@
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { Word } from "../../../config/rankTopicConfig";
 import { ArenaGameRenderer } from "../../ArenaGameRenderer";
+import { UserAvatar } from "../../../components/UserAvatar";
 
 interface ArenaPlayingHUDProps {
   user: any;
@@ -68,19 +69,26 @@ export function ArenaPlayingHUD({
           {/* User Score */}
           <div
             className={cn(
-              "flex items-center gap-2 md:gap-4 bg-blue-950/50 border p-1 md:p-2 pr-4 md:pr-6 rounded-full backdrop-blur-md transition-colors",
-              hasAnswered ? "border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]" : "border-blue-500/30",
+              "flex items-center gap-2 md:gap-4 border p-1 md:p-2 pr-4 md:pr-6 rounded-full backdrop-blur-md transition-colors",
+              hasAnswered 
+                ? (lastAnswerCorrect ? "border-green-500 bg-green-950/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]" : "border-red-500 bg-red-950/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-shake") 
+                : "border-blue-500/30 bg-blue-950/50",
             )}
           >
-            <img
+            <UserAvatar
               src={user?.photoURL || "/mascot/Lopy (1).png"}
-              className="w-8 h-8 md:w-12 md:h-12 rounded-full border-2 border-blue-400 object-cover"
+              level={user?.level || 1}
+              disableLink
+              className="w-10 h-10 md:w-14 md:h-14 shrink-0"
+              avatarClassName="border-2 border-blue-400"
             />
             <div>
-              <div className="text-[10px] md:text-sm text-blue-200 hidden md:block">Điểm của bạn</div>
+              <div className={cn("text-[10px] md:text-sm hidden md:block", hasAnswered && !lastAnswerCorrect ? "text-red-200" : "text-blue-200")}>Điểm của bạn</div>
               <div className="text-lg md:text-2xl font-black text-white flex items-center gap-1 md:gap-2">
                 {userScore}
-                {hasAnswered && <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-500 animate-in zoom-in" />}
+                {hasAnswered && (
+                  lastAnswerCorrect ? <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-500 animate-in zoom-in" /> : <XCircle className="w-4 h-4 md:w-5 md:h-5 text-red-500 animate-in zoom-in" />
+                )}
               </div>
             </div>
           </div>
@@ -102,9 +110,12 @@ export function ArenaPlayingHUD({
               oppAnswered ? "border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]" : "border-red-500/30",
             )}
           >
-            <img
+            <UserAvatar
               src={opponent?.avatar || "/mascot/Lopy (3).png"}
-              className="w-8 h-8 md:w-12 md:h-12 rounded-full border-2 border-red-400 object-cover"
+              level={opponent?.level || 1}
+              disableLink
+              className="w-10 h-10 md:w-14 md:h-14 shrink-0"
+              avatarClassName="border-2 border-red-400"
             />
             <div className="text-right">
               <div className="text-[10px] md:text-sm text-red-200 hidden md:block">Đối thủ</div>

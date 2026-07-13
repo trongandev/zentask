@@ -18,7 +18,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { ModeTyping } from "@/src/components/practice/ModeTyping";
 import { VoiceSelectorModal } from "@/src/components/practice/VoiceSelectorModal";
 import { getVoiceForLanguage } from "@/src/lib/ttsVoiceStorage";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
@@ -126,7 +126,7 @@ export function FlashcardPractice() {
   const reviewBeginnerWrong = React.useCallback(() => {
     const wrongCards = beginnerAllCards.filter((card) => beginnerWrongIds.includes(card.id));
     if (wrongCards.length === 0) {
-      toast("Bạn không có câu sai nào để ôn lại.");
+      toastService.info("Bạn không có câu sai nào để ôn lại.");
       return;
     }
     setBeginnerCards(wrongCards);
@@ -150,10 +150,7 @@ export function FlashcardPractice() {
         <AlertTriangle className="h-5 w-5" />
         Ôn tập lại câu sai ({beginnerWrongIds.length})
       </button>
-      <button
-        onClick={reviewBeginnerAll}
-        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-50 px-5 py-3 font-bold text-blue-600 transition-colors hover:bg-blue-100"
-      >
+      <button onClick={reviewBeginnerAll} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-50 px-5 py-3 font-bold text-blue-600 transition-colors hover:bg-blue-100">
         <RotateCw className="h-5 w-5" />
         Ôn tập lại toàn bộ câu
       </button>
@@ -188,11 +185,11 @@ export function FlashcardPractice() {
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Xin chúc mừng!</h2>
         <p className="text-gray-500 mb-3 text-center max-w-md">Bạn đã học hết các từ cần ôn tập hôm nay.</p>
         <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row mt-6">
-          <button 
+          <button
             onClick={() => {
               setIsReviewAll(true);
-              setPracticeSessionKey(k => k + 1);
-            }} 
+              setPracticeSessionKey((k) => k + 1);
+            }}
             className="flex-1 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition-colors hover:bg-blue-700 flex justify-center items-center gap-2"
           >
             <RotateCw className="w-5 h-5" />
@@ -219,7 +216,11 @@ export function FlashcardPractice() {
           Chủ đề đã hoàn thành
         </div>
         <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row">
-          <button onClick={reviewBeginnerWrong} disabled={beginnerWrongIds.length === 0} className="flex-1 rounded-xl bg-orange-50 px-6 py-3 font-bold text-orange-600 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50">
+          <button
+            onClick={reviewBeginnerWrong}
+            disabled={beginnerWrongIds.length === 0}
+            className="flex-1 rounded-xl bg-orange-50 px-6 py-3 font-bold text-orange-600 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
             Ôn tập lại câu sai ({beginnerWrongIds.length})
           </button>
           <button onClick={reviewBeginnerAll} className="flex-1 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition-colors hover:bg-blue-700">
@@ -263,18 +264,21 @@ export function FlashcardPractice() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {!isBeginner && (
-            isReviewAll ? (
-              <span className="hidden sm:inline-flex px-3 py-2 bg-purple-50 text-purple-600 font-semibold rounded-xl text-sm items-center gap-1">
-                Đang ôn tất cả (không lưu điểm)
-              </span>
+          {!isBeginner &&
+            (isReviewAll ? (
+              <span className="hidden sm:inline-flex px-3 py-2 bg-purple-50 text-purple-600 font-semibold rounded-xl text-sm items-center gap-1">Đang ôn tất cả (không lưu điểm)</span>
             ) : allCards.length > dueCards.length ? (
-              <button onClick={() => { setIsReviewAll(true); setPracticeSessionKey(k => k + 1); }} className="hidden sm:inline-flex px-3 py-2 bg-purple-50 text-purple-600 font-semibold rounded-xl hover:bg-purple-100 transition-colors text-sm items-center gap-1">
+              <button
+                onClick={() => {
+                  setIsReviewAll(true);
+                  setPracticeSessionKey((k) => k + 1);
+                }}
+                className="hidden sm:inline-flex px-3 py-2 bg-purple-50 text-purple-600 font-semibold rounded-xl hover:bg-purple-100 transition-colors text-sm items-center gap-1"
+              >
                 <RotateCw className="w-4 h-4" />
                 Ôn tất cả ({allCards.length})
               </button>
-            ) : null
-          )}
+            ) : null)}
           <button onClick={() => setIsVoiceModalOpen(true)} className="px-3 py-2 md:px-4 md:py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors text-sm">
             Thay đổi giọng nói
           </button>
@@ -289,15 +293,33 @@ export function FlashcardPractice() {
         {/* Play Area (75%) */}
         <div className="flex-1 bg-gray-50/50 p-4 md:p-6 overflow-y-auto relative h-full flex flex-col">
           <div className={cn("m-auto w-full flex flex-col items-center justify-center", activeMode === "bubble" ? "h-full py-0" : "min-h-full py-4")}>
-            {activeMode === "flashcard" && <ModeFlashcard key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
-            {activeMode === "quiz" && <ModeQuiz key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
-            {activeMode === "fill_blank" && <ModeFillBlank key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
-            {activeMode === "listening" && <ModeListening key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
-            {activeMode === "pronunciation" && <ModePronunciation key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
-            {activeMode === "match" && <ModeMatch key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
-            {activeMode === "bubble" && <ModeBubble key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
-            {activeMode === "guess" && <ModeGuess key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
-            {activeMode === "typing" && <ModeTyping key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />}
+            {activeMode === "flashcard" && (
+              <ModeFlashcard key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />
+            )}
+            {activeMode === "quiz" && (
+              <ModeQuiz key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />
+            )}
+            {activeMode === "fill_blank" && (
+              <ModeFillBlank key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />
+            )}
+            {activeMode === "listening" && (
+              <ModeListening key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />
+            )}
+            {activeMode === "pronunciation" && (
+              <ModePronunciation key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />
+            )}
+            {activeMode === "match" && (
+              <ModeMatch key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />
+            )}
+            {activeMode === "bubble" && (
+              <ModeBubble key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />
+            )}
+            {activeMode === "guess" && (
+              <ModeGuess key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />
+            )}
+            {activeMode === "typing" && (
+              <ModeTyping key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />
+            )}
           </div>
         </div>
 
@@ -329,7 +351,13 @@ export function FlashcardPractice() {
         </div>
       </div>
 
-      <VoiceSelectorModal isOpen={isVoiceModalOpen} onClose={() => setIsVoiceModalOpen(false)} currentVoiceId={currentVoiceId} onSelectVoice={setCurrentVoiceId} language={(currentSet as any)?.language} />
+      <VoiceSelectorModal
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
+        currentVoiceId={currentVoiceId}
+        onSelectVoice={setCurrentVoiceId}
+        language={(currentSet as any)?.language}
+      />
     </div>
   );
 }

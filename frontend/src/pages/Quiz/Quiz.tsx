@@ -3,10 +3,25 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuizStore } from "../../services/quizService";
 import { useAuth } from "../../contexts/AuthContext";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 export function Quiz() {
-  const { quizzes, publicQuizzes, builtinQuizzes, quizHistory: history, quizCategories, getQuizzes, getPublicQuizzes, getBuiltinQuizzes, getQuizHistory, fetchQuizCategories, createQuizCategory, deleteQuizCategory, loading, getRoomByCode } = useQuizStore();
+  const {
+    quizzes,
+    publicQuizzes,
+    builtinQuizzes,
+    quizHistory: history,
+    quizCategories,
+    getQuizzes,
+    getPublicQuizzes,
+    getBuiltinQuizzes,
+    getQuizHistory,
+    fetchQuizCategories,
+    createQuizCategory,
+    deleteQuizCategory,
+    loading,
+    getRoomByCode,
+  } = useQuizStore();
   const { user } = useAuth();
   const [roomCode, setRoomCode] = useState("");
   const [activeTab, setActiveTab] = useState<"mine" | "builtin" | "public">("mine");
@@ -24,7 +39,7 @@ export function Quiz() {
     user?.role === "admin" ||
     (user as any)?.role === "vip" ||
     ["vip", "pro", "premium"].includes(String((user as any)?.plan || (user as any)?.subscriptionPlan || "").toLowerCase()) ||
-    String((user as any)?.subscriptionStatus || "").toLowerCase() === "active"
+    String((user as any)?.subscriptionStatus || "").toLowerCase() === "active",
   );
 
   const visibleQuizzes = activeTab === "mine" ? quizzes : activeTab === "builtin" ? builtinQuizzes : publicQuizzes;
@@ -39,30 +54,24 @@ export function Quiz() {
 
   const matchesCategory = (quiz: any) => activeCategoryKey === "all" || getQuizCategoryKey(quiz) === activeCategoryKey;
 
-  const searchedVisibleQuizzes = visibleQuizzes
-    .filter(matchesCategory)
-    .filter((quiz) => {
-      if (!normalizedSearch) return true;
-      const haystack = [
-        quiz.title,
-        quiz.description,
-        quiz.difficulty,
-        quiz.categoryName,
-        (quiz as any).creator?.displayName,
-        ...(quiz.questions || []).flatMap((q: any) => [q.text, ...(q.options || []), q.correctAnswer]),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(normalizedSearch);
-    });
+  const searchedVisibleQuizzes = visibleQuizzes.filter(matchesCategory).filter((quiz) => {
+    if (!normalizedSearch) return true;
+    const haystack = [
+      quiz.title,
+      quiz.description,
+      quiz.difficulty,
+      quiz.categoryName,
+      (quiz as any).creator?.displayName,
+      ...(quiz.questions || []).flatMap((q: any) => [q.text, ...(q.options || []), q.correctAnswer]),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(normalizedSearch);
+  });
 
-  const orderedVisibleQuizzes = activeTab === "mine"
-    ? [
-        ...searchedVisibleQuizzes.filter((quiz) => (quiz as any).isFeatured),
-        ...searchedVisibleQuizzes.filter((quiz) => !(quiz as any).isFeatured),
-      ]
-    : searchedVisibleQuizzes;
+  const orderedVisibleQuizzes =
+    activeTab === "mine" ? [...searchedVisibleQuizzes.filter((quiz) => (quiz as any).isFeatured), ...searchedVisibleQuizzes.filter((quiz) => !(quiz as any).isFeatured)] : searchedVisibleQuizzes;
 
   const quizCategoryOptions = (() => {
     const base = [{ key: "all", name: "Tất cả", count: visibleQuizzes.length, color: "bg-blue-600" }];
@@ -107,7 +116,7 @@ export function Quiz() {
   }, [activeTab]);
 
   const handleJoinRoom = async () => {
-    if (!roomCode.trim()) return toast.error("Vui lòng nhập mã phòng");
+    if (!roomCode.trim()) return toastService.error("Vui lòng nhập mã phòng");
     const room = await getRoomByCode(roomCode);
     if (room) {
       navigate(`/quiz/room/${room.roomCode}`);
@@ -122,7 +131,7 @@ export function Quiz() {
 
   const continueCreateQuiz = () => {
     if (!createIsPublic && !isVip) {
-      toast.error("Quiz riêng tư chỉ dành cho tài khoản VIP. Vui lòng chọn Công khai hoặc nâng cấp VIP.");
+      toastService.error("Quiz riêng tư chỉ dành cho tài khoản VIP. Vui lòng chọn Công khai hoặc nâng cấp VIP.");
       return;
     }
     setIsCreateModalOpen(false);
@@ -133,7 +142,7 @@ export function Quiz() {
 
   const handleCreateQuizCategory = async () => {
     const name = newQuizCategoryName.trim();
-    if (!name) return toast.error("Nhập tên đề mục quiz trước");
+    if (!name) return toastService.error("Nhập tên đề mục quiz trước");
     const created = await createQuizCategory(name, "bg-blue-500");
     if (created) {
       setNewQuizCategoryName("");
@@ -257,11 +266,7 @@ export function Quiz() {
                 <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryKey === category.key ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{category.count}</span>
               </button>
               {activeTab === "mine" && category.id && (
-                <button
-                  onClick={() => deleteQuizCategory(category.id)}
-                  title="Xóa đề mục"
-                  className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
-                >
+                <button onClick={() => deleteQuizCategory(category.id)} title="Xóa đề mục" className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">
                   ×
                 </button>
               )}
@@ -274,7 +279,13 @@ export function Quiz() {
       <div>
         <div className="mb-4 flex flex-col gap-1">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            {activeTab === "public" ? <Globe2 className="w-6 h-6 text-emerald-500" /> : activeTab === "builtin" ? <Star className="w-6 h-6 text-indigo-500" /> : <Award className="w-6 h-6 text-blue-500" />}
+            {activeTab === "public" ? (
+              <Globe2 className="w-6 h-6 text-emerald-500" />
+            ) : activeTab === "builtin" ? (
+              <Star className="w-6 h-6 text-indigo-500" />
+            ) : (
+              <Award className="w-6 h-6 text-blue-500" />
+            )}
             {activeTab === "public" ? "Quiz công khai" : activeTab === "builtin" ? "Quiz có sẵn IELTS/TOEIC" : "Bài thi nổi bật"}
           </h2>
           {activeTab === "mine" ? (
@@ -293,7 +304,15 @@ export function Quiz() {
           </div>
         ) : orderedVisibleQuizzes.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-300">
-            <p className="text-gray-500 mb-4">{searchQuery.trim() ? "Không tìm thấy quiz phù hợp." : activeTab === "public" ? "Chưa có quiz công khai nào." : activeTab === "builtin" ? "Chưa có quiz có sẵn nào." : "Chưa có bài thi nào được tạo."}</p>
+            <p className="text-gray-500 mb-4">
+              {searchQuery.trim()
+                ? "Không tìm thấy quiz phù hợp."
+                : activeTab === "public"
+                  ? "Chưa có quiz công khai nào."
+                  : activeTab === "builtin"
+                    ? "Chưa có quiz có sẵn nào."
+                    : "Chưa có bài thi nào được tạo."}
+            </p>
             {activeTab === "mine" && (
               <button onClick={openCreateQuizModal} className="text-blue-600 font-bold hover:underline">
                 Tạo bài thi đầu tiên
@@ -317,7 +336,9 @@ export function Quiz() {
                           <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors line-clamp-1">{quiz.title}</h3>
                           <p className="text-sm text-gray-500 line-clamp-2">{quiz.description}</p>
                           {activeTab === "public" && (quiz as any).creator?.displayName && <p className="mt-1 text-xs font-semibold text-gray-400">Tác giả: {(quiz as any).creator.displayName}</p>}
-                          {(quiz as any).categoryName && <span className="mt-2 inline-flex w-max rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-extrabold text-indigo-600">{(quiz as any).categoryName}</span>}
+                          {(quiz as any).categoryName && (
+                            <span className="mt-2 inline-flex w-max rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-extrabold text-indigo-600">{(quiz as any).categoryName}</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -335,7 +356,9 @@ export function Quiz() {
                       </span>
                     )}
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${getDifficultyColor(quiz.difficulty)}`}>{quiz.difficulty}</span>
-                    <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg border ${quiz.isPublic === false ? "bg-slate-50 text-slate-600 border-slate-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"}`}>
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg border ${quiz.isPublic === false ? "bg-slate-50 text-slate-600 border-slate-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"}`}
+                    >
                       {quiz.isPublic === false ? <Lock className="w-3.5 h-3.5" /> : <Globe2 className="w-3.5 h-3.5" />}
                       {quiz.isPublic === false ? "Riêng tư" : "Công khai"}
                     </span>
@@ -451,21 +474,25 @@ export function Quiz() {
                 onClick={() => setCreateIsPublic(true)}
                 className={`w-full rounded-2xl border p-4 text-left transition-all ${createIsPublic ? "border-emerald-400 bg-emerald-50 ring-4 ring-emerald-100" : "border-gray-200 bg-gray-50 hover:bg-white"}`}
               >
-                <div className="flex items-center gap-2 font-extrabold text-gray-900"><Globe2 className="w-5 h-5 text-emerald-600" /> Công khai</div>
+                <div className="flex items-center gap-2 font-extrabold text-gray-900">
+                  <Globe2 className="w-5 h-5 text-emerald-600" /> Công khai
+                </div>
                 <p className="mt-1 text-sm font-medium text-gray-500">Mặc định. Quiz sẽ xuất hiện ở tab Công khai.</p>
               </button>
               <button
                 type="button"
                 onClick={() => {
                   if (!isVip) {
-                    toast.error("Quiz riêng tư chỉ dành cho tài khoản VIP.");
+                    toastService.error("Quiz riêng tư chỉ dành cho tài khoản VIP.");
                     return;
                   }
                   setCreateIsPublic(false);
                 }}
                 className={`w-full rounded-2xl border p-4 text-left transition-all ${!createIsPublic ? "border-slate-400 bg-slate-100 ring-4 ring-slate-100" : "border-gray-200 bg-gray-50 hover:bg-white"} ${!isVip ? "opacity-75" : ""}`}
               >
-                <div className="flex items-center gap-2 font-extrabold text-gray-900"><Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}</div>
+                <div className="flex items-center gap-2 font-extrabold text-gray-900">
+                  <Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}
+                </div>
                 <p className="mt-1 text-sm font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo quiz riêng tư.</p>
               </button>
             </div>
@@ -478,18 +505,23 @@ export function Quiz() {
               >
                 <option value="">Chưa phân loại</option>
                 {quizCategories.map((category) => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
                 ))}
               </select>
             </div>
             <div className="flex gap-3 border-t border-gray-100 p-6">
-              <button onClick={() => setIsCreateModalOpen(false)} className="flex-1 rounded-xl bg-gray-100 py-3 font-bold text-gray-700 hover:bg-gray-200">Hủy</button>
-              <button onClick={continueCreateQuiz} className="flex-1 rounded-xl bg-blue-600 py-3 font-bold text-white hover:bg-blue-700">Tiếp tục</button>
+              <button onClick={() => setIsCreateModalOpen(false)} className="flex-1 rounded-xl bg-gray-100 py-3 font-bold text-gray-700 hover:bg-gray-200">
+                Hủy
+              </button>
+              <button onClick={continueCreateQuiz} className="flex-1 rounded-xl bg-blue-600 py-3 font-bold text-white hover:bg-blue-700">
+                Tiếp tục
+              </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

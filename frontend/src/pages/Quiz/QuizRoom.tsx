@@ -4,7 +4,7 @@ import { Users, Play, Copy, Check, BarChart2, CheckCircle2, LogOut, X } from "lu
 import { useSocket } from "../../contexts/SocketContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useQuizStore, QuizRoom as QuizRoomType, Quiz } from "../../services/quizService";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 interface ParticipantProgress {
   uid: string;
@@ -84,7 +84,7 @@ export function QuizRoom() {
 
     socket.on("room_kicked_student", (data: any) => {
       if (data.uid === user?.uid) {
-        toast.error("Bạn đã bị mời ra khỏi phòng thi.");
+        toastService.error("Bạn đã bị mời ra khỏi phòng thi.");
         navigate("/quiz");
       }
     });

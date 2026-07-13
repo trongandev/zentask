@@ -1,5 +1,6 @@
-import { Trophy, Flame, ChevronUp, ChevronDown, Minus, Medal, Gift } from "lucide-react";
+import { Trophy, Flame, ChevronUp, ChevronDown, Minus, Medal, Gift, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
+import toastService from "@/src/services/toastService";
 import { UserAvatar } from "../components/UserAvatar";
 import { UserLevelBadge } from "../components/UserLevelBadge";
 import { cn } from "../lib/utils";
@@ -32,6 +33,12 @@ export function Leaderboard() {
   const [timeframe, setTimeframe] = useState<"week" | "month" | "all">("week");
   const [countdown, setCountdown] = useState("");
   const [rewards, setRewards] = useState<any[]>([]);
+  const [lastReloadTime, setLastReloadTime] = useState<number>(() => {
+    const saved = localStorage.getItem("leaderboardLastReload");
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
+  const canReload = Date.now() - lastReloadTime > 10 * 60 * 1000;
 
   useEffect(() => {
     if (user) {
@@ -43,7 +50,6 @@ export function Leaderboard() {
     try {
       await claimLeaderboardReward(reward.type, reward.period);
       setRewards((prev) => prev.filter((r) => r.period !== reward.period));
-      window.location.reload();
     } catch (e) {
       // toast error is already handled by store
     }
@@ -83,20 +89,31 @@ export function Leaderboard() {
     return () => clearInterval(timer);
   }, [timeframe]);
 
+  const fetchLeaderboardData = async (force = false) => {
+    setLoading(true);
+    const data = await getLeaderboard(timeframe, force);
+    const enrichedData = data.map((item: any) => ({
+      ...item,
+      isUser: user ? item.id === user.uid : false,
+      xp: item.xp.toLocaleString(),
+    }));
+    setLeaderboard(enrichedData);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchLeaderboard = async () => {
-      setLoading(true);
-      const data = await getLeaderboard(timeframe);
-      const enrichedData = data.map((item: any) => ({
-        ...item,
-        isUser: user ? item.id === user.uid : false,
-        xp: item.xp.toLocaleString(),
-      }));
-      setLeaderboard(enrichedData);
-      setLoading(false);
-    };
-    fetchLeaderboard();
+    fetchLeaderboardData();
   }, [user, timeframe, getLeaderboard]);
+
+  const handleReload = () => {
+    if (!canReload) {
+      toastService.error("Vui lòng đợi 10 phút giữa mỗi lần làm mới.");
+      return;
+    }
+    setLastReloadTime(Date.now());
+    localStorage.setItem("leaderboardLastReload", Date.now().toString());
+    fetchLeaderboardData(true);
+  };
 
   const getRankBadge = (rank: number) => {
     if (rank === 1) return <img src="/top/top1.png" alt="Top 1" className="w-10 h-10 object-contain drop-shadow-md" />;
@@ -195,24 +212,34 @@ export function Leaderboard() {
               </p>
             )}
           </div>
-          <div className="flex bg-gray-100 p-1 rounded-lg self-start md:self-auto">
+          <div className="flex items-center gap-2">
+            <div className="flex bg-gray-100 p-1 rounded-lg self-start md:self-auto">
+              <button
+                onClick={() => setTimeframe("week")}
+                className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "week" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
+              >
+                Tuần
+              </button>
+              <button
+                onClick={() => setTimeframe("month")}
+                className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "month" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
+              >
+                Tháng
+              </button>
+              <button
+                onClick={() => setTimeframe("all")}
+                className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "all" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
+              >
+                Tất cả
+              </button>
+            </div>
             <button
-              onClick={() => setTimeframe("week")}
-              className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "week" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
+              onClick={handleReload}
+              disabled={!canReload || loading}
+              className="p-1.5 rounded-lg bg-gray-100 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all disabled:opacity-50"
+              title={!canReload ? "Vui lòng đợi 10 phút" : "Làm mới"}
             >
-              Tuần
-            </button>
-            <button
-              onClick={() => setTimeframe("month")}
-              className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "month" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
-            >
-              Tháng
-            </button>
-            <button
-              onClick={() => setTimeframe("all")}
-              className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "all" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
-            >
-              Tất cả
+              <RefreshCw className={cn("w-5 h-5", loading && "animate-spin")} />
             </button>
           </div>
         </div>

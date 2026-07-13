@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { adminService } from "../../services/adminService";
 import { format } from "date-fns";
 import { Activity, Search, AlertCircle, ChevronLeft, ChevronRight, Eye } from "lucide-react";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 interface SystemLog {
   id: string;
@@ -34,7 +34,7 @@ export function SystemLogs() {
       setTotalPages(res.totalPages);
       setTotal(res.total);
     } catch (error: any) {
-      toast.error(error.message || "Lỗi khi tải system logs");
+      toastService.error(error.message || "Lỗi khi tải system logs");
     } finally {
       setLoading(false);
     }

@@ -4,7 +4,7 @@ import { Bot, FileText, ArrowLeft, Loader2, Sparkles, Plus, Trash2, Globe2, Lock
 import { useQuizStore, QuizQuestion } from "../../services/quizService";
 import { useConfigStore } from "../../services/configService";
 import { useUserStore } from "../../services/userService";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 import { useAuth } from "../../contexts/AuthContext";
 
 export function QuizCreate() {
@@ -23,7 +23,7 @@ export function QuizCreate() {
     user?.role === "admin" ||
     (user as any)?.role === "vip" ||
     ["vip", "pro", "premium"].includes(String((user as any)?.plan || (user as any)?.subscriptionPlan || "").toLowerCase()) ||
-    String((user as any)?.subscriptionStatus || "").toLowerCase() === "active"
+    String((user as any)?.subscriptionStatus || "").toLowerCase() === "active",
   );
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export function QuizCreate() {
 
   const selectPrivate = () => {
     if (!isVip) {
-      toast.error("Quiz riêng tư chỉ dành cho tài khoản VIP.");
+      toastService.error("Quiz riêng tư chỉ dành cho tài khoản VIP.");
       return;
     }
     setIsPublic(false);
@@ -52,7 +52,7 @@ export function QuizCreate() {
 
   const handleGenerateAI = async () => {
     if (!aiPrompt.trim()) {
-      toast.error("Vui lòng nhập chủ đề cần tạo");
+      toastService.error("Vui lòng nhập chủ đề cần tạo");
       return;
     }
     try {
@@ -68,7 +68,7 @@ export function QuizCreate() {
             useUserStore.getState().triggerLevelUp(quiz.xpResult.level);
           }
         }
-        toast.success("Tạo quiz thành công!");
+        toastService.success("Tạo quiz thành công!");
         navigate(`/quiz/${quiz.id}`);
       }
     } finally {
@@ -77,14 +77,14 @@ export function QuizCreate() {
   };
 
   const handleSaveManual = async () => {
-    if (!title.trim()) return toast.error("Vui lòng nhập tiêu đề");
+    if (!title.trim()) return toastService.error("Vui lòng nhập tiêu đề");
 
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
-      if (!q.text.trim()) return toast.error(`Câu hỏi ${i + 1} chưa có nội dung`);
-      if (q.options.some((opt) => !opt.trim())) return toast.error(`Câu hỏi ${i + 1} chưa điền đủ 4 đáp án`);
-      if (!q.correctAnswer.trim()) return toast.error(`Câu hỏi ${i + 1} chưa chọn đáp án đúng`);
-      if (!q.options.includes(q.correctAnswer)) return toast.error(`Đáp án đúng của câu ${i + 1} phải nằm trong 4 lựa chọn`);
+      if (!q.text.trim()) return toastService.error(`Câu hỏi ${i + 1} chưa có nội dung`);
+      if (q.options.some((opt) => !opt.trim())) return toastService.error(`Câu hỏi ${i + 1} chưa điền đủ 4 đáp án`);
+      if (!q.correctAnswer.trim()) return toastService.error(`Câu hỏi ${i + 1} chưa chọn đáp án đúng`);
+      if (!q.options.includes(q.correctAnswer)) return toastService.error(`Đáp án đúng của câu ${i + 1} phải nằm trong 4 lựa chọn`);
     }
 
     try {
@@ -120,7 +120,7 @@ export function QuizCreate() {
   };
 
   const removeQuestion = (id: string) => {
-    if (questions.length === 1) return toast.error("Phải có ít nhất 1 câu hỏi");
+    if (questions.length === 1) return toastService.error("Phải có ít nhất 1 câu hỏi");
     setQuestions(questions.filter((q) => q.id !== id));
   };
 
@@ -177,7 +177,9 @@ export function QuizCreate() {
             onClick={() => setIsPublic(true)}
             className={`rounded-2xl border p-4 text-left transition-all ${isPublic ? "border-emerald-400 bg-emerald-50 ring-4 ring-emerald-100" : "border-gray-200 bg-gray-50 hover:bg-white"}`}
           >
-            <div className="flex items-center gap-2 font-extrabold text-gray-900"><Globe2 className="w-5 h-5 text-emerald-600" /> Công khai</div>
+            <div className="flex items-center gap-2 font-extrabold text-gray-900">
+              <Globe2 className="w-5 h-5 text-emerald-600" /> Công khai
+            </div>
             <p className="mt-1 text-xs font-medium text-gray-500">Mặc định. Quiz sẽ xuất hiện ở tab Công khai.</p>
           </button>
           <button
@@ -185,7 +187,9 @@ export function QuizCreate() {
             onClick={selectPrivate}
             className={`rounded-2xl border p-4 text-left transition-all ${!isPublic ? "border-slate-400 bg-slate-100 ring-4 ring-slate-100" : "border-gray-200 bg-gray-50 hover:bg-white"} ${!isVip ? "opacity-75" : ""}`}
           >
-            <div className="flex items-center gap-2 font-extrabold text-gray-900"><Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}</div>
+            <div className="flex items-center gap-2 font-extrabold text-gray-900">
+              <Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}
+            </div>
             <p className="mt-1 text-xs font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo quiz riêng tư.</p>
           </button>
         </div>
@@ -200,7 +204,9 @@ export function QuizCreate() {
         >
           <option value="">Chưa phân loại</option>
           {quizCategories.map((category) => (
-            <option key={category.id} value={category.id}>{category.name}</option>
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
           ))}
         </select>
         <p className="mt-2 text-xs font-medium text-gray-500">Đề mục giúp bài quiz xuất hiện đúng nhóm trong tab Của tôi và Công khai.</p>

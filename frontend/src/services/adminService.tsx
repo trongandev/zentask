@@ -1,4 +1,4 @@
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
@@ -12,7 +12,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch users");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return { users: [], total: 0, page: 1, totalPages: 1 };
     }
   },
@@ -26,10 +26,10 @@ export const adminService = {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to update role");
-      toast.success("Cập nhật quyền thành công!");
+      toastService.success("Cập nhật quyền thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -44,10 +44,10 @@ export const adminService = {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update ban status");
-      toast.success(isBanned ? "Đã khoá tài khoản!" : "Đã mở khoá tài khoản!");
+      toastService.success(isBanned ? "Đã khoá tài khoản!" : "Đã mở khoá tài khoản!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -62,7 +62,7 @@ export const adminService = {
       const data = await res.json();
       return data.tasks;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return [];
     }
   },
@@ -76,10 +76,10 @@ export const adminService = {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to create task");
-      toast.success("Thêm nhiệm vụ thành công!");
+      toastService.success("Thêm nhiệm vụ thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -93,10 +93,10 @@ export const adminService = {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to update task");
-      toast.success("Cập nhật nhiệm vụ thành công!");
+      toastService.success("Cập nhật nhiệm vụ thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -108,10 +108,10 @@ export const adminService = {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to delete task");
-      toast.success("Xóa nhiệm vụ thành công!");
+      toastService.success("Xóa nhiệm vụ thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -123,7 +123,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch vocab sets");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return { items: [], total: 0, page: 1, totalPages: 1 };
     }
   },
@@ -131,10 +131,10 @@ export const adminService = {
     try {
       const res = await fetch(`${API_URL}/api/admin/vocab-sets/${id}`, { method: "DELETE", credentials: "include" });
       if (!res.ok) throw new Error("Failed to delete vocab set");
-      toast.success("Xóa bộ từ vựng thành công!");
+      toastService.success("Xóa bộ từ vựng thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -146,7 +146,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch vocab");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return { items: [], total: 0, page: 1, totalPages: 1 };
     }
   },
@@ -154,10 +154,10 @@ export const adminService = {
     try {
       const res = await fetch(`${API_URL}/api/admin/vocab/${id}`, { method: "DELETE", credentials: "include" });
       if (!res.ok) throw new Error("Failed to delete vocab");
-      toast.success("Xóa từ vựng thành công!");
+      toastService.success("Xóa từ vựng thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -169,7 +169,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch quizzes");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return { items: [], total: 0, page: 1, totalPages: 1 };
     }
   },
@@ -177,10 +177,10 @@ export const adminService = {
     try {
       const res = await fetch(`${API_URL}/api/admin/quizzes/${id}`, { method: "DELETE", credentials: "include" });
       if (!res.ok) throw new Error("Failed to delete quiz");
-      toast.success("Xóa quiz thành công!");
+      toastService.success("Xóa quiz thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -192,7 +192,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch quiz history");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return { items: [], total: 0, page: 1, totalPages: 1 };
     }
   },
@@ -204,7 +204,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch bot configs");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return { items: [] };
     }
   },
@@ -217,7 +217,7 @@ export const adminService = {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(config),
-        credentials: "include"
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to save bot config");
       return await res.json();
@@ -242,7 +242,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch system logs");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return { items: [], total: 0, page: 1, totalPages: 1 };
     }
   },
@@ -254,7 +254,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch analytics");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return null;
     }
   },
@@ -266,7 +266,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch posts");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return { items: [], total: 0, page: 1, totalPages: 1 };
     }
   },
@@ -278,10 +278,10 @@ export const adminService = {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to delete post");
-      toast.success("Xoá bài viết thành công!");
+      toastService.success("Xoá bài viết thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -293,7 +293,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch banned IPs");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return [];
     }
   },
@@ -304,13 +304,13 @@ export const adminService = {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ ip, reason, isHoneypot })
+        body: JSON.stringify({ ip, reason, isHoneypot }),
       });
       if (!res.ok) throw new Error("Failed to ban IP");
-      toast.success("Đã cấm IP thành công!");
+      toastService.success("Đã cấm IP thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -322,10 +322,10 @@ export const adminService = {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to unban IP");
-      toast.success("Đã gỡ cấm IP thành công!");
+      toastService.success("Đã gỡ cấm IP thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
   },
@@ -337,7 +337,7 @@ export const adminService = {
       if (!res.ok) throw new Error("Failed to fetch feedbacks");
       return await res.json();
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return [];
     }
   },
@@ -349,11 +349,11 @@ export const adminService = {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to delete feedback");
-      toast.success("Xoá feedback thành công!");
+      toastService.success("Xoá feedback thành công!");
       return true;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return false;
     }
-  }
+  },
 };

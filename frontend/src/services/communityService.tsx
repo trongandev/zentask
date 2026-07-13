@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 import { assertPublicContentSafe } from "../utils/publicContentGuard";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
@@ -52,13 +52,13 @@ const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
 interface CommunityState {
   loading: boolean;
   posts: Post[];
-  
+
   getPosts: (tags?: string, background?: boolean) => Promise<Post[]>;
   createPost: (content: string, tags: string[]) => Promise<any | null>;
   updatePost: (id: string, content: string, tags: string[]) => Promise<any | null>;
   deletePost: (id: string) => Promise<any | null>;
   togglePostLike: (id: string) => Promise<any | null>;
-  
+
   getComments: (postId: string) => Promise<Comment[]>;
   createComment: (postId: string, content: string, parentId?: string) => Promise<any | null>;
   toggleCommentLike: (commentId: string) => Promise<any | null>;
@@ -77,7 +77,7 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
       set({ posts: data, loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return [];
     }
@@ -92,10 +92,10 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
         body: JSON.stringify({ content, tags }),
       });
       get().getPosts(undefined, true);
-      toast.success("Đăng bài thành công");
+      toastService.success("Đăng bài thành công");
       return result;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return null;
     }
   },
@@ -109,10 +109,10 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
         body: JSON.stringify({ content, tags }),
       });
       get().getPosts(undefined, true);
-      toast.success("Cập nhật bài viết thành công");
+      toastService.success("Cập nhật bài viết thành công");
       return result;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return null;
     }
   },
@@ -123,10 +123,10 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
         method: "DELETE",
       });
       set((state) => ({ posts: state.posts.filter((p) => p.id !== id) }));
-      toast.success("Xóa bài viết thành công");
+      toastService.success("Xóa bài viết thành công");
       return result;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return null;
     }
   },
@@ -138,7 +138,7 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
       });
       return result;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return null;
     }
   },
@@ -148,7 +148,7 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
       const data = await fetchApi(`/community/posts/${postId}/comments`);
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return [];
     }
   },
@@ -162,7 +162,7 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
       });
       return result;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return null;
     }
   },
@@ -174,7 +174,7 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
       });
       return result;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return null;
     }
   },
@@ -188,9 +188,8 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
       });
       return result;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       return null;
     }
-  }
+  },
 }));
-

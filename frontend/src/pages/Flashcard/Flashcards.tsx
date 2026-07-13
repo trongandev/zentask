@@ -6,7 +6,7 @@ import { RankCard } from "../../components/shared/RankCard";
 import { useFlashcardStore } from "../../services/flashcardService";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 import { SEO } from "../../components/SEO";
 import { Modal } from "../../components/shared/Modal";
 import { CreateEditFolderModal, DeleteFolderModal, CreateEditSetModal, DeleteSetModal, COLORS } from "./components/FlashcardModals";
@@ -143,9 +143,15 @@ function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popoverId, 
           <div className="bg-yellow-400 h-full transition-all" style={{ width: `${almostPct}%` }} title={`Gần nhớ: ${almostCount}`}></div>
         </div>
         <div className="flex justify-between text-[10px] font-semibold text-gray-500 mb-4 px-1">
-          <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-500"></div> Đã nhớ ({knownCount})</div>
-          <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-yellow-400"></div> Gần nhớ ({almostCount})</div>
-          <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-gray-200"></div> Chưa nhớ ({Math.max(0, cardCount - knownCount - almostCount)})</div>
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-green-500"></div> Đã nhớ ({knownCount})
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-yellow-400"></div> Gần nhớ ({almostCount})
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-gray-200"></div> Chưa nhớ ({Math.max(0, cardCount - knownCount - almostCount)})
+          </div>
         </div>
         <button className="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors pointer-events-none">
           <Play className="w-4 h-4 fill-current" />
@@ -451,7 +457,7 @@ export function Flashcards() {
       useFlashcardStore.setState((state) => ({
         sets: state.sets.map((s) => (s.id === activeSet.id ? { ...s, folderId: oldFolderId } : s)),
       }));
-      toast.error("Chưa lưu được vị trí mới của bộ thẻ.");
+      toastService.error("Chưa lưu được vị trí mới của bộ thẻ.");
     }
   };
 
@@ -481,12 +487,12 @@ export function Flashcards() {
 
   const handleCreateOrUpdateSet = async () => {
     if (!newTitle.trim()) {
-      toast.error("Vui lòng nhập tên bộ thẻ");
+      toastService.error("Vui lòng nhập tên bộ thẻ");
       return;
     }
 
     if (!setIsPublic && !isVip) {
-      toast.error("Bộ thẻ riêng tư chỉ dành cho tài khoản VIP. Vui lòng chọn Công khai hoặc nâng cấp VIP.");
+      toastService.error("Bộ thẻ riêng tư chỉ dành cho tài khoản VIP. Vui lòng chọn Công khai hoặc nâng cấp VIP.");
       return;
     }
 
@@ -512,7 +518,7 @@ export function Flashcards() {
 
   const handleCreateOrUpdateFolder = async () => {
     if (!newFolderName.trim()) {
-      toast.error("Vui lòng nhập tên thư mục");
+      toastService.error("Vui lòng nhập tên thư mục");
       return;
     }
 
@@ -607,7 +613,7 @@ export function Flashcards() {
   const handleCreateCategory = async () => {
     const name = newCategoryName.trim();
     if (!name) {
-      toast.error("Nhập tên đề mục trước");
+      toastService.error("Nhập tên đề mục trước");
       return;
     }
     const created = await createCategory(name, COLORS[Math.floor(Math.random() * COLORS.length)]);

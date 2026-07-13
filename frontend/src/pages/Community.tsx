@@ -7,7 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useCommunityStore, Post as ApiPost, Comment as ApiComment } from "../services/communityService";
 import DOMPurify from "dompurify";
 import { RichTextEditor } from "../components/RichTextEditor";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 import { SEO } from "../components/SEO";
 
 // Cấu hình DOMPurify để chặn các thẻ và style độc hại
@@ -15,13 +15,16 @@ DOMPurify.addHook("uponSanitizeAttribute", (node, data) => {
   if (data.attrName === "style") {
     // Chỉ cho phép color và font-size (từ Tiptap config của bạn)
     const allowedProps = ["color", "font-size"];
-    const styles = data.attrValue.split(";").map((s) => s.trim()).filter(Boolean);
-    
+    const styles = data.attrValue
+      .split(";")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
     const safeStyles = styles.filter((style) => {
       const prop = style.split(":")[0].trim().toLowerCase();
       return allowedProps.includes(prop);
     });
-    
+
     if (safeStyles.length > 0) {
       data.attrValue = safeStyles.join("; ");
     } else {
@@ -94,7 +97,7 @@ export function Community() {
   }, [filterTag, getPosts]);
 
   const handleLike = async (postId: string) => {
-    if (!user) return toast.error("Vui lòng đăng nhập");
+    if (!user) return toastService.error("Vui lòng đăng nhập");
     // The optimistic update would require us to manipulate store's state,
     // For simplicity, we just toggle and re-fetch if needed.
     const res = await togglePostLike(postId);
@@ -105,11 +108,14 @@ export function Community() {
 
   const handlePostSubmit = async () => {
     if (!newPostContent.trim()) return;
-    
+
     // Validate length >= 50 chars (ignore HTML tags)
-    const plainText = newPostContent.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim();
+    const plainText = newPostContent
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim();
     if (plainText.length < 50) {
-      toast.error("Bài viết phải có ít nhất 50 ký tự (không tính hình ảnh/định dạng).");
+      toastService.error("Bài viết phải có ít nhất 50 ký tự");
       return;
     }
 
@@ -172,7 +178,7 @@ export function Community() {
   };
 
   const handleCommentLike = async (postId: string, commentId: string) => {
-    if (!user) return toast.error("Vui lòng đăng nhập");
+    if (!user) return toastService.error("Vui lòng đăng nhập");
     const res = await toggleCommentLike(commentId);
     if (res) {
       await fetchCommentsForPost(postId);

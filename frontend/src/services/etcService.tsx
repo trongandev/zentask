@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
@@ -21,8 +21,8 @@ const fetchApi = async (path: string, options: RequestInit = {}) => {
 
 interface EtcState {
   loading: boolean;
-  
-  getLeaderboard: (type: "week" | "month" | "all") => Promise<any[]>;
+
+  getLeaderboard: (type: "week" | "month" | "all", force?: boolean) => Promise<any[]>;
   preloadedWeeklyLeaderboard: any[] | null;
   setPreloadedWeeklyLeaderboard: (leaderboard: any[]) => void;
   checkLeaderboardRewards: () => Promise<any[]>;
@@ -37,10 +37,10 @@ export const useEtcStore = create<EtcState>((set, get) => ({
 
   setPreloadedWeeklyLeaderboard: (leaderboard) => set({ preloadedWeeklyLeaderboard: leaderboard }),
 
-  getLeaderboard: async (type = "all") => {
+  getLeaderboard: async (type = "all", force = false) => {
     if (type === "week") {
       const { preloadedWeeklyLeaderboard } = get();
-      if (preloadedWeeklyLeaderboard) {
+      if (preloadedWeeklyLeaderboard && !force) {
         set({ preloadedWeeklyLeaderboard: null });
         return preloadedWeeklyLeaderboard;
       }
@@ -48,11 +48,11 @@ export const useEtcStore = create<EtcState>((set, get) => ({
 
     set({ loading: true });
     try {
-      const data = await fetchApi(`/leaderboard?type=${type}`);
+      const data = await fetchApi(`/leaderboard?type=${type}${force ? "&force=true" : ""}`);
       set({ loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return [];
     }
@@ -76,7 +76,7 @@ export const useEtcStore = create<EtcState>((set, get) => ({
       set({ loading: false });
       return res;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       throw error;
     }
@@ -89,7 +89,7 @@ export const useEtcStore = create<EtcState>((set, get) => ({
       set({ loading: false });
       return data;
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       set({ loading: false });
       return null;
     }
@@ -102,9 +102,8 @@ export const useEtcStore = create<EtcState>((set, get) => ({
       const audioBlob = await response.blob();
       return URL.createObjectURL(audioBlob);
     } catch (error: any) {
-      toast.error(error.message);
+      toastService.error(error.message);
       throw error;
     }
-  }
+  },
 }));
-

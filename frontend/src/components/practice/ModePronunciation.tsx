@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle, Loader2, Mic, MicOff, RotateCw, Volume2 } from "lucide-react";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 import { Flashcard } from "../../services/flashcardService";
 import { pronunciationService } from "../../services/pronunciationService";
 import { cn } from "../../lib/utils";
@@ -24,7 +24,9 @@ function sleep(ms: number) {
 }
 
 function normalizeWebmDataUrl(value: string) {
-  const raw = String(value || "").trim().replace(/\s+/g, "");
+  const raw = String(value || "")
+    .trim()
+    .replace(/\s+/g, "");
   const commaIndex = raw.indexOf(",");
   if (commaIndex === -1) return raw;
   const body = raw.slice(commaIndex + 1);
@@ -64,13 +66,7 @@ function toScoreNumber(value: any) {
 }
 
 function pickScore(result: any) {
-  const preferredKeys = [
-    "pronunciationscore",
-    "pronunciationscorepercent",
-    "accuracyscore",
-    "accuracy",
-    "score",
-  ];
+  const preferredKeys = ["pronunciationscore", "pronunciationscorepercent", "accuracyscore", "accuracy", "score"];
   const found: Array<{ key: string; value: number }> = [];
 
   walkValues(result, (key, value) => {
@@ -128,17 +124,11 @@ interface WordResult {
 }
 
 /** Map phoneme scores proportionally onto each character of the word. */
-function mapPhonemesToChars(
-  word: string,
-  phonemes: { phoneme: string; correct: boolean }[],
-): CharResult[] {
+function mapPhonemesToChars(word: string, phonemes: { phoneme: string; correct: boolean }[]): CharResult[] {
   const chars = word.split("");
   if (!phonemes.length) return chars.map((c) => ({ char: c, correct: null }));
   return chars.map((c, i) => {
-    const idx = Math.min(
-      Math.floor((i / chars.length) * phonemes.length),
-      phonemes.length - 1,
-    );
+    const idx = Math.min(Math.floor((i / chars.length) * phonemes.length), phonemes.length - 1);
     return { char: c, correct: phonemes[idx].correct };
   });
 }
@@ -146,43 +136,28 @@ function mapPhonemesToChars(
 function pickWords(result: any): WordResult[] {
   // Try NBest[].Words[] (Azure SDK shape)
   const nBest = result?.NBest ?? result?.nBest ?? result?.nbest;
-  const wordsArray =
-    (Array.isArray(nBest) && nBest[0]?.Words) ||
-    (Array.isArray(nBest) && nBest[0]?.words) ||
-    result?.Words ||
-    result?.words ||
-    null;
+  const wordsArray = (Array.isArray(nBest) && nBest[0]?.Words) || (Array.isArray(nBest) && nBest[0]?.words) || result?.Words || result?.words || null;
 
   if (!Array.isArray(wordsArray) || wordsArray.length === 0) return [];
 
   return wordsArray.map((w: any) => {
     const wordText: string = w?.Word ?? w?.word ?? w?.text ?? "";
     const pa = w?.PronunciationAssessment ?? w?.pronunciationAssessment ?? w?.assessment ?? {};
-    const accuracyRaw =
-      pa?.AccuracyScore ?? pa?.accuracyScore ?? pa?.accuracy ?? w?.AccuracyScore ?? null;
+    const accuracyRaw = pa?.AccuracyScore ?? pa?.accuracyScore ?? pa?.accuracy ?? w?.AccuracyScore ?? null;
     const score = toScoreNumber(accuracyRaw);
     const errorType: string = (pa?.ErrorType ?? pa?.errorType ?? "").toLowerCase();
-    const correct =
-      errorType === "none" || errorType === ""
-        ? score == null || score >= PASS_SCORE
-        : false;
+    const correct = errorType === "none" || errorType === "" ? score == null || score >= PASS_SCORE : false;
 
     // Extract phoneme-level data
     const phonemesRaw = w?.Phonemes ?? w?.phonemes ?? [];
     const phonemes: { phoneme: string; correct: boolean }[] = Array.isArray(phonemesRaw)
       ? phonemesRaw.map((p: any) => {
-        const ppa =
-          p?.PronunciationAssessment ?? p?.pronunciationAssessment ?? p?.assessment ?? {};
-        const pScore = toScoreNumber(
-          ppa?.AccuracyScore ?? ppa?.accuracyScore ?? ppa?.accuracy ?? null,
-        );
-        const pError = (ppa?.ErrorType ?? ppa?.errorType ?? "").toLowerCase();
-        const pCorrect =
-          pError === "none" || pError === ""
-            ? pScore == null || pScore >= PASS_SCORE
-            : false;
-        return { phoneme: p?.Phoneme ?? p?.phoneme ?? "", correct: pCorrect };
-      })
+          const ppa = p?.PronunciationAssessment ?? p?.pronunciationAssessment ?? p?.assessment ?? {};
+          const pScore = toScoreNumber(ppa?.AccuracyScore ?? ppa?.accuracyScore ?? ppa?.accuracy ?? null);
+          const pError = (ppa?.ErrorType ?? ppa?.errorType ?? "").toLowerCase();
+          const pCorrect = pError === "none" || pError === "" ? pScore == null || pScore >= PASS_SCORE : false;
+          return { phoneme: p?.Phoneme ?? p?.phoneme ?? "", correct: pCorrect };
+        })
       : [];
 
     const chars = mapPhonemesToChars(wordText, phonemes);
@@ -197,32 +172,18 @@ function WordHighlight({ wordResult }: { wordResult: WordResult }) {
   return (
     <span className="inline-flex flex-col items-center gap-0.5">
       <span className="text-xl font-black tracking-wide">
-        {hasPhonemeData
-          ? wordResult.chars.map((c, i) => (
-            <span
-              key={i}
-              className={
-                c.correct === true
-                  ? "text-green-500"
-                  : c.correct === false
-                    ? "text-red-500"
-                    : "text-gray-700"
-              }
-            >
+        {hasPhonemeData ? (
+          wordResult.chars.map((c, i) => (
+            <span key={i} className={c.correct === true ? "text-green-500" : c.correct === false ? "text-red-500" : "text-gray-700"}>
               {c.char}
             </span>
           ))
-          : (
-            <span className={wordResult.correct ? "text-green-500" : "text-red-500"}>
-              {wordResult.word}
-            </span>
-          )}
+        ) : (
+          <span className={wordResult.correct ? "text-green-500" : "text-red-500"}>{wordResult.word}</span>
+        )}
       </span>
       {/* tiny underline bar for quick scan */}
-      <span
-        className={`h-0.5 w-full rounded-full ${wordResult.correct ? "bg-green-400" : "bg-red-400"
-          }`}
-      />
+      <span className={`h-0.5 w-full rounded-full ${wordResult.correct ? "bg-green-400" : "bg-red-400"}`} />
     </span>
   );
 }
@@ -278,7 +239,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
   const startRecording = async () => {
     if (!currentCard || status === "checking") return;
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
-      toast.error("Trình duyệt này chưa hỗ trợ ghi âm.");
+      toastService.error("Trình duyệt này chưa hỗ trợ ghi âm.");
       return;
     }
 
@@ -296,14 +257,10 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
         },
       });
       streamRef.current = stream;
-      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-        ? "audio/webm;codecs=opus"
-        : MediaRecorder.isTypeSupported("audio/webm")
-          ? "audio/webm"
-          : "";
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus" : MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
       if (!mimeType) {
         stream.getTracks().forEach((track) => track.stop());
-        toast.error("Trình duyệt này chưa hỗ trợ ghi âm WebM. Hãy dùng Chrome hoặc Edge.");
+        toastService.error("Trình duyệt này chưa hỗ trợ ghi âm WebM. Hãy dùng Chrome hoặc Edge.");
         return;
       }
       const recorder = new MediaRecorder(stream, { mimeType });
@@ -311,7 +268,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
 
       recorder.onerror = (event) => {
         console.error("MediaRecorder error:", event);
-        toast.error("Micro bị lỗi khi ghi âm. Hãy thử ghi âm lại.");
+        toastService.error("Micro bị lỗi khi ghi âm. Hãy thử ghi âm lại.");
         stopTimer();
         stream.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
@@ -342,7 +299,9 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
           const base64Audio = normalizeWebmDataUrl(dataUrl);
 
           console.log("Pronunciation payload preview", {
-            title: String(currentCard.term || "").trim().toLowerCase(),
+            title: String(currentCard.term || "")
+              .trim()
+              .toLowerCase(),
             language: "en",
             base64AudioPrefix: base64Audio.slice(0, 32),
             base64AudioLength: base64Audio.length,
@@ -350,7 +309,9 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
           });
 
           const response = await pronunciationService.assess({
-            title: String(currentCard.term || "").trim().toLowerCase(),
+            title: String(currentCard.term || "")
+              .trim()
+              .toLowerCase(),
             base64Audio,
             language: "en",
           });
@@ -366,7 +327,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
         } catch (error: any) {
           console.error("Pronunciation check error:", error);
           setStatus("idle");
-          toast.error(error?.message || "Không chấm được phát âm.");
+          toastService.error(error?.message || "Không chấm được phát âm.");
         }
       };
 
@@ -377,7 +338,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
     } catch (error: any) {
       console.error("Start recording error:", error);
       setStatus("idle");
-      toast.error("Không mở được micro. Hãy kiểm tra quyền truy cập micro của trình duyệt.");
+      toastService.error("Không mở được micro. Hãy kiểm tra quyền truy cập micro của trình duyệt.");
     }
   };
 
@@ -386,12 +347,12 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
     if (!recorder || recorder.state === "inactive") return;
     const elapsedMs = Date.now() - recordingStartedAtRef.current;
     if (elapsedMs < MIN_RECORDING_MS) {
-      toast.error("Hãy ghi âm tối thiểu 0.5 giây rồi mới chấm điểm.");
+      toastService.error("Hãy ghi âm tối thiểu 0.5 giây rồi mới chấm điểm.");
       return;
     }
     try {
       recorder.requestData();
-    } catch { }
+    } catch {}
     recorder.stop();
   };
 
@@ -508,54 +469,55 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
             )}
           </div>
 
-          <p className="mt-4 text-sm text-gray-400">Nhấn <strong>Bắt đầu ghi âm</strong>, đọc to rõ ràng, rồi nhấn <strong>Dừng &amp; chấm điểm</strong>.</p>
+          <p className="mt-4 text-sm text-gray-400">
+            Nhấn <strong>Bắt đầu ghi âm</strong>, đọc to rõ ràng, rồi nhấn <strong>Dừng &amp; chấm điểm</strong>.
+          </p>
         </div>
 
-        {result && (() => {
-          const wordResults = pickWords(result);
-          return (
-            <div className="mt-8 rounded-3xl border border-gray-100 bg-gray-50 p-4 md:p-6 text-left">
-              {/* Header: score badge + status */}
-              <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h3 className="text-lg font-black text-gray-900">Kết quả phát âm</h3>
-                  <p className="text-sm text-gray-500">
-                    {status === "correct" ? "✅ Bạn phát âm đạt yêu cầu!" : "❌ Chưa đạt — hãy thử lại hoặc chuyển câu tiếp."}
-                  </p>
+        {result &&
+          (() => {
+            const wordResults = pickWords(result);
+            return (
+              <div className="mt-8 rounded-3xl border border-gray-100 bg-gray-50 p-4 md:p-6 text-left">
+                {/* Header: score badge + status */}
+                <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h3 className="text-lg font-black text-gray-900">Kết quả phát âm</h3>
+                    <p className="text-sm text-gray-500">{status === "correct" ? "✅ Bạn phát âm đạt yêu cầu!" : "❌ Chưa đạt — hãy thử lại hoặc chuyển câu tiếp."}</p>
+                  </div>
+                  <div className={cn("rounded-2xl px-5 py-3 text-center font-black text-xl", status === "correct" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
+                    {mainScore != null ? `${Math.round(mainScore)}/100` : "—"}
+                  </div>
                 </div>
-                <div className={cn("rounded-2xl px-5 py-3 text-center font-black text-xl", status === "correct" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
-                  {mainScore != null ? `${Math.round(mainScore)}/100` : "—"}
-                </div>
-              </div>
 
-              {/* Character-level feedback */}
-              {wordResults.length > 0 ? (
-                <div>
-                  <p className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-400">Từng chữ cái</p>
-                  <div className="flex flex-wrap items-end gap-x-3 gap-y-4">
-                    {wordResults.map((w, i) => (
-                      <WordHighlight key={i} wordResult={w} />
-                    ))}
+                {/* Character-level feedback */}
+                {wordResults.length > 0 ? (
+                  <div>
+                    <p className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-400">Từng chữ cái</p>
+                    <div className="flex flex-wrap items-end gap-x-3 gap-y-4">
+                      {wordResults.map((w, i) => (
+                        <WordHighlight key={i} wordResult={w} />
+                      ))}
+                    </div>
+                    <div className="mt-4 flex gap-5 text-xs text-gray-400">
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-400" />
+                        Phát âm đúng
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-400" />
+                        Phát âm sai
+                      </span>
+                    </div>
                   </div>
-                  <div className="mt-4 flex gap-5 text-xs text-gray-400">
-                    <span className="flex items-center gap-1.5">
-                      <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-400" />
-                      Phát âm đúng
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-400" />
-                      Phát âm sai
-                    </span>
+                ) : recognizedText ? (
+                  <div className="rounded-2xl bg-white p-4 text-sm text-gray-600">
+                    Máy nghe được: <span className="font-bold text-gray-900">{recognizedText}</span>
                   </div>
-                </div>
-              ) : recognizedText ? (
-                <div className="rounded-2xl bg-white p-4 text-sm text-gray-600">
-                  Máy nghe được: <span className="font-bold text-gray-900">{recognizedText}</span>
-                </div>
-              ) : null}
-            </div>
-          );
-        })()}
+                ) : null}
+              </div>
+            );
+          })()}
       </div>
 
       <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:justify-center">

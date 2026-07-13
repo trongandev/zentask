@@ -9,6 +9,7 @@ interface ArenaChallengeModalProps {
     avatar: string;
     rankInfo?: string;
     level?: number;
+    challengeMode?: string;
   };
   onAccept: () => void;
   onDecline: () => void;
@@ -55,6 +56,11 @@ export function ArenaChallengeModal({ challenger, onAccept, onDecline }: ArenaCh
             <div className="text-lg font-bold text-white">{challenger.name}</div>
             {challenger.rankInfo && (
               <div className="text-sm text-yellow-400/80 font-medium mt-0.5">{challenger.rankInfo}</div>
+            )}
+            {challenger.challengeMode && (
+              <div className="text-xs font-bold px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-lg mt-2 inline-block uppercase">
+                {challenger.challengeMode === "solo" ? "Solo 1vs1" : challenger.challengeMode === "team2v2" ? "Đồng đội 2vs2" : challenger.challengeMode}
+              </div>
             )}
           </div>
         </div>

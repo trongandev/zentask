@@ -193,6 +193,31 @@ router.get(
 );
 
 router.get(
+  "/online",
+  asyncHandler(async (req, res) => {
+    const friendships = await Friendship.find({ users: req.user.uid }).lean();
+    const userSockets = req.app.get("userSockets");
+    if (!userSockets) return res.json([]);
+
+    const onlineFriends = [];
+    for (const doc of friendships) {
+      const friendId = doc.users.find((id) => id.toString() !== req.user.uid);
+      if (friendId && userSockets.has(friendId.toString())) {
+        const friend = await getPublicUser(friendId);
+        if (friend) {
+          onlineFriends.push({
+            friendshipId: doc._id,
+            friendId,
+            ...friend,
+          });
+        }
+      }
+    }
+    res.json(onlineFriends);
+  }),
+);
+
+router.get(
   "/requests",
   asyncHandler(async (req, res) => {
     const incomingDocs = await FriendRequest.find({ toId: req.user.uid, status: "pending" }).lean();
@@ -245,9 +270,22 @@ router.post(
       status: "pending",
     });
 
-    await createNotification(req.app, userId, "friend_request", "Lời mời kết bạn mới", `${me?.displayName || "Một học viên"} muốn kết bạn với bạn.`, docRef._id.toString());
+    await createNotification(req.app, userId, "friend_request", "Lời mời kết bạn mới", `${me?.displayName || "Một học viên"} muốn kết bạn với bạn.`, req.user.uid);
 
     res.json({ id: docRef._id, status: "pending" });
+  }),
+);
+
+router.post(
+  "/unfriend/:friendId",
+  asyncHandler(async (req, res) => {
+    const { friendId } = req.params;
+    if (!(await ensureFriendship(req.user.uid, friendId))) {
+      return res.status(400).json({ error: "Hai bạn chưa là bạn bè." });
+    }
+
+    await Friendship.deleteOne({ users: { $all: [req.user.uid, friendId] } });
+    res.json({ success: true, status: "none" });
   }),
 );
 
@@ -309,16 +347,27 @@ router.post(
       text,
     });
 
-    await createNotification(req.app, friendId, "friend_message", "Tin nhắn mới", `${me?.displayName || "Bạn bè"}: ${text.slice(0, 80)}`, req.user.uid);
+    // await createNotification(req.app, friendId, "friend_message", "Tin nhắn mới", `${me?.displayName || "Bạn bè"}: ${text.slice(0, 80)}`, req.user.uid);
 
-    res.json({
+    const payload = {
       id: docRef._id,
       type: "text",
       text,
       senderId: req.user.uid,
       receiverId: friendId,
       createdAt: docRef.createdAt.toISOString(),
-    });
+    };
+
+    const io = req.app.get("io");
+    const userSockets = req.app.get("userSockets");
+    if (io && userSockets) {
+      const friendSocketId = userSockets.get(friendId);
+      if (friendSocketId) {
+        io.to(friendSocketId).emit("receive_message", payload);
+      }
+    }
+
+    res.json(payload);
   }),
 );
 
@@ -398,7 +447,7 @@ router.post(
       docRef._id.toString(),
     );
 
-    res.json({
+    const payload = {
       id: docRef._id,
       type: "share",
       text,
@@ -406,7 +455,18 @@ router.post(
       senderId: req.user.uid,
       receiverId: friendId,
       createdAt: docRef.createdAt.toISOString(),
-    });
+    };
+
+    const io = req.app.get("io");
+    const userSockets = req.app.get("userSockets");
+    if (io && userSockets) {
+      const friendSocketId = userSockets.get(friendId);
+      if (friendSocketId) {
+        io.to(friendSocketId).emit("receive_message", payload);
+      }
+    }
+
+    res.json(payload);
   }),
 );
 

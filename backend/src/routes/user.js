@@ -19,7 +19,7 @@ const getLocalDateString = () => {
 };
 
 // Helper: add XP and calculate level
-export const addXpToUser = async (uid, xpToAdd) => {
+export const addXpToUser = async (uid, xpToAdd, excludeFromLeaderboard = false) => {
   const user = await User.findById(uid);
   if (!user) throw new Error("User not found");
 
@@ -39,13 +39,15 @@ export const addXpToUser = async (uid, xpToAdd) => {
   user.level = newLevel;
   await user.save();
 
-  // Update weekly and monthly leaderboards
-  const weekString = getWeekString();
-  const monthString = getMonthString();
+  if (!excludeFromLeaderboard) {
+    // Update weekly and monthly leaderboards
+    const weekString = getWeekString();
+    const monthString = getMonthString();
 
-  await LeaderboardWeekly.findOneAndUpdate({ uid, period: weekString }, { $inc: { xp: xpToAdd } }, { upsert: true, new: true });
+    await LeaderboardWeekly.findOneAndUpdate({ uid, period: weekString }, { $inc: { xp: xpToAdd } }, { upsert: true, new: true });
 
-  await LeaderboardMonthly.findOneAndUpdate({ uid, period: monthString }, { $inc: { xp: xpToAdd } }, { upsert: true, new: true });
+    await LeaderboardMonthly.findOneAndUpdate({ uid, period: monthString }, { $inc: { xp: xpToAdd } }, { upsert: true, new: true });
+  }
 
   return { xp, level: newLevel, levelUp };
 };
@@ -185,6 +187,37 @@ router.post(
     checkAchievements(uid, "STUDY_TIME", { todayMinutes: stat.studyMinutes }, req.app);
 
     res.json({ status: "success" });
+  }),
+);
+
+// Get study stats for a specific month
+router.get(
+  "/calendar-stats",
+  asyncHandler(async (req, res) => {
+    const { year, month } = req.query; // 1-12
+    if (!year || !month) return res.status(400).json({ error: "Missing year or month" });
+
+    const y = parseInt(year);
+    const m = parseInt(month);
+    
+    // Create start and end date strings for the month (YYYY-MM-DD)
+    const startDate = new Date(Date.UTC(y, m - 1, 1)).toISOString().split("T")[0];
+    const endDate = new Date(Date.UTC(y, m, 0)).toISOString().split("T")[0];
+
+    const stats = await UserDailyStat.find({
+      userId: req.user.uid,
+      date: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    const statsMap = {};
+    stats.forEach((doc) => {
+      statsMap[doc.date] = {
+        minutes: doc.studyMinutes || 0,
+        isCheckedIn: doc.isCheckedIn || false,
+      };
+    });
+
+    res.json(statsMap);
   }),
 );
 

@@ -1,24 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Bell,
-  BookOpen,
-  Check,
-  CheckCircle2,
-  Eye,
-  FolderOpen,
-  HelpCircle,
-  Loader2,
-  MessageCircle,
-  Plus,
-  Save,
-  Search,
-  Send,
-  Share2,
-  UserPlus,
-  Users,
-  X,
-} from "lucide-react";
-import toast from "react-hot-toast";
+import { Bell, BookOpen, Check, CheckCircle2, Eye, FolderOpen, HelpCircle, Loader2, MessageCircle, Plus, Save, Search, Send, Share2, UserPlus, Users, X } from "lucide-react";
+import toastService from "@/src/services/toastService";
 import { useAuth } from "../contexts/AuthContext";
 import { friendsService, type FriendMessage, type FriendRequestItem, type FriendUser, type ShareOptions } from "../services/friendsService";
 import { cn, timeAgo } from "../lib/utils";
@@ -86,7 +68,7 @@ export default function Friends() {
       setShareOptions(optionsData);
       if (!activeFriend && friendsData.length) setActiveFriend(friendsData[0]);
     } catch (error: any) {
-      toast.error(error.message || "Không tải được trang bạn bè");
+      toastService.error(error.message || "Không tải được trang bạn bè");
     } finally {
       setLoading(false);
     }
@@ -98,7 +80,7 @@ export default function Friends() {
       const data = await friendsService.getMessages(activeFriendId);
       setMessages(data);
     } catch (error: any) {
-      toast.error(error.message || "Không tải được tin nhắn");
+      toastService.error(error.message || "Không tải được tin nhắn");
     }
   }, [activeFriendId]);
 
@@ -112,7 +94,7 @@ export default function Friends() {
     friendsService
       .getMessages(activeFriendId)
       .then(setMessages)
-      .catch((error) => toast.error(error.message || "Không tải được tin nhắn"))
+      .catch((error) => toastService.error(error.message || "Không tải được tin nhắn"))
       .finally(() => setMessageLoading(false));
 
     const timer = window.setInterval(() => {
@@ -132,7 +114,7 @@ export default function Friends() {
         const data = await friendsService.searchUsers(keyword);
         setSearchResults(data);
       } catch (error: any) {
-        toast.error(error.message || "Không tìm được người dùng");
+        toastService.error(error.message || "Không tìm được người dùng");
       }
     }, 350);
     return () => window.clearTimeout(timer);
@@ -145,22 +127,22 @@ export default function Friends() {
   async function sendFriendRequest(target: FriendUser) {
     try {
       await friendsService.sendRequest(target.uid);
-      toast.success("Đã gửi lời mời kết bạn");
+      toastService.success("Đã gửi lời mời kết bạn");
       setSearchResults((prev) => prev.map((item) => (item.uid === target.uid ? { ...item, friendStatus: "sent" } : item)));
       await loadRequests();
     } catch (error: any) {
-      toast.error(error.message || "Không gửi được lời mời");
+      toastService.error(error.message || "Không gửi được lời mời");
     }
   }
 
   async function respondRequest(requestId: string, action: "accept" | "decline") {
     try {
       await friendsService.respondRequest(requestId, action);
-      toast.success(action === "accept" ? "Đã chấp nhận kết bạn" : "Đã từ chối lời mời");
+      toastService.success(action === "accept" ? "Đã chấp nhận kết bạn" : "Đã từ chối lời mời");
       await Promise.all([loadFriends(), loadRequests()]);
       setTab(action === "accept" ? "friends" : "requests");
     } catch (error: any) {
-      toast.error(error.message || "Không xử lý được lời mời");
+      toastService.error(error.message || "Không xử lý được lời mời");
     }
   }
 
@@ -170,7 +152,7 @@ export default function Friends() {
       const data = await friendsService.previewShare(messageId);
       setPreview(data);
     } catch (error: any) {
-      toast.error(error.message || "Không xem trước được nội dung");
+      toastService.error(error.message || "Không xem trước được nội dung");
     } finally {
       setPreviewLoading(false);
     }
@@ -184,10 +166,10 @@ export default function Friends() {
       if (latestFlashcardShare) {
         setMessageText("");
         await openSharePreview(latestFlashcardShare.id);
-        toast("Mình đã mở bản xem trước. Bạn kiểm tra rồi bấm lưu nhé.", { icon: "👀" });
+        toastService.info("Mình đã mở bản xem trước. Bạn kiểm tra rồi bấm lưu nhé.", { icon: "👀" });
         return;
       }
-      toast.error("Chưa có thư mục flashcard nào được chia sẻ trong cuộc trò chuyện này.");
+      toastService.error("Chưa có thư mục flashcard nào được chia sẻ trong cuộc trò chuyện này.");
       return;
     }
 
@@ -196,19 +178,19 @@ export default function Friends() {
       setMessages((prev) => [...prev, msg]);
       setMessageText("");
     } catch (error: any) {
-      toast.error(error.message || "Không gửi được tin nhắn");
+      toastService.error(error.message || "Không gửi được tin nhắn");
     }
   }
 
   async function shareContent() {
-    if (!activeFriendId || !shareId) return toast.error("Hãy chọn nội dung muốn chia sẻ.");
+    if (!activeFriendId || !shareId) return toastService.error("Hãy chọn nội dung muốn chia sẻ.");
     try {
       const msg = await friendsService.shareContent(activeFriendId, shareType, shareId, shareNote);
       setMessages((prev) => [...prev, msg]);
       setShareNote("");
-      toast.success("Đã chia sẻ nội dung học tập");
+      toastService.success("Đã chia sẻ nội dung học tập");
     } catch (error: any) {
-      toast.error(error.message || "Không chia sẻ được nội dung");
+      toastService.error(error.message || "Không chia sẻ được nội dung");
     }
   }
 
@@ -216,11 +198,11 @@ export default function Friends() {
     if (!preview?.messageId) return;
     try {
       const result = await friendsService.saveShare(preview.messageId);
-      toast.success(preview.share?.type === "flashcard_folder" ? "Đã lưu flashcard vào cá nhân" : "Đã lưu quiz vào cá nhân");
+      toastService.success(preview.share?.type === "flashcard_folder" ? "Đã lưu flashcard vào cá nhân" : "Đã lưu quiz vào cá nhân");
       setPreview({ ...preview, saved: true, saveResult: result });
       await loadMessages();
     } catch (error: any) {
-      toast.error(error.message || "Không lưu được nội dung");
+      toastService.error(error.message || "Không lưu được nội dung");
     }
   }
 
@@ -237,7 +219,9 @@ export default function Friends() {
   return (
     <div className="mx-auto max-w-[1500px] space-y-6">
       <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-700 p-6 text-white shadow-xl md:p-8">
-        <div className="absolute right-8 top-8 opacity-20"><Users className="h-32 w-32" /></div>
+        <div className="absolute right-8 top-8 opacity-20">
+          <Users className="h-32 w-32" />
+        </div>
         <div className="relative z-10 max-w-3xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-1 text-sm font-bold">
             <Bell className="h-4 w-4" /> Kết bạn, nhắn tin và chia sẻ học liệu
@@ -251,11 +235,13 @@ export default function Friends() {
         <aside className="space-y-4">
           <section className="rounded-[2rem] border border-gray-100 bg-white p-4 shadow-sm">
             <div className="mb-4 flex gap-2 rounded-2xl bg-gray-50 p-1.5">
-              {([
-                ["friends", "Bạn bè", friends.length],
-                ["requests", "Lời mời", incoming.length],
-                ["discover", "Tìm bạn", searchResults.length],
-              ] as const).map(([key, label, count]) => (
+              {(
+                [
+                  ["friends", "Bạn bè", friends.length],
+                  ["requests", "Lời mời", incoming.length],
+                  ["discover", "Tìm bạn", searchResults.length],
+                ] as const
+              ).map(([key, label, count]) => (
                 <button
                   key={key}
                   onClick={() => setTab(key)}
@@ -268,16 +254,25 @@ export default function Friends() {
 
             {tab === "friends" && (
               <div className="space-y-2">
-                {friends.length ? friends.map((friend) => (
-                  <button key={friend.uid} onClick={() => setActiveFriend(friend)} className={cn("flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition", activeFriendId === (friend.friendId || friend.uid) ? "border-blue-200 bg-blue-50" : "border-gray-100 bg-gray-50 hover:bg-white")}>
-                    <Avatar user={friend} />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-extrabold text-gray-900">{friend.displayName}</p>
-                      <p className="truncate text-xs text-gray-500">{friend.email || "Bạn học Zentask"}</p>
-                    </div>
-                    <MessageCircle className="h-4 w-4 text-blue-500" />
-                  </button>
-                )) : (
+                {friends.length ? (
+                  friends.map((friend) => (
+                    <button
+                      key={friend.uid}
+                      onClick={() => setActiveFriend(friend)}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition",
+                        activeFriendId === (friend.friendId || friend.uid) ? "border-blue-200 bg-blue-50" : "border-gray-100 bg-gray-50 hover:bg-white",
+                      )}
+                    >
+                      <Avatar user={friend} />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-extrabold text-gray-900">{friend.displayName}</p>
+                        <p className="truncate text-xs text-gray-500">{friend.email || "Bạn học Zentask"}</p>
+                      </div>
+                      <MessageCircle className="h-4 w-4 text-blue-500" />
+                    </button>
+                  ))
+                ) : (
                   <div className="rounded-2xl bg-gray-50 p-5 text-center text-sm text-gray-500">Bạn chưa có bạn bè. Hãy tìm người học để gửi lời mời.</div>
                 )}
               </div>
@@ -287,21 +282,35 @@ export default function Friends() {
               <div className="space-y-4">
                 <div>
                   <h3 className="mb-2 text-sm font-extrabold text-gray-800">Lời mời nhận được</h3>
-                  {incoming.length ? incoming.map((request) => (
-                    <div key={request.id} className="mb-2 rounded-2xl border border-blue-100 bg-blue-50 p-3">
-                      <div className="mb-3 flex items-center gap-3">
-                        <Avatar user={request.user} />
-                        <div className="min-w-0">
-                          <p className="truncate font-bold text-gray-900">{request.user?.displayName}</p>
-                          <p className="text-xs text-gray-500">{request.user?.email}</p>
+                  {incoming.length ? (
+                    incoming.map((request) => (
+                      <div key={request.id} className="mb-2 rounded-2xl border border-blue-100 bg-blue-50 p-3">
+                        <div className="mb-3 flex items-center gap-3">
+                          <Avatar user={request.user} />
+                          <div className="min-w-0">
+                            <p className="truncate font-bold text-gray-900">{request.user?.displayName}</p>
+                            <p className="text-xs text-gray-500">{request.user?.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => respondRequest(request.id, "accept")}
+                            className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white"
+                          >
+                            <Check className="h-4 w-4" /> Chấp nhận
+                          </button>
+                          <button
+                            onClick={() => respondRequest(request.id, "decline")}
+                            className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-white px-3 py-2 text-xs font-bold text-gray-600"
+                          >
+                            <X className="h-4 w-4" /> Từ chối
+                          </button>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => respondRequest(request.id, "accept")} className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white"><Check className="h-4 w-4" /> Chấp nhận</button>
-                        <button onClick={() => respondRequest(request.id, "decline")} className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-white px-3 py-2 text-xs font-bold text-gray-600"><X className="h-4 w-4" /> Từ chối</button>
-                      </div>
-                    </div>
-                  )) : <p className="rounded-2xl bg-gray-50 p-4 text-sm text-gray-500">Không có lời mời mới.</p>}
+                    ))
+                  ) : (
+                    <p className="rounded-2xl bg-gray-50 p-4 text-sm text-gray-500">Không có lời mời mới.</p>
+                  )}
                 </div>
                 {!!outgoing.length && (
                   <div>
@@ -324,7 +333,12 @@ export default function Friends() {
               <div className="space-y-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm theo tên hoặc email..." className="h-11 w-full rounded-2xl border border-gray-200 pl-10 pr-3 text-sm outline-none focus:border-blue-300" />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Tìm theo tên hoặc email..."
+                    className="h-11 w-full rounded-2xl border border-gray-200 pl-10 pr-3 text-sm outline-none focus:border-blue-300"
+                  />
                 </div>
                 {searchResults.map((item) => (
                   <div key={item.uid} className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3">
@@ -333,8 +347,14 @@ export default function Friends() {
                       <p className="truncate font-bold text-gray-900">{item.displayName}</p>
                       <p className="truncate text-xs text-gray-500">{item.email}</p>
                     </div>
-                    {item.friendStatus === "friend" ? <CheckCircle2 className="h-5 w-5 text-emerald-500" /> : item.friendStatus === "sent" ? <span className="text-xs font-bold text-gray-400">Đã gửi</span> : (
-                      <button onClick={() => sendFriendRequest(item)} className="rounded-xl bg-blue-600 p-2 text-white"><UserPlus className="h-4 w-4" /></button>
+                    {item.friendStatus === "friend" ? (
+                      <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                    ) : item.friendStatus === "sent" ? (
+                      <span className="text-xs font-bold text-gray-400">Đã gửi</span>
+                    ) : (
+                      <button onClick={() => sendFriendRequest(item)} className="rounded-xl bg-blue-600 p-2 text-white">
+                        <UserPlus className="h-4 w-4" />
+                      </button>
                     )}
                   </div>
                 ))}
@@ -355,7 +375,7 @@ export default function Friends() {
                   </div>
                 </div>
 
-                <div className="flex-1 space-y-4 overflow-y-auto bg-[#f8faff] p-4">
+                <div className="flex-1 space-y-4 overflow-y-auto  bg-[#f8faff] p-4">
                   {messageLoading && <div className="text-center text-sm text-gray-400">Đang tải tin nhắn...</div>}
                   {messages.map((message) => {
                     const mine = message.senderId === user?.uid;
@@ -373,9 +393,16 @@ export default function Friends() {
                                 <p className="font-bold">{message.share.title}</p>
                                 <p className={cn("text-xs", mine ? "text-blue-100" : "text-gray-500")}>{message.share.summary}</p>
                                 <div className="mt-3 flex flex-wrap gap-2">
-                                  <button onClick={() => openSharePreview(message.id)} className={cn("flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold", mine ? "bg-white text-blue-700" : "bg-blue-600 text-white")}><Eye className="h-4 w-4" /> Xem trước</button>
+                                  <button
+                                    onClick={() => openSharePreview(message.id)}
+                                    className={cn("flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold", mine ? "bg-white text-blue-700" : "bg-blue-600 text-white")}
+                                  >
+                                    <Eye className="h-4 w-4" /> Xem trước
+                                  </button>
                                   {!mine && (
-                                    <button onClick={() => openSharePreview(message.id)} className="flex items-center gap-1 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white"><Save className="h-4 w-4" /> Lưu</button>
+                                    <button onClick={() => openSharePreview(message.id)} className="flex items-center gap-1 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white">
+                                      <Save className="h-4 w-4" /> Lưu
+                                    </button>
                                   )}
                                 </div>
                               </div>
@@ -402,7 +429,9 @@ export default function Friends() {
                       placeholder='Nhập tin nhắn... hoặc gõ "lưu flashcard" để mở bản xem trước gần nhất'
                       className="h-12 min-w-0 flex-1 rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:border-blue-300"
                     />
-                    <button onClick={() => void sendMessage()} className="flex h-12 items-center gap-2 rounded-2xl bg-blue-600 px-5 font-bold text-white"><Send className="h-5 w-5" /> Gửi</button>
+                    <button onClick={() => void sendMessage()} className="flex h-12 items-center gap-2 rounded-2xl bg-blue-600 px-5 font-bold text-white">
+                      <Send className="h-5 w-5" /> Gửi
+                    </button>
                   </div>
                 </div>
               </>
@@ -422,17 +451,46 @@ export default function Friends() {
                 <h3 className="font-extrabold text-gray-900">Chia sẻ học liệu</h3>
               </div>
               <div className="mb-3 grid grid-cols-2 gap-2 rounded-2xl bg-gray-50 p-1.5">
-                <button onClick={() => { setShareType("flashcard_folder"); setShareId(""); }} className={cn("rounded-xl px-3 py-2 text-xs font-bold", shareType === "flashcard_folder" ? "bg-blue-600 text-white" : "text-gray-600")}>Flashcard</button>
-                <button onClick={() => { setShareType("quiz"); setShareId(""); }} className={cn("rounded-xl px-3 py-2 text-xs font-bold", shareType === "quiz" ? "bg-blue-600 text-white" : "text-gray-600")}>Quiz</button>
+                <button
+                  onClick={() => {
+                    setShareType("flashcard_folder");
+                    setShareId("");
+                  }}
+                  className={cn("rounded-xl px-3 py-2 text-xs font-bold", shareType === "flashcard_folder" ? "bg-blue-600 text-white" : "text-gray-600")}
+                >
+                  Flashcard
+                </button>
+                <button
+                  onClick={() => {
+                    setShareType("quiz");
+                    setShareId("");
+                  }}
+                  className={cn("rounded-xl px-3 py-2 text-xs font-bold", shareType === "quiz" ? "bg-blue-600 text-white" : "text-gray-600")}
+                >
+                  Quiz
+                </button>
               </div>
               <select value={shareId} onChange={(e) => setShareId(e.target.value)} className="mb-3 h-11 w-full rounded-2xl border border-gray-200 px-3 text-sm outline-none">
                 <option value="">Chọn {shareType === "flashcard_folder" ? "thư mục flashcard" : "quiz"}</option>
                 {shareItems.map((item: any) => (
-                  <option key={item.id} value={item.id}>{item.name || item.title} {item.setCount !== undefined ? `• ${item.setCount} bộ` : item.questionCount !== undefined ? `• ${item.questionCount} câu` : ""}</option>
+                  <option key={item.id} value={item.id}>
+                    {item.name || item.title} {item.setCount !== undefined ? `• ${item.setCount} bộ` : item.questionCount !== undefined ? `• ${item.questionCount} câu` : ""}
+                  </option>
                 ))}
               </select>
-              <textarea value={shareNote} onChange={(e) => setShareNote(e.target.value)} placeholder="Lời nhắn kèm theo..." className="mb-3 h-24 w-full resize-none rounded-2xl border border-gray-200 px-3 py-3 text-sm outline-none" />
-              <button disabled={!activeFriend || !shareId} onClick={() => void shareContent()} className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 font-bold text-white disabled:opacity-50"><Plus className="h-4 w-4" /> Gửi chia sẻ</button>
+              <textarea
+                value={shareNote}
+                onChange={(e) => setShareNote(e.target.value)}
+                placeholder="Lời nhắn kèm theo..."
+                className="mb-3 h-24 w-full resize-none rounded-2xl border border-gray-200 px-3 py-3 text-sm outline-none"
+              />
+              <button
+                disabled={!activeFriend || !shareId}
+                onClick={() => void shareContent()}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 font-bold text-white disabled:opacity-50"
+              >
+                <Plus className="h-4 w-4" /> Gửi chia sẻ
+              </button>
               <p className="mt-3 text-xs leading-relaxed text-gray-500">Người nhận sẽ thấy trong tin nhắn và chuông thông báo. Khi lưu flashcard, hệ thống luôn mở bản xem trước trước.</p>
             </section>
           </aside>
@@ -447,20 +505,29 @@ export default function Friends() {
                 <h2 className="text-xl font-extrabold text-gray-900">Xem trước trước khi lưu</h2>
                 <p className="text-sm text-gray-500">Kiểm tra nội dung rồi mới lưu vào tài khoản cá nhân.</p>
               </div>
-              <button onClick={() => setPreview(null)} className="rounded-full bg-gray-100 p-2 text-gray-500"><X className="h-5 w-5" /></button>
+              <button onClick={() => setPreview(null)} className="rounded-full bg-gray-100 p-2 text-gray-500">
+                <X className="h-5 w-5" />
+              </button>
             </div>
             <div className="max-h-[65vh] overflow-y-auto p-5">
               {previewLoading ? (
-                <div className="flex min-h-[260px] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>
+                <div className="flex min-h-[260px] items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                </div>
               ) : preview.preview?.type === "flashcard_folder" ? (
                 <div className="space-y-4">
                   <div className="rounded-3xl bg-blue-50 p-4">
                     <h3 className="text-lg font-extrabold text-blue-900">{preview.preview.folder?.name}</h3>
-                    <p className="text-sm text-blue-700">{preview.preview.totalSets} bộ thẻ • {preview.preview.totalCards} thẻ</p>
+                    <p className="text-sm text-blue-700">
+                      {preview.preview.totalSets} bộ thẻ • {preview.preview.totalCards} thẻ
+                    </p>
                   </div>
                   {preview.preview.sets?.map((set: any) => (
                     <div key={set.id} className="rounded-3xl border border-gray-100 p-4">
-                      <h4 className="mb-3 font-extrabold text-gray-900"><BookOpen className="mr-2 inline h-5 w-5 text-blue-600" />{set.title}</h4>
+                      <h4 className="mb-3 font-extrabold text-gray-900">
+                        <BookOpen className="mr-2 inline h-5 w-5 text-blue-600" />
+                        {set.title}
+                      </h4>
                       <div className="grid gap-2 md:grid-cols-2">
                         {set.cards?.slice(0, 12).map((card: any) => (
                           <div key={card.id} className="rounded-2xl bg-gray-50 p-3">
@@ -477,13 +544,21 @@ export default function Friends() {
                 <div className="space-y-4">
                   <div className="rounded-3xl bg-purple-50 p-4">
                     <h3 className="text-lg font-extrabold text-purple-900">{preview.preview.quiz?.title}</h3>
-                    <p className="text-sm text-purple-700">{preview.preview.quiz?.questions?.length || 0} câu hỏi • {preview.preview.quiz?.difficulty}</p>
+                    <p className="text-sm text-purple-700">
+                      {preview.preview.quiz?.questions?.length || 0} câu hỏi • {preview.preview.quiz?.difficulty}
+                    </p>
                   </div>
                   {preview.preview.quiz?.questions?.slice(0, 20).map((q: any, index: number) => (
                     <div key={q.id || index} className="rounded-2xl border border-gray-100 p-4">
-                      <p className="mb-2 font-bold text-gray-900">{index + 1}. {q.text}</p>
+                      <p className="mb-2 font-bold text-gray-900">
+                        {index + 1}. {q.text}
+                      </p>
                       <div className="grid gap-2 md:grid-cols-2">
-                        {q.options?.map((opt: string) => <div key={opt} className="rounded-xl bg-gray-50 px-3 py-2 text-sm text-gray-600">{opt}</div>)}
+                        {q.options?.map((opt: string) => (
+                          <div key={opt} className="rounded-xl bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                            {opt}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}
@@ -491,8 +566,14 @@ export default function Friends() {
               ) : null}
             </div>
             <div className="flex flex-col gap-3 border-t border-gray-100 p-5 sm:flex-row sm:justify-end">
-              <button onClick={() => setPreview(null)} className="rounded-2xl bg-gray-100 px-5 py-3 font-bold text-gray-700">Đóng</button>
-              <button disabled={preview.saved} onClick={() => void savePreview()} className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 font-bold text-white disabled:opacity-60">
+              <button onClick={() => setPreview(null)} className="rounded-2xl bg-gray-100 px-5 py-3 font-bold text-gray-700">
+                Đóng
+              </button>
+              <button
+                disabled={preview.saved}
+                onClick={() => void savePreview()}
+                className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 font-bold text-white disabled:opacity-60"
+              >
                 {preview.saved ? <CheckCircle2 className="h-5 w-5" /> : <Save className="h-5 w-5" />}
                 {preview.saved ? "Đã lưu" : preview.share?.type === "flashcard_folder" ? "Lưu flashcard" : "Lưu quiz"}
               </button>

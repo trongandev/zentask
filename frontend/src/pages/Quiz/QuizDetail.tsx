@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Play, Users, Clock, Target, Loader2, ArrowLeft, Settings2 } from "lucide-react";
 import { useQuizStore, Quiz, QuizRoomSettings } from "../../services/quizService";
-import toast from "react-hot-toast";
+import toastService from "@/src/services/toastService";
 
 export function QuizDetail() {
   const { id } = useParams<{ id: string }>();

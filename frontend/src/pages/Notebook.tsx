@@ -24,16 +24,8 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
-import toast from "react-hot-toast";
-import {
-  NotebookBackground,
-  NotebookDocument,
-  NotebookItem,
-  NotebookPageData,
-  NotebookStroke,
-  NotebookTool,
-  notebookService,
-} from "../services/notebookService";
+import toastService from "@/src/services/toastService";
+import { NotebookBackground, NotebookDocument, NotebookItem, NotebookPageData, NotebookStroke, NotebookTool, notebookService } from "../services/notebookService";
 
 const BOARD_WIDTH = 1200;
 const BOARD_HEIGHT = 760;
@@ -151,17 +143,7 @@ interface DragState {
   origin: NotebookItem;
 }
 
-function ToolButton({
-  active,
-  icon: Icon,
-  label,
-  onClick,
-}: {
-  active?: boolean;
-  icon: React.ElementType;
-  label: string;
-  onClick: () => void;
-}) {
+function ToolButton({ active, icon: Icon, label, onClick }: { active?: boolean; icon: React.ElementType; label: string; onClick: () => void }) {
   return (
     <button
       type="button"
@@ -337,9 +319,12 @@ export default function Notebook() {
     futureRef.current = [];
   }, [pages]);
 
-  const updateActivePage = useCallback((updater: (page: NotebookPageData) => NotebookPageData) => {
-    setPages((prev) => prev.map((page) => (page.id === activePageId ? updater(page) : page)));
-  }, [activePageId]);
+  const updateActivePage = useCallback(
+    (updater: (page: NotebookPageData) => NotebookPageData) => {
+      setPages((prev) => prev.map((page) => (page.id === activePageId ? updater(page) : page)));
+    },
+    [activePageId],
+  );
 
   const getCanvasPoint = useCallback(
     (event: React.PointerEvent) => {
@@ -494,7 +479,7 @@ export default function Notebook() {
 
   const deletePage = () => {
     if (!activePage || pages.length <= 1) {
-      toast.error("Sổ tay cần ít nhất 1 trang.");
+      toastService.error("Sổ tay cần ít nhất 1 trang.");
       return;
     }
     pushHistory();
@@ -556,7 +541,7 @@ export default function Notebook() {
   const addMediaFromUrl = () => {
     const trimmed = imageUrl.trim();
     if (!isValidMediaUrl(trimmed)) {
-      toast.error("Đường dẫn ảnh chưa hợp lệ.");
+      toastService.error("Đường dẫn ảnh chưa hợp lệ.");
       return;
     }
 
@@ -576,7 +561,7 @@ export default function Notebook() {
     setImageUrl("");
     setShowImagePanel(false);
     setTool("select");
-    toast.success(item.type === "gif" ? "Đã thêm ảnh động" : "Đã thêm hình ảnh");
+    toastService.success(item.type === "gif" ? "Đã thêm ảnh động" : "Đã thêm hình ảnh");
   };
 
   const updateItem = (itemId: string, updater: (item: NotebookItem) => NotebookItem) => {
@@ -710,7 +695,9 @@ export default function Notebook() {
             <Sparkles className="h-4 w-4" />
             Tính năng đã có
           </div>
-          <p className="text-xs leading-relaxed text-blue-800/80">Vẽ, tẩy, bút đánh dấu, ghi chú màu, hộp chữ, thêm ảnh hoặc ảnh động bằng đường dẫn, kéo thả, đổi kích thước, nhiều trang và tự lưu an toàn.</p>
+          <p className="text-xs leading-relaxed text-blue-800/80">
+            Vẽ, tẩy, bút đánh dấu, ghi chú màu, hộp chữ, thêm ảnh hoặc ảnh động bằng đường dẫn, kéo thả, đổi kích thước, nhiều trang và tự lưu an toàn.
+          </p>
         </div>
       </aside>
 
@@ -757,11 +744,7 @@ export default function Notebook() {
                 </option>
               ))}
             </select>
-            <button
-              type="button"
-              onClick={handleManualSave}
-              className="flex shrink-0 items-center gap-1 rounded-2xl bg-white px-3 py-2 text-xs font-bold text-blue-600 shadow-sm hover:bg-blue-50"
-            >
+            <button type="button" onClick={handleManualSave} className="flex shrink-0 items-center gap-1 rounded-2xl bg-white px-3 py-2 text-xs font-bold text-blue-600 shadow-sm hover:bg-blue-50">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Lưu
             </button>
@@ -819,8 +802,12 @@ export default function Notebook() {
               className="min-w-[260px] flex-1 rounded-2xl border border-blue-100 bg-white px-4 py-2 text-sm outline-none focus:border-blue-300"
               placeholder="Dán đường dẫn hình ảnh hoặc ảnh động, ví dụ https://.../image.gif"
             />
-            <button onClick={addMediaFromUrl} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">Thêm vào trang</button>
-            <button onClick={() => setShowImagePanel(false)} className="rounded-2xl p-2 text-blue-700 hover:bg-blue-100"><X className="h-5 w-5" /></button>
+            <button onClick={addMediaFromUrl} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">
+              Thêm vào trang
+            </button>
+            <button onClick={() => setShowImagePanel(false)} className="rounded-2xl p-2 text-blue-700 hover:bg-blue-100">
+              <X className="h-5 w-5" />
+            </button>
           </div>
         )}
 
@@ -828,7 +815,9 @@ export default function Notebook() {
           <div className="mb-2 flex items-center justify-between gap-2">
             <div className="min-w-0">
               <h3 className="text-sm font-extrabold text-slate-700">Các trang</h3>
-              <p className="truncate text-[11px] text-slate-400">{activePage?.title || "Trang hiện tại"} · {activePage?.strokes.length || 0} nét · {activePage?.items.length || 0} vật thể</p>
+              <p className="truncate text-[11px] text-slate-400">
+                {activePage?.title || "Trang hiện tại"} · {activePage?.strokes.length || 0} nét · {activePage?.items.length || 0} vật thể
+              </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <button onClick={addPage} className="rounded-xl bg-white p-2 text-blue-600 shadow-sm hover:bg-blue-50" title="Thêm trang">
@@ -890,15 +879,23 @@ export default function Notebook() {
                     onClick={(event) => event.stopPropagation()}
                     className="w-full rounded-lg bg-transparent px-1 text-xs font-bold text-slate-700 outline-none focus:bg-blue-50"
                   />
-                  <p className="px-1 text-[10px] text-slate-400">{page.strokes.length} nét • {page.items.length} vật thể</p>
+                  <p className="px-1 text-[10px] text-slate-400">
+                    {page.strokes.length} nét • {page.items.length} vật thể
+                  </p>
                 </button>
               ))}
             </div>
 
             <div className="mt-3 grid grid-cols-3 gap-2">
-              <button onClick={duplicatePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-blue-600" title="Nhân bản trang"><CopyIcon className="h-4 w-4" /></button>
-              <button onClick={deletePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-red-600" title="Xóa trang"><Trash2 className="h-4 w-4" /></button>
-              <button onClick={clearPage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-red-600" title="Xóa nội dung"><Eraser className="h-4 w-4" /></button>
+              <button onClick={duplicatePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-blue-600" title="Nhân bản trang">
+                <CopyIcon className="h-4 w-4" />
+              </button>
+              <button onClick={deletePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-red-600" title="Xóa trang">
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <button onClick={clearPage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-red-600" title="Xóa nội dung">
+                <Eraser className="h-4 w-4" />
+              </button>
             </div>
           </aside>
 
@@ -936,9 +933,13 @@ export default function Notebook() {
               </div>
 
               <div className="ml-auto flex items-center gap-2 rounded-2xl bg-white p-1.5 shadow-sm">
-                <button onClick={() => setZoom((value) => Math.max(0.35, value - 0.08))} className="rounded-xl p-2 text-slate-500 hover:bg-slate-50"><ZoomOut className="h-4 w-4" /></button>
+                <button onClick={() => setZoom((value) => Math.max(0.35, value - 0.08))} className="rounded-xl p-2 text-slate-500 hover:bg-slate-50">
+                  <ZoomOut className="h-4 w-4" />
+                </button>
                 <span className="w-14 text-center text-xs font-bold text-slate-500">{Math.round(zoom * 100)}%</span>
-                <button onClick={() => setZoom((value) => Math.min(1.5, value + 0.08))} className="rounded-xl p-2 text-slate-500 hover:bg-slate-50"><ZoomIn className="h-4 w-4" /></button>
+                <button onClick={() => setZoom((value) => Math.min(1.5, value + 0.08))} className="rounded-xl p-2 text-slate-500 hover:bg-slate-50">
+                  <ZoomIn className="h-4 w-4" />
+                </button>
               </div>
 
               <button onClick={exportJson} className="rounded-2xl bg-white px-3 py-2 text-xs font-bold text-slate-500 shadow-sm hover:text-blue-600">
@@ -948,10 +949,18 @@ export default function Notebook() {
 
             {selectedItem && (
               <div className="flex flex-wrap items-center gap-2 border-b border-blue-100 bg-blue-50/70 px-4 py-2 text-xs">
-                <span className="font-bold text-blue-700">Đang chọn: {selectedItem.type === "gif" ? "Ảnh động" : selectedItem.type === "image" ? "Hình ảnh" : selectedItem.type === "sticky" ? "Ghi chú màu" : "Hộp chữ"}</span>
-                <button onClick={bringSelectedToFront} className="rounded-xl bg-white px-3 py-1.5 font-bold text-slate-600 hover:text-blue-600">Đưa lên trước</button>
-                <button onClick={duplicateSelectedItem} className="rounded-xl bg-white px-3 py-1.5 font-bold text-slate-600 hover:text-blue-600">Nhân bản</button>
-                <button onClick={deleteSelectedItem} className="rounded-xl bg-white px-3 py-1.5 font-bold text-red-600 hover:bg-red-50">Xóa</button>
+                <span className="font-bold text-blue-700">
+                  Đang chọn: {selectedItem.type === "gif" ? "Ảnh động" : selectedItem.type === "image" ? "Hình ảnh" : selectedItem.type === "sticky" ? "Ghi chú màu" : "Hộp chữ"}
+                </span>
+                <button onClick={bringSelectedToFront} className="rounded-xl bg-white px-3 py-1.5 font-bold text-slate-600 hover:text-blue-600">
+                  Đưa lên trước
+                </button>
+                <button onClick={duplicateSelectedItem} className="rounded-xl bg-white px-3 py-1.5 font-bold text-slate-600 hover:text-blue-600">
+                  Nhân bản
+                </button>
+                <button onClick={deleteSelectedItem} className="rounded-xl bg-white px-3 py-1.5 font-bold text-red-600 hover:bg-red-50">
+                  Xóa
+                </button>
                 {selectedItem.type !== "image" && selectedItem.type !== "gif" && (
                   <>
                     <label className="ml-1 flex items-center gap-2 rounded-xl bg-white px-3 py-1.5 font-bold text-slate-600">
@@ -1022,7 +1031,9 @@ export default function Notebook() {
                           >
                             <img src={item.url} alt="Hình trong sổ tay" className="h-full w-full select-none object-contain" draggable={false} />
                             {item.type === "gif" && <span className="absolute left-2 top-2 rounded-lg bg-black/60 px-2 py-1 text-[10px] font-bold text-white">Ảnh động</span>}
-                            {selected && <button className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-white bg-blue-600" onPointerDown={(event) => startItemDrag(event, item, "resize")} />}
+                            {selected && (
+                              <button className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-white bg-blue-600" onPointerDown={(event) => startItemDrag(event, item, "resize")} />
+                            )}
                           </div>
                         );
                       }
@@ -1044,7 +1055,9 @@ export default function Notebook() {
                             className={`h-full w-full resize-none bg-transparent font-bold leading-snug outline-none ${item.type === "sticky" ? "placeholder:text-slate-400" : ""}`}
                             style={{ color: item.textColor || "#0f172a", fontSize: item.fontSize || 22 }}
                           />
-                          {selected && <button className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-white bg-blue-600" onPointerDown={(event) => startItemDrag(event, item, "resize")} />}
+                          {selected && (
+                            <button className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-white bg-blue-600" onPointerDown={(event) => startItemDrag(event, item, "resize")} />
+                          )}
                         </div>
                       );
                     })}

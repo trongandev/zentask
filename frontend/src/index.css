@@ -78,6 +78,15 @@
     background-color: #cbd5e1;
     border-radius: 10px;
   }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px) rotate(-2deg); }
+    75% { transform: translateX(5px) rotate(2deg); }
+  }
+  .animate-shake {
+    animation: shake 0.4s ease-in-out;
+  }
 }
 /* ZenTask appearance saved from Settings */
 @layer base {
