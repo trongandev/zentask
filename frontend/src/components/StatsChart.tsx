@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BarChart3, ChevronRight, ChevronDown } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { useUserStore } from "../services/userService";
+import { useAuth } from "../contexts/AuthContext";
 
 export function StatsChart() {
   const { getStats } = useUserStore();
@@ -17,7 +18,13 @@ export function StatsChart() {
   const [loading, setLoading] = useState(true);
   const [totalMinutes, setTotalMinutes] = useState(0);
 
+  const { user } = useAuth();
+
   useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     async function fetchData() {
       const stats = await getStats();
       if (stats && stats.length > 0) {
@@ -28,7 +35,20 @@ export function StatsChart() {
       setLoading(false);
     }
     fetchData();
-  }, [getStats]);
+  }, [getStats, user]);
+
+  if (!user) {
+    return (
+      <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col h-full shadow-sm items-center justify-center min-h-[300px]">
+        <BarChart3 className="w-12 h-12 text-gray-300 mb-4" />
+        <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Thống kê học tập</h3>
+        <p className="text-gray-500 mb-6 text-center text-sm">Vui lòng đăng nhập để xem biểu đồ thống kê thời gian học của bạn trong tuần!</p>
+        <button onClick={() => window.location.href = '/auth'} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
+          Đăng nhập ngay
+        </button>
+      </div>
+    );
+  }
 
   const formatHours = (mins: number) => {
     const h = Math.floor(mins / 60);

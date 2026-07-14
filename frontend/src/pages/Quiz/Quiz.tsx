@@ -104,10 +104,12 @@ export function Quiz() {
   })();
 
   useEffect(() => {
-    getQuizzes();
+    if (user) {
+      getQuizzes();
+      getQuizHistory();
+    }
     getPublicQuizzes();
     getBuiltinQuizzes();
-    getQuizHistory();
     fetchQuizCategories();
   }, [getQuizzes, getPublicQuizzes, getBuiltinQuizzes, getQuizHistory, fetchQuizCategories]);
 

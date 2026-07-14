@@ -12,7 +12,6 @@ import { consumeDailyLimit } from "../../utils/usageLimits.js";
 import { cleanAndValidatePublicText, validatePublicObject } from "../../utils/moderation.js";
 
 const router = Router();
-router.use(verifyToken);
 
 const isVipUser = (profile = {}) => {
   const role = String(profile.role || "").toLowerCase();
@@ -121,6 +120,34 @@ const evaluateQuizAnswers = (quiz, answers = {}) => {
   return { score, correctCount, totalQuestions, evaluation };
 };
 
+// GET /api/quiz/public
+router.get(
+  "/public",
+  asyncHandler(async (req, res) => {
+    const quizzes = await Quiz.find({ isPublic: true }).sort({ createdAt: -1 }).lean();
+    const formatted = await attachCreators(quizzes.map((q) => ({ id: q._id, ...q })));
+    res.json(formatted);
+  }),
+);
+
+router.get(
+  "/builtin",
+  asyncHandler(async (req, res) => {
+    res.json(BUILTIN_QUIZZES.map(formatBuiltinQuiz));
+  }),
+);
+
+router.get(
+  "/builtin/:id",
+  asyncHandler(async (req, res) => {
+    const quiz = getBuiltinQuizById(req.params.id);
+    if (!quiz) return res.status(404).json({ error: "Không tìm thấy quiz có sẵn" });
+    res.json(formatBuiltinQuiz(quiz));
+  }),
+);
+
+router.use(verifyToken);
+
 // ==================== CATEGORY ROUTES ====================
 router.get(
   "/categories",
@@ -192,21 +219,6 @@ router.delete(
 // ==================== BUILT-IN LEARNING QUIZZES ====================
 // Static IELTS/TOEIC mock quizzes generated from bundled LEARNING documents.
 // They are separate from user-created MongoDB quizzes and cannot be deleted by users.
-router.get(
-  "/builtin",
-  asyncHandler(async (req, res) => {
-    res.json(BUILTIN_QUIZZES.map(formatBuiltinQuiz));
-  }),
-);
-
-router.get(
-  "/builtin/:id",
-  asyncHandler(async (req, res) => {
-    const quiz = getBuiltinQuizById(req.params.id);
-    if (!quiz) return res.status(404).json({ error: "Không tìm thấy quiz có sẵn" });
-    res.json(formatBuiltinQuiz(quiz));
-  }),
-);
 
 router.post(
   "/builtin/:id/submit",
@@ -262,16 +274,6 @@ router.get(
       .slice(0, 80);
 
     res.json(quizzes);
-  }),
-);
-
-// GET /api/quiz/public
-router.get(
-  "/public",
-  asyncHandler(async (req, res) => {
-    const quizzes = await Quiz.find({ isPublic: true }).sort({ createdAt: -1 }).lean();
-    const formatted = await attachCreators(quizzes.map((q) => ({ id: q._id, ...q })));
-    res.json(formatted);
   }),
 );
 
@@ -363,7 +365,7 @@ router.post(
       action: "Tạo Quiz",
       target: newQuiz.title,
       type: "quiz",
-      xpEarned: taskResult.success ? taskResult.xpToAdd : 0
+      xpEarned: taskResult.success ? taskResult.xpToAdd : 0,
     });
 
     res.json({
@@ -500,7 +502,7 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
       action: "Tạo Quiz bằng AI",
       target: newQuiz.title,
       type: "quiz",
-      xpEarned: taskResult.success ? taskResult.xpToAdd : 0
+      xpEarned: taskResult.success ? taskResult.xpToAdd : 0,
     });
 
     const quizObj = newQuiz.toObject();
@@ -641,7 +643,7 @@ router.post(
       action: "Làm bài Quiz",
       target: quiz.title,
       type: "quiz",
-      xpEarned: expGain
+      xpEarned: expGain,
     });
 
     res.json({

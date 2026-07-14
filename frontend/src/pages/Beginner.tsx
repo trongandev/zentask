@@ -38,7 +38,6 @@ export function Beginner() {
   const { sets, fetchSets, createCard } = useFlashcardStore();
 
   useEffect(() => {
-    fetchSets();
     const savedDefault = localStorage.getItem("defaultFlashcardSetId");
     if (savedDefault) {
       setSelectedUserSetId(savedDefault);
@@ -57,6 +56,8 @@ export function Beginner() {
       }
     };
     if (user) {
+      fetchSets();
+
       fetchLearnedWords();
     }
   }, [fetchSets, user]);
@@ -251,7 +252,7 @@ export function Beginner() {
                       </div>
                       <p className="text-sm text-gray-500 font-medium">{set.description}</p>
 
-                      {set.progress < 100 && (
+                      {user && set.progress < 100 && (
                         <div className="mt-4">
                           <div className="flex justify-between text-xs font-bold text-gray-500 mb-1">
                             <span>
@@ -266,12 +267,14 @@ export function Beginner() {
                       )}
 
                       <div className="mt-4 flex items-center justify-between">
-                        {set.progress === 100 ? (
+                        {!user ? (
+                          <span className="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded-md">{set.total} từ vựng</span>
+                        ) : set.progress === 100 ? (
                           <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-md flex items-center gap-1">
                             <Check className="w-3.5 h-3.5" /> Hoàn thành
                           </span>
                         ) : (
-                          <span className="text-xs font-bold text-gray-400 bg-gray-200 px-2 py-1 rounded-md">{set.total - set.learned} từ chưa học</span>
+                          <span className="text-xs font-bold text-gray-500 bg-gray-200 px-2 py-1 rounded-md">{set.total - set.learned} từ chưa học</span>
                         )}
                         <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600" />
                       </div>

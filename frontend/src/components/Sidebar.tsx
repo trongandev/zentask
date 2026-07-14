@@ -15,6 +15,7 @@ import {
   FileText,
   Diamond,
   ChevronRight,
+  ChevronDown,
   PanelLeftOpen,
   PanelLeftClose,
   ShieldAlert,
@@ -34,6 +35,33 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const { user } = useAuth();
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(() => {
+    const saved = localStorage.getItem("sidebarCollapsedGroups");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return {
+      "NHÓM HỌC TẬP": false,
+      "CỐT LÕI": false,
+      "CỘNG ĐỒNG": true,
+      "CÔNG CỤ": true,
+    };
+  });
+
+  const toggleGroup = (label: string) => {
+    if (!label) return;
+    setCollapsedGroups((prev) => {
+      const newState = {
+        ...prev,
+        [label]: !prev[label],
+      };
+      localStorage.setItem("sidebarCollapsedGroups", JSON.stringify(newState));
+      return newState;
+    });
+  };
+
   const menuGroups = [
     {
       label: "",
@@ -95,49 +123,57 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
       {/* Navigation */}
       <nav className={cn("flex-1 pb-6 space-y-6 mt-2", isOpen ? "px-4" : "px-3")}>
-        {menuGroups.map((group, idx) => (
-          <div key={idx}>
-            {isOpen && group.label && <h2 className="text-xs font-semibold text-gray-400 mb-3 px-3 uppercase tracking-wider">{group.label}</h2>}
-            {!isOpen && group.label && <div className="w-8 h-px bg-gray-200 mx-auto my-4"></div>}
-            <ul className="space-y-1.5">
-              {group.items.map((item, itemIdx) => {
-                const Icon = item.icon;
-                return (
-                  <li key={itemIdx} className="relative group/nav">
-                    <NavLink
-                      to={item.to}
-                      onClick={() => {
-                        if (window.innerWidth < 1024) {
-                          onToggle();
+        {menuGroups.map((group, idx) => {
+          const isCollapsed = collapsedGroups[group.label] || false;
+          return (
+            <div key={idx}>
+              {isOpen && group.label && (
+                <div className="flex items-center justify-between mb-3 px-3 cursor-pointer group/label" onClick={() => toggleGroup(group.label)}>
+                  <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider group-hover/label:text-blue-500 transition-colors">{group.label}</h2>
+                  <ChevronDown className={cn("w-4 h-4 text-gray-400 transition-transform", isCollapsed ? "-rotate-90" : "")} />
+                </div>
+              )}
+              {!isOpen && group.label && <div className="w-8 h-px bg-gray-200 mx-auto my-4"></div>}
+              <ul className={cn("space-y-1.5", isOpen && isCollapsed ? "hidden" : "block")}>
+                {group.items.map((item, itemIdx) => {
+                  const Icon = item.icon;
+                  return (
+                    <li key={itemIdx} className="relative group/nav">
+                      <NavLink
+                        to={item.to}
+                        onClick={() => {
+                          if (window.innerWidth < 1024) {
+                            onToggle();
+                          }
+                        }}
+                        className={({ isActive }) =>
+                          cn(
+                            "flex items-center rounded-xl font-medium transition-colors",
+                            isOpen ? "gap-3 px-3 py-2.5 text-sm" : "justify-center p-3",
+                            isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                          )
                         }
-                      }}
-                      className={({ isActive }) =>
-                        cn(
-                          "flex items-center rounded-xl font-medium transition-colors",
-                          isOpen ? "gap-3 px-3 py-2.5 text-sm" : "justify-center p-3",
-                          isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                        )
-                      }
-                    >
-                      {({ isActive }) => (
-                        <>
-                          <Icon className={cn("flex-shrink-0", isOpen ? "w-5 h-5" : "w-6 h-6", isActive ? "text-blue-600" : "text-gray-400")} />
-                          {isOpen && <span>{item.label}</span>}
-                        </>
+                      >
+                        {({ isActive }) => (
+                          <>
+                            <Icon className={cn("flex-shrink-0", isOpen ? "w-5 h-5" : "w-6 h-6", isActive ? "text-blue-600" : "text-gray-400")} />
+                            {isOpen && <span>{item.label}</span>}
+                          </>
+                        )}
+                      </NavLink>
+                      {!isOpen && (
+                        <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover/nav:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-xl">
+                          {item.label}
+                          <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-[6px] border-transparent border-r-gray-900"></div>
+                        </div>
                       )}
-                    </NavLink>
-                    {!isOpen && (
-                      <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover/nav:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-xl">
-                        {item.label}
-                        <div className="absolute right-full top-1/2 -translate-y-1/2 w-0 h-0 border-[6px] border-transparent border-r-gray-900"></div>
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
       </nav>
 
       {/* Footer Area */}

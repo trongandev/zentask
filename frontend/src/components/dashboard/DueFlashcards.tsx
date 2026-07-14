@@ -3,6 +3,7 @@ import { Clock, ChevronRight, GraduationCap } from "lucide-react";
 import { useFlashcardStore } from "../../services/flashcardService";
 import { useNavigate } from "react-router-dom";
 import { cn } from "../../lib/utils";
+import { useAuth } from "@/src/contexts/AuthContext";
 
 export function DueFlashcards() {
   const { getDueCards } = useFlashcardStore();
@@ -10,14 +11,33 @@ export function DueFlashcards() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const { user } = useAuth();
+
   useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     const fetchCards = async () => {
       const data = await getDueCards();
       setCards(data || []);
       setLoading(false);
     };
     fetchCards();
-  }, [getDueCards]);
+  }, [getDueCards, user]);
+
+  if (!user) {
+    return (
+      <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col items-center justify-center min-h-[300px]">
+        <Clock className="w-12 h-12 text-gray-300 mb-4" />
+        <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Từ vựng cần ôn tập</h3>
+        <p className="text-gray-500 mb-6 text-center text-sm">Vui lòng đăng nhập để lưu trữ và ôn tập từ vựng của riêng bạn!</p>
+        <button onClick={() => (window.location.href = "/auth")} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
+          Đăng nhập ngay
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

@@ -31,6 +31,19 @@ export function ProgressCard() {
   const learnedCount = learnedWords.length;
   const percentage = totalWords > 0 ? Math.round((learnedCount / totalWords) * 100) : 0;
 
+  if (!user) {
+    return (
+      <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col items-center justify-center h-full shadow-sm min-h-[300px]">
+        <TrendingUp className="w-12 h-12 text-gray-300 mb-4" />
+        <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Tiến độ học tập</h3>
+        <p className="text-gray-500 mb-6 text-center text-sm">Vui lòng đăng nhập để lưu trữ tiến độ học tập và theo dõi số từ vựng đã thuộc!</p>
+        <button onClick={() => window.location.href = '/auth'} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
+          Đăng nhập ngay
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col h-full shadow-sm">
       <div className="flex items-center gap-2 mb-8">

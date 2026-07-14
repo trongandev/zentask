@@ -63,12 +63,42 @@ import { ZaloGo } from "./pages/ZaloAuth/ZaloGo";
 import { ZaloAuthorize } from "./pages/ZaloAuth/ZaloAuthorize";
 import FirstLoginOnboarding from "./components/onboarding/FirstLoginOnboarding";
 
-function RequireAuthRedirect() {
+function ProtectedRouteLayout() {
+  const { user, loading } = useAuth();
   const location = useLocation();
-  useEffect(() => {
-    sessionStorage.setItem("redirect_url", location.pathname);
-  }, [location]);
-  return <Navigate to="/auth" replace />;
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[60vh]">
+        <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mb-6 border border-blue-100 shadow-sm">
+          <img src="/mascot/Lopy (10).png" alt="Mascot" className="w-16 h-16 object-contain" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-3">Yêu cầu đăng nhập</h2>
+        <p className="text-gray-500 max-w-md mx-auto mb-8 text-sm">
+          Bạn cần đăng nhập để sử dụng tính năng này. Hãy đăng nhập để lưu trữ tiến trình và kết nối với cộng đồng Zentask nhé!
+        </p>
+        <button 
+          onClick={() => {
+            sessionStorage.setItem("redirect_url", location.pathname);
+            window.location.href = "/auth";
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all active:scale-95"
+        >
+          Đăng nhập ngay
+        </button>
+      </div>
+    );
+  }
+
+  return <Outlet />;
 }
 
 function MainLayout() {
@@ -144,14 +174,12 @@ function MainLayout() {
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <div className={`transition-[grid-template-rows] duration-300 ease-in-out grid ${isHeaderVisible ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} relative z-10 shrink-0`}>
-          <div className="overflow-hidden">
+        <main id="main-scroll-container" className="flex-1 overflow-y-auto flex flex-col" onScroll={handleScroll}>
+          <div className={`sticky top-0 z-50 transition-transform duration-300 ease-in-out ${isHeaderVisible ? "translate-y-0" : "-translate-y-full"}`}>
             <Header isLeftSidebarOpen={isLeftSidebarOpen} onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
           </div>
-        </div>
 
-        <main id="main-scroll-container" className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col" onScroll={handleScroll}>
-          <div className="flex-1">
+          <div className="flex-1 p-4 md:p-8 flex flex-col">
             <Outlet />
           </div>
           <footer className="mt-8 text-center text-sm text-gray-500 pb-2 border-t border-gray-200 pt-5 ">
@@ -224,22 +252,13 @@ function AppContent() {
     );
   }
 
-  if (!user) {
-    return (
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms-of-service" element={<TermsOfService />} />
-        <Route path="/go/:id" element={<ZaloGo />} />
-        <Route path="/authorize/:id" element={<RequireAuthRedirect />} />
-        <Route path="*" element={<Navigate to="/auth" replace />} />
-      </Routes>
-    );
-  }
+
 
   return (
     <>
       <Routes>
+        <Route path="/auth" element={<Auth />} />
+        
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
@@ -261,42 +280,47 @@ function AppContent() {
         <Route path="/authorize/:id" element={<ZaloAuthorize />} />
 
         <Route path="/" element={<MainLayout />}>
+          {/* Public routes */}
           <Route index element={<Dashboard />} />
           <Route path="beginner" element={<Beginner />} />
           <Route path="beginner/flashcard/:id" element={<BeginnerFlashcardDetail />} />
-          <Route path="beginner/flashcard/:id/practice" element={<FlashcardPractice />} />
-          <Route path="beginner/skills/:mode" element={<SkillPracticeRoom />} />
           <Route path="flashcards" element={<Flashcards />} />
           <Route path="flashcard/:id" element={<FlashcardDetail />} />
-          <Route path="flashcard/:id/practice" element={<FlashcardPractice />} />
           <Route path="quiz" element={<Quiz />} />
-          <Route path="quiz/create" element={<QuizCreate />} />
           <Route path="quiz/:id" element={<QuizDetail />} />
-          <Route path="quiz/room/:code" element={<QuizRoom />} />
-          <Route path="quiz/play/:id" element={<QuizPlay />} />
-          <Route path="quiz/result/:resultId" element={<QuizResult />} />
           <Route path="grammar" element={<Grammar />} />
-          <Route path="grammar/practice" element={<GrammarPractice />} />
-          <Route path="grammar/practice/:stageId" element={<GrammarPractice />} />
           <Route path="tenses" element={<Tenses />} />
-          <Route path="tenses/practice" element={<TensesPractice />} />
-          <Route path="tenses/practice/:stageId" element={<TensesPractice />} />
-          <Route path="profile" element={<Profile />} />
           <Route path="profile/:id" element={<Profile />} />
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="community" element={<Community />} />
-          <Route path="ai-chat" element={<AIChat />} />
-          <Route path="notebook" element={<Notebook />} />
           <Route path="utilities" element={<Utilities />} />
-          <Route path="friends" element={<Friends />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="setting" element={<Settings />} />
-          <Route path="notifications" element={<Notifications />} />
           <Route path="posts" element={<Posts />} />
           <Route path="posts/:id" element={<PostDetail />} />
           <Route path="post" element={<Posts />} />
           <Route path="privacy-policy" element={<PrivacyPolicy />} />
           <Route path="terms-of-service" element={<TermsOfService />} />
+
+          {/* Protected routes */}
+          <Route element={<ProtectedRouteLayout />}>
+            <Route path="beginner/flashcard/:id/practice" element={<FlashcardPractice />} />
+            <Route path="beginner/skills/:mode" element={<SkillPracticeRoom />} />
+            <Route path="flashcard/:id/practice" element={<FlashcardPractice />} />
+            <Route path="quiz/create" element={<QuizCreate />} />
+            <Route path="quiz/room/:code" element={<QuizRoom />} />
+            <Route path="quiz/play/:id" element={<QuizPlay />} />
+            <Route path="quiz/result/:resultId" element={<QuizResult />} />
+            <Route path="grammar/practice" element={<GrammarPractice />} />
+            <Route path="grammar/practice/:stageId" element={<GrammarPractice />} />
+            <Route path="tenses/practice" element={<TensesPractice />} />
+            <Route path="tenses/practice/:stageId" element={<TensesPractice />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="ai-chat" element={<AIChat />} />
+            <Route path="notebook" element={<Notebook />} />
+            <Route path="friends" element={<Friends />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="setting" element={<Settings />} />
+            <Route path="notifications" element={<Notifications />} />
+          </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

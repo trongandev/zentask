@@ -9,7 +9,6 @@ import { consumeDailyLimit } from "../../utils/usageLimits.js";
 import { cleanAndValidateCommunityHtml, cleanAndValidateCommunityText } from "../../utils/moderation.js";
 
 const router = Router();
-router.use(verifyToken);
 
 const postsCache = new Map();
 const POSTS_CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours
@@ -62,6 +61,8 @@ router.get(
     res.json(posts);
   }),
 );
+
+router.use(verifyToken);
 
 // Middleware bảo trì: Chỉ cho phép method GET (đọc bài/đọc comment), chặn tất cả thao tác Ghi (POST, PUT, DELETE)
 // router.use((req, res, next) => {
@@ -197,7 +198,7 @@ router.post(
       isLiking = true;
     }
     await post.save();
-    
+
     postsCache.clear();
 
     const postOwnerId = post.uid.toString();

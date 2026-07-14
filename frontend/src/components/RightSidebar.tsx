@@ -220,8 +220,23 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
           </>
         )}
 
+        {/* Guest CTA Card */}
+        {!user && isOpen && (
+          <div className="bg-white rounded-2xl border border-blue-100 p-6 shadow-sm flex flex-col items-center text-center bg-blue-50/30">
+            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+              <Target className="w-8 h-8 text-blue-600" />
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2">Trải nghiệm đầy đủ</h3>
+            <p className="text-xs text-gray-500 mb-4 px-2">Đăng nhập để nhận điểm danh hàng ngày, kết nối bạn bè và làm nhiệm vụ nhận XP!</p>
+            <button onClick={() => (window.location.href = "/auth")} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition-colors text-sm">
+              Đăng nhập ngay
+            </button>
+          </div>
+        )}
+
         {/* Streak Card */}
-        {!isCheckedInToday &&
+        {user &&
+          !isCheckedInToday &&
           (isOpen ? (
             <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
@@ -309,7 +324,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
           ))}
 
         {/* Online Friends */}
-        {isOpen ? (
+        {user && isOpen ? (
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -336,7 +351,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
               )}
             </div>
           </div>
-        ) : (
+        ) : user ? (
           <div className="flex flex-col items-center gap-2 w-full border-t border-gray-100 pt-6 mt-4">
             <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center border border-green-100 shadow-sm group relative cursor-pointer" onClick={onOpen}>
               <Users className="w-6 h-6 text-green-600" />
@@ -350,10 +365,12 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
               </div>
             </div>
           </div>
+        ) : (
+          <div></div>
         )}
 
         {/* Daily Tasks */}
-        {isOpen ? (
+        {user && isOpen ? (
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
@@ -399,59 +416,61 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
             </p>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-3 w-full border-t border-gray-100 pt-6">
-            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100 shadow-sm group relative cursor-pointer" onClick={onOpen}>
-              <Target className="w-6 h-6 text-blue-600" />
-              <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-xl">
-                Nhiệm vụ hôm nay
-                <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-[6px] border-transparent border-l-gray-900"></div>
+          user && (
+            <div className="flex flex-col items-center gap-3 w-full border-t border-gray-100 pt-6">
+              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100 shadow-sm group relative cursor-pointer" onClick={onOpen}>
+                <Target className="w-6 h-6 text-blue-600" />
+                <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-xl">
+                  Nhiệm vụ hôm nay
+                  <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-[6px] border-transparent border-l-gray-900"></div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 w-full items-center">
+                {tasks.every((t) => t.current >= t.total) ? (
+                  <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center border border-green-200 shadow-sm relative group cursor-pointer" onClick={onOpen}>
+                    <Check className="w-5 h-5 text-green-600" />
+                    <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-lg">
+                      Đã hoàn thành tất cả!
+                      <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-4 border-transparent border-l-gray-900"></div>
+                    </div>
+                  </div>
+                ) : (
+                  tasks.map((task, idx) => {
+                    const percent = (task.current / task.total) * 100;
+                    return (
+                      <div key={idx} className="relative group cursor-pointer" onClick={onOpen}>
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center relative shadow-sm">
+                          <div className="absolute inset-0 rounded-full border border-gray-200 bg-white" style={{ background: `conic-gradient(#3b82f6 ${percent}%, #f9fafb ${percent}%)` }}></div>
+                          <div className="absolute inset-0.5 rounded-full bg-white flex items-center justify-center">
+                            <img src={task.icon} alt={task.title} className="w-6 h-6 object-contain" />
+                          </div>
+                          {task.current === task.total && (
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
+                              <Check className="w-2.5 h-2.5 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 p-3 bg-gray-900 text-white text-xs font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-xl flex flex-col min-w-[160px] items-start">
+                          <span className="text-gray-100 mb-2">{task.title}</span>
+                          <span className="text-[10px] text-gray-400 mb-2 whitespace-normal break-words leading-tight w-full">{task.desc}</span>
+                          <div className="w-full bg-gray-700 h-1.5 rounded-full mb-1.5 overflow-hidden">
+                            <div className="bg-blue-400 h-1.5 rounded-full" style={{ width: `${percent}%` }}></div>
+                          </div>
+                          <div className="flex justify-between w-full items-center">
+                            <span className="text-blue-300 font-medium text-[10px]">
+                              {task.current} / {task.total} hoàn thành
+                            </span>
+                            <span className="text-green-400 font-bold text-[10px]">+{task.xpPerItem} XP</span>
+                          </div>
+                          <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-[6px] border-transparent border-l-gray-900"></div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
-            <div className="flex flex-col gap-3 w-full items-center">
-              {tasks.every((t) => t.current >= t.total) ? (
-                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center border border-green-200 shadow-sm relative group cursor-pointer" onClick={onOpen}>
-                  <Check className="w-5 h-5 text-green-600" />
-                  <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-lg">
-                    Đã hoàn thành tất cả!
-                    <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-4 border-transparent border-l-gray-900"></div>
-                  </div>
-                </div>
-              ) : (
-                tasks.map((task, idx) => {
-                  const percent = (task.current / task.total) * 100;
-                  return (
-                    <div key={idx} className="relative group cursor-pointer" onClick={onOpen}>
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center relative shadow-sm">
-                        <div className="absolute inset-0 rounded-full border border-gray-200 bg-white" style={{ background: `conic-gradient(#3b82f6 ${percent}%, #f9fafb ${percent}%)` }}></div>
-                        <div className="absolute inset-0.5 rounded-full bg-white flex items-center justify-center">
-                          <img src={task.icon} alt={task.title} className="w-6 h-6 object-contain" />
-                        </div>
-                        {task.current === task.total && (
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
-                            <Check className="w-2.5 h-2.5 text-white" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 p-3 bg-gray-900 text-white text-xs font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100] pointer-events-none shadow-xl flex flex-col min-w-[160px] items-start">
-                        <span className="text-gray-100 mb-2">{task.title}</span>
-                        <span className="text-[10px] text-gray-400 mb-2 whitespace-normal break-words leading-tight w-full">{task.desc}</span>
-                        <div className="w-full bg-gray-700 h-1.5 rounded-full mb-1.5 overflow-hidden">
-                          <div className="bg-blue-400 h-1.5 rounded-full" style={{ width: `${percent}%` }}></div>
-                        </div>
-                        <div className="flex justify-between w-full items-center">
-                          <span className="text-blue-300 font-medium text-[10px]">
-                            {task.current} / {task.total} hoàn thành
-                          </span>
-                          <span className="text-green-400 font-bold text-[10px]">+{task.xpPerItem} XP</span>
-                        </div>
-                        <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-[6px] border-transparent border-l-gray-900"></div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
+          )
         )}
 
         {/* Dev-only Test Buttons */}
@@ -504,7 +523,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                 <Link
                   to={lUser.isUser ? "/profile" : `/profile/${lUser.id}`}
                   key={`top-${idx}`}
-                  className={cn("flex items-center gap-3 p-2.5 rounded-xl transition-colors cursor-pointer", user.isUser ? "bg-blue-50 border border-blue-100" : "hover:bg-gray-50")}
+                  className={cn("flex items-center gap-3 p-2.5 rounded-xl transition-colors cursor-pointer", lUser.isUser ? "bg-blue-50 border border-blue-100" : "hover:bg-gray-50")}
                 >
                   {lUser.rank <= 3 ? (
                     <div className="w-6 flex-shrink-0 flex items-center justify-center">

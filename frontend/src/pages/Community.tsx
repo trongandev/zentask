@@ -375,25 +375,29 @@ export function Community() {
                   )}
 
                   {/* Actions */}
-                  <div className="flex items-center justify-between py-3 border-y border-gray-100 mb-4">
-                    <div className="flex items-center gap-6">
-                      <button
-                        onClick={() => handleLike(post.id)}
-                        className={cn("flex items-center gap-2 font-bold text-sm transition-colors", isLiked ? "text-red-500" : "text-gray-500 hover:text-red-500")}
-                      >
-                        <Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
-                        {post.likes.length} <span className="hidden sm:inline">Thích</span>
-                      </button>
-                      <button onClick={() => toggleCommentSection(post.id)} className="flex items-center gap-2 text-gray-500 hover:text-blue-500 font-bold text-sm transition-colors">
-                        <MessageSquare className="w-5 h-5" />
-                        {post.commentsCount} <span className="hidden sm:inline">Bình luận</span>
+                  {user ? (
+                    <div className="flex items-center justify-between py-3 border-y border-gray-100 mb-4">
+                      <div className="flex items-center gap-6">
+                        <button
+                          onClick={() => handleLike(post.id)}
+                          className={cn("flex items-center gap-2 font-bold text-sm transition-colors", isLiked ? "text-red-500" : "text-gray-500 hover:text-red-500")}
+                        >
+                          <Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
+                          {post.likes.length} <span className="hidden sm:inline">Thích</span>
+                        </button>
+                        <button onClick={() => toggleCommentSection(post.id)} className="flex items-center gap-2 text-gray-500 hover:text-blue-500 font-bold text-sm transition-colors">
+                          <MessageSquare className="w-5 h-5" />
+                          {post.commentsCount} <span className="hidden sm:inline">Bình luận</span>
+                        </button>
+                      </div>
+                      <button className="flex items-center gap-2 text-gray-500 hover:text-green-500 font-bold text-sm transition-colors">
+                        <Share2 className="w-5 h-5" />
+                        <span className="hidden sm:inline">Chia sẻ</span>
                       </button>
                     </div>
-                    <button className="flex items-center gap-2 text-gray-500 hover:text-green-500 font-bold text-sm transition-colors">
-                      <Share2 className="w-5 h-5" />
-                      <span className="hidden sm:inline">Chia sẻ</span>
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="flex items-center justify-center py-3 border-y border-gray-100 mb-4 text-gray-500 text-sm">Vui lòng đăng nhập để tương tác</div>
+                  )}
 
                   {/* Comments Section */}
                   {activeCommentPost === post.id && (

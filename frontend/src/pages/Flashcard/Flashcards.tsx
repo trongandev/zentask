@@ -326,12 +326,14 @@ export function Flashcards() {
   };
 
   useEffect(() => {
-    fetchSets();
-    fetchFolders();
-    fetchCategories();
+    if (user) {
+      fetchSets();
+      fetchFolders();
+      fetchCategories();
+    }
     fetchPublicSets();
     fetchBuiltinSets();
-  }, [fetchSets, fetchFolders, fetchCategories, fetchPublicSets, fetchBuiltinSets]);
+  }, [fetchSets, fetchFolders, fetchCategories, fetchPublicSets, fetchBuiltinSets, user]);
 
   useEffect(() => {
     const handleClickOutside = () => {

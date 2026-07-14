@@ -121,7 +121,7 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
   };
 
   return (
-    <div className="sticky top-0 z-20 flex flex-col w-full flex-shrink-0">
+    <div className="sticky top-0 z-50 flex flex-col w-full flex-shrink-0">
       {showExtensionAd && (
         <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-4 py-2.5 flex items-center justify-between text-sm shadow-md">
           <div className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center sm:text-left">
