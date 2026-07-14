@@ -53,7 +53,7 @@ export function RankCard({ showButton = false, buttonText = "Bắt đầu đấu
   }
 
   return (
-    <div className={cn("bg-gradient-to-b from-blue-900 to-indigo-950 rounded-3xl p-6 text-white shadow-sm relative overflow-hidden transition-all hover:shadow-md h-full", className)}>
+    <div className={cn("bg-gradient-to-b from-blue-900 to-indigo-950 rounded-3xl p-6 text-white shadow-sm relative overflow-hidden transition-all hover:shadow-md", className)}>
       <div className="absolute top-1/2 -translate-y-1/2 right-0 opacity-20 pointer-events-none scale-150">
         <img src={`/rank/${rankId}.png`} alt="Rank Background" className="w-48 h-48 object-contain drop-shadow-2xl" />
       </div>

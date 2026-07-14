@@ -1138,18 +1138,9 @@ export function Flashcards() {
           )}
         </div>
       )}
-      <div className="flex gap-4">
-        <Link to="https://zalo.me/0842034755" target="_blank" className="bg-white rounded-2xl p-1 border border-gray-100 shadow-sm">
-          <img src="/lopy-zentask-bot.png" alt="" className="h-full w-full cursor-pointer" />
-        </Link>
-        <Link
-          to="https://chromewebstore.google.com/detail/lkhjgkjabnfbfblflgkcapamidmfkjnc?utm_source=item-share-cb"
-          target="_blank"
-          className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm "
-        >
-          <img src="/zentask-extension-banner.png" alt="" className="h-full w-full cursor-pointer rounded-2xl" />
-        </Link>
-      </div>
+      <Link to="https://chromewebstore.google.com/detail/lkhjgkjabnfbfblflgkcapamidmfkjnc?utm_source=item-share-cb" target="_blank" className="">
+        <img src="/zentask-extension-banner.png" alt="" className="cursor-pointer rounded-2xl" />
+      </Link>
       {/* --- Modals --- */}
       <CreateEditFolderModal
         isOpen={isFolderModalOpen}
