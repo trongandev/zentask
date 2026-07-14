@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toastService from "../../services/toastService";
 import { useAuth } from "../../contexts/AuthContext";
@@ -10,6 +10,12 @@ export function ZaloAuthorize() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      navigate(`/auth/auth?redirect_url=${window.location.href}`);
+    }
+  }, [user]);
 
   const handleAuthorize = async () => {
     setLoading(true);

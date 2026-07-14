@@ -27,7 +27,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         throw new Error(data.error || "Failed to login");
       }
       toastService.success("Đăng nhập thành công");
-      const redirectUrl = sessionStorage.getItem("redirect_url") || "/";
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramRedirect = urlParams.get("redirect_url");
+      const redirectUrl = paramRedirect || sessionStorage.getItem("redirect_url") || "/";
       sessionStorage.removeItem("redirect_url");
       window.location.href = redirectUrl;
     } catch (err: any) {
@@ -51,7 +53,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         throw new Error(data.error || "Failed to register");
       }
       toastService.success("Đăng ký thành công");
-      const redirectUrl = sessionStorage.getItem("redirect_url") || "/";
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramRedirect = urlParams.get("redirect_url");
+      const redirectUrl = paramRedirect || sessionStorage.getItem("redirect_url") || "/";
       sessionStorage.removeItem("redirect_url");
       window.location.href = redirectUrl;
     } catch (err: any) {

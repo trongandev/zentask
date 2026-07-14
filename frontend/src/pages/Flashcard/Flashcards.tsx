@@ -330,6 +330,8 @@ export function Flashcards() {
       fetchSets();
       fetchFolders();
       fetchCategories();
+    } else {
+      setActiveTab("public");
     }
     fetchPublicSets();
     fetchBuiltinSets();
@@ -637,32 +639,38 @@ export function Flashcards() {
             <p className="text-gray-500">Ôn tập và ghi nhớ từ vựng hiệu quả qua các bộ thẻ.</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setEditingFolder(null);
-              setNewFolderName("");
-              setNewFolderColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
-              setIsFolderModalOpen(true);
-            }}
-            className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"
-          >
-            <FolderIcon className="w-5 h-5" /> Tạo Folder
+        {user ? (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingFolder(null);
+                setNewFolderName("");
+                setNewFolderColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
+                setIsFolderModalOpen(true);
+              }}
+              className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"
+            >
+              <FolderIcon className="w-5 h-5" /> Tạo Folder
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                openCreateSetModal(null);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 whitespace-nowrap"
+            >
+              <Plus className="w-5 h-5" /> Tạo bộ thẻ
+            </button>
+          </div>
+        ) : (
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 whitespace-nowrap">
+            <Plus className="w-5 h-5" /> Bạn cần đăng nhập
           </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              openCreateSetModal(null);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 whitespace-nowrap"
-          >
-            <Plus className="w-5 h-5" /> Tạo bộ thẻ
-          </button>
-        </div>
+        )}
       </div>
 
-      {activeTab === "mine" && (
+      {activeTab === "mine" && user && (
         <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
           <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>

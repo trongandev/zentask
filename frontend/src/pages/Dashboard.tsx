@@ -5,14 +5,12 @@ import { Recommendations } from "../components/Recommendations";
 import { RankCard } from "../components/shared/RankCard";
 import { DueFlashcards } from "../components/dashboard/DueFlashcards";
 import { CalendarCheckin } from "../components/dashboard/CalendarCheckin";
-import { SEO } from "../components/SEO";
 import { Link } from "react-router-dom";
 import CTAZaloZentaskCommunity from "../components/dashboard/CTAZaloZentaskCommunity";
 
 export function Dashboard() {
   return (
     <div className="max-w-6xl mx-auto space-y-8 pb-12">
-      <SEO title="Bảng điều khiển" />
       <Hero />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-1 h-full">

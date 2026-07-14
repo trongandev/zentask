@@ -107,6 +107,8 @@ export function Quiz() {
     if (user) {
       getQuizzes();
       getQuizHistory();
+    } else {
+      setActiveTab("public");
     }
     getPublicQuizzes();
     getBuiltinQuizzes();
