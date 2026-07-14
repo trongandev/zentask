@@ -658,7 +658,6 @@ export default function App() {
       {tab === "setting" && (
         <div className="flex-1 bg-gray-50 flex flex-col">
           <div className="p-5 space-y-6 overflow-y-auto custom-scrollbar">
-            {/* Vị trí lưu từ vựng */}
             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
                 <FolderHeart size={16} className="text-teal-600" /> Thư mục lưu từ vựng mặc định
