@@ -671,70 +671,72 @@ export function Flashcards() {
       </div>
 
       {activeTab === "mine" && user && (
-        <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
+        <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm w-full">
           <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-sm font-extrabold uppercase tracking-wide text-gray-700">Đề mục flashcard</h2>
               <p className="text-xs font-medium text-gray-400">Chia bộ thẻ theo mục như IELTS, TOEIC, Giao tiếp hoặc mục tự tạo.</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex w-full gap-2 sm:w-auto">
               <input
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateCategory()}
                 placeholder="Tạo đề mục mới..."
-                className="w-44 rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold outline-none focus:border-blue-500"
+                className="w-full md:w-44 rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold outline-none focus:border-blue-500"
               />
-              <button onClick={handleCreateCategory} className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800">
+              <button onClick={handleCreateCategory} className="shrink-0 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800">
                 Thêm
               </button>
             </div>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            <button
-              onClick={() => setActiveCategoryId("all")}
-              className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryId === "all" ? "bg-blue-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-            >
-              Tất cả
-              <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === "all" ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{sets.length}</span>
-            </button>
-            {categories.map((category: any) => (
-              <div key={category.id} className="group inline-flex shrink-0 items-center overflow-hidden rounded-2xl bg-gray-100">
-                <button
-                  onClick={() => setActiveCategoryId(category.id)}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryId === category.id ? `${category.color || "bg-blue-600"} text-white shadow-sm` : "text-gray-600 hover:bg-gray-200"}`}
-                >
-                  <span>{category.name}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === category.id ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>
-                    {getCategoryCount(category.id)}
-                  </span>
-                </button>
-                <button onClick={() => deleteCategory(category.id)} title="Xóa đề mục" className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">
-                  ×
-                </button>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <div className="flex flex-wrap gap-2  pb-1">
+              <button
+                onClick={() => setActiveCategoryId("all")}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryId === "all" ? "bg-blue-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+              >
+                Tất cả
+                <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === "all" ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{sets.length}</span>
+              </button>
+              {categories.map((category: any) => (
+                <div key={category.id} className="group flex items-center rounded-2xl bg-gray-100">
+                  <button
+                    onClick={() => setActiveCategoryId(category.id)}
+                    className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryId === category.id ? `${category.color || "bg-blue-600"} text-white shadow-sm` : "text-gray-600 hover:bg-gray-200"}`}
+                  >
+                    <span>{category.name}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === category.id ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>
+                      {getCategoryCount(category.id)}
+                    </span>
+                  </button>
+                  <button onClick={() => deleteCategory(category.id)} title="Xóa đề mục" className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 flex flex-col sm:flex-row gap-2 w-full sm:w-max">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 flex gap-2 w-full sm:w-max">
           <button
             onClick={() => setActiveTab("mine")}
-            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "mine" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "mine" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Của tôi
           </button>
           <button
             onClick={() => setActiveTab("builtin")}
-            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "builtin" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={` px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "builtin" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Có sẵn
           </button>
           <button
             onClick={() => setActiveTab("public")}
-            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "public" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "public" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Công khai
           </button>

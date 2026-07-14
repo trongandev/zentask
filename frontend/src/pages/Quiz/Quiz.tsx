@@ -203,22 +203,22 @@ export function Quiz() {
       </div>
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 flex flex-col sm:flex-row gap-2 w-full sm:w-max">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 flex  gap-2 w-full sm:w-max">
           <button
             onClick={() => setActiveTab("mine")}
-            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "mine" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "mine" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Của tôi
           </button>
           <button
             onClick={() => setActiveTab("builtin")}
-            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "builtin" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "builtin" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Có sẵn
           </button>
           <button
             onClick={() => setActiveTab("public")}
-            className={`px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "public" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "public" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Công khai
           </button>
@@ -259,7 +259,7 @@ export function Quiz() {
             </div>
           )}
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex flex-wrap gap-2 overflow-x-auto pb-1">
           {quizCategoryOptions.map((category: any) => (
             <div key={category.key} className="group inline-flex shrink-0 items-center overflow-hidden rounded-2xl bg-gray-100">
               <button

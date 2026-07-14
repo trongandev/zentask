@@ -14,7 +14,8 @@ export const CATEGORIES = [
 export const FEATURED_POST = {
   id: 1,
   title: "Bí kíp đạt điểm tuyệt đối trong bài kiểm tra TOEIC Reading",
-  excerpt: "Khám phá những phương pháp làm bài và mẹo phân bổ thời gian hiệu quả nhất giúp bạn chinh phục phần thi TOEIC Reading dễ dàng hơn bao giờ hết. Chúng tôi đã tổng hợp từ kinh nghiệm của hơn 100 học viên xuất sắc.",
+  excerpt:
+    "Khám phá những phương pháp làm bài và mẹo phân bổ thời gian hiệu quả nhất giúp bạn chinh phục phần thi TOEIC Reading dễ dàng hơn bao giờ hết. Chúng tôi đã tổng hợp từ kinh nghiệm của hơn 100 học viên xuất sắc.",
   category: "Kinh nghiệm thi",
   date: "12 Tháng 4, 2024",
   readTime: "5 phút đọc",
@@ -22,8 +23,8 @@ export const FEATURED_POST = {
   author: {
     name: "Zentask Team",
     avatar: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=200&auto=format&fit=crop",
-    level: 99
-  }
+    level: 99,
+  },
 };
 
 export const POSTS = [
@@ -38,8 +39,8 @@ export const POSTS = [
     author: {
       name: "Zentask Team",
       avatar: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=200&auto=format&fit=crop",
-      level: 99
-    }
+      level: 99,
+    },
   },
   {
     id: 3,
@@ -52,8 +53,8 @@ export const POSTS = [
     author: {
       name: "Zentask Team",
       avatar: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=200&auto=format&fit=crop",
-      level: 99
-    }
+      level: 99,
+    },
   },
   {
     id: 4,
@@ -66,8 +67,8 @@ export const POSTS = [
     author: {
       name: "Zentask Team",
       avatar: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=200&auto=format&fit=crop",
-      level: 99
-    }
+      level: 99,
+    },
   },
   {
     id: 5,
@@ -80,39 +81,45 @@ export const POSTS = [
     author: {
       name: "Zentask Team",
       avatar: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=200&auto=format&fit=crop",
-      level: 99
-    }
-  }
+      level: 99,
+    },
+  },
 ];
 
 export function Posts() {
   const [activeCategory, setActiveCategory] = useState("all");
   const navigate = useNavigate();
 
-  const filteredPosts = activeCategory === "all" 
-    ? POSTS 
-    : POSTS.filter(post => post.category === CATEGORIES.find(c => c.id === activeCategory)?.label);
+  const filteredPosts = activeCategory === "all" ? POSTS : POSTS.filter((post) => post.category === CATEGORIES.find((c) => c.id === activeCategory)?.label);
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "Kinh nghiệm học": return "text-blue-600 bg-blue-50";
-      case "Kinh nghiệm thi": return "text-orange-600 bg-orange-50";
-      case "Tin tức Zentask": return "text-green-600 bg-green-50";
-      default: return "text-gray-600 bg-gray-50";
+      case "Kinh nghiệm học":
+        return "text-blue-600 bg-blue-50";
+      case "Kinh nghiệm thi":
+        return "text-orange-600 bg-orange-50";
+      case "Tin tức Zentask":
+        return "text-green-600 bg-green-50";
+      default:
+        return "text-gray-600 bg-gray-50";
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case "Kinh nghiệm học": return <BookOpen className="w-3 h-3" />;
-      case "Kinh nghiệm thi": return <Star className="w-3 h-3" />;
-      case "Tin tức Zentask": return <Zap className="w-3 h-3" />;
-      default: return null;
+      case "Kinh nghiệm học":
+        return <BookOpen className="w-3 h-3" />;
+      case "Kinh nghiệm thi":
+        return <Star className="w-3 h-3" />;
+      case "Tin tức Zentask":
+        return <Zap className="w-3 h-3" />;
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="w-full md:max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="max-w-2xl">
@@ -123,16 +130,12 @@ export function Posts() {
 
       {/* Featured Post */}
       {activeCategory === "all" && (
-        <div 
+        <div
           onClick={() => navigate(`/posts/${FEATURED_POST.id}`)}
           className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row group cursor-pointer transition-all hover:shadow-md"
         >
           <div className="lg:w-1/2 relative overflow-hidden h-64 lg:h-auto">
-            <img 
-              src={FEATURED_POST.image} 
-              alt={FEATURED_POST.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+            <img src={FEATURED_POST.image} alt={FEATURED_POST.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent lg:hidden" />
           </div>
           <div className="p-6 md:p-8 lg:p-10 lg:w-1/2 flex flex-col justify-center bg-white relative">
@@ -146,15 +149,11 @@ export function Posts() {
                 {FEATURED_POST.readTime}
               </span>
             </div>
-            
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors">
-              {FEATURED_POST.title}
-            </h2>
-            
-            <p className="text-gray-600 mb-8 line-clamp-3 leading-relaxed">
-              {FEATURED_POST.excerpt}
-            </p>
-            
+
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors">{FEATURED_POST.title}</h2>
+
+            <p className="text-gray-600 mb-8 line-clamp-3 leading-relaxed">{FEATURED_POST.excerpt}</p>
+
             <div className="mt-auto flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <UserAvatar src={FEATURED_POST.author.avatar} level={FEATURED_POST.author.level} className="w-10 h-10" />
@@ -173,15 +172,13 @@ export function Posts() {
 
       {/* Categories */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-        {CATEGORIES.map(category => (
+        {CATEGORIES.map((category) => (
           <button
             key={category.id}
             onClick={() => setActiveCategory(category.id)}
             className={cn(
               "px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all",
-              activeCategory === category.id
-                ? "bg-gray-900 text-white shadow-md"
-                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+              activeCategory === category.id ? "bg-gray-900 text-white shadow-md" : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200",
             )}
           >
             {category.label}
@@ -191,39 +188,32 @@ export function Posts() {
 
       {/* Post Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPosts.map(post => (
-          <div 
-            key={post.id} 
+        {filteredPosts.map((post) => (
+          <div
+            key={post.id}
             onClick={() => navigate(`/posts/${post.id}`)}
             className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group cursor-pointer hover:shadow-md transition-all"
           >
             <div className="relative h-48 overflow-hidden">
-              <img 
-                src={post.image} 
-                alt={post.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+              <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute top-4 left-4">
-                <span className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm backdrop-blur-md", 
-                  post.category === "Kinh nghiệm học" ? "bg-blue-500/90 text-white" : 
-                  post.category === "Kinh nghiệm thi" ? "bg-orange-500/90 text-white" : 
-                  "bg-green-500/90 text-white"
-                )}>
+                <span
+                  className={cn(
+                    "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm backdrop-blur-md",
+                    post.category === "Kinh nghiệm học" ? "bg-blue-500/90 text-white" : post.category === "Kinh nghiệm thi" ? "bg-orange-500/90 text-white" : "bg-green-500/90 text-white",
+                  )}
+                >
                   {getCategoryIcon(post.category)}
                   {post.category}
                 </span>
               </div>
             </div>
-            
+
             <div className="p-6 flex flex-col flex-1">
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
-                {post.title}
-              </h3>
-              
-              <p className="text-gray-600 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
-                {post.excerpt}
-              </p>
-              
+              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">{post.title}</h3>
+
+              <p className="text-gray-600 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">{post.excerpt}</p>
+
               <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
                 <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
                   <Calendar className="w-3.5 h-3.5" />

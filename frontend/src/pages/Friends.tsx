@@ -363,8 +363,8 @@ export default function Friends() {
           </section>
         </aside>
 
-        <main className="grid min-h-[720px] grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <section className="flex min-h-[620px] flex-col overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-sm">
+        <main className="grid max-h-[720px] grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <section className="flex max-h-[500px] flex-col overflow-hidden rounded-[2rem] border border-gray-100 bg-white shadow-sm">
             {activeFriend ? (
               <>
                 <div className="flex items-center gap-3 border-b border-gray-100 p-4">

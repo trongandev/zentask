@@ -10,19 +10,19 @@ import {
   BookOpen,
   Clock,
   Trophy,
-  Users,
   Globe,
   FileText,
-  Diamond,
   ChevronRight,
   ChevronDown,
   PanelLeftOpen,
   PanelLeftClose,
   ShieldAlert,
   MountainSnow,
-  MessageCircle,
-  NotebookPen,
-  Wrench,
+  // Diamond,
+  // Users,
+  // MessageCircle,
+  // NotebookPen,
+  // Wrench,
   UserRoundPlus,
 } from "lucide-react";
 import CTAZaloZentaskCommunity from "./dashboard/CTAZaloZentaskCommunity";
@@ -91,14 +91,14 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         { icon: FileText, label: "Bài viết", to: "/posts" },
       ],
     },
-    {
-      label: "CÔNG CỤ",
-      items: [
-        { icon: MessageCircle, label: "Trợ lý AI", to: "/ai-chat" },
-        { icon: NotebookPen, label: "Sổ tay", to: "/notebook" },
-        { icon: Wrench, label: "Tiện ích", to: "/utilities" },
-      ],
-    },
+    // {
+    //   label: "CÔNG CỤ",
+    //   items: [
+    //     { icon: MessageCircle, label: "Trợ lý AI", to: "/ai-chat" },
+    //     { icon: NotebookPen, label: "Sổ tay", to: "/notebook" },
+    //     { icon: Wrench, label: "Tiện ích", to: "/utilities" },
+    //   ],
+    // },
   ];
 
   if (user?.role === "admin") {

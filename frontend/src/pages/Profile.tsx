@@ -225,7 +225,7 @@ export function Profile() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="w-full md:max-w-5xl mx-auto space-y-6">
       {/* Cover & Profile Header */}
       <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100">
         {/* Cover Image */}
