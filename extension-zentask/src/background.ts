@@ -100,21 +100,21 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ term, setId })
+        body: JSON.stringify({ term, setId }),
       })
-      .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
-      .then(({ ok, data }) => {
-        if (ok && data.ok !== false) {
-           sendResponse({ ok: true, data });
-        } else {
-           sendResponse({ ok: false, message: data.error || data.message || "Có lỗi từ server" });
-        }
-      })
-      .catch(e => {
-        sendResponse({ ok: false, message: e.message || "Kết nối API thất bại" });
-      });
+        .then((res) => res.json().then((data) => ({ status: res.status, ok: res.ok, data })))
+        .then(({ ok, data }) => {
+          if (ok && data.ok !== false) {
+            sendResponse({ ok: true, data });
+          } else {
+            sendResponse({ ok: false, message: data.error || data.message || "Có lỗi từ server" });
+          }
+        })
+        .catch((e) => {
+          sendResponse({ ok: false, message: e.message || "Kết nối API thất bại" });
+        });
     });
     return true;
   } else if (request.action === "ENHANCE_WITH_AI") {
@@ -128,21 +128,21 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ word: text, language: target_language })
+        body: JSON.stringify({ word: text, language: target_language }),
       })
-      .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
-      .then(({ ok, data }) => {
-        if (ok && data.ok !== false) {
-           sendResponse({ ok: true, ...data });
-        } else {
-           sendResponse({ ok: false, message: data.error || data.message || "Có lỗi từ server" });
-        }
-      })
-      .catch(e => {
-        sendResponse({ ok: false, message: e.message || "Kết nối API thất bại" });
-      });
+        .then((res) => res.json().then((data) => ({ status: res.status, ok: res.ok, data })))
+        .then(({ ok, data }) => {
+          if (ok && data.ok !== false) {
+            sendResponse({ ok: true, ...data });
+          } else {
+            sendResponse({ ok: false, message: data.error || data.message || "Có lỗi từ server" });
+          }
+        })
+        .catch((e) => {
+          sendResponse({ ok: false, message: e.message || "Kết nối API thất bại" });
+        });
     });
     return true;
   } else if (request.action === "POPUP_OPENED") {
@@ -154,7 +154,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 });
 const fetchTokens = async () => {
   try {
-    const { token, user } = await chrome.storage.local.get(["token", "user"]);
+    const { token, user, list_flashcard_id } = await chrome.storage.local.get(["token", "user", "list_flashcard_id"]);
     if (!token) {
       return false;
     }
@@ -168,19 +168,20 @@ const fetchTokens = async () => {
       },
     });
     if (response.ok) {
+      let lfi = null;
       const listFlashCards = await response.json();
-      let list_flashcard_id = null;
-      if (listFlashCards && listFlashCards.length > 0) {
-        list_flashcard_id = listFlashCards[0];
+      if (list_flashcard_id && listFlashCards.find((x: any) => x._id === list_flashcard_id._id)) {
+        lfi = list_flashcard_id;
+      } else if (listFlashCards && listFlashCards.length > 0) {
+        lfi = listFlashCards[0];
       }
 
       const newStorage = {
         token,
         user: user || null,
         list_flashcard: listFlashCards,
-        list_flashcard_id,
+        list_flashcard_id: lfi,
       };
-
       await chrome.storage.local.set(newStorage);
       return newStorage;
     } else {

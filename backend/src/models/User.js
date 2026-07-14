@@ -127,6 +127,19 @@ const userSchema = new mongoose.Schema(
       totalTimeSpent: { type: Number, default: 0 },
       completedStages: { type: [String], default: [] },
     },
+    zaloId: {
+      type: String,
+      default: null,
+      index: true,
+    },
+    checkinTime: {
+      type: String,
+      default: "08:00",
+    },
+    botState: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    }
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt

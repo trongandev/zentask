@@ -202,13 +202,22 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
 
         {/* Mascot Card */}
         {isOpen && (
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 shadow-sm text-white relative overflow-hidden flex-shrink-0 mt-4">
-            <div className="relative z-10 w-2/3">
-              <h3 className="font-bold text-lg mb-1 font-heading">Cố lên nhé!</h3>
-              <p className="text-xs text-blue-100 mb-3">Bạn đang làm rất tốt, tiếp tục phát huy nha.</p>
+          <>
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 shadow-sm text-white relative overflow-hidden flex-shrink-0 mt-4">
+              <div className="relative z-10 w-2/3">
+                <h3 className="font-bold text-lg mb-1 font-heading">Cố lên nhé!</h3>
+                <p className="text-xs text-blue-100 mb-3">Bạn đang làm rất tốt, tiếp tục phát huy nha.</p>
+              </div>
+              <img src="/mascot/Lopy (10).png" className="absolute -right-2 -bottom-2 w-24 h-24 object-contain drop-shadow-lg" alt="Mascot" />
             </div>
-            <img src="/mascot/Lopy (10).png" className="absolute -right-2 -bottom-2 w-24 h-24 object-contain drop-shadow-lg" alt="Mascot" />
-          </div>
+            <Link
+              to="https://chromewebstore.google.com/detail/lkhjgkjabnfbfblflgkcapamidmfkjnc?utm_source=item-share-cb"
+              target="_blank"
+              className="bg-white rounded-2xl p-1 border border-gray-100 shadow-sm"
+            >
+              <img src="/zentask-extension-banner.png" alt="" className="h-full w-full cursor-pointer" />
+            </Link>
+          </>
         )}
 
         {/* Streak Card */}

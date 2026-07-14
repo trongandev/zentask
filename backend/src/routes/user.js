@@ -296,6 +296,22 @@ router.put(
   }),
 );
 
+// Update checkin time
+router.put(
+  "/checkin-time",
+  asyncHandler(async (req, res) => {
+    const { checkinTime } = req.body;
+    if (!checkinTime || !/^([01]\d|2[0-3]):([0-5]\d)$/.test(checkinTime)) {
+      return res.status(400).json({ error: "Thời gian không hợp lệ. Vui lòng gửi định dạng HH:mm" });
+    }
+
+    const user = await User.findByIdAndUpdate(req.user.uid, { checkinTime }, { new: true });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.json({ status: "success", checkinTime: user.checkinTime });
+  }),
+);
+
 // Update app appearance/settings
 router.put(
   "/settings",

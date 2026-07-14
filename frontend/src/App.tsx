@@ -56,10 +56,20 @@ import { GrammarPractice } from "./pages/GrammarPractice";
 import { TensesPractice } from "./pages/TensesPractice";
 import Friends from "./pages/Friends";
 import SkillPracticeRoom from "./pages/SkillPracticeRoom";
-import FirstLoginOnboarding from "./components/onboarding/FirstLoginOnboarding";
 import BotConfigPage from "./pages/Admin/BotConfigPage";
 import { SystemLogs } from "./pages/Admin/SystemLogs";
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
+import { ZaloGo } from "./pages/ZaloAuth/ZaloGo";
+import { ZaloAuthorize } from "./pages/ZaloAuth/ZaloAuthorize";
+import FirstLoginOnboarding from "./components/onboarding/FirstLoginOnboarding";
+
+function RequireAuthRedirect() {
+  const location = useLocation();
+  useEffect(() => {
+    sessionStorage.setItem("redirect_url", location.pathname);
+  }, [location]);
+  return <Navigate to="/auth" replace />;
+}
 
 function MainLayout() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(() => {
@@ -134,8 +144,10 @@ function MainLayout() {
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        <div className={`transition-all duration-300 ease-in-out ${isHeaderVisible ? "mt-0" : "-mt-20"} relative z-10 shrink-0`}>
-          <Header isLeftSidebarOpen={isLeftSidebarOpen} onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
+        <div className={`transition-[grid-template-rows] duration-300 ease-in-out grid ${isHeaderVisible ? "grid-rows-[1fr]" : "grid-rows-[0fr]"} relative z-10 shrink-0`}>
+          <div className="overflow-hidden">
+            <Header isLeftSidebarOpen={isLeftSidebarOpen} onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
+          </div>
         </div>
 
         <main id="main-scroll-container" className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col" onScroll={handleScroll}>
@@ -218,6 +230,8 @@ function AppContent() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/go/:id" element={<ZaloGo />} />
+        <Route path="/authorize/:id" element={<RequireAuthRedirect />} />
         <Route path="*" element={<Navigate to="/auth" replace />} />
       </Routes>
     );
@@ -241,6 +255,10 @@ function AppContent() {
           <Route path="banned-ips" element={<AdminBannedIPs />} />
         </Route>
         <Route path="arena" element={<Arena />} />
+
+        {/* Zalo Auth Flow */}
+        <Route path="/go/:id" element={<ZaloGo />} />
+        <Route path="/authorize/:id" element={<ZaloAuthorize />} />
 
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Dashboard />} />

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
-import { Volume2, Star, Settings, X, RotateCcw, Clock, Sparkles, HistoryIcon, Loader2, FolderHeart, Bookmark } from "lucide-react";
+import { Volume2, Star, Settings, X, Clock, Sparkles, HistoryIcon, Loader2, FolderHeart, Bookmark, ArrowLeft } from "lucide-react";
 import css from "./index.css?inline";
 import etcService from "./services/etcService";
+import { UserAvatar } from "./UserAvatar";
 
 const ICON_URL = chrome.runtime.getURL("icon64.png");
 
@@ -27,7 +28,6 @@ const ContentApp = () => {
   const [result, setResult] = useState<TranslateResult | null>(null);
 
   // New States
-  const [isSyncing, setIsSyncing] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isEnhancingAI, setIsEnhancingAI] = useState(false);
   const [isSavingBookmark, setIsSavingBookmark] = useState(false);
@@ -88,20 +88,28 @@ const ContentApp = () => {
         setUserInfo(response.result.user);
       }
     });
-  }, []);
 
-  const handleSyncData = () => {
-    if (isSyncing) return;
-    setIsSyncing(true);
-    chrome.runtime.sendMessage({ action: "reload" }, (response) => {
-      setIsSyncing(false);
-      if (response && response.success) {
-        showToast("Đồng bộ dữ liệu thành công", "success");
-      } else {
-        showToast("Đồng bộ thất bại, vui lòng thử lại", "error");
+    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
+      if (namespace === "local") {
+        if (changes.list_flashcard_id) {
+          setListFlashcardId(changes.list_flashcard_id.newValue);
+        }
+        if (changes.list_flashcard) {
+          setListFlashcard(changes.list_flashcard.newValue);
+        }
+        if (changes.token) {
+          setUserToken(changes.token.newValue);
+        }
+        if (changes.user) {
+          setUserInfo(changes.user.newValue);
+        }
       }
-    });
-  };
+    };
+    chrome.storage.onChanged.addListener(handleStorageChange);
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
+  }, []);
 
   useEffect(() => {
     const handleMouseUp = (e: MouseEvent) => {
@@ -509,16 +517,20 @@ const ContentApp = () => {
 
             {activeView === "settings" && (
               <div className="text-gray-600 flex flex-col gap-4">
-                <h3 className="font-bold text-gray-800 text-base border-b border-gray-100 pb-2">Cài đặt mở rộng</h3>
+                <div className="flex items-center gap-3 cursor-pointer hover:text-teal-500 border-b border-gray-100 pb-2" onClick={() => setActiveView("translate")}>
+                  <ArrowLeft size={18} className="text-gray-600" />
+                  <h3 className="font-bold text-gray-800 text-base">Cài đặt mở rộng</h3>
+                </div>
                 <label className="flex flex-col gap-1.5 text-sm font-medium">
                   <span className="text-gray-700">Vị trí lưu từ vựng</span>
                   <select
                     className="border border-gray-200 rounded-lg p-2 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-shadow bg-white"
-                    value={listFlashcardId}
+                    value={listFlashcardId?._id || listFlashcardId?.id || listFlashcardId}
                     onChange={(e) => {
-                      const newId = e.target.value;
-                      setListFlashcardId(newId);
-                      chrome.storage.local.set({ list_flashcard_id: newId });
+                      const selectedId = e.target.value;
+                      const selectedObj = listFlashcard.find((f: any) => (f._id || f.id) === selectedId) || selectedId;
+                      setListFlashcardId(selectedObj);
+                      chrome.storage.local.set({ list_flashcard_id: selectedObj });
                     }}
                   >
                     {listFlashcard.length > 0 ? (
@@ -532,13 +544,6 @@ const ContentApp = () => {
                     )}
                   </select>
                 </label>
-                <label
-                  className={`flex items-center gap-2 text-sm font-medium mt-2 cursor-pointer p-2 hover:bg-gray-50 rounded-lg border border-transparent hover:border-gray-100 transition-colors ${isSyncing ? "opacity-50" : ""}`}
-                  onClick={handleSyncData}
-                >
-                  <span className="text-gray-700">Đồng bộ Data</span>
-                  <RotateCcw size={14} className={`text-teal-600 ml-auto ${isSyncing ? "animate-spin" : ""}`} />
-                </label>
               </div>
             )}
           </div>
@@ -546,10 +551,10 @@ const ContentApp = () => {
           <div className="p-3 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
             {userInfo ? (
               <div className="flex items-center gap-2">
-                <img src={userInfo.photoURL || ICON_URL} alt="Avatar" className="w-8 h-8 rounded-full border border-gray-200 bg-white object-cover" />
+                <UserAvatar src={userInfo.photoURL || ICON_URL} level={userInfo.level || 1} uid={userInfo.uid} className="w-9 h-9" avatarClassName="bg-white border border-gray-200" />
                 <div>
                   <div className="font-semibold text-gray-700 text-xs">{userInfo.displayName || "User"}</div>
-                  <div className="text-xs text-gray-500 flex items-center gap-1 line-clamp-1">
+                  <div className="text-xs text-gray-500 flex items-center gap-1 line-clamp-1 cursor-pointer hover:text-teal-500" onClick={() => setActiveView("settings")}>
                     <FolderHeart size={14} /> {listFlashcardId?.title}
                   </div>
                 </div>

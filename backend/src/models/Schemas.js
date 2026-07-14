@@ -316,6 +316,12 @@ export const BotConfigSchema = new Schema({
   slowResponseRate: { type: Number, required: true }, // > 10s
 }, { timestamps: true });
 
+export const ZaloAuthSchema = new Schema({
+  authId: { type: String, required: true, unique: true },
+  zaloId: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now, expires: 900 } // Tự động xoá sau 15 phút (900s)
+}, { timestamps: true });
+
 export const SystemLogSchema = new Schema({
   method: { type: String, required: true },
   url: { type: String, required: true },
@@ -375,3 +381,4 @@ export const UserActivity = mongoose.models.UserActivity || mongoose.model('User
 export const SystemLog = mongoose.models.SystemLog || mongoose.model('SystemLog', SystemLogSchema);
 export const BannedIP = mongoose.models.BannedIP || mongoose.model('BannedIP', BannedIPSchema);
 export const AttackerFeedback = mongoose.models.AttackerFeedback || mongoose.model('AttackerFeedback', AttackerFeedbackSchema);
+export const ZaloAuth = mongoose.models.ZaloAuth || mongoose.model('ZaloAuth', ZaloAuthSchema);

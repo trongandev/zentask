@@ -40,7 +40,7 @@
   "host_permissions": ["*://*/*"],
   "web_accessible_resources": [
     {
-      "resources": ["icon64.png"],
+      "resources": ["icon64.png", "level-frame/*"],
       "matches": ["<all_urls>"]
     }
   ]

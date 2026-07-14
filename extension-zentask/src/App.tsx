@@ -3,6 +3,7 @@ import { toast, Toaster } from "sonner";
 import { useDebounce } from "use-debounce";
 import { Settings, ArrowLeftRight, X, Volume2, Copy, Bookmark, Home, Bug, ScrollText, Loader2, FolderHeart, Play, Star, CheckSquare, Square, Trash2 } from "lucide-react";
 import etcService from "./services/etcService";
+import { UserAvatar } from "./UserAvatar";
 
 const ICON_URL = chrome.runtime.getURL("icon64.png");
 
@@ -20,6 +21,7 @@ export const LANGUAGE_OPTIONS = [
   { label: "Chinese", value: "zh", audioCharacter: "zh-CN-XiaoxiaoNeural" },
   { label: "Japanese", value: "ja", audioCharacter: "ja-JP-NanamiNeural" },
   { label: "Korean", value: "ko", audioCharacter: "ko-KR-SunHiNeural" },
+  { label: "Thai", value: "th", audioCharacter: "th-TH-NichapaNeural" },
 ];
 
 export default function App() {
@@ -41,6 +43,7 @@ export default function App() {
   const [isTestingVoice, setIsTestingVoice] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingBookmark, setIsSavingBookmark] = useState(false);
+  const [checkinTime, setCheckinTime] = useState("08:00");
 
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [selectedBookmarks, setSelectedBookmarks] = useState<string[]>([]);
@@ -59,6 +62,7 @@ export default function App() {
       if (result.list_flashcard_id) setListFlashcardId(result.list_flashcard_id);
       if (result.token) setUserToken(result.token);
       if (result.quizzet_bookmarks) setBookmarks(result.quizzet_bookmarks);
+      if (result.checkinTime) setCheckinTime(result.checkinTime);
     });
   }, []);
 
@@ -129,7 +133,7 @@ export default function App() {
   const handleClearOutputs = () => {
     setInputFrom("");
     setInputTo("");
-    toastService.success("Đã xóa các ô input", { position: "bottom-center" });
+    toast.success("Đã xóa các ô input", { position: "bottom-center" });
   };
 
   const handleSaveWord = async () => {
@@ -158,7 +162,7 @@ export default function App() {
         },
         (res) => {
           if (res && res.ok !== false) {
-            toastService.success(`Lưu thành công từ "${inputFrom}"`, {
+            toast.success(`Lưu thành công từ "${inputFrom}"`, {
               id: toastId,
               position: "bottom-center",
             });
@@ -202,7 +206,7 @@ export default function App() {
         const updated = [newBookmark, ...bookmarks];
         setBookmarks(updated);
         await chrome.storage.local.set({ quizzet_bookmarks: updated });
-        toastService.success("Đã lưu vào Bookmark", { position: "bottom-center" });
+        toast.success("Đã lưu vào Bookmark", { position: "bottom-center" });
       } else {
         toast.error("Từ này đã có trong Bookmark", {
           position: "bottom-center",
@@ -250,7 +254,7 @@ export default function App() {
     await chrome.storage.local.set({ quizzet_bookmarks: updatedBookmarks });
     setSelectedBookmarks([]);
     setIsSelectingBookmarks(false);
-    toastService.success("Đã xóa từ khỏi Bookmark", { position: "bottom-center" });
+    toast.success("Đã xóa từ khỏi Bookmark", { position: "bottom-center" });
   };
 
   const handleSaveSelectedToFlashcard = async () => {
@@ -293,7 +297,7 @@ export default function App() {
         setBookmarks(updatedBookmarks);
         await chrome.storage.local.set({ quizzet_bookmarks: updatedBookmarks });
 
-        toastService.success(`Đã lưu ${wordsToSave.length} từ vào Flashcard`, {
+        toast.success(`Đã lưu ${wordsToSave.length} từ vào Flashcard`, {
           id: "save-selected",
         });
       } catch (e) {
@@ -313,7 +317,7 @@ export default function App() {
     } else {
       navigator.clipboard.writeText(inputTo);
     }
-    toastService.success("Đã sao chép thành công", { position: "bottom-center" });
+    toast.success("Đã sao chép thành công", { position: "bottom-center" });
   };
 
   const handleChangeValueOptions = (position: number, value: string) => {
@@ -387,9 +391,7 @@ export default function App() {
         </a>
         {user ? (
           <div className="flex gap-3 items-center">
-            <a href={`${import.meta.env.VITE_API_FRONTEND}/profile`} target="_blank" rel="noopener noreferrer">
-              <img src={user.photoURL || ICON_URL} alt="Avatar" className="w-9 h-9 rounded-full border-2 border-white object-cover" />
-            </a>
+            <UserAvatar src={user.photoURL || ICON_URL} level={user.level || 1} uid={user.uid} className="w-10 h-10" avatarClassName="border-2 border-white" />
           </div>
         ) : (
           <a
@@ -662,13 +664,16 @@ export default function App() {
                 <FolderHeart size={16} className="text-teal-600" /> Thư mục lưu từ vựng mặc định
               </h2>
               <select
-                value={listFlashcardId}
+                value={listFlashcardId?._id || listFlashcardId?.id || listFlashcardId}
                 onChange={(e) => {
-                  setListFlashcardId(e.target.value);
+                  const selectedId = e.target.value;
+                  const selectedObj = listFlashcard.find((f: any) => (f._id || f.id) === selectedId) || selectedId;
+                  setListFlashcardId(selectedObj);
+                  console.log(selectedObj);
                   chrome.storage.local.set({
-                    list_flashcard_id: e.target.value,
+                    list_flashcard_id: selectedObj,
                   });
-                  toastService.success("Đã cập nhật thư mục lưu!", {
+                  toast.success("Đã cập nhật thư mục lưu!", {
                     position: "top-center",
                   });
                 }}
@@ -715,6 +720,55 @@ export default function App() {
                   Nghe thử giọng đọc này
                 </button>
                 <p className=" text-xs text-gray-500">Hệ thống tự động chọn giọng đọc mặc định dựa trên ngôn ngữ bạn chọn.</p>
+              </div>
+            </div>
+
+            {/* Giờ nhận tin nhắn Zalo */}
+            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+              <h2 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <CheckSquare size={16} className="text-teal-600" /> Cài đặt Bot Zalo
+              </h2>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm text-gray-700">Giờ hỏi thăm buổi sáng (Mood Check-in)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="time"
+                    value={checkinTime}
+                    onChange={(e) => setCheckinTime(e.target.value)}
+                    className="flex-1 bg-gray-50 h-10 px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+                  />
+                  <button
+                    onClick={async () => {
+                      if (!userToken) {
+                        toast.error("Vui lòng đăng nhập để cài đặt", { position: "top-center" });
+                        return;
+                      }
+                      try {
+                        const res = await fetch(`${import.meta.env.VITE_API_BACKEND}/api/user/checkin-time`, {
+                          method: "PUT",
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${userToken}`,
+                          },
+                          body: JSON.stringify({ checkinTime }),
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                          chrome.storage.local.set({ checkinTime });
+                          toast.success("Lưu giờ hỏi thăm thành công!", { position: "top-center" });
+                        } else {
+                          toast.error(data.error || "Lỗi lưu cấu hình", { position: "top-center" });
+                        }
+                      } catch (err) {
+                        toast.error("Lỗi kết nối máy chủ", { position: "top-center" });
+                      }
+                    }}
+                    className="h-10 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg text-sm transition-colors"
+                  >
+                    Lưu
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Bot Zalo sẽ nhắn tin nhắc nhở học tập và kiểm tra tâm trạng vào thời gian này mỗi ngày.</p>
               </div>
             </div>
           </div>

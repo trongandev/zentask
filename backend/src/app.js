@@ -38,6 +38,8 @@ import friendsRoutes from "./routes/friends.js";
 import pronunciationRoutes from "./routes/pronunciation.js";
 import skillPracticeRoutes from "./routes/skillPractice.js";
 import publicRoutes from "./routes/public.js";
+import chatbotAuthRoutes from "./routes/chatbotAuth.js";
+import chatbotRoutes from "./routes/chatbot.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 
@@ -45,7 +47,6 @@ dotenv.config();
 
 const app = express();
 app.set("trust proxy", 1);
-
 
 const port = process.env.PORT || 3001;
 
@@ -110,7 +111,8 @@ app.use(async (req, res, next) => {
       return res.status(403).json({
         success: false,
         error: "IP_BANNED_HONEYPOT",
-        message: "Hệ thống nhận thấy một số truy cập bất thường từ địa chỉ IP của bạn. Có vẻ như bạn đang cố gắng tìm hiểu cách hệ thống hoạt động hoặc kiểm tra các lỗ hổng bảo mật. Thay vì mất thời gian để tấn công một hệ thống học tập dành cho cộng đồng, tại sao chúng ta không hợp tác? Nếu bạn tìm thấy bất kỳ lỗi hoặc lỗ hổng nào, xin vui lòng đóng góp ý kiến để chúng tôi cải thiện."
+        message:
+          "Hệ thống nhận thấy một số truy cập bất thường từ địa chỉ IP của bạn. Có vẻ như bạn đang cố gắng tìm hiểu cách hệ thống hoạt động hoặc kiểm tra các lỗ hổng bảo mật. Thay vì mất thời gian để tấn công một hệ thống học tập dành cho cộng đồng, tại sao chúng ta không hợp tác? Nếu bạn tìm thấy bất kỳ lỗi hoặc lỗ hổng nào, xin vui lòng đóng góp ý kiến để chúng tôi cải thiện.",
       });
     } else if (banned) {
       return res.status(403).json({ success: false, error: "IP_BANNED", message: "IP has been blocked." });
@@ -129,7 +131,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
   skip: (req, res) => {
     return req.user?.role === "admin";
-  }
+  },
 });
 app.use(limiter);
 
@@ -181,6 +183,8 @@ app.use("/api/utilities", utilitiesRoutes);
 app.use("/api/friends", friendsRoutes);
 app.use("/api/pronunciation", pronunciationRoutes);
 app.use("/api/skill-practice", skillPracticeRoutes);
+app.use("/api/chatbot", chatbotRoutes);
+app.use("/api/chatbot-auth", chatbotAuthRoutes);
 
 app.use(errorHandler);
 
