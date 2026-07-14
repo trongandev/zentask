@@ -90,7 +90,6 @@ export default function App() {
     });
   }, []);
 
-  // Lưu ngôn ngữ mỗi khi thay đổi
   useEffect(() => {
     chrome.storage.local.set({ languageFrom: from, languageTo: to });
   }, [from, to]);
