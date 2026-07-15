@@ -30,7 +30,7 @@ export function Leaderboard() {
 
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timeframe, setTimeframe] = useState<"week" | "month" | "all">("week");
+  const [timeframe, setTimeframe] = useState<"week" | "month" | "all" | "rank">("week");
   const [countdown, setCountdown] = useState("");
   const [rewards, setRewards] = useState<any[]>([]);
   const [lastReloadTime, setLastReloadTime] = useState<number>(() => {
@@ -232,6 +232,12 @@ export function Leaderboard() {
               >
                 Tất cả
               </button>
+              <button
+                onClick={() => setTimeframe("rank")}
+                className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "rank" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
+              >
+                Rank
+              </button>
             </div>
             <button
               onClick={handleReload}
@@ -274,8 +280,17 @@ export function Leaderboard() {
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <div className="flex items-center gap-1">
-                        <span className={cn("font-extrabold text-sm md:text-base", userItem.isUser ? "text-blue-700" : "text-gray-900")}>{userItem.xp}</span>
-                        <span className="text-[10px] md:text-xs font-bold text-yellow-500">XP</span>
+                        {timeframe === "rank" ? (
+                          <>
+                            <span className={cn("font-extrabold text-sm md:text-base", userItem.isUser ? "text-blue-700" : "text-gray-900")}>{userItem.stars || 0}</span>
+                            <span className="text-[10px] md:text-xs font-bold text-yellow-500">⭐</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className={cn("font-extrabold text-sm md:text-base", userItem.isUser ? "text-blue-700" : "text-gray-900")}>{userItem.xp}</span>
+                            <span className="text-[10px] md:text-xs font-bold text-yellow-500">XP</span>
+                          </>
+                        )}
                       </div>
                       <span className="text-gray-300">|</span>
                       <span className="text-[10px] uppercase font-bold text-gray-500">
@@ -289,18 +304,19 @@ export function Leaderboard() {
             ))
           )}
 
-          {/* Separator for skipped ranks */}
-          <div className="flex items-center justify-center py-4">
-            <div className="flex gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
-            </div>
-          </div>
-
-          {/* Current User at bottom if not in top list */}
+          {/* Current User at bottom (and separator) if not in top list */}
           {!loading && user && !leaderboard.find((u) => u.isUser) && (
-            <Link to="/profile" className="flex items-center gap-3 md:gap-6 p-3 md:p-4 rounded-2xl transition-all border bg-blue-50/50 border-blue-200 shadow-sm mt-4">
+            <>
+              {/* Separator for skipped ranks */}
+              <div className="flex items-center justify-center py-4">
+                <div className="flex gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                </div>
+              </div>
+
+              <Link to="/profile" className="flex items-center gap-3 md:gap-6 p-3 md:p-4 rounded-2xl transition-all border bg-blue-50/50 border-blue-200 shadow-sm">
               {/* Rank */}
               <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
                 <div className="w-10 flex justify-center">
@@ -322,8 +338,17 @@ export function Leaderboard() {
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <div className="flex items-center gap-1">
-                      <span className="font-extrabold text-sm md:text-base text-blue-700">{user?.xp?.toLocaleString() || "0"}</span>
-                      <span className="text-[10px] md:text-xs font-bold text-yellow-500">XP</span>
+                      {timeframe === "rank" ? (
+                        <>
+                          <span className="font-extrabold text-sm md:text-base text-blue-700">{(user as any)?.stars || 0}</span>
+                          <span className="text-[10px] md:text-xs font-bold text-yellow-500">⭐</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-extrabold text-sm md:text-base text-blue-700">{user?.xp?.toLocaleString() || "0"}</span>
+                          <span className="text-[10px] md:text-xs font-bold text-yellow-500">XP</span>
+                        </>
+                      )}
                     </div>
                     <span className="text-gray-300">|</span>
                     <span className="text-[10px] uppercase font-bold text-gray-500">
@@ -334,7 +359,8 @@ export function Leaderboard() {
                 <img src={`/rank/${user?.rankId || 1}.png`} alt="Rank" className="w-10 object-contain drop-shadow-sm" />
               </div>
             </Link>
-          )}
+          </>
+        )}
         </div>
       </div>
     </div>

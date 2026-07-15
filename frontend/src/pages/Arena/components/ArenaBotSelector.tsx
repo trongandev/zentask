@@ -33,44 +33,39 @@ export function ArenaBotSelector({ onSelectBot, onClose }: ArenaBotSelectorProps
         {/* Auto option */}
         <button
           onClick={() => onSelectBot(null)}
-          className="w-full mb-3 p-4 rounded-2xl border-2 border-dashed border-blue-500/40 hover:border-blue-400 bg-blue-500/5 hover:bg-blue-500/10 transition-all text-left group"
+          className="w-full mb-4 p-6 rounded-3xl border-2 border-blue-500 hover:border-blue-400 bg-blue-500/10 hover:bg-blue-500/20 transition-all text-left group shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] scale-100 hover:scale-[1.02]"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <Zap className="w-7 h-7 text-white fill-white" />
             </div>
             <div>
-              <div className="font-bold text-blue-300 group-hover:text-blue-200 transition-colors">Tự động (Mặc định)</div>
-              <div className="text-xs text-gray-500">Hệ thống tự chọn bot phù hợp rank của bạn</div>
+              <div className="text-xl font-black text-blue-200 group-hover:text-white transition-colors tracking-wide">Tự động (Mặc định)</div>
+              <div className="text-sm text-blue-200/70 mt-1">Hệ thống sẽ chọn bot có trình độ phù hợp với Rank hiện tại của bạn</div>
             </div>
           </div>
         </button>
 
         {/* Bot levels */}
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
           {BOT_LEVELS.map((bot) => (
             <button
               key={bot.rankId}
               onClick={() => onSelectBot(bot.rankId)}
               className={cn(
-                "w-full p-3.5 rounded-2xl border transition-all text-left group hover:scale-[1.02]",
+                "w-full p-2.5 rounded-xl border transition-all text-left group hover:scale-[1.02]",
                 bot.borderColor,
                 "bg-white/5 hover:bg-white/10",
               )}
             >
-              <div className="flex items-center gap-3">
-                <div className={cn("w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-inner", bot.color)}>
-                  <Bot className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-white">{bot.name}</span>
-                    <span className="text-xs font-black px-2 py-0.5 rounded-full bg-white/10 text-white/70">
-                      {bot.accuracy} đúng
-                    </span>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <div className={cn("w-6 h-6 rounded-lg bg-gradient-to-br flex items-center justify-center shadow-inner", bot.color)}>
+                    <Bot className="w-3.5 h-3.5 text-white" />
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">{bot.description}</div>
+                  <span className="font-bold text-sm text-white truncate">{bot.name}</span>
                 </div>
+                <div className="text-[10px] text-gray-400 leading-tight line-clamp-2">{bot.description}</div>
               </div>
             </button>
           ))}

@@ -84,7 +84,7 @@ async function startZaloBot() {
         if (fs.existsSync(imagePath)) {
           return api.sendMessage(
             {
-              msg: "Dạ Mentor Lopy nghe đây! 🥰 Cần hỗ trợ gì bạn cứ nhắn nha!",
+              msg: "Dạ Mentor Lopy nghe đây! 🥰 Cần hỗ trợ gì bạn cứ nhắn riêng với mình nha!",
               attachments: [imagePath],
             },
             message.threadId,
@@ -168,7 +168,7 @@ async function startZaloBot() {
           const quote = [
             "Chào bạn! Mình là Mentor Tiếng Anh của ZenTask đây 👋",
             "Sắp tới mình sẽ là 'bảo mẫu' gánh bạn trên con đường diệt gọn từ vựng Tiếng Anh. Lười là tui nhắc à nha! 🔥",
-            "Để bắt đầu, bạn hãy nhắn email tài khoản ZenTask của bạn để mình liên kết hệ thống nhé!",
+            "Bạn gõ help để xem các câu lệnh hỗ trợ nhé",
           ];
           for (let index = 0; index < quote.length; index++) {
             await api.sendMessage(

@@ -67,7 +67,7 @@ export function Arena() {
   // History & search
   const [matchHistory, setMatchHistory] = useState<any[]>([]);
   const [searchElapsed, setSearchElapsed] = useState(0);
-  const [prepCountdown, setPrepCountdown] = useState(7);
+  const [prepCountdown, setPrepCountdown] = useState(0);
   const [currentTip, setCurrentTip] = useState("");
 
   // Friends for lobby
@@ -320,6 +320,9 @@ export function Arena() {
       } else {
         if (arenaMode === "solo") {
           setOpponent(null);
+          setMatchState("lobby");
+          setRoomCode("");
+          if (socket) socket.emit("cancel_arena_search");
         } else {
           setArenaPlayers((prev) => prev.filter((p) => p.uid !== data.targetUid));
           if (opponent?.uid === data.targetUid) setOpponent(null);
@@ -356,8 +359,18 @@ export function Arena() {
       setLobbyMessages((prev) => [...prev, msg]);
     });
     socket.on("arena_start_match", () => {
-      setMatchState("playing");
-      startTimer();
+      setPrepCountdown(3);
+      const prepInterval = setInterval(() => {
+        setPrepCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(prepInterval);
+            setMatchState("playing");
+            startTimer();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     });
     socket.on("arena_opponent_left", async (payload: any = {}) => {
       if (payload?.mode === "tournament" || arenaMode === "tournament") {
@@ -382,7 +395,16 @@ export function Arena() {
         } catch (err) {}
       } else {
         toastService.info("Đối thủ đã rời khỏi phòng chờ.");
-        handleReset();
+        if (arenaMode === "solo") {
+          setOpponent(null);
+          setMatchState("lobby");
+          setRoomCode("");
+          if (socket) socket.emit("cancel_arena_search");
+          setIsReady(false);
+          setOpponentReady(false);
+        } else {
+          handleReset();
+        }
       }
     });
 

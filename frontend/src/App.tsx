@@ -61,7 +61,6 @@ import { SystemLogs } from "./pages/Admin/SystemLogs";
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import { ZaloGo } from "./pages/ZaloAuth/ZaloGo";
 import { ZaloAuthorize } from "./pages/ZaloAuth/ZaloAuthorize";
-import FirstLoginOnboarding from "./components/onboarding/FirstLoginOnboarding";
 
 function ProtectedRouteLayout() {
   const { user, loading } = useAuth();
@@ -325,7 +324,6 @@ function AppContent() {
         </Route>
       </Routes>
       {levelUpData && <LevelUpModal newLevel={levelUpData.newLevel} onClose={clearLevelUp} />}
-      <FirstLoginOnboarding />
     </>
   );
 }

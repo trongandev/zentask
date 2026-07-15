@@ -105,14 +105,7 @@ const userSchema = new mongoose.Schema(
       theme: { type: String, default: 'light' },
       accentColor: { type: String, default: 'blue' },
     },
-    onboarding: {
-      completed: { type: Boolean, default: false },
-      completedAt: { type: Date, default: null },
-      skipped: { type: Boolean, default: false },
-      skippedAt: { type: Date, default: null },
-      lastStep: { type: Number, default: 0 },
-      version: { type: String, default: 'zentask-onboarding-v1' },
-    },
+
     grammarProgress: {
       maxStage: { type: Number, default: 1 },
       totalCorrect: { type: Number, default: 0 },

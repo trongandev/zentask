@@ -84,26 +84,26 @@ export function ArenaTournamentBracket({
   return (
     <div className="fixed inset-0 z-40 bg-slate-950 text-white flex flex-col font-sans overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 bg-slate-900/50 border-b border-white/5 z-10 backdrop-blur-md">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-6 bg-slate-900/50 border-b border-white/5 z-10 backdrop-blur-md gap-4">
+        <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/70">
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
-          <div>
-            <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 uppercase tracking-wider flex items-center gap-3">
-              <Trophy className="w-6 h-6 text-yellow-500" />
-              {tournamentRoom ? tournamentRoom.title : "Giải Đấu Bracket"}
+          <div className="flex-1">
+            <h1 className="text-lg md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 uppercase tracking-wider flex items-center gap-2 md:gap-3">
+              <Trophy className="w-5 h-5 md:w-6 md:h-6 text-yellow-500 shrink-0" />
+              <span className="truncate max-w-[200px] md:max-w-none">{tournamentRoom ? tournamentRoom.title : "Giải Đấu Bracket"}</span>
             </h1>
-            <p className="text-sm font-medium text-white/50">
+            <p className="text-xs md:text-sm font-medium text-white/50">
               {tournamentRoom ? `Mã phòng: ${tournamentRoom.code} • 16 Slots` : "Đấu loại trực tiếp 16 người"}
             </p>
           </div>
         </div>
         
         {tournamentRoom && (
-          <div className="flex items-center gap-3 bg-yellow-500/10 border border-yellow-500/30 px-4 py-2 rounded-full">
-            <Users className="w-5 h-5 text-yellow-500" />
-            <span className="font-bold text-yellow-500">{tournamentParticipants.length} / {maxSlots}</span>
+          <div className="flex items-center gap-2 md:gap-3 bg-yellow-500/10 border border-yellow-500/30 px-3 md:px-4 py-1.5 md:py-2 rounded-full w-full md:w-auto justify-center md:justify-start">
+            <Users className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" />
+            <span className="font-bold text-yellow-500 text-sm md:text-base">{tournamentParticipants.length} / {maxSlots}</span>
           </div>
         )}
       </div>
@@ -174,18 +174,18 @@ export function ArenaTournamentBracket({
 
       {/* Control Panel Footer */}
       {!tournamentRoom ? (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[800px] bg-slate-800/90 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-6 flex gap-6 z-20">
-          <div className="flex-1 bg-slate-900/50 p-5 rounded-2xl border border-white/5">
-            <h3 className="font-bold text-lg mb-4 text-white/80 flex items-center gap-2"><Plus className="w-5 h-5 text-yellow-500" /> Tạo Giải Đấu Mới</h3>
+        <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 w-[95%] md:w-[800px] max-h-[40vh] md:max-h-none overflow-y-auto custom-scrollbar bg-slate-800/95 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 z-20">
+          <div className="flex-1 bg-slate-900/50 p-4 md:p-5 rounded-2xl border border-white/5">
+            <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4 text-white/80 flex items-center gap-2"><Plus className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" /> Tạo Giải Đấu Mới</h3>
             <input
               value={tournamentTitle}
               onChange={(e) => setTournamentTitle(e.target.value)}
               placeholder="Tên giải đấu"
-              className="w-full rounded-xl bg-slate-800 px-4 py-3 outline-none text-sm mb-4 border border-white/10 focus:border-yellow-500/50 transition-colors"
+              className="w-full rounded-xl bg-slate-800 px-3 md:px-4 py-2.5 md:py-3 outline-none text-sm mb-3 md:mb-4 border border-white/10 focus:border-yellow-500/50 transition-colors"
             />
             {tournamentFriends.length > 0 && (
-              <div className="mb-4">
-                <p className="text-xs font-bold text-white/50 mb-2">MỜI BẠN BÈ</p>
+              <div className="mb-3 md:mb-4">
+                <p className="text-[10px] md:text-xs font-bold text-white/50 mb-2">MỜI BẠN BÈ</p>
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                   {tournamentFriends.map((friend) => {
                     const isSelected = selectedInviteIds.includes(friend.uid);
@@ -193,11 +193,11 @@ export function ArenaTournamentBracket({
                       <button
                         key={friend.uid}
                         onClick={() => setSelectedInviteIds(prev => isSelected ? prev.filter(id => id !== friend.uid) : [...prev, friend.uid])}
-                        className={`flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${
+                        className={`flex-shrink-0 flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full border text-[10px] md:text-xs font-bold transition-all ${
                           isSelected ? "bg-yellow-500 text-black border-yellow-500" : "bg-slate-800 text-white/70 border-white/10 hover:border-white/30"
                         }`}
                       >
-                        <img src={friend.photoURL || "/mascot/Lopy (1).png"} alt="" className="w-5 h-5 rounded-full" />
+                        <img src={friend.photoURL || "/mascot/Lopy (1).png"} alt="" className="w-4 h-4 md:w-5 md:h-5 rounded-full" />
                         {friend.displayName?.split(" ")[0] || "Bạn"}
                       </button>
                     );
@@ -207,45 +207,46 @@ export function ArenaTournamentBracket({
             )}
             <button
               onClick={onCreateRoom}
-              className="w-full bg-yellow-500 text-black font-black py-3 rounded-xl hover:bg-yellow-400 transition-colors"
+              className="w-full bg-yellow-500 text-black font-black py-2.5 md:py-3 rounded-xl hover:bg-yellow-400 transition-colors text-sm md:text-base"
             >
               TẠO PHÒNG CỐ ĐỊNH
             </button>
           </div>
 
-          <div className="w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
+          <div className="hidden md:block w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
+          <div className="block md:hidden h-[1px] w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
-          <div className="flex-1 bg-slate-900/50 p-5 rounded-2xl border border-white/5">
-            <h3 className="font-bold text-lg mb-4 text-white/80 flex items-center gap-2"><UserPlus className="w-5 h-5 text-blue-400" /> Vào Phóng Đã Có</h3>
+          <div className="flex-1 bg-slate-900/50 p-4 md:p-5 rounded-2xl border border-white/5">
+            <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4 text-white/80 flex items-center gap-2"><UserPlus className="w-4 h-4 md:w-5 md:h-5 text-blue-400" /> Vào Phóng Đã Có</h3>
             <input
               value={tournamentCode}
               onChange={(e) => setTournamentCode(e.target.value)}
               placeholder="Nhập mã phòng 6 số"
-              className="w-full rounded-xl bg-slate-800 px-4 py-3 outline-none text-sm mb-4 border border-white/10 focus:border-blue-400/50 transition-colors text-center font-mono tracking-widest text-xl"
+              className="w-full rounded-xl bg-slate-800 px-3 md:px-4 py-2.5 md:py-3 outline-none text-sm mb-3 md:mb-4 border border-white/10 focus:border-blue-400/50 transition-colors text-center font-mono tracking-widest text-lg md:text-xl"
             />
             <button
               onClick={onJoinByCode}
-              className="w-full bg-blue-600 text-white font-black py-3 rounded-xl hover:bg-blue-500 transition-colors"
+              className="w-full bg-blue-600 text-white font-black py-2.5 md:py-3 rounded-xl hover:bg-blue-500 transition-colors text-sm md:text-base"
             >
               VÀO PHÒNG
             </button>
           </div>
         </div>
       ) : (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-slate-800/90 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl p-2 pr-8 flex items-center gap-6 z-20">
-           <div className="bg-yellow-500/20 text-yellow-400 px-6 py-4 rounded-full font-mono text-xl font-black tracking-widest">
+        <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 w-[95%] md:w-auto bg-slate-800/90 backdrop-blur-xl rounded-2xl md:rounded-full border border-white/10 shadow-2xl p-4 md:p-2 md:pr-8 flex flex-col md:flex-row items-center gap-3 md:gap-6 z-20">
+           <div className="bg-yellow-500/20 text-yellow-400 px-6 py-3 md:py-4 rounded-full font-mono text-xl font-black tracking-widest w-full md:w-auto text-center">
             {tournamentRoom.code}
            </div>
-           <div className="flex flex-col">
+           <div className="flex flex-col text-center md:text-left w-full md:w-auto">
               <span className="text-sm font-bold text-white/80">Trạng thái: Đang chờ</span>
               <span className="text-xs text-white/50">{tournamentParticipants.length < 2 ? "Cần tối thiểu 2 người để bắt đầu" : "Đã có thể bắt đầu!"}</span>
            </div>
            <button
             onClick={onStartMatch}
             disabled={!tournamentCanStart || tournamentParticipants.length < 2}
-            className="ml-4 flex items-center gap-2 bg-yellow-500 text-black px-8 py-3 rounded-full font-black disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform"
+            className="w-full md:w-auto mt-2 md:mt-0 flex justify-center items-center gap-2 bg-yellow-500 text-black px-8 py-3 rounded-full font-black disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform"
            >
-             <Play className="w-5 h-5 fill-current" />
+             <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" />
              BẮT ĐẦU NGAY
            </button>
         </div>

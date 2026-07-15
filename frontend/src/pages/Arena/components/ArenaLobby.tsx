@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Swords, Plus, UserPlus, Bot, Search, ArrowLeft, Loader2 } from "lucide-react";
+import { useSocket } from "../../../contexts/SocketContext";
 import { cn } from "../../../lib/utils";
 import { UserAvatar } from "../../../components/UserAvatar";
 import { UserLevelBadge } from "../../../components/UserLevelBadge";
 import { ArenaBotSelector } from "./ArenaBotSelector";
 import { RANK_TOPIC_CONFIG } from "../../../config/rankTopicConfig";
+import { toastService } from "../../../services/toastService";
+
+const API = import.meta.env.VITE_API_BACKEND || "http://localhost:3001";
 
 const ARENA_TIPS = [
   "Tập trung và phản xạ nhanh sẽ mang lại cho bạn nhiều điểm số hơn!",
@@ -26,6 +30,8 @@ function PlayerSlot({
   canKick,
   onKick,
   isReady,
+  onAddFriend,
+  friendStatus,
 }: {
   player?: { uid?: string; name: string; avatar: string; rankInfo?: string; rankId?: number; tier?: number; isBot?: boolean; botAccuracyLabel?: string; level?: number };
   side: "left" | "right";
@@ -36,6 +42,8 @@ function PlayerSlot({
   canKick?: boolean;
   onKick?: () => void;
   isReady?: boolean;
+  onAddFriend?: () => void;
+  friendStatus?: "none" | "sent" | "friend" | "received";
 }) {
   const borderColor = side === "left" ? "border-blue-500" : "border-red-500";
   const shadowColor = side === "left" ? "shadow-[0_0_30px_rgba(59,130,246,0.5)]" : "shadow-[0_0_30px_rgba(239,68,68,0.5)]";
@@ -95,7 +103,26 @@ function PlayerSlot({
           </button>
         )}
       </div>
-      <h3 className="text-sm md:text-xl font-bold text-white text-center line-clamp-1 max-w-[100px] md:max-w-none">{player?.name || "???"}</h3>
+      <div className="flex items-center justify-center gap-2 mt-1 w-full px-2">
+        <h3 className="text-sm md:text-xl font-bold text-white text-center line-clamp-1 flex-1 max-w-[100px] md:max-w-none">{player?.name || "???"}</h3>
+        {onAddFriend && (!friendStatus || friendStatus === "none") && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddFriend();
+            }}
+            className="shrink-0 bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white p-1 rounded-full transition-colors"
+            title="Kết bạn"
+          >
+            <UserPlus className="w-4 h-4 md:w-5 md:h-5" />
+          </button>
+        )}
+        {friendStatus === "sent" && (
+          <span className="shrink-0 bg-white/10 text-white/50 px-2 py-0.5 rounded text-[10px] uppercase font-bold" title="Đã gửi lời mời">
+            Đã gửi
+          </span>
+        )}
+      </div>
       <div className="flex flex-col items-center justify-center gap-1 mt-1">
         <div className="flex items-center gap-1.5">{(player?.level || 1) > 0 && <UserLevelBadge level={player?.level || 1} size="sm" />}</div>
         {(player?.rankId || player?.rankInfo) && (
@@ -141,10 +168,56 @@ function OpponentPicker({
   onClose: () => void;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const filteredFriends = friends.filter(
-    (f) => !searchQuery.trim() || (f.displayName || "").toLowerCase().includes(searchQuery.toLowerCase()) || (f.email || "").toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await fetch(`${API}/api/friends/search?q=${encodeURIComponent(searchQuery)}`, {
+          credentials: "include",
+          headers: { ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}) },
+        });
+        const data = await res.json();
+        setSearchResults(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleSendFriendRequest = async (uid: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const res = await fetch(`${API}/api/friends/request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}) },
+        credentials: "include",
+        body: JSON.stringify({ userId: uid }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toastService.success("Đã gửi lời mời kết bạn");
+        setSearchResults((prev) => prev.map((u) => (u.uid === uid ? { ...u, friendStatus: "sent" } : u)));
+      } else {
+        toastService.error(data.error || "Không thể gửi lời mời");
+      }
+    } catch (err) {
+      toastService.error("Lỗi kết nối");
+    }
+  };
+
+  const displayUsers = searchQuery.trim().length >= 2 ? searchResults : friends;
+  const isLoading = searchQuery.trim().length >= 2 ? isSearching : friendsLoading;
+  const showEmptyMessage = !isLoading && displayUsers.length === 0;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm animate-in fade-in duration-200">
@@ -204,41 +277,52 @@ function OpponentPicker({
           )}
         </div>
 
-        {/* Friend list */}
+        {/* User list */}
         {!onSwapSlot && (
           <div>
             <div className="flex items-center gap-2 mb-3">
               <UserPlus className="w-4 h-4 text-yellow-400" />
-              <span className="text-sm font-bold text-yellow-300">Mời bạn bè Solo</span>
+              <span className="text-sm font-bold text-yellow-300">Mời người chơi Solo</span>
             </div>
 
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm bạn bè..."
+              placeholder="Tìm bạn bè hoặc người chơi khác..."
               className="w-full rounded-xl bg-white/10 px-4 py-2.5 text-sm outline-none placeholder:text-white/30 mb-3"
             />
 
             <div className="max-h-48 overflow-y-auto space-y-1.5 custom-scrollbar">
-              {friendsLoading ? (
+              {isLoading ? (
                 <div className="flex justify-center py-6">
                   <Loader2 className="w-6 h-6 text-white/30 animate-spin" />
                 </div>
-              ) : filteredFriends.length === 0 ? (
-                <p className="text-center text-sm text-white/30 py-4">{searchQuery ? "Không tìm thấy bạn bè" : "Chưa có bạn bè nào đang online"}</p>
+              ) : showEmptyMessage ? (
+                <p className="text-center text-sm text-white/30 py-4">{searchQuery ? "Không tìm thấy người chơi" : "Chưa có bạn bè nào đang online"}</p>
               ) : (
-                filteredFriends.map((friend: any) => (
+                displayUsers.map((u: any) => (
                   <button
-                    key={friend.uid}
-                    onClick={() => onInviteFriend(friend.uid)}
+                    key={u.uid || u.friendId}
+                    onClick={() => onInviteFriend(u.uid || u.friendId)}
                     className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all text-left group"
                   >
-                    <img src={friend.photoURL || "/mascot/Lopy (1).png"} className="w-9 h-9 rounded-full object-cover border-2 border-white/10" />
+                    <img src={u.photoURL || "/mascot/Lopy (1).png"} className="w-9 h-9 rounded-full object-cover border-2 border-white/10" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-bold text-white truncate">{friend.displayName || friend.email || "Bạn bè"}</div>
-                      {friend.rankInfo && <div className="text-[11px] text-gray-500">{friend.rankInfo}</div>}
+                      <div className="text-sm font-bold text-white truncate flex items-center gap-2">
+                        {u.displayName || u.email || "Người chơi"}
+                        {u.friendStatus === "none" && searchQuery.length >= 2 && (
+                          <span
+                            onClick={(e) => handleSendFriendRequest(u.uid, e)}
+                            className="bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white px-2 py-0.5 rounded text-[10px] uppercase font-bold transition-colors cursor-pointer"
+                          >
+                            Kết bạn
+                          </span>
+                        )}
+                        {u.friendStatus === "sent" && searchQuery.length >= 2 && <span className="bg-white/10 text-white/50 px-2 py-0.5 rounded text-[10px] uppercase font-bold">Đã gửi</span>}
+                      </div>
+                      {u.rankInfo && <div className="text-[11px] text-gray-500">{u.rankInfo}</div>}
                     </div>
-                    <Swords className="w-4 h-4 text-yellow-500/50 group-hover:text-yellow-400 transition-colors" />
+                    <Swords className="w-4 h-4 text-yellow-500/50 group-hover:text-yellow-400 transition-colors shrink-0" />
                   </button>
                 ))
               )}
@@ -246,6 +330,132 @@ function OpponentPicker({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// --- Friend Requests Widget ---
+function FriendRequestsWidget() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    fetchRequests();
+
+    if (!socket) return;
+    const handleNewNotification = (notification: any) => {
+      if (notification?.type === "friend_request") {
+        fetchRequests();
+      }
+    };
+
+    socket.on("new_notification", handleNewNotification);
+    return () => {
+      socket.off("new_notification", handleNewNotification);
+    };
+  }, [socket]);
+
+  const fetchRequests = async () => {
+    try {
+      const res = await fetch(`${API}/api/friends/requests`, {
+        headers: { ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}) },
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok && data.incoming) {
+        setRequests(data.incoming);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRespond = async (id: string, action: "accept" | "decline") => {
+    try {
+      const res = await fetch(`${API}/api/friends/request/${id}/respond`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}) },
+        credentials: "include",
+        body: JSON.stringify({ action }),
+      });
+      if (res.ok) {
+        toastService.success(action === "accept" ? "Đã chấp nhận kết bạn" : "Đã từ chối kết bạn");
+        setRequests((prev) => prev.filter((r) => r.id !== id));
+      }
+    } catch (err) {
+      toastService.error("Lỗi khi phản hồi");
+    }
+  };
+
+  return (
+    <div className={cn("fixed bottom-24 right-4 z-40 transition-all duration-300", isOpen ? "w-72 md:w-80 h-[300px]" : "w-14 h-14")}>
+      {isOpen ? (
+        <div className="w-full h-full bg-slate-900/90 backdrop-blur-md rounded-2xl border border-white/10 flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5">
+          <div className="bg-slate-800/80 px-4 py-3 flex items-center justify-between border-b border-white/5 cursor-pointer" onClick={() => setIsOpen(false)}>
+            <h4 className="text-white font-bold text-sm flex items-center gap-2">
+              <UserPlus className="w-4 h-4 text-emerald-400" />
+              Lời mời kết bạn
+            </h4>
+            <button className="text-white/50 hover:text-white transition-colors">
+              <ArrowLeft className="w-4 h-4 -rotate-90" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar flex flex-col">
+            {isLoading ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="w-6 h-6 text-white/30 animate-spin" />
+              </div>
+            ) : requests.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-white/30 text-xs italic text-center">
+                <p>Không có lời mời nào</p>
+              </div>
+            ) : (
+              requests.map((req) => (
+                <div key={req.id} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5 gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <img src={req.user?.photoURL || "/mascot/Lopy (1).png"} className="w-8 h-8 rounded-full border border-white/10 object-cover shrink-0" />
+                    <div className="truncate">
+                      <div className="text-sm text-white font-bold truncate">{req.user?.displayName || "Người chơi"}</div>
+                      <div className="text-[10px] text-gray-400">Level {req.user?.level || 1}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    <button
+                      onClick={() => handleRespond(req.id, "accept")}
+                      className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white px-2 py-1 rounded-lg text-xs font-bold transition-colors"
+                    >
+                      Nhận
+                    </button>
+                    <button
+                      onClick={() => handleRespond(req.id, "decline")}
+                      className="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-2 py-1 rounded-lg text-xs font-bold transition-colors"
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="w-full h-full bg-emerald-600 hover:bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95 relative animate-in zoom-in"
+        >
+          <UserPlus className="w-6 h-6" />
+          {requests.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-slate-900 animate-in zoom-in">
+              {requests.length > 99 ? "99+" : requests.length}
+            </span>
+          )}
+        </button>
+      )}
     </div>
   );
 }
@@ -321,6 +531,7 @@ export function ArenaLobby({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isChatOpen, setIsChatOpen] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [friendStatuses, setFriendStatuses] = useState<Record<string, "none" | "sent" | "friend" | "received">>({});
   const prevMessagesLengthRef = useRef(lobbyMessages.length);
 
   useEffect(() => {
@@ -378,6 +589,31 @@ export function ArenaLobby({
   const p2 = redTeam.find((p) => p.slotIndex === 2) || (redTeam.length > 0 && redTeam[0].slotIndex === undefined ? redTeam[0] : undefined);
   const p3 = redTeam.find((p) => p.slotIndex === 3) || (redTeam.length > 1 && redTeam[1].slotIndex === undefined ? redTeam[1] : undefined);
 
+  const handleSendFriendRequest = async (uid: string) => {
+    try {
+      const res = await fetch(`${API}/api/friends/request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(localStorage.getItem("token") ? { Authorization: `Bearer ${localStorage.getItem("token")}` } : {}) },
+        credentials: "include",
+        body: JSON.stringify({ userId: uid }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toastService.success("Đã gửi lời mời kết bạn");
+        setFriendStatuses((prev) => ({ ...prev, [uid]: "sent" }));
+      } else {
+        if (data.error === "Hai bạn đã là bạn bè.") {
+          toastService.error("Hai bạn đã là bạn bè");
+          setFriendStatuses((prev) => ({ ...prev, [uid]: "friend" }));
+        } else {
+          toastService.error(data.error || "Không thể gửi lời mời");
+        }
+      }
+    } catch (err) {
+      toastService.error("Lỗi kết nối");
+    }
+  };
+
   const renderSlot = (player: any, side: "left" | "right", slotIdx: number) => {
     if (player) {
       return (
@@ -398,6 +634,12 @@ export function ArenaLobby({
           onKick={() => onKickPlayer?.(player.uid)}
           isReady={readyPlayers[player.uid] || (player.uid === opponent?.uid ? opponentReady : false)}
           onClickFull={player.uid !== user?.uid ? () => handleOpenPicker(slotIdx, player.uid) : undefined}
+          onAddFriend={
+            player.uid !== user?.uid && !player.isBot && friendStatuses[player.uid] !== "friend" && !friends.some((f) => f.uid === player.uid || f.friendId === player.uid)
+              ? () => handleSendFriendRequest(player.uid)
+              : undefined
+          }
+          friendStatus={friendStatuses[player.uid]}
         />
       );
     }
@@ -436,7 +678,11 @@ export function ArenaLobby({
 
             {/* VS center */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center animate-in zoom-in delay-300 duration-500">
-              {isFound && isRoomFull ? (
+              {prepCountdown > 0 ? (
+                <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(59,130,246,0.5)] border-4 border-white animate-in zoom-in duration-300">
+                  <span className="text-5xl md:text-7xl font-black text-white animate-pulse">{prepCountdown}</span>
+                </div>
+              ) : isFound && isRoomFull ? (
                 <div className="flex flex-col items-center gap-3 relative z-20">
                   <button
                     onClick={onReady}
@@ -484,7 +730,11 @@ export function ArenaLobby({
 
             {/* VS center */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center animate-in zoom-in delay-300 duration-500">
-              {isFound && isRoomFull ? (
+              {prepCountdown > 0 ? (
+                <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(59,130,246,0.5)] border-4 border-white animate-in zoom-in duration-300">
+                  <span className="text-5xl md:text-7xl font-black text-white animate-pulse">{prepCountdown}</span>
+                </div>
+              ) : isFound && isRoomFull ? (
                 <div className="flex flex-col items-center gap-3 relative z-20">
                   <button
                     onClick={onReady}
@@ -522,6 +772,12 @@ export function ArenaLobby({
                 canKick={isHost}
                 onKick={() => onKickPlayer?.(opponent.uid)}
                 isReady={readyPlayers[opponent.uid] || opponentReady}
+                onAddFriend={
+                  opponent.uid !== user?.uid && !opponent.isBot && friendStatuses[opponent.uid] !== "friend" && !friends.some((f) => f.uid === opponent.uid || f.friendId === opponent.uid)
+                    ? () => handleSendFriendRequest(opponent.uid)
+                    : undefined
+                }
+                friendStatus={friendStatuses[opponent.uid]}
               />
             ) : isSearching ? (
               <PlayerSlot side="right" showAnimation />
@@ -545,7 +801,16 @@ export function ArenaLobby({
         )}
 
         {/* Action buttons */}
-        <div className="mt-8 flex gap-4">
+        <div className="mt-8 flex gap-4 items-center">
+          {!isSearching && !isFound && !isRoomFull && (
+            <button
+              onClick={onStartAutoMatch}
+              className="px-10 py-3.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-full font-black text-lg shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(37,99,235,0.6)] border border-blue-400/30"
+            >
+              Bắt đầu
+            </button>
+          )}
+
           {isSearching ? (
             <button onClick={onCancelSearch} className="px-6 py-2.5 border border-white/20 rounded-full text-white/50 hover:bg-white/10 hover:text-white transition-colors">
               Hủy tìm
@@ -610,11 +875,15 @@ export function ArenaLobby({
         <ArenaBotSelector
           onSelectBot={(rankId) => {
             setShowBotSelector(false);
-            onStartBotMatch(rankId, targetSlotIndex);
+            const finalRank = rankId === null ? Math.min(Number((user as any)?.rankId) || 1, 5) : rankId;
+            onStartBotMatch(finalRank, targetSlotIndex);
           }}
           onClose={() => setShowBotSelector(false)}
         />
       )}
+
+      {/* Friend Requests Widget */}
+      <FriendRequestsWidget />
 
       {/* Lobby Chat Widget */}
       {isFound && (

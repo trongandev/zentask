@@ -40,7 +40,7 @@ const BOT_ACCURACY_BY_RANK = {
   5: 0.85,
 };
 
-const isBotEligible = (user = {}) => getRankId(user) <= 5;
+const isBotEligible = (user = {}) => true;
 const getBotAccuracy = (seedUser = {}) => {
   const rankId = getRankId(seedUser);
   if (botConfigsCache[rankId]) {
@@ -591,7 +591,7 @@ export function registerArenaHandlers(io, socket) {
     if (roomCode && socket.currentArenaRoom === roomCode) socket.currentArenaMode = mode || socket.currentArenaMode;
   });
 
-  socket.on("find_arena_match", async ({ user, matchData, mode, matchMode, botRankOverride } = {}) => {
+  socket.on("find_arena_match", async ({ user, matchData, mode, matchMode, botRankOverride, targetSlotIndex } = {}) => {
     if (!user || !matchData) return;
     touchArenaSocket(socket);
     cleanupArenaQueue();
