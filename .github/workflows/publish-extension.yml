@@ -23,10 +23,10 @@ jobs:
           echo "Publishing version: $VERSION"
 
           # Cập nhật manifest.json
-          jq ".version = \"$VERSION\"" extension-zentask/manifest.json > tmp.json && mv tmp.json extension-zentask/manifest.json
+          jq ".version = \"$VERSION\"" extension-zentask/public/manifest.json > tmp.json && mv tmp.json extension-zentask/public/manifest.json
 
           # Hiển thị version đã set
-          echo "manifest.json version: $(jq -r '.version' extension-zentask/manifest.json)"
+          echo "manifest.json version: $(jq -r '.version' extension-zentask/public/manifest.json)"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
