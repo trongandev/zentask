@@ -699,7 +699,6 @@ export function Arena() {
     fetchLobbyFriends();
   };
 
-  // Tournament actions
   const joinTournamentLobby = useCallback(
     (room: any) => {
       if (!socket || !user || !room?.code) return;
