@@ -693,7 +693,6 @@ export function Arena() {
     } else navigate(-1);
   };
 
-  // Mode selection → lobby
   const handleSelectMode = (mode: "solo" | "team2v2") => {
     setArenaMode(mode);
     setMatchState("lobby");
