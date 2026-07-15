@@ -31,7 +31,7 @@ export function Arena() {
   const [arenaMode, setArenaMode] = useState<"solo" | "team2v2" | "tournament">("solo");
   const [arenaPlayers, setArenaPlayers] = useState<any[]>([]);
   const [myTeam, setMyTeam] = useState<"blue" | "red">("blue");
-  
+
   const { playAudio, stopAudio, preloadAudio } = useTTSAudio();
 
   // Game play state
@@ -354,7 +354,7 @@ export function Arena() {
       }
       setReadyPlayers((prev) => ({ ...prev, [data.uid]: isReadyState }));
     });
-    
+
     socket.on("arena_lobby_chat_received", (msg: any) => {
       setLobbyMessages((prev) => [...prev, msg]);
     });
@@ -603,7 +603,7 @@ export function Arena() {
   // Ready
   const handleReady = () => {
     if (!socket || !user || !roomCodeRef.current) return;
-    
+
     if (isReady) {
       setIsReady(false);
       setReadyPlayers((prev) => ({ ...prev, [user.uid]: false }));
@@ -639,9 +639,7 @@ export function Arena() {
       socket.emit("arena_move_slot", { roomCode, targetSlotIndex });
     } else {
       setArenaPlayers((prev) => {
-        const newPlayers = prev.length > 0 ? [...prev] : [
-          { uid: user?.uid, name: user?.displayName, avatar: user?.photoURL, rankInfo: (user as any)?.rankInfo || "", level: user?.level }
-        ];
+        const newPlayers = prev.length > 0 ? [...prev] : [{ uid: user?.uid, name: user?.displayName, avatar: user?.photoURL, rankInfo: (user as any)?.rankInfo || "", level: user?.level }];
         const me = newPlayers.find((p) => p.uid === user?.uid);
         if (me) {
           me.slotIndex = targetSlotIndex;
@@ -663,7 +661,7 @@ export function Arena() {
     setHasAnswered(true);
     setLastAnswerCorrect(isCorrect);
     socket?.emit("arena_answer", { roomCode, uid: user?.uid, timeRemaining: timeRem, isCorrect });
-    
+
     const currentWord = matchData?.cards[currentQuestionIndex];
     if (currentWord) {
       playAudio(currentWord.term, undefined, isCorrect ? "correct" : "wrong");
@@ -688,7 +686,6 @@ export function Arena() {
   };
 
   const handleCloseClick = () => {
-    console.log(matchState);
     if (matchState === "playing") setShowSurrenderModal(true);
     else if (!["selecting", "finished"].includes(matchState)) {
       cancelSearch();
@@ -810,7 +807,7 @@ export function Arena() {
         rankId: user.rankId || 1,
         tier: user.tier || 3,
         level: user.level,
-      }
+      },
     });
     setIncomingChallenge(null);
   };

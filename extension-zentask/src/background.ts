@@ -83,9 +83,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       return true;
     }
   } else if (request.action === "SYNC_FIREBASE_LOGOUT_FROM_CONTENT") {
-    console.log("Received logout request from content script");
     chrome.storage.local.clear().then(() => {
-      console.log("Local storage cleared for logout via content script");
       sendResponse({ success: true });
     });
     return true;
@@ -211,9 +209,7 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
       return true; // Báo hiệu async response
     }
   } else if (request.action === "SYNC_FIREBASE_LOGOUT") {
-    console.log("Received logout request from web app");
     chrome.storage.local.clear().then(() => {
-      console.log("Local storage cleared for logout");
       sendResponse({ success: true });
     });
     return true; // Báo hiệu async response

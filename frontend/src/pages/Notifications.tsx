@@ -11,9 +11,7 @@ export function Notifications() {
   const navigate = useNavigate();
 
   const filteredNotifications = filter === "all" ? notifications : notifications.filter((n) => !n.isRead);
-  console.log(filteredNotifications);
   const handleNotificationClick = (n: any) => {
-    console.log(n);
     if (!n.isRead) markAsRead(n.id);
     navigate(getNotificationLink(n));
   };

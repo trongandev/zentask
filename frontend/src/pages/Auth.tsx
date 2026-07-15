@@ -2,9 +2,10 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { ArrowRight, BookOpenCheck, CheckCircle2, Eye, EyeOff, Lock, LogIn, Mail, ShieldCheck, Sparkles, UserCheck, Trophy, UserPlus } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuthStore } from "../services/authService";
+import { useAuth } from "../contexts/AuthContext";
 import toastService from "@/src/services/toastService";
 import { hasRecaptchaSiteKey, RecaptchaBox, type RecaptchaBoxHandle } from "../components/security/RecaptchaBox";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const MASCOT_SRC = "/mascot/Lopy%20(16).png";
 
@@ -37,6 +38,8 @@ export function Auth() {
   const recaptchaRef = useRef<RecaptchaBoxHandle | null>(null);
 
   const { loading, login, register, loginWithGoogle } = useAuthStore();
+  const { checkAuth } = useAuth();
+  const navigate = useNavigate();
 
   const authTitle = useMemo(() => (isLogin ? "Chào mừng bạn quay lại" : "Tạo tài khoản ZenTask"), [isLogin]);
 
@@ -67,14 +70,20 @@ export function Auth() {
       return;
     }
 
+    let redirectUrl: string | void;
     if (isLogin) {
-      await login(normalizedEmail, password, recaptchaToken);
+      redirectUrl = await login(normalizedEmail, password, recaptchaToken);
     } else {
-      await register(normalizedEmail, password, recaptchaToken);
+      redirectUrl = await register(normalizedEmail, password, recaptchaToken);
     }
 
     setRecaptchaToken("");
     recaptchaRef.current?.reset();
+
+    if (redirectUrl) {
+      await checkAuth(); // Đồng bộ auth và phát sự kiện sang extension
+      navigate(redirectUrl);
+    }
   };
 
   return (

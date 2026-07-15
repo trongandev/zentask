@@ -28,22 +28,41 @@ const normalizePublicFlag = async (uid, requestedValue = true) => {
 };
 
 const normalizeLearningTerm = (value = "") => {
-  return String(value || "").trim().replace(/\s+/g, " ").slice(0, 120);
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, 120);
 };
 
 const normalizeGeneratedFlashcard = (data = {}, fallbackTerm = "") => {
   const examples = Array.isArray(data.examples)
-    ? data.examples.slice(0, 3).map((ex) => ({
-          en: String(ex?.en || "").trim().slice(0, 500),
-          vi: String(ex?.vi || "").trim().slice(0, 500),
-        })).filter((ex) => ex.en || ex.vi)
+    ? data.examples
+        .slice(0, 3)
+        .map((ex) => ({
+          en: String(ex?.en || "")
+            .trim()
+            .slice(0, 500),
+          vi: String(ex?.vi || "")
+            .trim()
+            .slice(0, 500),
+        }))
+        .filter((ex) => ex.en || ex.vi)
     : [];
 
   return {
-    term: String(data.term || fallbackTerm || "").trim().replace(/\s+/g, " ").slice(0, 120),
-    phonetic: String(data.phonetic || "").trim().slice(0, 120),
-    translation: String(data.translation || "").trim().slice(0, 500),
-    notes: String(data.notes || "").trim().slice(0, 1200),
+    term: String(data.term || fallbackTerm || "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .slice(0, 120),
+    phonetic: String(data.phonetic || "")
+      .trim()
+      .slice(0, 120),
+    translation: String(data.translation || "")
+      .trim()
+      .slice(0, 500),
+    notes: String(data.notes || "")
+      .trim()
+      .slice(0, 1200),
     examples,
   };
 };
@@ -111,7 +130,9 @@ const DEFAULT_FLASHCARD_CATEGORIES = [
 class FlashcardService {
   async getDueCards(userId) {
     const now = new Date();
-    const progressDocs = await FlashcardProgress.find({ userId, dueDate: { $lte: now } }).limit(5).lean();
+    const progressDocs = await FlashcardProgress.find({ userId, dueDate: { $lte: now } })
+      .limit(5)
+      .lean();
     if (progressDocs.length === 0) return [];
 
     const cards = [];
@@ -165,9 +186,7 @@ class FlashcardService {
   async getCategories(userId) {
     let categories = await FlashcardCategory.find({ userId }).sort({ createdAt: 1 }).lean();
     if (categories.length === 0) {
-      const created = await FlashcardCategory.insertMany(
-        DEFAULT_FLASHCARD_CATEGORIES.map((item) => ({ userId, ...item }))
-      );
+      const created = await FlashcardCategory.insertMany(DEFAULT_FLASHCARD_CATEGORIES.map((item) => ({ userId, ...item })));
       categories = created.map((doc) => doc.toObject());
     }
     return categories.map(formatCategory);
@@ -254,7 +273,7 @@ class FlashcardService {
           translation: word.translation || "",
           examples: word.examples || [],
           notes: word.notes || "",
-        }))
+        })),
       );
     }
     const setObj = newSet.toObject();
@@ -281,16 +300,15 @@ class FlashcardService {
   }
 
   async getPublicSets() {
-    const sets = await FlashcardSet.find({ isPublic: true })
-      .sort({ createdAt: -1 })
-      .populate("userId", "displayName email photoURL")
-      .lean();
+    const sets = await FlashcardSet.find({ isPublic: true }).sort({ createdAt: -1 }).populate("userId", "displayName email photoURL").lean();
     return sets.map((set) => {
-      const creator = set.userId ? {
-        uid: set.userId._id,
-        displayName: set.userId.displayName || set.userId.email || "Người dùng ZenTask",
-        photoURL: set.userId.photoURL || "",
-      } : null;
+      const creator = set.userId
+        ? {
+            uid: set.userId._id,
+            displayName: set.userId.displayName || set.userId.email || "Người dùng ZenTask",
+            photoURL: set.userId.photoURL || "",
+          }
+        : null;
       return { id: set._id, ...set, creator, userId: set.userId?._id };
     });
   }
@@ -332,7 +350,7 @@ class FlashcardService {
       action: "Tạo bộ thẻ",
       target: safeTitle,
       type: "flashcard",
-      xpEarned: 0
+      xpEarned: 0,
     });
 
     const setObj = newSet.toObject();
@@ -348,7 +366,7 @@ class FlashcardService {
     if (description !== undefined) set.description = await cleanAndValidatePublicText(description, "Mô tả bộ flashcard", { maxLength: 600 });
     if (color) set.color = color;
     if (folderId !== undefined) set.folderId = folderId;
-    
+
     if (categoryId !== undefined) {
       if (!categoryId) {
         set.categoryId = null;
@@ -370,9 +388,15 @@ class FlashcardService {
 
     await set.save();
     return {
-      title: set.title, description: set.description, color: set.color,
-      folderId: set.folderId, categoryId: set.categoryId, categoryName: set.categoryName,
-      order: set.order, isPublic: set.isPublic, language: set.language,
+      title: set.title,
+      description: set.description,
+      color: set.color,
+      folderId: set.folderId,
+      categoryId: set.categoryId,
+      categoryName: set.categoryName,
+      order: set.order,
+      isPublic: set.isPublic,
+      language: set.language,
     };
   }
 
@@ -454,7 +478,7 @@ class FlashcardService {
     return { success: true };
   }
 
-  async generateAiFlashcards(userId, { term, targetSetId }) {
+  async generateAiFlashcards(userId, { term, setId }) {
     if (!term) throw { statusCode: 400, message: "Term is required" };
     const safeTerm = normalizeLearningTerm(term);
     if (!safeTerm) throw { statusCode: 400, message: "Term is required" };
@@ -467,21 +491,21 @@ class FlashcardService {
 
     let targetLang = "en";
     let targetSet = null;
-    if (targetSetId) {
-      targetSet = await FlashcardSet.findById(targetSetId).lean();
+    if (setId) {
+      targetSet = await FlashcardSet.findById(setId).lean();
       if (targetSet && targetSet.language) targetLang = targetSet.language;
     }
 
     const lowercaseTerm = safeTerm.trim().toLowerCase();
     const saveToUserSet = async (vocabData) => {
-      if (!targetSetId) return;
-      const set = await FlashcardSet.findById(targetSetId);
+      if (!setId) return;
+      const set = await FlashcardSet.findById(setId);
       if (set && set.userId.toString() === userId) {
-        const existingCard = await Flashcard.findOne({ setId: targetSetId, term: vocabData.term });
+        const existingCard = await Flashcard.findOne({ setId: setId, term: vocabData.term });
         if (!existingCard) {
           await validateFlashcardOnlyWhenPublic(vocabData, set);
           await Flashcard.create({
-            setId: targetSetId,
+            setId: setId,
             userId,
             language: targetLang,
             term: vocabData.term,
@@ -517,12 +541,24 @@ class FlashcardService {
         notesInstruction: "Ghi chú ngữ pháp (viết bằng tiếng Việt)",
         exampleInstruction: 'Mảng 3 ví dụ, mỗi cái có "en" và "vi".',
       },
-      zh: { dict: "Trung-Việt", termInstruction: "từ/cụm từ tiếng Trung (cả Pinyin nếu cần)", phoneticInstruction: "Phiên âm Pinyin", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Trung) và "vi".' },
+      zh: {
+        dict: "Trung-Việt",
+        termInstruction: "từ/cụm từ tiếng Trung (cả Pinyin nếu cần)",
+        phoneticInstruction: "Phiên âm Pinyin",
+        notesInstruction: "Ghi chú",
+        exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Trung) và "vi".',
+      },
       ko: { dict: "Hàn-Việt", termInstruction: "từ tiếng Hàn", phoneticInstruction: "Romanization", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Hàn) và "vi".' },
       ja: { dict: "Nhật-Việt", termInstruction: "từ tiếng Nhật", phoneticInstruction: "Romaji", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Nhật) và "vi".' },
       de: { dict: "Đức-Việt", termInstruction: "từ tiếng Đức", phoneticInstruction: "IPA", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Đức) và "vi".' },
       fr: { dict: "Pháp-Việt", termInstruction: "từ tiếng Pháp", phoneticInstruction: "IPA", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Pháp) và "vi".' },
-      es: { dict: "Tây Ban Nha-Việt", termInstruction: "từ tiếng Tây Ban Nha", phoneticInstruction: "IPA", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Tây Ban Nha) và "vi".' },
+      es: {
+        dict: "Tây Ban Nha-Việt",
+        termInstruction: "từ tiếng Tây Ban Nha",
+        phoneticInstruction: "IPA",
+        notesInstruction: "Ghi chú",
+        exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Tây Ban Nha) và "vi".',
+      },
       th: { dict: "Thái-Việt", termInstruction: "từ tiếng Thái", phoneticInstruction: "Romanization", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Thái) và "vi".' },
     };
 
@@ -572,11 +608,7 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
       throw { statusCode: 502, message: "AI trả dữ liệu flashcard chưa đủ thông tin. Vui lòng thử lại.", code: "AI_FLASHCARD_INCOMPLETE" };
     }
 
-    await Vocabulary.findOneAndUpdate(
-      { term: lowercaseTerm, language: targetLang },
-      { $setOnInsert: { ...newVocab, language: targetLang } },
-      { upsert: true, new: true }
-    );
+    await Vocabulary.findOneAndUpdate({ term: lowercaseTerm, language: targetLang }, { $setOnInsert: { ...newVocab, language: targetLang } }, { upsert: true, new: true });
     await saveToUserSet(newVocab);
     return { source: "ai", ...newVocab, ok: true, message: "Lưu thành công!" };
   }
@@ -599,15 +631,17 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
 
     const cards = await Flashcard.find({ setId }).lean();
     if (cards.length > 0) {
-      await Flashcard.insertMany(cards.map((c) => ({
-        setId: newSet._id,
-        userId,
-        term: c.term,
-        phonetic: c.phonetic || "",
-        translation: c.translation,
-        examples: c.examples || [],
-        notes: c.notes || "",
-      })));
+      await Flashcard.insertMany(
+        cards.map((c) => ({
+          setId: newSet._id,
+          userId,
+          term: c.term,
+          phonetic: c.phonetic || "",
+          translation: c.translation,
+          examples: c.examples || [],
+          notes: c.notes || "",
+        })),
+      );
     }
     const setObj = newSet.toObject();
     return { id: setObj._id, ...setObj };
@@ -663,7 +697,7 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
       action: "Học Flashcard",
       target: `Học ${updates.length} thẻ`,
       type: "flashcard",
-      xpEarned: taskResult.success ? taskResult.xpToAdd : 0
+      xpEarned: taskResult.success ? taskResult.xpToAdd : 0,
     });
 
     return {

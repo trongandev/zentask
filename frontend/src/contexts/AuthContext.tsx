@@ -64,9 +64,10 @@ interface AuthContextType {
   initialNotifications: any[];
   logout: () => Promise<void>;
   updateUser: (updates: Partial<UserProfile>) => void;
+  checkAuth: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true, isIpBanned: false, initialNotifications: [], logout: async () => {}, updateUser: () => {} });
+const AuthContext = createContext<AuthContextType>({ user: null, loading: true, isIpBanned: false, initialNotifications: [], logout: async () => {}, updateUser: () => {}, checkAuth: async () => {} });
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -222,5 +223,5 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  return <AuthContext.Provider value={{ user, loading, isIpBanned, initialNotifications, logout, updateUser }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, isIpBanned, initialNotifications, logout, updateUser, checkAuth }}>{children}</AuthContext.Provider>;
 }

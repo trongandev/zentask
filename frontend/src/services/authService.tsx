@@ -3,8 +3,8 @@ import toastService from "@/src/services/toastService";
 
 interface AuthState {
   loading: boolean;
-  login: (email: string, password: string, recaptchaToken?: string) => Promise<void>;
-  register: (email: string, password: string, recaptchaToken?: string) => Promise<void>;
+  login: (email: string, password: string, recaptchaToken?: string) => Promise<string | void>;
+  register: (email: string, password: string, recaptchaToken?: string) => Promise<string | void>;
   loginWithGoogle: () => Promise<void>;
 }
 
@@ -31,7 +31,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const paramRedirect = urlParams.get("redirect_url");
       const redirectUrl = paramRedirect || sessionStorage.getItem("redirect_url") || "/";
       sessionStorage.removeItem("redirect_url");
-      window.location.href = redirectUrl;
+      return redirectUrl;
     } catch (err: any) {
       toastService.error(err.message || "Có lỗi xảy ra khi đăng nhập.");
     } finally {
@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const paramRedirect = urlParams.get("redirect_url");
       const redirectUrl = paramRedirect || sessionStorage.getItem("redirect_url") || "/";
       sessionStorage.removeItem("redirect_url");
-      window.location.href = redirectUrl;
+      return redirectUrl;
     } catch (err: any) {
       toastService.error(err.message || "Có lỗi xảy ra khi đăng ký.");
     } finally {

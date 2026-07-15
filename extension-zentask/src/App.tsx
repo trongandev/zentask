@@ -667,7 +667,6 @@ export default function App() {
                   const selectedId = e.target.value;
                   const selectedObj = listFlashcard.find((f: any) => (f._id || f.id) === selectedId) || selectedId;
                   setListFlashcardId(selectedObj);
-                  console.log(selectedObj);
                   chrome.storage.local.set({
                     list_flashcard_id: selectedObj,
                   });

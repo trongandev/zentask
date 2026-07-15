@@ -305,14 +305,13 @@ const ContentApp = () => {
       message: "Đang lưu từ " + selectedText,
       type: "waiting",
     });
-
     try {
       chrome.runtime.sendMessage(
         {
           action: "GENERATE_FLASHCARD_AI",
           payload: {
             term: selectedText,
-            setId: listFlashcardId.id || listFlashcardId._id || listFlashcardId,
+            setId: listFlashcardId.id,
           },
         },
         (res) => {

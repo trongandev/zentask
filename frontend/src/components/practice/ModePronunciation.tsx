@@ -298,16 +298,6 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
           const dataUrl = await blobToDataUrl(blob);
           const base64Audio = normalizeWebmDataUrl(dataUrl);
 
-          console.log("Pronunciation payload preview", {
-            title: String(currentCard.term || "")
-              .trim()
-              .toLowerCase(),
-            language: "en",
-            base64AudioPrefix: base64Audio.slice(0, 32),
-            base64AudioLength: base64Audio.length,
-            blobSize: blob.size,
-          });
-
           const response = await pronunciationService.assess({
             title: String(currentCard.term || "")
               .trim()
