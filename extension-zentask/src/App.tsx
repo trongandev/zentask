@@ -741,7 +741,7 @@ export default function App() {
                         return;
                       }
                       try {
-                        const res = await fetch(`${import.meta.env.VITE_API_BACKEND}/api/user/checkin-time`, {
+                        const res = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/user/checkin-time`, {
                           method: "PUT",
                           headers: {
                             "Content-Type": "application/json",

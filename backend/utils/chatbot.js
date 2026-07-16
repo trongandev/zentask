@@ -9,6 +9,7 @@ import fetch from "node-fetch";
 import { parseMarkdownToZalo } from "./util.js";
 import { MENTOR_PROMPT } from "./prompt.js";
 import FlashcardService from "../src/services/flashcard.service.js";
+import { activeGroupGames, checkWordChainValidity, botNextWord } from "../src/services/minigame.service.js";
 
 // In-memory store for chat history to maintain context
 const memorySessions = new Map();
@@ -83,6 +84,43 @@ class ChatbotUtil {
 
     if (message.type === "event" && message.data.action) {
       content = message.data.action;
+    } else if (message.type === 1) {
+      // Tin nhắn trong group (text)
+      if (activeGroupGames.has(threadId)) {
+        const textLower = content.toLowerCase();
+        const game = activeGroupGames.get(threadId);
+
+        if (textLower === game.answer) {
+          activeGroupGames.delete(threadId); // Kết thúc game
+          const uid = message.data.uidFrom;
+          const dName = message.data.dName;
+
+          if (user) {
+            const { addXpToUser } = await import("../src/routes/user.js");
+            const { xp, level } = await addXpToUser(user._id, game.xp);
+            return this.api.sendMessage(
+              { msg: `🎉 CHÍNH XÁC!\n\nChúc mừng **${dName}** đã đoán đúng từ "${game.answer}" nhanh nhất!\n\n🎁 Bạn nhận được +${game.xp} XP.\n⭐ Tổng XP hiện tại: ${xp}\n👑 Level: ${level}` },
+              threadId,
+              1,
+            );
+          } else {
+            // Chưa đăng nhập
+            const authId = crypto.randomBytes(6).toString("hex");
+            await ZaloAuth.create({ authId, zaloId: String(uid) });
+            const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+            const authLink = `${frontendUrl}/go/${authId}`;
+
+            return this.api.sendMessage(
+              {
+                msg: `🎉 CHÍNH XÁC!\n\nChúc mừng **${dName}** đã đoán đúng từ "${game.answer}" nhanh nhất!\n\nTuy nhiên, tài khoản Zalo của bạn chưa liên kết với ZenTask nên chưa thể cộng thưởng ${game.xp} XP.\n👉 Vui lòng bấm vào link dưới đây để đăng nhập nhé:\n${authLink}\n\n(Bạn có thể gõ lệnh "login" lúc nào cũng được để tạo link đăng nhập mới)`,
+              },
+              threadId,
+              1,
+            );
+          }
+        }
+      }
+      return; // Bỏ qua các tin nhắn text khác trong group
     } else if (message.type !== 0) {
       return; // Bỏ qua ảnh/sticker không xử lý
     }
@@ -142,6 +180,43 @@ class ChatbotUtil {
       return this.handleCommandChat(user, threadId);
     }
 
+    if (textLower === "game-word-chain" || textLower === "/game-word-chain") {
+      const starterWords = ["apple", "hello", "world", "water", "music", "smile", "happy", "house", "train", "plant", "brain", "cloud"];
+      const startWord = starterWords[Math.floor(Math.random() * starterWords.length)];
+      user.botState = {
+        ...user.botState,
+        action: "word_chain_playing",
+        lastWord: startWord,
+        wordCount: 0,
+        usedWords: [startWord],
+      };
+      user.markModified("botState");
+      await user.save();
+      return this.api.sendMessage(
+        { msg: `Ván nối từ bắt đầu! Từ đầu tiên của Lopy là: **${startWord}**\n👉 Tới lượt bạn (từ tiếp theo phải bắt đầu bằng chữ '${startWord.slice(-1)}')\n(Bạn cần nối đúng 5 từ liên tiếp để chiến thắng!)` },
+        threadId,
+        0,
+      );
+    }
+    
+    if (textLower === "game-scrambled" || textLower === "/game-scrambled") {
+      const { triggerMinigame } = await import("../src/services/minigame.service.js");
+      await triggerMinigame(this.api, threadId, "scrambled");
+      return;
+    }
+
+    if (textLower === "game-emoji" || textLower === "/game-emoji") {
+      const { triggerMinigame } = await import("../src/services/minigame.service.js");
+      await triggerMinigame(this.api, threadId, "emoji");
+      return;
+    }
+
+    if (textLower === "game-listening" || textLower === "/game-listening") {
+      const { triggerMinigame } = await import("../src/services/minigame.service.js");
+      await triggerMinigame(this.api, threadId, "listening");
+      return;
+    }
+
     const isBanIpCommand = textLower.startsWith("ban-ip ") || textLower.startsWith("/ban-ip ");
     if (isBanIpCommand) {
       if (user.role === "admin" || process.env.NODE_ENV === "development") {
@@ -166,6 +241,25 @@ class ChatbotUtil {
         const { triggerFlashDrop } = await import("./chatbotJobs.js");
         await triggerFlashDrop(this.api);
         return this.api.sendMessage({ msg: "✅ Đã test kích hoạt Flash Drop thành công." }, threadId, 0);
+      }
+      
+      const groupThreadId = process.env.QUIZ_GROUP_THREAD_ID;
+      if (textLower === "test-scrambled" || textLower === "/test-scrambled") {
+        const { triggerMinigame } = await import("../src/services/minigame.service.js");
+        await triggerMinigame(this.api, groupThreadId, "scrambled");
+        return this.api.sendMessage({ msg: "✅ Đã gửi game Đảo chữ ra nhóm." }, threadId, 0);
+      }
+      
+      if (textLower === "test-emoji" || textLower === "/test-emoji") {
+        const { triggerMinigame } = await import("../src/services/minigame.service.js");
+        await triggerMinigame(this.api, groupThreadId, "emoji");
+        return this.api.sendMessage({ msg: "✅ Đã gửi game Đuổi hình bắt chữ ra nhóm." }, threadId, 0);
+      }
+      
+      if (textLower === "test-listening" || textLower === "/test-listening") {
+        const { triggerMinigame } = await import("../src/services/minigame.service.js");
+        await triggerMinigame(this.api, groupThreadId, "listening");
+        return this.api.sendMessage({ msg: "✅ Đã gửi game Nghe & Chép chính tả ra nhóm." }, threadId, 0);
       }
     }
 
@@ -194,6 +288,12 @@ class ChatbotUtil {
     }
     if (state.action === "mood_checkin") {
       return this.handleMoodCheckin(user, threadId, content, state);
+    }
+    if (state.action === "word_chain_invite") {
+      return this.handleWordChainInvite(user, threadId, content, state);
+    }
+    if (state.action === "word_chain_playing") {
+      return this.handleWordChainPlaying(user, threadId, content, state);
     }
 
     // Luồng mặc định: Trò chuyện tự do với AI
@@ -229,6 +329,99 @@ class ChatbotUtil {
       threadId,
       0,
     );
+  }
+
+  async handleWordChainInvite(user, threadId, content, state) {
+    const textLower = content.toLowerCase();
+    if (textLower === "ok" || textLower === "chơi") {
+      // Bắt đầu chơi, bot đi trước
+      const starterWords = ["apple", "hello", "world", "water", "music", "smile", "happy", "house", "train", "plant", "brain", "cloud"];
+      const startWord = starterWords[Math.floor(Math.random() * starterWords.length)];
+      user.botState = {
+        ...user.botState,
+        action: "word_chain_playing",
+        lastWord: startWord,
+        wordCount: 0,
+        usedWords: [startWord],
+      };
+      user.markModified("botState");
+      await user.save();
+
+      return this.api.sendMessage({ msg: `Ván nối từ bắt đầu! Từ đầu tiên của Lopy là: **${startWord}**\n👉 Tới lượt bạn (từ tiếp theo phải bắt đầu bằng chữ '${startWord.slice(-1)}')` }, threadId, 0);
+    } else if (textLower === "huy" || textLower === "huỷ" || textLower === "không" || textLower === "no") {
+      user.botState = { action: null };
+      user.markModified("botState");
+      await user.save();
+      return this.api.sendMessage({ msg: "Đã huỷ minigame Word Chain. Khi nào muốn chơi bạn nhớ kêu Lopy nha!" }, threadId, 0);
+    } else {
+      return this.api.sendMessage({ msg: "Bạn có muốn chơi Word Chain không? Trả lời 'ok' để chơi hoặc 'huy' để từ chối nhé." }, threadId, 0);
+    }
+  }
+
+  async handleWordChainPlaying(user, threadId, content, state) {
+    const textLower = content.toLowerCase().trim();
+    if (textLower === "huy" || textLower === "huỷ" || textLower === "exit" || textLower === "quit") {
+      user.botState = { action: null };
+      user.markModified("botState");
+      await user.save();
+      return this.api.sendMessage({ msg: "Đã dừng game. Hẹn gặp lại bạn sau!" }, threadId, 0);
+    }
+
+    // Kiểm tra hợp lệ (đầu vào từ user)
+    const usedWords = new Set(state.usedWords || []);
+    const validation = await checkWordChainValidity(state.lastWord, textLower, usedWords);
+    if (!validation.valid) {
+      // KHÔNG end game, cho phép user đoán lại
+      return this.api.sendMessage(
+        {
+          msg: `❌ Rất tiếc, bạn đã nối sai từ!\nLý do: ${validation.reason}\n\n👉 Hãy suy nghĩ và đoán lại một từ khác bắt đầu bằng chữ '${state.lastWord.slice(-1)}' nhé!\n(Gõ "exit" nếu bạn muốn dừng chơi)`,
+        },
+        threadId,
+        0,
+      );
+    }
+
+    // Hợp lệ, tăng count
+    usedWords.add(textLower);
+    const wordCount = (state.wordCount || 0) + 1;
+
+    let rewardMsg = "";
+    // Thưởng XP mỗi 5 từ liên tiếp, game vẫn tiếp tục
+    if (wordCount % 5 === 0) {
+      const { addXpToUser } = await import("../src/routes/user.js");
+      const { xp, level } = await addXpToUser(user._id, 10);
+      rewardMsg = `🎉 Tự hào quá! Bạn đã nối thành công ${wordCount} từ!\n🎁 Thưởng nóng +10 XP (Tổng: ${xp} XP - Lv.${level})\n\n`;
+    }
+
+    // Bot suy nghĩ từ tiếp theo
+    const lastChar = textLower.slice(-1);
+    const botWord = await botNextWord(lastChar, usedWords);
+
+    if (!botWord) {
+      user.botState = { action: null };
+      user.markModified("botState");
+      await user.save();
+      const { addXpToUser } = await import("../src/routes/user.js");
+      const { xp, level } = await addXpToUser(user._id, 15);
+      return this.api.sendMessage(
+        { msg: `🎉 CHÚC MỪNG!\n\nLopy bí rồi, không tìm được từ nào tiếp theo! Bạn đã chiến thắng xuất sắc!\n🎁 Lopy tặng bạn +15 XP.\n⭐ Tổng XP hiện tại: ${xp}\n👑 Level: ${level}` },
+        threadId,
+        0,
+      );
+    }
+
+    usedWords.add(botWord);
+    user.botState = {
+      ...user.botState,
+      lastWord: botWord,
+      wordCount: wordCount,
+      usedWords: Array.from(usedWords),
+    };
+    user.markModified("botState");
+    await user.save();
+
+    const turnMsg = `✅ Hợp lệ (${wordCount} từ)\n\nTừ tiếp theo của Lopy là: **${botWord}**\n👉 Lượt bạn (bắt đầu bằng chữ '${botWord.slice(-1)}')`;
+    return this.api.sendMessage({ msg: rewardMsg + turnMsg }, threadId, 0);
   }
 
   async handleVoicePronunciation(user, threadId, audioUrl, session) {
@@ -451,23 +644,41 @@ Từ vựng: "${state.quizData.term}"`;
     await progress.save();
   }
   async handleCommandHelp(user, threadId) {
-    let msg = `## 📋 Danh sách Lệnh (Commands)
-Bạn có thể gõ các lệnh sau (có hoặc không có dấu / đều được):
-- **help** hoặc **menu**: Xem danh sách lệnh này.
-- **tts [từ vựng]**: Đọc phát âm của từ vựng. VD: *tts apple* (đọc phát âm từ apple).\n`;
+    let msg = `🌟 **DANH SÁCH LỆNH CỦA LOPY** 🌟\n\nBạn có thể gõ các lệnh sau (có dấu / hoặc không):\n\n`;
+
+    msg += `🚀 **Cơ bản**:\n`;
+    msg += `🔸 **help** / **menu**: Xem menu lệnh.\n`;
+    msg += `🔸 **tts [từ]**: Đọc phát âm từ vựng (VD: tts apple).\n\n`;
 
     if (user) {
-      msg += `- **me**: Xem thông tin tài khoản đang liên kết.
-- **logout**: Đăng xuất (hủy liên kết Zalo).
-- **fl**: Xem 10 bộ từ vựng mới nhất của bạn.
-- **fl [stt] [trang]**: Xem danh sách từ vựng trong bộ có số thứ tự [stt]. Mỗi trang hiển thị tối đa 10 từ. VD: *fl 1 2* (xem trang 2 của bộ thứ 1).
-- **new [stt] [từ vựng]**: Thêm từ vựng mới vào bộ số [stt]. VD: *new 1 accuracy* (thêm từ accuracy vào bộ thứ 1).`;
+      msg += `👤 **Tài khoản của bạn**:\n`;
+      msg += `🔸 **me**: Xem thông tin tài khoản.\n`;
+      msg += `🔸 **logout**: Hủy liên kết Zalo.\n\n`;
+
+      msg += `🎮 **Giải trí & Học tập**:\n`;
+      msg += `🔸 **game-word-chain**: Bắt đầu minigame nối từ Tiếng Anh.\n`;
+      msg += `🔸 **game-scrambled**: Bắt đầu minigame Đảo Chữ.\n`;
+      msg += `🔸 **game-emoji**: Bắt đầu minigame Đuổi hình bắt chữ (Emoji).\n`;
+      msg += `🔸 **game-listening**: Bắt đầu minigame Nghe & chép chính tả.\n\n`;
+
+      msg += `📚 **Flashcards (Từ vựng)**:\n`;
+      msg += `🔸 **fl**: Xem 10 bộ từ vựng mới nhất.\n`;
+      msg += `🔸 **fl [stt] [trang]**: Xem chi tiết 1 bộ (VD: fl 1 2).\n`;
+      msg += `🔸 **new [stt] [từ]**: Thêm từ mới vào bộ (VD: new 1 accuracy).\n`;
     } else {
-      msg += `- **login**: Đăng nhập (liên kết tài khoản với ZenTask).`;
+      msg += `🔑 **Tài khoản**:\n`;
+      msg += `🔸 **login**: Đăng nhập & liên kết với ZenTask.\n`;
     }
 
     if (user?.role === "admin" || process.env.NODE_ENV === "development") {
-      msg += `\n\n**🛠️ Lệnh Admin/Dev:**\n- **ban-ip [ip]**: Cấm địa chỉ IP truy cập hệ thống.\n- **test-flash-drop**: Test gọi chức năng rải lì xì.\n- **test-create-quiz**: Yêu cầu AI tạo 10 câu trắc nghiệm.\n- **test-quiz**: Gửi đố vui ra nhóm ngay lập tức.`;
+      msg += `\n\n**🛠️ Lệnh Admin/Dev:**\n`;
+      msg += `- **ban-ip [ip]**: Cấm địa chỉ IP truy cập hệ thống.\n`;
+      msg += `- **test-flash-drop**: Test gọi chức năng rải lì xì.\n`;
+      msg += `- **test-create-quiz**: Yêu cầu AI tạo 10 câu trắc nghiệm.\n`;
+      msg += `- **test-quiz**: Gửi đố vui ra nhóm ngay lập tức.\n`;
+      msg += `- **test-scrambled**: Gửi game Đảo chữ ra nhóm ngay.\n`;
+      msg += `- **test-emoji**: Gửi game Đuổi hình bắt chữ ra nhóm ngay.\n`;
+      msg += `- **test-listening**: Gửi game Nghe chính tả ra nhóm ngay.`;
     }
 
     await this.sendAIMessage(threadId, msg);

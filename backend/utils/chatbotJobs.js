@@ -6,6 +6,7 @@ import ChatbotUtil from "./chatbot.js";
 import OpenAI from "openai";
 import { parseMarkdownToZalo } from "./util.js";
 import { generateDailyQuizzes, sendQuiz, activeFlashDrops } from "../src/services/quizBot.service.js";
+import { generateScrambledWord, generateEmojiWord, getListeningFlashcard, activeGroupGames } from "../src/services/minigame.service.js";
 
 const openai = new OpenAI({
   baseURL: process.env.BASE_URL_AI || "https://api.openai.com/v1",
@@ -158,6 +159,42 @@ export function startChatbotJobs(api) {
     }
   });
 
+  // GAME CỘNG ĐỒNG VÀO BUỔI TỐI
+  const triggerGroupMinigame = async (api, type) => {
+    const threadId = process.env.QUIZ_GROUP_THREAD_ID;
+    if (!threadId) return;
+    
+    const { triggerMinigame } = await import("../src/services/minigame.service.js");
+    await triggerMinigame(api, threadId, type);
+  };
+
+  cron.schedule("0 21 * * *", () => triggerGroupMinigame(api, "scrambled"));
+  cron.schedule("30 21 * * *", () => triggerGroupMinigame(api, "emoji"));
+  cron.schedule("0 22 * * *", () => triggerGroupMinigame(api, "listening"));
+
+  // LỜI MỜI WORD CHAIN (GAME CÁ NHÂN) LÚC 20:30
+  cron.schedule("30 20 * * *", async () => {
+    try {
+      console.log("[Chatbot Jobs] Đang gửi lời mời chơi Word Chain lúc 20h30...");
+      const users = await User.find({ zaloId: { $ne: null } }).lean();
+      if (users.length === 0) return;
+
+      for (const user of users) {
+        // Cập nhật trạng thái botState
+        await User.updateOne({ _id: user._id }, { $set: { "botState.action": "word_chain_invite", "botState.wordCount": 0, "botState.lastWord": "" } });
+
+        const msg = `🎮 **MINIGAME: WORD CHAIN (NỐI TỪ)** 🎮\n\nChào buổi tối ${user.displayName || "bạn"}! Bạn có muốn khởi động trí não bằng một ván nối từ Tiếng Anh với Lopy không?\n\n👉 Gõ "ok" hoặc "chơi" để bắt đầu nhé!\n(Bạn cần nối đúng 5 từ liên tiếp để nhận 10 XP thưởng. Gõ "huy" nếu không muốn chơi nữa)`;
+        try {
+          await api.sendMessage({ msg }, user.zaloId, 0);
+        } catch (err) {
+          console.error(`[Chatbot Jobs] Không thể gửi lời mời Word Chain cho ZaloId ${user.zaloId}:`, err.message);
+        }
+      }
+    } catch (error) {
+      console.error("[Chatbot Jobs] Lỗi khi chạy job Word Chain 20h30:", error);
+    }
+  });
+
   // Cảnh báo đứt chuỗi (Streak Warning) lúc 22:00
   cron.schedule("0 22 * * *", async () => {
     try {
@@ -212,15 +249,15 @@ export function startChatbotJobs(api) {
       const now = new Date();
       // Format current hour: "14:00"
       const currentHourStr = `${now.getHours().toString().padStart(2, "0")}:00`;
-      
+
       console.log(`[Chatbot Jobs] Đang kiểm tra Flashcard cần ôn tập lúc ${currentHourStr}...`);
-      
+
       // Lấy user có ZaloId và có giờ học trùng với giờ hiện tại (hoặc mặc định 14:00)
-      const users = await User.find({ 
+      const users = await User.find({
         zaloId: { $ne: null },
-        preferredStudyTime: currentHourStr 
+        preferredStudyTime: currentHourStr,
       }).lean();
-      
+
       if (users.length === 0) return;
 
       for (const user of users) {
@@ -351,21 +388,21 @@ export function startChatbotJobs(api) {
     console.log("[Chatbot Jobs] Running Daily Wrap-up...");
     const today = new Date().toISOString().split("T")[0];
     const users = await User.find({ zaloId: { $ne: null } });
-    
+
     for (const user of users) {
       try {
         const stat = await UserDailyStat.findOne({ userId: user._id, date: today }).lean();
         const streak = user.streak || 0;
-        
+
         let msg = `Ting ting! 🔔 Báo cáo cuối ngày của bạn:\n`;
         msg += `- Chuỗi học liên tiếp (Streak): ${streak} ngày 🔥\n`;
         msg += `- Tổng XP hiện tại: ${user.xp} XP\n`;
-        
+
         if (stat) {
           const tasks = stat.tasks || {};
           const flashcards = tasks.flashcard_review || 0;
           const quizzes = tasks.quiz_taken || 0;
-          
+
           if (flashcards > 0 || quizzes > 0) {
             msg += `\n🌟 Hôm nay bạn đã ôn ${flashcards} từ vựng và tham gia ${quizzes} lần quiz!`;
           } else if (stat.isCheckedIn) {
@@ -376,13 +413,13 @@ export function startChatbotJobs(api) {
         } else {
           msg += `\n💤 Hôm nay bạn chưa tham gia hoạt động nào.`;
         }
-        
+
         if (streak > 0) {
           msg += `\n\nBạn đang giữ chuỗi rất tốt, Mentor tự hào về bạn. Nghỉ ngơi nhé! 🚀`;
         } else {
           msg += `\n\nKhông sao cả, ngày mai hãy bắt đầu lại một chuỗi mới nhé! 🚀`;
         }
-        
+
         await api.sendMessage({ msg }, user.zaloId, 0);
       } catch (err) {
         console.error(`[Chatbot Jobs] Lỗi gửi Daily Wrap-up cho ${user.zaloId}:`, err);

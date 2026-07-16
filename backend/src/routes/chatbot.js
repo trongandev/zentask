@@ -46,6 +46,7 @@ import { activeQuizzes, activeFlashDrops, sendQuiz, generateDailyQuizzes } from 
 import { parseMarkdownToZalo } from "../../utils/util.js";
 import crypto from "crypto";
 import { ZaloAuth } from "../models/Schemas.js";
+import { activeGroupGames } from "../services/minigame.service.js";
 
 const cookie = JSON.parse(fs.readFileSync("./cookie.json", "utf-8"));
 
