@@ -51,6 +51,7 @@ const cookie = JSON.parse(fs.readFileSync("./cookie.json", "utf-8"));
 let api;
 let chatbotUtil;
 const messageBuffers = new Map();
+const zaloSpamMap = new Map();
 
 async function startZaloBot() {
   try {
@@ -80,6 +81,30 @@ async function startZaloBot() {
       }
 
       console.log(`[ZCA-JS] Received message from thread: ${message.threadId}`);
+
+      // Spam/DDoS Zalo Bot Detection
+      const now = Date.now();
+      if (!zaloSpamMap.has(message.threadId)) {
+        zaloSpamMap.set(message.threadId, { count: 1, firstMsgAt: now });
+      } else {
+        const spamRecord = zaloSpamMap.get(message.threadId);
+        if (now - spamRecord.firstMsgAt < 60000) { // trong 1 phút
+          spamRecord.count++;
+          if (spamRecord.count > 15 && !spamRecord.alerted) {
+            spamRecord.alerted = true;
+            try {
+              const admins = await User.find({ role: "admin", zaloId: { $ne: null } });
+              const alertMsg = `🚨 **CẢNH BÁO ZALO BOT** 🚨\n\nPhát hiện spam tin nhắn liên tục.\n- Zalo ID: ${message.threadId}\n- Tên: ${message.data.dName || "Unknown"}\n\nHãy chặn người dùng này trên ứng dụng Zalo nếu cần thiết.`;
+              for (const admin of admins) {
+                api.sendMessage({ msg: alertMsg }, admin.zaloId, 0).catch(() => {});
+              }
+            } catch(e) {}
+          }
+          if (spamRecord.count > 15) return; // Ignore message processing if spamming
+        } else {
+          zaloSpamMap.set(message.threadId, { count: 1, firstMsgAt: now }); // reset sau 1 phút
+        }
+      }
 
       // Xử lý Mention Bot
       const botId = api.getCurrentUserId ? api.getCurrentUserId() : api.getOwnId ? api.getOwnId() : null;
@@ -208,22 +233,29 @@ async function startZaloBot() {
         // Quét Flash Drops
         if (activeFlashDrops.has(String(targetMsgId))) {
           const drop = activeFlashDrops.get(String(targetMsgId));
-          if (!drop.winners.has(uid)) {
-            drop.winners.add(uid);
-            console.log(`[FlashDrop] User ${uid} nhặt được ${drop.xpAmount} XP`);
+          if (!drop.winners.has(uid) && drop.xpChunks.length > 0) {
+            const receivedXp = drop.xpChunks.shift(); // Lấy 1 phần XP
+            drop.winners.set(uid, receivedXp);
+            console.log(`[FlashDrop] User ${uid} nhặt được ${receivedXp} XP`);
 
             // Tìm user
-            User.findOne({ zaloId: String(uid) }).then((user) => {
+            User.findOne({ zaloId: String(uid) }).then(async (user) => {
               if (user) {
-                addXpToUser(user._id, drop.xpAmount).then(({ xp, level }) => {
-                  api.sendMessage({ msg: `🎉 Chúc mừng bạn đã nhặt được túi ${drop.xpAmount} XP!\n⭐ XP hiện tại: ${xp} - Level: ${level}` }, String(uid), 0);
+                addXpToUser(user._id, receivedXp).then(({ xp, level }) => {
+                  api.sendMessage({ msg: `🎉 Chúc mừng bạn đã nhặt được ${receivedXp} XP từ túi lì xì!\n⭐ XP hiện tại: ${xp} - Level: ${level}` }, String(uid), 0);
                 });
+              } else {
+                const authId = crypto.randomBytes(6).toString("hex");
+                await ZaloAuth.create({ authId, zaloId: String(uid) });
+                const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+                const authLink = `${frontendUrl}/go/${authId}`;
+                api.sendMessage({ msg: `🎉 Bạn đã giành được ${receivedXp} XP từ túi lì xì!\n\nTuy nhiên, tài khoản Zalo của bạn chưa liên kết với ZenTask.\n👉 Vui lòng bấm vào link dưới đây để đăng nhập và nhận thưởng nhé:\n${authLink}\n\n(Bạn có thể gõ lệnh "login" lúc nào cũng được để tạo link đăng nhập mới)` }, String(uid), 0);
               }
             });
 
-            if (drop.winners.size >= 3) {
-              api.sendMessage({ msg: `✅ Túi kinh nghiệm ${drop.xpAmount} XP đã được 3 bạn nhanh tay nhất nhặt hết! Hẹn các bạn dịp sau nhé!` }, drop.threadId, 1);
-              activeFlashDrops.delete(String(targetMsgId));
+            if (drop.xpChunks.length === 0) {
+              // Đã nhặt hết
+              announceFlashDropEnd(String(targetMsgId));
             }
           }
         }
@@ -318,5 +350,39 @@ async function startZaloBot() {
 startZaloBot();
 
 export const getApi = () => api;
+
+export async function announceFlashDropEnd(dropMsgId) {
+  const drop = activeFlashDrops.get(dropMsgId);
+  if (!drop) return;
+  
+  activeFlashDrops.delete(dropMsgId);
+
+  if (drop.winners.size === 0) {
+    await api.sendMessage({ msg: `❌ Túi kinh nghiệm ${drop.totalXP} XP đã hết hạn mà không có ai nhận!` }, drop.threadId, 1);
+    return;
+  }
+
+  try {
+    const winnerZaloIds = Array.from(drop.winners.keys());
+    const users = await User.find({ zaloId: { $in: winnerZaloIds } }).lean();
+    const userMap = {};
+    users.forEach(u => userMap[u.zaloId] = u.displayName || "Thành viên ẩn danh");
+
+    let msg = `✅ **KẾT QUẢ GIẬT LÌ XÌ** ✅\n\nTúi **${drop.totalXP} XP** đã được phân phát:\n`;
+
+    // Sắp xếp theo XP nhận được giảm dần
+    const sortedWinners = Array.from(drop.winners.entries()).sort((a, b) => b[1] - a[1]);
+
+    sortedWinners.forEach(([uid, xp], index) => {
+      const name = userMap[uid] || "Thành viên ẩn danh";
+      const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "🔹";
+      msg += `\n${medal} ${name}: +${xp} XP`;
+    });
+
+    await api.sendMessage({ msg }, drop.threadId, 1);
+  } catch (error) {
+    console.error("[FlashDrop] Lỗi khi announce kết quả:", error);
+  }
+}
 
 export default router;

@@ -131,6 +131,32 @@ const limiter = rateLimit({
   skip: (req, res) => {
     return req.user?.role === "admin";
   },
+  handler: async (req, res, next, options) => {
+    try {
+      let clientIp = req.headers["cf-connecting-ip"] || req.headers["x-real-ip"] || req.headers["x-forwarded-for"] || req.ip || req.socket.remoteAddress || "";
+      if (typeof clientIp === "string") {
+        clientIp = clientIp.split(",")[0].trim();
+        if (clientIp.startsWith("::ffff:")) {
+          clientIp = clientIp.substring(7);
+        }
+      }
+      
+      const { getApi } = await import("./routes/chatbot.js");
+      const User = (await import("./models/User.js")).default;
+      const api = getApi();
+
+      if (api) {
+        const admins = await User.find({ role: "admin", zaloId: { $ne: null } });
+        const alertMsg = `🚨 **CẢNH BÁO HỆ THỐNG** 🚨\n\nPhát hiện spam/DDoS API.\n- IP: ${clientIp}\n- Endpoint: ${req.method} ${req.originalUrl}\n\nGõ \`/ban-ip ${clientIp}\` để cấm IP này.`;
+        for (const admin of admins) {
+          api.sendMessage({ msg: alertMsg }, admin.zaloId, 0).catch(() => {});
+        }
+      }
+    } catch(e) {
+      console.error("Lỗi khi gửi cảnh báo spam/DDOS qua Zalo:", e);
+    }
+    return res.status(options.statusCode).send(options.message);
+  }
 });
 app.use(limiter);
 

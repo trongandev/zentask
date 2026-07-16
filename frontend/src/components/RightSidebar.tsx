@@ -74,11 +74,8 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
     fetchLeaderboard();
     fetchOnlineFriends();
 
-    const friendTimer = setInterval(fetchOnlineFriends, 30000);
-
     return () => {
       clearInterval(timer);
-      clearInterval(friendTimer);
     };
   }, [user, getLeaderboard]);
 

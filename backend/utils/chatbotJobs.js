@@ -12,6 +12,61 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_ADMIN_KEY || process.env.OPENAI_API_KEY,
 });
 
+export async function triggerFlashDrop(api) {
+  const threadId = process.env.QUIZ_GROUP_THREAD_ID;
+  if (!threadId) {
+    console.warn("[Chatbot Jobs] Chưa cấu hình QUIZ_GROUP_THREAD_ID trong .env");
+    return;
+  }
+
+  console.log("[Chatbot Jobs] Đang rải Lì xì XP (Flash Drop)...");
+  const totalXP = Math.floor(Math.random() * (300 - 70 + 1)) + 70; // 70 ~ 300
+  const numWinners = Math.floor(Math.random() * (10 - 3 + 1)) + 3; // 3 ~ 10
+
+  // Generate chunks
+  let remainingXP = totalXP;
+  const xpChunks = [];
+  for (let i = 0; i < numWinners - 1; i++) {
+    const limit = Math.max(1, Math.floor((remainingXP / (numWinners - i)) * 1.8));
+    const maxPossible = remainingXP - (numWinners - 1 - i);
+    const amount = Math.floor(Math.random() * Math.min(limit, maxPossible)) + 1;
+    xpChunks.push(amount);
+    remainingXP -= amount;
+  }
+  xpChunks.push(remainingXP);
+  xpChunks.sort(() => Math.random() - 0.5);
+
+  const msgText = `🎁 **TÚI KINH NGHIỆM BÍ ẨN!** 🎁\n\nLopy vừa đánh rơi một túi chứa tổng cộng **${totalXP} XP**!\n\n⏳ Dành cho **${numWinners} bạn** nhanh tay nhất thả tim ❤️ vào tin nhắn này!\n(Hết hạn sau 5 phút hoặc khi nhặt hết)`;
+
+  try {
+    const res = await api.sendMessage(parseMarkdownToZalo(msgText), threadId, 1);
+    const dropMsgId = res?.message?.msgId;
+
+    if (dropMsgId) {
+      activeFlashDrops.set(String(dropMsgId), {
+        totalXP,
+        xpChunks,
+        winners: new Map(), // zaloId -> xp
+        threadId,
+        createdAt: Date.now(),
+      });
+
+      // Sau 5 phút, xoá khỏi map nếu chưa hết
+      setTimeout(
+        async () => {
+          if (activeFlashDrops.has(String(dropMsgId))) {
+            const { announceFlashDropEnd } = await import("../src/routes/chatbot.js");
+            await announceFlashDropEnd(String(dropMsgId));
+          }
+        },
+        5 * 60 * 1000,
+      );
+    }
+  } catch (err) {
+    console.error("[Chatbot Jobs] Lỗi rải Flash Drop:", err);
+  }
+}
+
 export function startChatbotJobs(api) {
   // 0. Sinh trắc nghiệm tự động lúc 06:00 sáng
   cron.schedule("0 6 * * *", async () => {
@@ -38,14 +93,14 @@ export function startChatbotJobs(api) {
 
   const generateFlashDropSchedule = () => {
     flashDropSchedule = [];
-    const numDrops = Math.floor(Math.random() * 3) + 1; // 1 to 3 drops
-    for (let i = 0; i < numDrops; i++) {
-      // Giờ từ 7 đến 21 (7h sáng -> 21h59 đêm)
-      const hour = Math.floor(Math.random() * 15) + 7;
+    const dropCount = Math.floor(Math.random() * 3) + 1; // 1 ~ 3 lần/ngày
+    for (let i = 0; i < dropCount; i++) {
+      const hour = Math.floor(Math.random() * (22 - 7 + 1)) + 7; // 7h - 22h
       const minute = Math.floor(Math.random() * 60);
-      flashDropSchedule.push(`${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`);
+      const timeStr = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+      flashDropSchedule.push(timeStr);
     }
-    console.log(`[Chatbot Jobs] Hôm nay sẽ có ${numDrops} lần Lì xì XP vào lúc: ${flashDropSchedule.join(", ")}`);
+    console.log(`[Chatbot Jobs] Đã lên lịch rải lì xì hôm nay vào các giờ: ${flashDropSchedule.join(", ")}`);
   };
 
   // Tạo lịch rải lì xì ngay khi khởi động server
@@ -62,43 +117,7 @@ export function startChatbotJobs(api) {
     if (flashDropSchedule.includes(currentTimeStr)) {
       // Bỏ qua thời gian này để không trigger 2 lần
       flashDropSchedule = flashDropSchedule.filter((t) => t !== currentTimeStr);
-
-      const threadId = process.env.QUIZ_GROUP_THREAD_ID;
-      if (!threadId) return;
-
-      console.log("[Chatbot Jobs] Đang rải Lì xì XP (Flash Drop)...");
-      const xpAmount = Math.floor(Math.random() * (30 - 5 + 1)) + 5; // 5 ~ 30
-      const msgText = `🎁 **TÚI KINH NGHIỆM BÍ ẨN!** 🎁\n\nLopy vừa đánh rơi một túi chứa ${xpAmount} XP!\n\n⏳ 3 bạn nhanh tay nhất thả tim ❤️ vào tin nhắn này sẽ nhận được XP!\n(Hết hạn sau 5 phút hoặc khi đủ 3 người)`;
-
-      try {
-        const res = await api.sendMessage(parseMarkdownToZalo(msgText), threadId, 1);
-        const dropMsgId = res?.message?.msgId;
-
-        if (dropMsgId) {
-          activeFlashDrops.set(String(dropMsgId), {
-            xpAmount,
-            winners: new Set(),
-            threadId,
-            createdAt: Date.now(),
-          });
-
-          // Sau 5 phút, xoá khỏi map nếu chưa hết
-          setTimeout(
-            async () => {
-              if (activeFlashDrops.has(String(dropMsgId))) {
-                const drop = activeFlashDrops.get(String(dropMsgId));
-                if (drop.winners.size < 3) {
-                  await api.sendMessage({ msg: `❌ Túi kinh nghiệm ${xpAmount} XP đã hết hạn!` }, threadId, 1);
-                }
-                activeFlashDrops.delete(String(dropMsgId));
-              }
-            },
-            5 * 60 * 1000,
-          );
-        }
-      } catch (err) {
-        console.error("[Chatbot Jobs] Lỗi rải Flash Drop:", err);
-      }
+      await triggerFlashDrop(api);
     }
   });
 

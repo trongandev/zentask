@@ -32,18 +32,6 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
       setShowExtensionAd(true);
     }
 
-    initTodayMinutes();
-
-    const intervalId = setInterval(() => {
-      incrementLocalMinutes(1);
-    }, 60000);
-
-    const handleUnload = () => {
-      syncStudyTime();
-    };
-
-    window.addEventListener("beforeunload", handleUnload);
-
     function handleClickOutside(event: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
@@ -56,11 +44,30 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    initTodayMinutes();
+
+    const intervalId = setInterval(() => {
+      incrementLocalMinutes(1);
+    }, 60000);
+
+    const handleUnload = () => {
+      syncStudyTime();
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+
+    return () => {
       clearInterval(intervalId);
       window.removeEventListener("beforeunload", handleUnload);
       syncStudyTime();
     };
-  }, []);
+  }, [user, initTodayMinutes, incrementLocalMinutes, syncStudyTime]);
 
   const handleLogout = async () => {
     try {
