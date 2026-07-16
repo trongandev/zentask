@@ -105,6 +105,7 @@ async function startZaloBot() {
       // Xử lý Rate-limit & Buffering (chờ 8s để gom tin nhắn)
       const threadId = message.threadId;
       const content = message.data.content.trim();
+      await api.sendTypingEvent(message.threadId, message.type);
 
       // Nếu là các câu lệnh (/help, /me, tts, fl, ...) xử lý ngay lập tức luôn để phản hồi nhanh
       const textLower = content.toLowerCase();
@@ -118,7 +119,6 @@ async function startZaloBot() {
         textLower.startsWith("new") ||
         textLower.startsWith("tts")
       ) {
-        await api.sendTypingEvent(message.threadId, message.type);
         return chatbotUtil.processMessage(message);
       }
 
@@ -201,30 +201,29 @@ async function startZaloBot() {
             console.log(`[QuizBot] User ${uid} chọn SAI cho quiz ${quizId}`);
           }
         }
-        
+
         // Quét Flash Drops
         if (activeFlashDrops.has(String(targetMsgId))) {
           const drop = activeFlashDrops.get(String(targetMsgId));
           if (!drop.winners.has(uid)) {
             drop.winners.add(uid);
             console.log(`[FlashDrop] User ${uid} nhặt được ${drop.xpAmount} XP`);
-            
+
             // Tìm user
-            User.findOne({ zaloId: String(uid) }).then(user => {
+            User.findOne({ zaloId: String(uid) }).then((user) => {
               if (user) {
                 addXpToUser(user._id, drop.xpAmount).then(({ xp, level }) => {
                   api.sendMessage({ msg: `🎉 Chúc mừng bạn đã nhặt được túi ${drop.xpAmount} XP!\n⭐ XP hiện tại: ${xp} - Level: ${level}` }, String(uid), 0);
                 });
               }
             });
-            
+
             if (drop.winners.size >= 3) {
               api.sendMessage({ msg: `✅ Túi kinh nghiệm ${drop.xpAmount} XP đã được 3 bạn nhanh tay nhất nhặt hết! Hẹn các bạn dịp sau nhé!` }, drop.threadId, 1);
               activeFlashDrops.delete(String(targetMsgId));
             }
           }
         }
-        
       } catch (error) {
         console.error("[QuizBot] Lỗi xử lý reaction:", error);
       }
