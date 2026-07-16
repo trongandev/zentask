@@ -73,7 +73,6 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
     try {
       await syncStudyTime();
 
-      // Gửi postMessage để content script bắt được tín hiệu logout
       window.postMessage(
         {
           type: "ZENTASK_SYNC_LOGOUT",
