@@ -306,4 +306,6 @@ async function startZaloBot() {
 
 startZaloBot();
 
+export const getApi = () => api;
+
 export default router;
