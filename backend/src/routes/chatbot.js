@@ -7,7 +7,7 @@ import fs from "fs";
 import path from "path";
 import sizeOf from "image-size";
 const THREADID_NOT_REPLY = [, "4730750718637283891" /** Quizzet cộng đồng học từ vựng */];
-const ZALOID_BANNED = ["2086135744744559463"];
+const ZALOID_BANNED = [];
 dotenv.config();
 
 async function imageMetadataGetter(filePath) {
