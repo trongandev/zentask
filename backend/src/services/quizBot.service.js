@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { BotQuiz } from "../models/Schemas.js";
+import { BotQuiz, ZaloAuth } from "../models/Schemas.js";
+import crypto from "crypto";
 import { parseMarkdownToZalo } from "../../utils/util.js";
 import User from "../models/User.js";
 import { addXpToUser } from "../routes/user.js";
@@ -109,7 +110,7 @@ export async function sendQuiz(api, threadId) {
     // Định nghĩa thời gian
     const timeOut = 10 * 60 * 1000 + 1 * 1000; // 10 phút + 1 giây
     const intervalDelay = 30000; // 30 giây thả tim 1 lần
-    const maxHearts = timeOut / intervalDelay;
+    const maxHearts = Math.trunc(timeOut / intervalDelay);
 
     // 3. Gửi câu hỏi
     const questionText = `## 🔔 MINI QUIZ TIẾNG ANH!\n\n${quiz.question}\n\n*Bạn có thể thả like hoặc tym vào đáp án đúng.*\n*⏳ Thời gian: 10 phút. Bot sẽ đếm ngược bằng cách thả ${maxHearts} tim vào tin nhắn này.*\nTrả lời đúng sẽ nhận được 5XP.`;
@@ -261,10 +262,16 @@ export async function evaluateQuiz(api, quizSessionId) {
           if (user) {
             // Cộng 5 XP
             const { xp, level } = await addXpToUser(user._id, 5);
-            
+
             // Gửi tin nhắn chúc mừng cá nhân
             const privateMsg = `🎉 Chúc mừng bạn đã trả lời chính xác câu hỏi Mini Quiz!\n\n🎁 Bạn nhận được +5 XP.\n⭐ Tổng XP hiện tại: ${xp}\n👑 Level: ${level}\n\nTiếp tục phát huy nhé!`;
             await api.sendMessage({ msg: privateMsg }, String(uid), 0);
+          } else {
+            const authId = crypto.randomBytes(6).toString("hex");
+            await ZaloAuth.create({ authId, zaloId: String(uid) });
+            const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+            const authLink = `${frontendUrl}/go/${authId}`;
+            api.sendMessage({ msg: `🎉 Bạn đã trả lời chính xác câu hỏi Mini Quiz!\n\nTuy nhiên, tài khoản Zalo của bạn chưa liên kết với ZenTask nên chưa thể cộng điểm thưởng (+5 XP).\n👉 Vui lòng bấm vào link dưới đây để đăng nhập và tích luỹ kinh nghiệm nha:\n${authLink}\n\n(Bạn có thể gõ lệnh "login" lúc nào cũng được để lấy link đăng nhập mới)` }, String(uid), 0);
           }
         } catch (err) {
           console.error(`[QuizBot] Error processing reward for Zalo uid ${uid}:`, err);

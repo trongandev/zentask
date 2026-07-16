@@ -7,6 +7,7 @@ import fs from "fs";
 import path from "path";
 import sizeOf from "image-size";
 const THREADID_NOT_REPLY = [, "4730750718637283891" /** Quizzet cộng đồng học từ vựng */];
+const ZALOID_BANNED = [2086135744744559463];
 dotenv.config();
 
 async function imageMetadataGetter(filePath) {
@@ -65,6 +66,14 @@ async function startZaloBot() {
 
     async function handleMessage(message) {
       console.log(message.data.uidFrom, message.data.dName);
+      if (ZALOID_BANNED.includes(message.threadId)) {
+        await api.sendMessage(
+          { msg: "Tài khoản của bạn đã bị khóa nhắn tin do nghi ngờ spam tin nhắn với tốc độ cao!, vui lòng liên hệ với admin trong group Zentask để mở khóa" },
+          message.threadId,
+          message.type,
+        );
+        return;
+      }
       if (THREADID_NOT_REPLY.includes(message.threadId)) return;
       if (message.isSelf) return; // Bỏ qua tin nhắn do bot tự gửi
       const isAudioFile = message.data?.content?.href?.includes(".aac");
@@ -88,7 +97,8 @@ async function startZaloBot() {
         zaloSpamMap.set(message.threadId, { count: 1, firstMsgAt: now });
       } else {
         const spamRecord = zaloSpamMap.get(message.threadId);
-        if (now - spamRecord.firstMsgAt < 60000) { // trong 1 phút
+        if (now - spamRecord.firstMsgAt < 60000) {
+          // trong 1 phút
           spamRecord.count++;
           if (spamRecord.count > 15 && !spamRecord.alerted) {
             spamRecord.alerted = true;
@@ -98,7 +108,7 @@ async function startZaloBot() {
               for (const admin of admins) {
                 api.sendMessage({ msg: alertMsg }, admin.zaloId, 0).catch(() => {});
               }
-            } catch(e) {}
+            } catch (e) {}
           }
           if (spamRecord.count > 15) return; // Ignore message processing if spamming
         } else {
@@ -249,7 +259,13 @@ async function startZaloBot() {
                 await ZaloAuth.create({ authId, zaloId: String(uid) });
                 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
                 const authLink = `${frontendUrl}/go/${authId}`;
-                api.sendMessage({ msg: `🎉 Bạn đã giành được ${receivedXp} XP từ túi lì xì!\n\nTuy nhiên, tài khoản Zalo của bạn chưa liên kết với ZenTask.\n👉 Vui lòng bấm vào link dưới đây để đăng nhập và nhận thưởng nhé:\n${authLink}\n\n(Bạn có thể gõ lệnh "login" lúc nào cũng được để tạo link đăng nhập mới)` }, String(uid), 0);
+                api.sendMessage(
+                  {
+                    msg: `🎉 Bạn đã giành được ${receivedXp} XP từ túi lì xì!\n\nTuy nhiên, tài khoản Zalo của bạn chưa liên kết với ZenTask.\n👉 Vui lòng bấm vào link dưới đây để đăng nhập và nhận thưởng nhé:\n${authLink}\n\n(Bạn có thể gõ lệnh "login" lúc nào cũng được để tạo link đăng nhập mới)`,
+                  },
+                  String(uid),
+                  0,
+                );
               }
             });
 
@@ -270,7 +286,7 @@ async function startZaloBot() {
           const friendId = event.data.fromUid;
           await api.acceptFriendRequest(friendId);
           console.log(`[ZCA-JS] Đã tự động kết bạn thành công với user ID: ${friendId} `);
-          
+
           const user = await User.findOne({ zaloId: String(friendId) });
           if (user) {
             const quote = [
@@ -289,7 +305,7 @@ async function startZaloBot() {
 
             const authLink = `${process.env.FRONTEND_URL}/go/${authId}`;
             const welcomeMsg = `Chào bạn! Mình là Mentor Tiếng Anh của ZenTask đây 👋\n\nĐể bắt đầu lộ trình học cá nhân hóa, bạn vui lòng bấm vào link dưới đây để đăng nhập và uỷ quyền cho Zalo Bot truy cập tài khoản của bạn nhé!\n\n👉 ${authLink}`;
-            
+
             await api.sendMessage(parseMarkdownToZalo(welcomeMsg), friendId, 0);
           }
         } catch (error) {
@@ -354,7 +370,7 @@ export const getApi = () => api;
 export async function announceFlashDropEnd(dropMsgId) {
   const drop = activeFlashDrops.get(dropMsgId);
   if (!drop) return;
-  
+
   activeFlashDrops.delete(dropMsgId);
 
   if (drop.winners.size === 0) {
@@ -366,7 +382,7 @@ export async function announceFlashDropEnd(dropMsgId) {
     const winnerZaloIds = Array.from(drop.winners.keys());
     const users = await User.find({ zaloId: { $in: winnerZaloIds } }).lean();
     const userMap = {};
-    users.forEach(u => userMap[u.zaloId] = u.displayName || "Thành viên ẩn danh");
+    users.forEach((u) => (userMap[u.zaloId] = u.displayName || "Thành viên ẩn danh"));
 
     let msg = `✅ **KẾT QUẢ GIẬT LÌ XÌ** ✅\n\nTúi **${drop.totalXP} XP** đã được phân phát:\n`;
 
