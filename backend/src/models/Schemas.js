@@ -342,6 +342,14 @@ export const AttackerFeedbackSchema = new Schema({
   userAgent: { type: String, default: "" },
 }, { timestamps: true });
 
+export const BotQuizSchema = new Schema({
+  question: { type: String, required: true },
+  options: [{ type: String, required: true }],
+  correctAnswerIndex: { type: Number, required: true },
+  explanation: { type: String, required: true },
+  isUsed: { type: Boolean, default: false },
+}, { timestamps: true });
+
 export const DailyUsage = mongoose.models.DailyUsage || mongoose.model('DailyUsage', DailyUsageSchema);
 export const IpSignupCounter = mongoose.models.IpSignupCounter || mongoose.model('IpSignupCounter', IpSignupCounterSchema);
 export const DailyTask = mongoose.models.DailyTask || mongoose.model('DailyTask', DailyTaskSchema);
@@ -382,3 +390,4 @@ export const SystemLog = mongoose.models.SystemLog || mongoose.model('SystemLog'
 export const BannedIP = mongoose.models.BannedIP || mongoose.model('BannedIP', BannedIPSchema);
 export const AttackerFeedback = mongoose.models.AttackerFeedback || mongoose.model('AttackerFeedback', AttackerFeedbackSchema);
 export const ZaloAuth = mongoose.models.ZaloAuth || mongoose.model('ZaloAuth', ZaloAuthSchema);
+export const BotQuiz = mongoose.models.BotQuiz || mongoose.model('BotQuiz', BotQuizSchema);

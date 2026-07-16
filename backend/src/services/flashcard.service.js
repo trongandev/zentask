@@ -610,7 +610,22 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
 
     await Vocabulary.findOneAndUpdate({ term: lowercaseTerm, language: targetLang }, { $setOnInsert: { ...newVocab, language: targetLang } }, { upsert: true, new: true });
     await saveToUserSet(newVocab);
-    return { source: "ai", ...newVocab, ok: true, message: "Lưu thành công!" };
+
+    const taskResult = await incrementDailyTask(userId, "flashcard_master", 1);
+    let xpResult = null;
+    if (taskResult.success && taskResult.xpToAdd > 0) {
+      xpResult = await addXpToUser(userId, taskResult.xpToAdd);
+    }
+
+    await UserActivity.create({
+      uid: userId,
+      action: "Tạo Flashcard bằng AI",
+      target: newVocab.term,
+      type: "flashcard",
+      xpEarned: taskResult.success ? taskResult.xpToAdd : 0,
+    });
+
+    return { source: "ai", ...newVocab, ok: true, message: "Lưu thành công!", xpResult, taskProgress: taskResult.success ? { flashcard_master: taskResult.progress } : {} };
   }
 
   async clonePublicSet(userId, setId) {

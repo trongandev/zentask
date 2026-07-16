@@ -82,7 +82,13 @@ export function Auth() {
 
     if (redirectUrl) {
       await checkAuth(); // Đồng bộ auth và phát sự kiện sang extension
-      navigate(redirectUrl);
+      setTimeout(() => {
+        if (redirectUrl.startsWith("http")) {
+          window.location.href = redirectUrl;
+        } else {
+          navigate(redirectUrl);
+        }
+      }, 500);
     }
   };
 

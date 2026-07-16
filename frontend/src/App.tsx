@@ -65,7 +65,6 @@ import { ZaloAuthorize } from "./pages/ZaloAuth/ZaloAuthorize";
 function ProtectedRouteLayout() {
   const { user, loading } = useAuth();
   const location = useLocation();
-
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
@@ -81,10 +80,8 @@ function ProtectedRouteLayout() {
           <img src="/mascot/Lopy (10).png" alt="Mascot" className="w-16 h-16 object-contain" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Yêu cầu đăng nhập</h2>
-        <p className="text-gray-500 max-w-md mx-auto mb-8 text-sm">
-          Bạn cần đăng nhập để sử dụng tính năng này. Hãy đăng nhập để lưu trữ tiến trình và kết nối với cộng đồng Zentask nhé!
-        </p>
-        <button 
+        <p className="text-gray-500 max-w-md mx-auto mb-8 text-sm">Bạn cần đăng nhập để sử dụng tính năng này. Hãy đăng nhập để lưu trữ tiến trình và kết nối với cộng đồng Zentask nhé!</p>
+        <button
           onClick={() => {
             sessionStorage.setItem("redirect_url", location.pathname);
             window.location.href = "/auth";
@@ -251,13 +248,11 @@ function AppContent() {
     );
   }
 
-
-
   return (
     <>
       <Routes>
         <Route path="/auth" element={<Auth />} />
-        
+
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />

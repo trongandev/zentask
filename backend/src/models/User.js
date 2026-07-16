@@ -129,6 +129,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "08:00",
     },
+    preferredStudyTime: {
+      type: String,
+      default: "14:00",
+    },
     botState: {
       type: mongoose.Schema.Types.Mixed,
       default: {},

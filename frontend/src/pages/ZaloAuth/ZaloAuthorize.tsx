@@ -11,12 +11,6 @@ export function ZaloAuthorize() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      navigate(`/auth/auth?redirect_url=${window.location.href}`);
-    }
-  }, [user]);
-
   const handleAuthorize = async () => {
     setLoading(true);
     try {
@@ -59,6 +53,13 @@ export function ZaloAuthorize() {
           <p className="text-gray-500 mb-6">Tài khoản Zalo của bạn đã được kết nối với hệ thống ZenTask. Bạn có thể quay lại Zalo để tiếp tục.</p>
           <button onClick={() => (window.location.href = "zalo://")} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 px-4 rounded-xl transition-colors">
             Mở Zalo ngay
+          </button>
+          <button
+            onClick={() => navigate("/")}
+            disabled={loading}
+            className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 px-4 rounded-xl transition-colors mt-5 cursor-pointer"
+          >
+            Quay về trang chủ
           </button>
         </div>
       </div>
