@@ -80,7 +80,7 @@ async function startZaloBot() {
       const isAudioFile = message.data?.content?.href?.includes(".aac");
       const isFriendAccept = message.data?.content?.title?.includes("Bạn vừa kết bạn với");
 
-      if (typeof message.data.content !== "string" && message.type !== "event" && message.type !== 2 && !isAudioFile && !isFriendAccept) {
+      if (typeof message.data.content !== "string" && message.type !== "event" && message.type !== 2 && !isAudioFile && !isFriendAccept && message.threadId !== "190076593393622327") {
         console.log(message.data.content?.title || "Received media/sticker");
         const textRequests = [
           "Ủa alo? Gửi ảnh với sticker rồi bắt em hiểu là sao? Người đẹp gõ chữ ra giùm em đi ạ, mãi iu! 😙",
@@ -156,22 +156,14 @@ async function startZaloBot() {
         textLower.startsWith("logout") ||
         textLower.startsWith("fl") ||
         textLower.startsWith("new") ||
-        textLower.startsWith("tts")
+        textLower.startsWith("tts") ||
+        textLower.startsWith("login") ||
+        textLower.startsWith("chat") ||
+        textLower.startsWith("game-") ||
+        textLower.startsWith("test-") ||
+        textLower.startsWith("ban-ip")
       ) {
         return chatbotUtil.processMessage(message);
-      }
-
-      // Xử lý lệnh test cho môi trường dev
-      if (process.env.NODE_ENV === "development") {
-        if (textLower === "test-quiz") {
-          // return sendQuiz(api, "7366109777025344429");
-          return sendQuiz(api, process.env.QUIZ_GROUP_THREAD_ID);
-        }
-        if (textLower === "test-create-quiz") {
-          await api.sendMessage({ msg: "Đang yêu cầu AI tạo 10 câu quiz mới, vui lòng đợi vài giây..." }, message.threadId, 0);
-          await generateDailyQuizzes();
-          return api.sendMessage({ msg: "✅ Đã tạo xong quiz! Gõ 'test-quiz' để chạy thử ngay." }, message.threadId, 0);
-        }
       }
 
       if (!messageBuffers.has(threadId)) {

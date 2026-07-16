@@ -46,7 +46,7 @@ class ChatbotUtil {
     }
   }
 
-  async sendVoiceMessage(threadId, text, langCode) {
+  async sendVoiceMessage(threadId, text, langCode, code = 0) {
     try {
       const voice = getAudioCharacterByLanguage(langCode);
       const pythonApi = process.env.API_PYTHON;
@@ -57,6 +57,7 @@ class ChatbotUtil {
           voiceUrl: audioUrl,
         },
         threadId,
+        code,
       );
     } catch (err) {
       console.error("Error sending voice message:", err);
@@ -110,12 +111,20 @@ class ChatbotUtil {
             const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
             const authLink = `${frontendUrl}/go/${authId}`;
 
-            return this.api.sendMessage(
+            this.api.sendMessage(
               {
-                msg: `🎉 CHÍNH XÁC!\n\nChúc mừng **${dName}** đã đoán đúng từ "${game.answer}" nhanh nhất!\n\nTuy nhiên, tài khoản Zalo của bạn chưa liên kết với ZenTask nên chưa thể cộng thưởng ${game.xp} XP.\n👉 Vui lòng bấm vào link dưới đây để đăng nhập nhé:\n${authLink}\n\n(Bạn có thể gõ lệnh "login" lúc nào cũng được để tạo link đăng nhập mới)`,
+                msg: `🎉 CHÍNH XÁC!\n\nChúc mừng **${dName}** đã đoán đúng từ "${game.answer}" nhanh nhất!\n\n(ZenTask đã gửi tin nhắn riêng cho bạn để nhận thưởng ${game.xp} XP nhé!)`,
               },
               threadId,
               1,
+            );
+
+            return this.api.sendMessage(
+              {
+                msg: `🎉 Bạn đã chiến thắng minigame và giành được ${game.xp} XP!\n\nTuy nhiên, tài khoản Zalo của bạn chưa liên kết với ZenTask nên chưa thể cộng thưởng.\n👉 Vui lòng bấm vào link dưới đây để đăng nhập nhé:\n${authLink}\n\n(Bạn có thể gõ lệnh "login" lúc nào cũng được để tạo link đăng nhập mới)`,
+              },
+              String(uid),
+              0,
             );
           }
         }
@@ -193,12 +202,14 @@ class ChatbotUtil {
       user.markModified("botState");
       await user.save();
       return this.api.sendMessage(
-        { msg: `Ván nối từ bắt đầu! Từ đầu tiên của Lopy là: **${startWord}**\n👉 Tới lượt bạn (từ tiếp theo phải bắt đầu bằng chữ '${startWord.slice(-1)}')\n(Bạn cần nối đúng 5 từ liên tiếp để chiến thắng!)` },
+        {
+          msg: `Ván nối từ bắt đầu! Từ đầu tiên của Lopy là: **${startWord}**\n👉 Tới lượt bạn (từ tiếp theo phải bắt đầu bằng chữ '${startWord.slice(-1)}')\n(Bạn cần nối đúng 5 từ liên tiếp để chiến thắng!)`,
+        },
         threadId,
         0,
       );
     }
-    
+
     if (textLower === "game-scrambled" || textLower === "/game-scrambled") {
       const { triggerMinigame } = await import("../src/services/minigame.service.js");
       await triggerMinigame(this.api, threadId, "scrambled");
@@ -242,24 +253,70 @@ class ChatbotUtil {
         await triggerFlashDrop(this.api);
         return this.api.sendMessage({ msg: "✅ Đã test kích hoạt Flash Drop thành công." }, threadId, 0);
       }
-      
+
       const groupThreadId = process.env.QUIZ_GROUP_THREAD_ID;
+
+      if (textLower === "test-quiz" || textLower === "/test-quiz") {
+        const { activeGroupGames } = await import("../src/services/minigame.service.js");
+        if (activeGroupGames.has(groupThreadId)) {
+          return this.api.sendMessage({ msg: "⚠️ Đang có một minigame diễn ra trong nhóm, không thể tạo thêm quiz!" }, threadId, 0);
+        }
+        const { sendQuiz } = await import("./chatbotJobs.js");
+        await sendQuiz(this.api, groupThreadId);
+        return this.api.sendMessage({ msg: "✅ Đã gửi đố vui (Quiz) ra nhóm." }, threadId, 0);
+      }
+
+      if (textLower === "test-create-quiz" || textLower === "/test-create-quiz") {
+        const { generateDailyQuizzes } = await import("./chatbotJobs.js");
+        await this.api.sendMessage({ msg: "Đang yêu cầu AI tạo 10 câu quiz mới, vui lòng đợi vài giây..." }, threadId, 0);
+        await generateDailyQuizzes();
+        return this.api.sendMessage({ msg: "✅ Đã tạo xong quiz! Gõ 'test-quiz' để chạy thử ngay." }, threadId, 0);
+      }
       if (textLower === "test-scrambled" || textLower === "/test-scrambled") {
         const { triggerMinigame } = await import("../src/services/minigame.service.js");
         await triggerMinigame(this.api, groupThreadId, "scrambled");
         return this.api.sendMessage({ msg: "✅ Đã gửi game Đảo chữ ra nhóm." }, threadId, 0);
       }
-      
+
       if (textLower === "test-emoji" || textLower === "/test-emoji") {
         const { triggerMinigame } = await import("../src/services/minigame.service.js");
         await triggerMinigame(this.api, groupThreadId, "emoji");
         return this.api.sendMessage({ msg: "✅ Đã gửi game Đuổi hình bắt chữ ra nhóm." }, threadId, 0);
       }
-      
+
       if (textLower === "test-listening" || textLower === "/test-listening") {
         const { triggerMinigame } = await import("../src/services/minigame.service.js");
         await triggerMinigame(this.api, groupThreadId, "listening");
         return this.api.sendMessage({ msg: "✅ Đã gửi game Nghe & Chép chính tả ra nhóm." }, threadId, 0);
+      }
+
+      if (textLower === "test-game-finish" || textLower === "/test-game-finish") {
+        const { activeGroupGames } = await import("../src/services/minigame.service.js");
+        const game = activeGroupGames.get(groupThreadId);
+        if (!game) return this.api.sendMessage({ msg: "❌ Không có minigame nào đang diễn ra trong nhóm." }, threadId, 0);
+
+        activeGroupGames.delete(groupThreadId);
+        const { addXpToUser } = await import("../src/routes/user.js");
+        const { xp, level } = await addXpToUser(user._id, game.xp);
+
+        this.api.sendMessage(
+          {
+            msg: `🎉 CHÍNH XÁC!\n\nAdmin **${user.displayName}** đã dùng quyền lực để cưỡng chế giải đúng từ "${game.answer}"!\n\n(ZenTask đã gửi tin nhắn riêng cho bạn để nhận thưởng ${game.xp} XP nhé!)`,
+          },
+          groupThreadId,
+          1,
+        );
+        return this.api.sendMessage({ msg: `✅ Đã trao giải game cho bạn! Bạn nhận được +${game.xp} XP. (Tổng: ${xp} - Lv.${level})` }, threadId, 0);
+      }
+
+      if (textLower === "test-game-end" || textLower === "/test-game-end") {
+        const { activeGroupGames } = await import("../src/services/minigame.service.js");
+        const game = activeGroupGames.get(groupThreadId);
+        if (!game) return this.api.sendMessage({ msg: "❌ Không có minigame nào đang diễn ra trong nhóm." }, threadId, 0);
+
+        activeGroupGames.delete(groupThreadId);
+        this.api.sendMessage({ msg: `🛑 Minigame đã bị admin huỷ bỏ!\n\nĐáp án chính xác là: **${game.answer}**` }, groupThreadId, 1);
+        return this.api.sendMessage({ msg: "✅ Đã huỷ minigame trong nhóm." }, threadId, 0);
       }
     }
 
@@ -678,7 +735,9 @@ Từ vựng: "${state.quizData.term}"`;
       msg += `- **test-quiz**: Gửi đố vui ra nhóm ngay lập tức.\n`;
       msg += `- **test-scrambled**: Gửi game Đảo chữ ra nhóm ngay.\n`;
       msg += `- **test-emoji**: Gửi game Đuổi hình bắt chữ ra nhóm ngay.\n`;
-      msg += `- **test-listening**: Gửi game Nghe chính tả ra nhóm ngay.`;
+      msg += `- **test-listening**: Gửi game Nghe chính tả ra nhóm ngay.\n`;
+      msg += `- **test-game-finish**: Trao giải minigame ngay lập tức cho Admin.\n`;
+      msg += `- **test-game-end**: Huỷ bỏ minigame đang diễn ra trong nhóm.`;
     }
 
     await this.sendAIMessage(threadId, msg);

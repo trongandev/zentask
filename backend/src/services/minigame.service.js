@@ -49,83 +49,89 @@ function getAvailableKeys() {
 }
 
 export async function generateScrambledWord() {
-  const keys = getAvailableKeys();
-  const randomKey = keys[Math.floor(Math.random() * keys.length)].key;
-  const ai = new GoogleGenAI({ apiKey: randomKey });
+  const keys = getAvailableKeys().sort(() => 0.5 - Math.random());
 
   const prompt = `Generate a random common English word (level Grade 1 to Grade 12). Return a JSON object with:
 - "word": the exact english word (letters only, no spaces or special characters)
 - "hint": a short hint in Vietnamese explaining the word (do not include the word itself).`;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            word: { type: Type.STRING },
-            hint: { type: Type.STRING },
+  for (const k of keys) {
+    const ai = new GoogleGenAI({ apiKey: k.key });
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              word: { type: Type.STRING },
+              hint: { type: Type.STRING },
+            },
+            required: ["word", "hint"],
           },
-          required: ["word", "hint"],
         },
-      },
-    });
+      });
 
-    let result = JSON.parse(response.text);
-    const originalWord = result.word.toLowerCase().trim();
-    // Scramble the word (make sure it's actually scrambled)
-    let scrambled = originalWord;
-    let attempts = 0;
-    while (scrambled === originalWord && attempts < 10) {
-      scrambled = scrambled
-        .split("")
-        .sort(() => 0.5 - Math.random())
-        .join("");
-      attempts++;
+      let result = JSON.parse(response.text);
+      const originalWord = result.word.toLowerCase().trim();
+      // Scramble the word (make sure it's actually scrambled)
+      let scrambled = originalWord;
+      let attempts = 0;
+      while (scrambled === originalWord && attempts < 10) {
+        scrambled = scrambled
+          .split("")
+          .sort(() => 0.5 - Math.random())
+          .join("");
+        attempts++;
+      }
+
+      return { word: originalWord, scrambled: scrambled.toUpperCase(), hint: result.hint };
+    } catch (err) {
+      console.error(`Error generating scrambled word with key index ${k.index}, trying next...:`, err.message);
     }
-
-    return { word: originalWord, scrambled: scrambled.toUpperCase(), hint: result.hint };
-  } catch (err) {
-    console.error("Error generating scrambled word:", err);
-    return null;
   }
+
+  console.error("All AI keys failed to generate scrambled word.");
+  return null;
 }
 
 export async function generateEmojiWord() {
-  const keys = getAvailableKeys();
-  const randomKey = keys[Math.floor(Math.random() * keys.length)].key;
-  const ai = new GoogleGenAI({ apiKey: randomKey });
+  const keys = getAvailableKeys().sort(() => 0.5 - Math.random());
 
   const prompt = `Generate a random common English word (level Grade 1 to Grade 12) that can be clearly represented by a sequence of emojis. Return a JSON object with:
 - "word": the exact english word (letters only)
 - "emojis": a sequence of 2-4 emojis that visually represent the word (no text).`;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            word: { type: Type.STRING },
-            emojis: { type: Type.STRING },
+  for (const k of keys) {
+    const ai = new GoogleGenAI({ apiKey: k.key });
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3.1-flash-lite",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              word: { type: Type.STRING },
+              emojis: { type: Type.STRING },
+            },
+            required: ["word", "emojis"],
           },
-          required: ["word", "emojis"],
         },
-      },
-    });
+      });
 
-    let result = JSON.parse(response.text);
-    return { word: result.word.toLowerCase().trim(), emojis: result.emojis };
-  } catch (err) {
-    console.error("Error generating emoji word:", err);
-    return null;
+      let result = JSON.parse(response.text);
+      return { word: result.word.toLowerCase().trim(), emojis: result.emojis };
+    } catch (err) {
+      console.error(`Error generating emoji word with key index ${k.index}, trying next...:`, err.message);
+    }
   }
+
+  console.error("All AI keys failed to generate emoji word.");
+  return null;
 }
 
 export async function getListeningFlashcard() {
@@ -162,15 +168,15 @@ export async function checkWordChainValidity(lastWord, newWord, usedWords = new 
 
 export async function botNextWord(lastChar, usedWords = new Set()) {
   const possibleWords = wordsByFirstLetter[lastChar] || [];
-  const unusedWords = possibleWords.filter(w => !usedWords.has(w));
-  
+  const unusedWords = possibleWords.filter((w) => !usedWords.has(w));
+
   if (unusedWords.length === 0) {
     return null; // Bot thua do hết từ
   }
 
   // Cơ chế cân bằng: Bot có 25% khả năng giả vờ không tìm được từ để user thắng (chỉ khi user đã nối được ít nhất 2 từ)
   if (usedWords.size >= 3 && Math.random() < 0.25) {
-    return null; 
+    return null;
   }
 
   // Chọn từ ngẫu nhiên
@@ -180,6 +186,13 @@ export async function botNextWord(lastChar, usedWords = new Set()) {
 
 export async function triggerMinigame(api, threadId, type) {
   if (!threadId) return;
+
+  if (activeGroupGames.has(threadId)) {
+    console.log(`[Minigame Service] Nhóm ${threadId} đang có một game diễn ra, không thể tạo thêm.`);
+    // Tùy chọn: Nhắn tin cho người yêu cầu biết nhóm đang bận
+    // await api.sendMessage({ msg: "⚠️ Đang có một minigame diễn ra trong nhóm, vui lòng chờ kết thúc rồi mới tạo game mới nhé!" }, threadId, 0);
+    return;
+  }
 
   let msgText = "";
   let answer = "";
@@ -202,15 +215,16 @@ export async function triggerMinigame(api, threadId, type) {
   } else if (type === "listening") {
     console.log(`[Minigame Service] Bắt đầu minigame Nghe & Chép Chính Tả (Listening Race) cho ${threadId}...`);
     const card = await getListeningFlashcard();
+    console.log(card);
     if (!card) return;
     answer = card.term.toLowerCase().trim();
-    msgText = `🎮 **MINIGAME: NGHE & CHÉP CHÍNH TẢ!** 🎮\n\nLopy vừa gửi một đoạn Voice ở trên.\n⏳ Bạn nào nghe và gõ lại chính xác TỪ VỰNG đó nhanh nhất sẽ nhận được ${xpReward} XP!`;
+    msgText = `🎮 **MINIGAME: NGHE & CHÉP CHÍNH TẢ!** 🎮\n\nLopy vừa gửi một đoạn Voice ở dưới.\n⏳ Bạn nào nghe và gõ lại chính xác TỪ VỰNG đó nhanh nhất sẽ nhận được ${xpReward} XP!`;
 
     try {
-      const pythonApi = process.env.API_PYTHON;
-      const audioUrl = `${pythonApi}/edge-tts?text=${encodeURIComponent(card.term)}&voice=${encodeURIComponent("en-US-AriaNeural")}`;
-      await api.sendVoice({ voiceUrl: audioUrl }, threadId);
       await api.sendMessage(parseMarkdownToZalo(msgText), threadId, 1);
+      const { default: ChatbotUtil } = await import("../../utils/chatbot.js");
+      const botUtil = new ChatbotUtil(api);
+      await botUtil.sendVoiceMessage(threadId, card.term, "en", 1);
     } catch (e) {
       console.error("Lỗi khi gửi voice:", e);
       return; // Hủy nếu lỗi
