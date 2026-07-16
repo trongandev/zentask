@@ -58,8 +58,9 @@ router.post(
     const api = getApi();
     if (api) {
       const welcomeMsg = `🎉 **Liên kết tài khoản thành công!** 🎉\n\nChào mừng ${user.displayName} đã kết nối tài khoản ZenTask với Zalo!\nTừ bây giờ, Mentor Lopy sẽ đồng hành cùng bạn học tiếng Anh mỗi ngày nhé.\n\n📚 **Hướng dẫn nhanh dành cho bạn mới:**\n- Gõ **help** hoặc **menu** để xem danh sách lệnh.\n- Trò chuyện tự nhiên với Lopy bằng cách gõ 1 từ tiếng Anh để tra từ điển, hoặc gõ **chat** để bật chế độ luyện nói 1-1.\n- Mỗi ngày, Lopy sẽ nhắn tin nhắc nhở bạn ôn tập Flashcard theo đúng phương pháp Spaced Repetition.\n\n👉 *Hãy gõ **help** ngay để bắt đầu nào!*`;
+      console.log(welcomeMsg, user.zaloId);
       try {
-        await api.sendMessage({ msg: parseMarkdownToZalo(welcomeMsg) }, user.zaloId, 0);
+        await api.sendMessage(parseMarkdownToZalo(welcomeMsg), user.zaloId, 0);
       } catch (err) {
         console.error("Không thể gửi tin nhắn chào mừng:", err);
       }

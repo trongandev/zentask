@@ -42,6 +42,9 @@ import User from "../models/User.js";
 import { addXpToUser } from "./user.js";
 import { startChatbotJobs } from "../../utils/chatbotJobs.js";
 import { activeQuizzes, activeFlashDrops, sendQuiz, generateDailyQuizzes } from "../services/quizBot.service.js";
+import { parseMarkdownToZalo } from "../../utils/util.js";
+import crypto from "crypto";
+import { ZaloAuth } from "../models/Schemas.js";
 
 const cookie = JSON.parse(fs.readFileSync("./cookie.json", "utf-8"));
 
@@ -235,19 +238,27 @@ async function startZaloBot() {
           const friendId = event.data.fromUid;
           await api.acceptFriendRequest(friendId);
           console.log(`[ZCA-JS] Đã tự động kết bạn thành công với user ID: ${friendId} `);
-          const quote = [
-            "🎉 Chào mừng bạn! Mình là **Lopy** - linh vật kiêm Mentor Tiếng Anh siêu nhiệt tình của ZenTask đây! 👋",
-            "Để bắt đầu hành trình nâng trình tiếng Anh, Lopy tóm tắt 3 việc bạn cần làm mỗi ngày nha:\n\n1️⃣ **Điểm danh (Check-in)**: Truy cập trang web ZenTask mỗi ngày để nhận quà và duy trì chuỗi học (streak).\n2️⃣ **Mini Quiz**: Lopy sẽ rải câu đố ngẫu nhiên vào Group. Bạn chỉ cần thả tim (❤️) vào tin nhắn chứa đáp án đúng để nhận 5 XP nhé!\n3️⃣ **Bảng xếp hạng**: Cuối tuần Lopy sẽ tổng kết Top 3 cao thủ cày cuốc. Hãy chăm chỉ học để lên đỉnh phong thần nha! 🏆",
-            "Sắp tới Lopy sẽ là 'bảo mẫu' gánh bạn trên con đường diệt gọn từ vựng Tiếng Anh. Lười là bị nhắc đó nha! 🔥\n👉 Gõ **help** để xem tất cả lệnh hỗ trợ nhé.",
-          ];
-          for (let index = 0; index < quote.length; index++) {
-            await api.sendMessage(
-              {
-                msg: quote[index],
-              },
-              friendId,
-              0,
-            );
+          
+          const user = await User.findOne({ zaloId: String(friendId) });
+          if (user) {
+            const quote = [
+              "🎉 Chào mừng bạn! Mình là **Lopy** - linh vật kiêm Mentor Tiếng Anh siêu nhiệt tình của ZenTask đây! 👋",
+              "Để bắt đầu hành trình nâng trình tiếng Anh, Lopy tóm tắt 3 việc bạn cần làm mỗi ngày nha:\n\n1️⃣ **Điểm danh (Check-in)**: Truy cập trang web ZenTask mỗi ngày để nhận quà và duy trì chuỗi học (streak).\n2️⃣ **Mini Quiz**: Lopy sẽ rải câu đố ngẫu nhiên vào Group. Bạn chỉ cần thả tim (❤️) vào tin nhắn chứa đáp án đúng để nhận 5 XP nhé!\n3️⃣ **Bảng xếp hạng**: Cuối tuần Lopy sẽ tổng kết Top 3 cao thủ cày cuốc. Hãy chăm chỉ học để lên đỉnh phong thần nha! 🏆",
+              "Sắp tới Lopy sẽ là 'bảo mẫu' gánh bạn trên con đường diệt gọn từ vựng Tiếng Anh. Lười là bị nhắc đó nha! 🔥\n👉 Gõ **help** để xem tất cả lệnh hỗ trợ nhé.",
+            ];
+            for (let index = 0; index < quote.length; index++) {
+              await api.sendMessage(parseMarkdownToZalo(quote[index]), friendId, 0);
+            }
+          } else {
+            // Generate auth link
+            const authId = crypto.randomBytes(16).toString("hex");
+            const newAuth = new ZaloAuth({ zaloId: String(friendId), authId });
+            await newAuth.save();
+
+            const authLink = `${process.env.FRONTEND_URL}/go/${authId}`;
+            const welcomeMsg = `Chào bạn! Mình là Mentor Tiếng Anh của ZenTask đây 👋\n\nĐể bắt đầu lộ trình học cá nhân hóa, bạn vui lòng bấm vào link dưới đây để đăng nhập và uỷ quyền cho Zalo Bot truy cập tài khoản của bạn nhé!\n\n👉 ${authLink}`;
+            
+            await api.sendMessage(parseMarkdownToZalo(welcomeMsg), friendId, 0);
           }
         } catch (error) {
           console.error("[ZCA-JS] Lỗi khi tự động kết bạn:", error);
