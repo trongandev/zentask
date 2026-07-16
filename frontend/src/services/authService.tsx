@@ -66,7 +66,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   loginWithGoogle: async () => {
-    // set({ loading: true });
-    window.location.href = `${API_URL}/api/auth/google`;
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramRedirect = urlParams.get("redirect_url");
+    const redirectUrl = paramRedirect || sessionStorage.getItem("redirect_url") || "/";
+    
+    window.location.href = `${API_URL}/api/auth/google?redirect_url=${encodeURIComponent(redirectUrl)}`;
   },
 }));

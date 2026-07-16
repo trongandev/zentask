@@ -31,10 +31,14 @@ router.get("/google", (req, res) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     return res.status(500).send("Google Client ID or Secret is missing in backend.");
   }
+  
+  const redirectUrl = req.query.redirect_url;
+  
   const authorizeUrl = googleClient.generateAuthUrl({
     access_type: "offline",
     scope: ["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
     prompt: "consent",
+    state: redirectUrl ? redirectUrl : "/",
   });
   res.redirect(authorizeUrl);
 });
@@ -74,7 +78,18 @@ router.get("/google/callback", async (req, res) => {
     }
 
     generateTokenAndSetCookie(res, user);
-    res.redirect(`${process.env.FRONTEND_URL}/`);
+    
+    let targetUrl = `${process.env.FRONTEND_URL}/`;
+    const state = req.query.state;
+    if (state && state !== "/") {
+      if (state.startsWith("/")) {
+        targetUrl = `${process.env.FRONTEND_URL}${state}`;
+      } else if (state.startsWith(process.env.FRONTEND_URL)) {
+        targetUrl = state;
+      }
+    }
+    
+    res.redirect(targetUrl);
   } catch (error) {
     console.error("Google auth callback error:", error);
     res.redirect(`${process.env.FRONTEND_URL}/auth?error=CallbackFailed`);
