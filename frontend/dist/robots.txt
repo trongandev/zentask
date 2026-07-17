@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://lrm.io.vn/sitemap.xml
+Sitemap: https://zentask.io.vn/sitemap.xml

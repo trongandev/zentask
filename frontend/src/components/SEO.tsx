@@ -11,8 +11,8 @@ interface SEOProps {
 export function SEO({
   title,
   description = "Đột phá kỹ năng tiếng Anh cùng Zentask qua Lộ trình Gamified, hệ thống lặp khoảng cách SRS Flashcards, luyện tập 5 kỹ năng với AI, thi Quiz nhanh và kết nối cùng cộng đồng sôi nổi.",
-  image = "https://lrm.io.vn/banner.png",
-  url = "https://lrm.io.vn",
+  image = "https://zentask.io.vn/banner.png",
+  url = "https://zentask.io.vn",
   type = "website",
 }: SEOProps) {
   const fullTitle = `${title} | Zentask - Ứng dụng học tiếng Anh toàn diện`;

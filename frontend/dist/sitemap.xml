@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://lrm.io.vn/</loc>
+    <loc>https://zentask.io.vn/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://lrm.io.vn/beginner</loc>
+    <loc>https://zentask.io.vn/beginner</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://lrm.io.vn/flashcard</loc>
+    <loc>https://zentask.io.vn/flashcard</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://lrm.io.vn/grammar</loc>
+    <loc>https://zentask.io.vn/grammar</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://lrm.io.vn/community</loc>
+    <loc>https://zentask.io.vn/community</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://lrm.io.vn/leaderboard</loc>
+    <loc>https://zentask.io.vn/leaderboard</loc>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
