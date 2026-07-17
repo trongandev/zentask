@@ -13,8 +13,7 @@ import { FlashcardDetail } from "./pages/Flashcard/FlashcardDetail";
 import { FlashcardPractice } from "./pages/Flashcard/FlashcardPractice";
 import { Quiz } from "./pages/Quiz/Quiz";
 import { QuizDetail } from "./pages/Quiz/QuizDetail";
-import { Grammar } from "./pages/Grammar";
-import { Tenses } from "./pages/Tenses";
+
 import { Profile } from "./pages/Profile";
 import { Leaderboard } from "./pages/Leaderboard";
 import { Community } from "./pages/Community";
@@ -47,18 +46,17 @@ import { PostDetail } from "./pages/PostDetail";
 import { RightSidebar } from "./components/RightSidebar";
 import { LevelUpModal } from "./components/LevelUpModal";
 import { useUserStore } from "./services/userService";
-import { Beginner } from "./pages/Beginner";
-import { BeginnerGrammar } from "./pages/BeginnerGrammar";
-import { BeginnerGrammarLesson } from "./pages/BeginnerGrammarLesson";
-import { BeginnerSkills } from "./pages/BeginnerSkills";
-import { BeginnerRank } from "./pages/BeginnerRank";
+import { Beginner } from "./pages/Beginner/Beginner";
+import { BeginnerGrammar } from "./pages/Beginner/BeginnerGrammar";
+import { BeginnerGrammarLesson } from "./pages/Beginner/BeginnerGrammarLesson";
+import { BeginnerSkills } from "./pages/Beginner/BeginnerSkills";
+import { BeginnerRank } from "./pages/Beginner/BeginnerRank";
 import { BeginnerFlashcardDetail } from "./pages/Flashcard/BeginnerFlashcardDetail";
 import { QuizCreate } from "./pages/Quiz/QuizCreate";
 import { QuizRoom } from "./pages/Quiz/QuizRoom";
 import { QuizPlay } from "./pages/Quiz/QuizPlay";
 import { QuizResult } from "./pages/Quiz/QuizResult";
-import { GrammarPractice } from "./pages/GrammarPractice";
-import { TensesPractice } from "./pages/TensesPractice";
+
 import Friends from "./pages/Friends";
 import SkillPracticeRoom from "./pages/SkillPracticeRoom";
 import BotConfigPage from "./pages/Admin/BotConfigPage";
@@ -240,7 +238,7 @@ function MainLayout() {
 }
 
 import { LandingPage } from "./pages/LandingPage";
-import { BeginnerLessonPractice } from "./pages/BeginnerLessonPractice";
+import { BeginnerLessonPractice } from "./pages/Beginner/BeginnerLessonPractice";
 
 function AppContent() {
   const { user, loading, isIpBanned } = useAuth();
@@ -295,8 +293,6 @@ function AppContent() {
           <Route path="flashcard/:id" element={<FlashcardDetail />} />
           <Route path="quiz" element={<Quiz />} />
           <Route path="quiz/:id" element={<QuizDetail />} />
-          <Route path="grammar" element={<Grammar />} />
-          <Route path="tenses" element={<Tenses />} />
           <Route path="profile/:id" element={<Profile />} />
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="community" element={<Community />} />
@@ -314,10 +310,6 @@ function AppContent() {
             <Route path="quiz/room/:code" element={<QuizRoom />} />
             <Route path="quiz/play/:id" element={<QuizPlay />} />
             <Route path="quiz/result/:resultId" element={<QuizResult />} />
-            <Route path="grammar/practice" element={<GrammarPractice />} />
-            <Route path="grammar/practice/:stageId" element={<GrammarPractice />} />
-            <Route path="tenses/practice" element={<TensesPractice />} />
-            <Route path="tenses/practice/:stageId" element={<TensesPractice />} />
             <Route path="profile" element={<Profile />} />
             <Route path="ai-chat" element={<AIChat />} />
             <Route path="notebook" element={<Notebook />} />

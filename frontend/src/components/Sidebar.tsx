@@ -7,8 +7,6 @@ import {
   Home,
   Copy,
   HelpCircle,
-  BookOpen,
-  Clock,
   Trophy,
   Globe,
   FileText,
@@ -73,13 +71,6 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         { icon: MountainSnow, label: "Người mới bắt đầu", to: "/beginner" },
         { icon: Copy, label: "Thẻ lật", to: "/flashcards" },
         { icon: HelpCircle, label: "Trắc nghiệm nhanh", to: "/quiz" },
-      ],
-    },
-    {
-      label: "CỐT LÕI",
-      items: [
-        { icon: BookOpen, label: "Ngữ pháp", to: "/grammar" },
-        { icon: Clock, label: "Thì", to: "/tenses" },
       ],
     },
     {

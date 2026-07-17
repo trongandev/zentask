@@ -21,7 +21,7 @@ export function BeginnerLayout() {
     (location.pathname.includes("/rank/") && location.pathname !== "/beginner/rank");
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
+    <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden relative">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm px-4 py-3 flex items-center">
         <button

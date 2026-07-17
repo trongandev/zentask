@@ -1,6 +1,6 @@
 import React from "react";
 import { Headphones, Mic, BookOpen, PenTool, PlayCircle, Trophy } from "lucide-react";
-import { cn } from "../lib/utils";
+import { cn } from "../../lib/utils";
 
 const SKILLS = [
   {
@@ -71,20 +71,12 @@ export function BeginnerSkills() {
             className="group bg-white rounded-3xl p-6 border-2 border-slate-100 hover:border-indigo-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
           >
             <div className="flex justify-between items-start mb-6">
-              <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm", skill.lightColor, skill.textColor)}>
-                {skill.icon}
-              </div>
-              <span className="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                {skill.level}
-              </span>
+              <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm", skill.lightColor, skill.textColor)}>{skill.icon}</div>
+              <span className="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">{skill.level}</span>
             </div>
-            
-            <h3 className="text-2xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">
-              {skill.title}
-            </h3>
-            <p className="text-slate-500 line-clamp-2 flex-1 mb-6">
-              {skill.description}
-            </p>
+
+            <h3 className="text-2xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{skill.title}</h3>
+            <p className="text-slate-500 line-clamp-2 flex-1 mb-6">{skill.description}</p>
 
             <button className="w-full py-3 bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors border border-slate-200 hover:border-indigo-200">
               <PlayCircle className="w-5 h-5" /> Bắt đầu luyện
@@ -92,11 +84,11 @@ export function BeginnerSkills() {
           </div>
         ))}
       </div>
-      
+
       {/* Daily Challenge Banner */}
       <div className="bg-white rounded-3xl p-6 border-2 border-slate-100 flex flex-col md:flex-row items-center gap-6 shadow-sm">
         <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center shrink-0">
-           <Trophy className="w-10 h-10 text-yellow-500" />
+          <Trophy className="w-10 h-10 text-yellow-500" />
         </div>
         <div className="flex-1 text-center md:text-left">
           <h3 className="text-xl font-bold text-slate-800">Thử thách tổng hợp (Sắp ra mắt)</h3>

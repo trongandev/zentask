@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, CheckCircle, Lock, Play, Star } from "lucide-react";
-import { cn } from "../lib/utils";
-import axiosInstance from "../services/axiosConfig";
+import { cn } from "../../lib/utils";
+import axiosInstance from "../../services/axiosConfig";
 
 const GRAMMAR_CATEGORIES = [
   {
@@ -121,9 +121,9 @@ export function BeginnerGrammar() {
                 </p>
               </div>
             </div>
-            
+
             {firstIncompleteTopic && (
-              <button 
+              <button
                 onClick={() => navigate(`/beginner/grammar/${firstIncompleteTopic}`)}
                 className="bg-white text-blue-600 font-bold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:bg-slate-50 transition-all flex items-center gap-2"
               >

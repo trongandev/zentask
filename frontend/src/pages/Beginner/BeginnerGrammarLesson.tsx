@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowRight, Check, X } from "lucide-react";
-import { cn } from "../lib/utils";
+import { cn } from "../../lib/utils";
 import toastService from "@/src/services/toastService";
-import axiosInstance from "../services/axiosConfig";
-import { BEGINNER_GRAMMAR_DATA } from "../data/beginner/grammarData";
+import axiosInstance from "../../services/axiosConfig";
+import { BEGINNER_GRAMMAR_DATA } from "../../data/beginner/grammarData";
 
-import { GrammarRound1Discovery } from "../components/beginner/grammar/GrammarRound1Discovery";
-import { GrammarRound2GuidedQuestion } from "../components/beginner/grammar/GrammarRound2GuidedQuestion";
-import { GrammarRound3RuleSummary } from "../components/beginner/grammar/GrammarRound3RuleSummary";
-import { GrammarRound4TrueFalse } from "../components/beginner/grammar/GrammarRound4TrueFalse";
-import { GrammarRound5FixError } from "../components/beginner/grammar/GrammarRound5FixError";
-import { GrammarRound6FreeOutput } from "../components/beginner/grammar/GrammarRound6FreeOutput";
+import { GrammarRound1Discovery } from "../../components/beginner/grammar/GrammarRound1Discovery";
+import { GrammarRound2GuidedQuestion } from "../../components/beginner/grammar/GrammarRound2GuidedQuestion";
+import { GrammarRound3RuleSummary } from "../../components/beginner/grammar/GrammarRound3RuleSummary";
+import { GrammarRound4TrueFalse } from "../../components/beginner/grammar/GrammarRound4TrueFalse";
+import { GrammarRound5FixError } from "../../components/beginner/grammar/GrammarRound5FixError";
+import { GrammarRound6FreeOutput } from "../../components/beginner/grammar/GrammarRound6FreeOutput";
 
 type GrammarRoundType = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -41,7 +41,7 @@ export function BeginnerGrammarLesson() {
     }
 
     if (isCorrect === false) {
-      // Nếu làm sai (trong demo này) bắt làm lại đến khi đúng thì thôi, 
+      // Nếu làm sai (trong demo này) bắt làm lại đến khi đúng thì thôi,
       // hoặc trong hệ thống thực tế sẽ lưu vào mistakes array.
       toastService.error("Vui lòng thử lại!");
       setIsCorrect(null);
@@ -123,17 +123,14 @@ export function BeginnerGrammarLesson() {
                   </span>
                 )}
               </div>
-              
+
               {isCorrect !== null && (
-                 <button
-                   onClick={nextStep}
-                   className={cn(
-                     "font-bold px-8 py-3 rounded-2xl flex items-center gap-2 text-white",
-                     isCorrect === true ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600",
-                   )}
-                 >
-                   Tiếp tục
-                 </button>
+                <button
+                  onClick={nextStep}
+                  className={cn("font-bold px-8 py-3 rounded-2xl flex items-center gap-2 text-white", isCorrect === true ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600")}
+                >
+                  Tiếp tục
+                </button>
               )}
             </div>
           )}

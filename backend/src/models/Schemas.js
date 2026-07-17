@@ -279,6 +279,10 @@ export const BeginnerProgressSchema = new Schema({
   uid: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   completedGrammarTopics: [{ type: String }],
   completedSkills: [{ type: String }],
+  userId: { type: Schema.Types.ObjectId, ref: 'User' },
+  lessonId: { type: String },
+  score: { type: Number, default: 100 },
+  rewardClaimed: { type: Boolean, default: false }, // x2 XP relearn bonus, only once
 }, { timestamps: true });
 
 export const UserActivitySchema = new Schema({

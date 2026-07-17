@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Trophy } from "lucide-react";
-import { cn } from "../lib/utils";
-import { useAuth } from "../contexts/AuthContext";
-import { UserLevelBadge } from "../components/UserLevelBadge";
-import { UserAvatar } from "../components/UserAvatar";
-import axiosInstance from "../services/axiosConfig";
+import { cn } from "../../lib/utils";
+import { useAuth } from "../../contexts/AuthContext";
+import { UserLevelBadge } from "../../components/UserLevelBadge";
+import { UserAvatar } from "../../components/UserAvatar";
+import axiosInstance from "../../services/axiosConfig";
 
 const RANK_NAMES: Record<number, string> = {
   1: "Bạc",

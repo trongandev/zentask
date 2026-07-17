@@ -37,22 +37,6 @@ interface UserProfile {
   bio?: string;
   username?: string;
   achievedBadges?: number[];
-  grammarProgress?: {
-    maxStage: number;
-    totalCorrect: number;
-    totalWrong: number;
-    totalTimeSpent: number;
-    completedStages: number[];
-  };
-  customGrammarTests?: any[]; // Array of GrammarStage
-  tensesProgress?: {
-    maxStage: number;
-    totalCorrect: number;
-    totalWrong: number;
-    totalTimeSpent: number;
-    completedStages: number[];
-  };
-  customTensesTests?: any[]; // Array of TensesStage
   appSettings?: AppSettings;
   onboarding?: OnboardingState;
 }

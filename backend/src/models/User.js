@@ -106,20 +106,6 @@ const userSchema = new mongoose.Schema(
       accentColor: { type: String, default: 'blue' },
     },
 
-    grammarProgress: {
-      maxStage: { type: Number, default: 1 },
-      totalCorrect: { type: Number, default: 0 },
-      totalWrong: { type: Number, default: 0 },
-      totalTimeSpent: { type: Number, default: 0 },
-      completedStages: { type: [String], default: [] },
-    },
-    tensesProgress: {
-      maxStage: { type: Number, default: 1 },
-      totalCorrect: { type: Number, default: 0 },
-      totalWrong: { type: Number, default: 0 },
-      totalTimeSpent: { type: Number, default: 0 },
-      completedStages: { type: [String], default: [] },
-    },
     zaloId: {
       type: String,
       default: null,

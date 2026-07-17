@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { RANK_TOPIC_CONFIG, getBeginnerSetById } from "../config/rankTopicConfig";
+import { RANK_TOPIC_CONFIG, getBeginnerSetById } from "../../config/rankTopicConfig";
 import { Volume2, Mic, ArrowRight, Check, X, SkipForward, Loader2 } from "lucide-react";
-import { useTTSAudio } from "../hooks/useTTSAudio";
-import { usePronunciationAssessment, pickWords } from "../hooks/usePronunciationAssessment";
-import { cn } from "../lib/utils";
+import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { usePronunciationAssessment, pickWords } from "../../hooks/usePronunciationAssessment";
+import { cn } from "../../lib/utils";
 import toastService from "@/src/services/toastService";
 
-import { Round1Listen } from "../components/beginner/practice/Round1Listen";
-import { Round2ChooseMeaning } from "../components/beginner/practice/Round2ChooseMeaning";
-import { Round3Pronunciation } from "../components/beginner/practice/Round3Pronunciation";
-import { Round4CompleteWord } from "../components/beginner/practice/Round4CompleteWord";
-import { Round5FillBlank } from "../components/beginner/practice/Round5FillBlank";
-import { Round6ReverseQuiz } from "../components/beginner/practice/Round6ReverseQuiz";
-import { RoundPlaceholder } from "../components/beginner/practice/RoundPlaceholders";
+import { Round1Listen } from "../../components/beginner/practice/Round1Listen";
+import { Round2ChooseMeaning } from "../../components/beginner/practice/Round2ChooseMeaning";
+import { Round3Pronunciation } from "../../components/beginner/practice/Round3Pronunciation";
+import { Round4CompleteWord } from "../../components/beginner/practice/Round4CompleteWord";
+import { Round5FillBlank } from "../../components/beginner/practice/Round5FillBlank";
+import { Round6ReverseQuiz } from "../../components/beginner/practice/Round6ReverseQuiz";
+import { RoundPlaceholder } from "../../components/beginner/practice/RoundPlaceholders";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
@@ -29,8 +29,8 @@ export function BeginnerLessonPractice() {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
   const [knownWordIds, setKnownWordIds] = useState<string[]>([]);
-  
-  const [mistakes, setMistakes] = useState<{word: any, round: RoundType}[]>([]);
+
+  const [mistakes, setMistakes] = useState<{ word: any; round: RoundType }[]>([]);
   const [isReviewPhase, setIsReviewPhase] = useState(false);
 
   // States for interactive inputs
@@ -43,7 +43,7 @@ export function BeginnerLessonPractice() {
   useEffect(() => {
     const lessonId = `${topicId}_${lessonIndex}`;
     const savedState = localStorage.getItem(`beginner_lesson_progress_${lessonId}`);
-    
+
     if (savedState) {
       try {
         const parsed = JSON.parse(savedState);
@@ -85,7 +85,7 @@ export function BeginnerLessonPractice() {
       currentWordIndex,
       knownWordIds,
       mistakes,
-      isReviewPhase
+      isReviewPhase,
     };
     localStorage.setItem(`beginner_lesson_progress_${lessonId}`, JSON.stringify(stateToSave));
   }, [words, currentRound, currentWordIndex, knownWordIds, topicId, lessonIndex, mistakes, isReviewPhase]);
@@ -104,7 +104,7 @@ export function BeginnerLessonPractice() {
   // Helper to move to next word or next round
   const nextStep = () => {
     let newMistakes = [...mistakes];
-    
+
     if (isReviewPhase) {
       if (isCorrect === true) {
         newMistakes.shift();
@@ -214,42 +214,28 @@ export function BeginnerLessonPractice() {
         <div className="flex-1 bg-slate-200 h-4 rounded-full overflow-hidden">
           <div className="bg-blue-500 h-full transition-all duration-300" style={{ width: `${(((currentRound - 1) * activeWords.length + currentWordIndex) / (7 * activeWords.length)) * 100}%` }} />
         </div>
-        <div className="text-sm font-bold text-slate-500">
-          {isReviewPhase ? `Ôn tập (${mistakes.length} câu)` : `Vòng ${currentRound}/6`}
-        </div>
+        <div className="text-sm font-bold text-slate-500">{isReviewPhase ? `Ôn tập (${mistakes.length} câu)` : `Vòng ${currentRound}/6`}</div>
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col justify-center pb-24">
         {activeRound === 1 && <Round1Listen currentWord={currentWord} />}
-        
+
         {activeRound === 2 && (
-          <Round2ChooseMeaning 
-            topicId={topicId} 
-            currentWord={currentWord} 
+          <Round2ChooseMeaning
+            topicId={topicId}
+            currentWord={currentWord}
             isCorrect={isCorrect}
             onCheckAnswer={(answer, correct) => {
               setSelectedAnswer(answer);
               checkAnswer(correct);
-            }} 
+            }}
           />
         )}
 
-        {activeRound === 3 && (
-          <Round3Pronunciation 
-            currentWord={currentWord} 
-            isCorrect={isCorrect} 
-            setIsCorrect={setIsCorrect} 
-          />
-        )}
+        {activeRound === 3 && <Round3Pronunciation currentWord={currentWord} isCorrect={isCorrect} setIsCorrect={setIsCorrect} />}
 
-        {activeRound === 4 && (
-          <Round4CompleteWord 
-            currentWord={currentWord} 
-            isCorrect={isCorrect} 
-            onCheckAnswer={checkAnswer} 
-          />
-        )}
+        {activeRound === 4 && <Round4CompleteWord currentWord={currentWord} isCorrect={isCorrect} onCheckAnswer={checkAnswer} />}
 
         {activeRound === 5 && (
           <Round5FillBlank

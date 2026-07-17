@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Star, Lock, BookOpen, X } from "lucide-react";
-import { cn } from "../lib/utils";
-import { RANK_TOPIC_CONFIG } from "../config/rankTopicConfig";
-import { useAuth } from "../contexts/AuthContext";
-import { SEO } from "../components/SEO";
+import { cn } from "../../lib/utils";
+import { RANK_TOPIC_CONFIG } from "../../config/rankTopicConfig";
+import { useAuth } from "../../contexts/AuthContext";
+import { SEO } from "../../components/SEO";
 
 // Các mức offset theo chu kỳ để tạo đường đi zigzag
 const PATH_OFFSETS = [0, -30, -60, -30, 0, 30, 60, 30];
@@ -22,6 +22,7 @@ interface LessonNode {
   status: "locked" | "current" | "completed";
   color: string;
   words: any[];
+  rewardClaimed: boolean; // x2 XP relearn bonus already claimed
 }
 
 export function Beginner() {
@@ -31,6 +32,7 @@ export function Beginner() {
   const API_URL = import.meta.env.VITE_API_BACKEND;
 
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [rewardClaimedLessons, setRewardClaimedLessons] = useState<string[]>([]);
   const [nodes, setNodes] = useState<LessonNode[]>([]);
   const [selectedNode, setSelectedNode] = useState<LessonNode | null>(null);
 
@@ -42,6 +44,7 @@ export function Beginner() {
         if (res.ok) {
           const data = await res.json();
           setCompletedLessons(data.completedLessons || []);
+          setRewardClaimedLessons(data.rewardClaimedLessons || []);
         }
       } catch (err) {
         console.error("Failed to fetch progress", err);
@@ -85,6 +88,7 @@ export function Beginner() {
                 status: "locked", // Will evaluate below
                 color: topic.color || "from-blue-500 to-cyan-400",
                 words: lessonWords,
+                rewardClaimed: false, // Will evaluate below
               });
             }
           }
@@ -96,14 +100,15 @@ export function Beginner() {
       let firstUncompletedFound = false;
       const evaluatedNodes = generatedNodes.map((node) => {
         const isCompleted = completedLessons.includes(node.id);
+        const rewardClaimed = rewardClaimedLessons.includes(node.id);
 
         if (isCompleted) {
-          return { ...node, status: "completed" as const };
+          return { ...node, status: "completed" as const, rewardClaimed };
         } else if (!firstUncompletedFound) {
           firstUncompletedFound = true;
-          return { ...node, status: "current" as const };
+          return { ...node, status: "current" as const, rewardClaimed: false };
         } else {
-          return { ...node, status: "locked" as const };
+          return { ...node, status: "locked" as const, rewardClaimed: false };
         }
       });
 
@@ -113,7 +118,7 @@ export function Beginner() {
     };
 
     buildPath();
-  }, [completedLessons]);
+  }, [completedLessons, rewardClaimedLessons]);
 
   const handleNodeClick = (node: LessonNode) => {
     if (node.status === "locked") return;
@@ -154,10 +159,10 @@ export function Beginner() {
           const isLastInTopic = node.lessonIndex === node.totalLessonsInTopic - 1;
 
           return (
-            <div key={node.id} className="w-full flex flex-col items-center relative z-10">
-              {/* Header Phân đoạn (Rank/Tier) */}
+            <React.Fragment key={node.id}>
+              {/* Header Phân đoạn (Rank/Tier) — phải là sibling của node để sticky hoạt động đúng */}
               {showHeader && (
-                <div className="w-full px-4 my-8 mb-5 sticky top-16 z-40">
+                <div className="w-full px-4 mt-8 mb-5 sticky top-0 z-40">
                   <div className="bg-blue-600 rounded-2xl p-4 shadow-xl text-white flex justify-between items-center">
                     <div className="flex items-center gap-4">
                       <div>
@@ -173,69 +178,71 @@ export function Beginner() {
               )}
 
               {/* Node Button */}
-              <div className="relative my-4 " style={{ transform: `translateX(${offset}px)` }}>
-                {/* Tooltip khi đang học */}
-                {isCurrent && (
-                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-xl font-bold text-blue-600 shadow-lg text-sm whitespace-nowrap animate-bounce z-30">
-                    Bắt đầu
-                    <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45"></div>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => handleNodeClick(node)}
-                  className={cn(
-                    "w-[70px] h-[70px] rounded-full border-b-[6px] active:border-b-0 active:translate-y-[6px] transition-all flex items-center justify-center relative",
-                    isLocked
-                      ? "bg-slate-200 border-slate-300 cursor-not-allowed"
-                      : isCompleted
-                        ? "bg-amber-400 border-amber-500 text-white shadow-xl shadow-amber-400/20"
-                        : "bg-blue-500 border-blue-600 text-white shadow-xl shadow-blue-500/30 ring-4 ring-blue-500/20",
-                  )}
-                >
-                  {/* Icon */}
-                  {isLocked ? (
-                    <Lock className="w-7 h-7 text-slate-400" />
-                  ) : isLastInTopic && isCompleted ? (
-                    <Star className="w-8 h-8 fill-current" />
-                  ) : isCompleted ? (
-                    <Check className="w-8 h-8 stroke-[3]" />
-                  ) : (
-                    <Star className="w-8 h-8 stroke-[3]" />
+              <div className="w-full flex flex-col items-center relative z-10">
+                <div className="relative my-4 " style={{ transform: `translateX(${offset}px)` }}>
+                  {/* Tooltip khi đang học */}
+                  {isCurrent && (
+                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-xl font-bold text-blue-600 shadow-lg text-sm whitespace-nowrap animate-bounce z-30">
+                      Bắt đầu
+                      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white rotate-45"></div>
+                    </div>
                   )}
 
-                  {/* Vòng sáng quanh node current */}
-                  {isCurrent && <div className="absolute inset-0 rounded-full border-4 border-blue-200 animate-ping opacity-50 -z-10 scale-125"></div>}
-                </button>
-
-                {/* Nhãn bài học bên cạnh */}
-                <div
-                  className={cn(
-                    "absolute top-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 md:opacity-100 font-bold text-sm",
-                    offset >= 0 ? "right-[100%] mr-4 text-right" : "left-[100%] ml-4 text-left",
-                    isLocked ? "text-slate-400" : "text-slate-700",
-                  )}
-                >
-                  <p>{node.title}</p>
-                  <p className="text-xs font-medium opacity-60">
-                    Phần {node.lessonIndex + 1}/{node.totalLessonsInTopic} ({node.wordCount} từ)
-                  </p>
-                </div>
-
-                {/* Mascot ngẫu nhiên (chỉ hiện ở một số node nhất định) */}
-                {index % 4 === 2 && (
-                  <div
+                  <button
+                    onClick={() => handleNodeClick(node)}
                     className={cn(
-                      "absolute top-1/2 -translate-y-1/2 w-16 h-16 pointer-events-none drop-shadow-md hidden md:block",
-                      offset >= 0 ? "left-[100%] ml-8" : "right-[100%] mr-8",
-                      isLocked && "opacity-40 grayscale",
+                      "w-[70px] h-[70px] rounded-full border-b-[6px] active:border-b-0 active:translate-y-[6px] transition-all flex items-center justify-center relative",
+                      isLocked
+                        ? "bg-slate-200 border-slate-300 cursor-not-allowed"
+                        : isCompleted
+                          ? "bg-amber-400 border-amber-500 text-white shadow-xl shadow-amber-400/20"
+                          : "bg-blue-500 border-blue-600 text-white shadow-xl shadow-blue-500/30 ring-4 ring-blue-500/20",
                     )}
                   >
-                    <img src={`/mascot/Lopy (${[1, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17][(index * 7) % 11]}).png`} alt="Lopy mascot" className="w-full h-full object-contain" />
+                    {/* Icon */}
+                    {isLocked ? (
+                      <Lock className="w-7 h-7 text-slate-400" />
+                    ) : isLastInTopic && isCompleted ? (
+                      <Star className="w-8 h-8 fill-current" />
+                    ) : isCompleted ? (
+                      <Check className="w-8 h-8 stroke-[3]" />
+                    ) : (
+                      <Star className="w-8 h-8 stroke-[3]" />
+                    )}
+
+                    {/* Vòng sáng quanh node current */}
+                    {isCurrent && <div className="absolute inset-0 rounded-full border-4 border-blue-200 animate-ping opacity-50 -z-10 scale-125"></div>}
+                  </button>
+
+                  {/* Nhãn bài học bên cạnh */}
+                  <div
+                    className={cn(
+                      "absolute top-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 md:opacity-100 font-bold text-sm",
+                      offset >= 0 ? "right-[100%] mr-4 text-right" : "left-[100%] ml-4 text-left",
+                      isLocked ? "text-slate-400" : "text-slate-700",
+                    )}
+                  >
+                    <p>{node.title}</p>
+                    <p className="text-xs font-medium opacity-60">
+                      Phần {node.lessonIndex + 1}/{node.totalLessonsInTopic} ({node.wordCount} từ)
+                    </p>
                   </div>
-                )}
+
+                  {/* Mascot ngẫu nhiên (chỉ hiện ở một số node nhất định) */}
+                  {index % 4 === 2 && (
+                    <div
+                      className={cn(
+                        "absolute top-1/2 -translate-y-1/2 w-16 h-16 pointer-events-none drop-shadow-md hidden md:block",
+                        offset >= 0 ? "left-[100%] ml-8" : "right-[100%] mr-8",
+                        isLocked && "opacity-40 grayscale",
+                      )}
+                    >
+                      <img src={`/mascot/Lopy (${[1, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17][(index * 7) % 11]}).png`} alt="Lopy mascot" className="w-full h-full object-contain" />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            </React.Fragment>
           );
         })}
       </div>
@@ -267,17 +274,26 @@ export function Beginner() {
             <button
               onClick={handleStartLesson}
               className={cn(
-                "w-full py-4 rounded-2xl font-bold text-white text-lg shadow-xl active:translate-y-1 transition-all border-b-4 flex items-center justify-center gap-2",
+                "w-full py-4 rounded-2xl font-bold text-lg shadow-xl active:translate-y-1 transition-all border-b-4 flex items-center justify-center gap-2",
                 selectedNode.status === "completed"
-                  ? "bg-amber-400 border-amber-500 hover:bg-amber-500 shadow-amber-400/30 text-amber-900"
-                  : "bg-blue-500 border-blue-600 hover:bg-blue-600 shadow-blue-500/30",
+                  ? selectedNode.rewardClaimed
+                    ? "bg-slate-200 border-slate-300 hover:bg-slate-300 shadow-slate-200/30 text-slate-600"
+                    : "bg-amber-400 border-amber-500 hover:bg-amber-500 shadow-amber-400/30 text-amber-900"
+                  : "bg-blue-500 border-blue-600 hover:bg-blue-600 shadow-blue-500/30 text-white",
               )}
             >
               {selectedNode.status === "completed" ? (
-                <>
-                  <Star className="w-6 h-6 fill-amber-900" />
-                  Học lại (Nhận x2 XP)
-                </>
+                selectedNode.rewardClaimed ? (
+                  <>
+                    <Star className="w-6 h-6" />
+                    Học lại
+                  </>
+                ) : (
+                  <>
+                    <Star className="w-6 h-6 fill-amber-900" />
+                    Học lại (Nhận x2 XP)
+                  </>
+                )
               ) : (
                 "Bắt đầu học"
               )}

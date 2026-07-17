@@ -179,7 +179,7 @@ router.post(
           action: "Hoàn thành nhiệm vụ",
           target: "Con người của công việc",
           type: "other",
-          xpEarned: taskResult.xpToAdd
+          xpEarned: taskResult.xpToAdd,
         });
       }
     }
@@ -199,7 +199,7 @@ router.get(
 
     const y = parseInt(year);
     const m = parseInt(month);
-    
+
     // Create start and end date strings for the month (YYYY-MM-DD)
     const startDate = new Date(Date.UTC(y, m - 1, 1)).toISOString().split("T")[0];
     const endDate = new Date(Date.UTC(y, m, 0)).toISOString().split("T")[0];
@@ -339,8 +339,6 @@ router.put(
   }),
 );
 
-
-
 // Get user profile by UID
 router.get(
   "/profile/:uid",
@@ -355,11 +353,8 @@ router.get(
     const [flashcardsCount, quizzesCount, studyStats, activities] = await Promise.all([
       FlashcardProgress.countDocuments({ userId: uid }),
       QuizResult.countDocuments({ uid: uid }),
-      UserDailyStat.aggregate([
-        { $match: { userId: user._id } },
-        { $group: { _id: null, totalMinutes: { $sum: "$studyMinutes" } } }
-      ]),
-      UserActivity.find({ uid: uid }).sort({ createdAt: -1 }).limit(10).lean()
+      UserDailyStat.aggregate([{ $match: { userId: user._id } }, { $group: { _id: null, totalMinutes: { $sum: "$studyMinutes" } } }]),
+      UserActivity.find({ uid: uid }).sort({ createdAt: -1 }).limit(10).lean(),
     ]);
 
     const totalStudyHours = studyStats.length > 0 ? Math.round(studyStats[0].totalMinutes / 60) : 0;
@@ -384,16 +379,16 @@ router.get(
       stats: {
         flashcardsLearned: flashcardsCount,
         quizzesCompleted: quizzesCount,
-        studyHours: totalStudyHours
+        studyHours: totalStudyHours,
       },
-      recentActivities: activities.map(a => ({
+      recentActivities: activities.map((a) => ({
         id: a._id,
         action: a.action,
         target: a.target,
         type: a.type,
         time: a.createdAt ? a.createdAt.toISOString() : new Date().toISOString(),
-        xpEarned: a.xpEarned
-      }))
+        xpEarned: a.xpEarned,
+      })),
     });
   }),
 );
@@ -418,8 +413,9 @@ router.get(
   "/beginner-progress",
   asyncHandler(async (req, res) => {
     const records = await BeginnerProgress.find({ userId: req.user.uid }).lean();
-    const completedLessons = records.map(r => r.lessonId);
-    res.json({ completedLessons });
+    const completedLessons = records.map((r) => r.lessonId);
+    const rewardClaimedLessons = records.filter((r) => r.rewardClaimed).map((r) => r.lessonId);
+    res.json({ completedLessons, rewardClaimedLessons });
   }),
 );
 
@@ -434,63 +430,29 @@ router.post(
 
     const existing = await BeginnerProgress.findOne({ userId: req.user.uid, lessonId });
     if (existing) {
-      return res.json({ status: "success", xpResult: null, message: "Already completed" });
+      if (existing.rewardClaimed) {
+        // Already received relearn bonus before — no more XP
+        return res.json({ status: "success", xpResult: null, message: "Already relearned, no XP" });
+      }
+      // First relearn: award x2 XP (20 XP) and mark as claimed
+      const xpResult = await addXpToUser(req.user.uid, 20);
+      await BeginnerProgress.updateOne({ _id: existing._id }, { $set: { rewardClaimed: true } });
+      return res.json({ status: "success", xpResult, message: "Relearned, awarded 20 XP" });
     }
 
     await BeginnerProgress.create({
       userId: req.user.uid,
       lessonId,
-      score: 100 // default score
+      score: 100, // default score
     });
 
-    // 20 XP per lesson (5 words * 4 XP)
-    const xpResult = await addXpToUser(req.user.uid, 20);
+    // 10 XP for the first time learning
+    const xpResult = await addXpToUser(req.user.uid, 10);
 
     res.json({ status: "success", xpResult, newLessonAdded: true });
   }),
 );
 
-// Complete beginner topic
-router.post(
-  "/beginner-topic-complete",
-  asyncHandler(async (req, res) => {
-    const { topicId } = req.body;
-    if (!topicId || typeof topicId !== "string") {
-      return res.status(400).json({ error: "topicId is required" });
-    }
-
-    const xpToAdd = 20;
-    const user = await User.findById(req.user.uid);
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    const completedTopics = user.completedBeginnerTopics || [];
-    if (completedTopics.includes(topicId)) {
-      return res.json({
-        status: "success",
-        alreadyAwarded: true,
-        awardedXp: 0,
-        xp: user.xp || 0,
-        level: user.level || 1,
-        levelUp: false,
-      });
-    }
-
-    // Update logic
-    user.completedBeginnerTopics = [...completedTopics, topicId];
-    await user.save();
-
-    const { xp, level, levelUp } = await addXpToUser(req.user.uid, xpToAdd);
-
-    res.json({
-      status: "success",
-      alreadyAwarded: false,
-      awardedXp: xpToAdd,
-      xp,
-      level,
-      levelUp,
-    });
-  }),
-);
 
 // Follow / Unfollow User
 router.post(

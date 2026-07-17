@@ -34,9 +34,9 @@ export function Recommendations() {
       )
     },
     {
-      title: "Ngữ pháp",
-      desc: "Nắm vững lý thuyết",
-      path: "/grammar",
+      title: "Người mới bắt đầu",
+      desc: "Lộ trình từ cơ bản",
+      path: "/beginner",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 text-blue-500 drop-shadow-md">
            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" stroke="currentColor" fill="currentColor" fillOpacity="0.2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
