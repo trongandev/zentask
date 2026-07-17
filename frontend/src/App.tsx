@@ -23,6 +23,7 @@ import { Notifications } from "./pages/Notifications";
 import { Auth } from "./pages/Auth";
 import { Arena } from "./pages/Arena/Arena";
 import { AdminLayout } from "./components/AdminLayout";
+import { BeginnerLayout } from "./components/BeginnerLayout";
 import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 import { AdminTasks } from "./pages/Admin/AdminTasks";
 import { AdminUsers } from "./pages/Admin/AdminUsers";
@@ -47,6 +48,10 @@ import { RightSidebar } from "./components/RightSidebar";
 import { LevelUpModal } from "./components/LevelUpModal";
 import { useUserStore } from "./services/userService";
 import { Beginner } from "./pages/Beginner";
+import { BeginnerGrammar } from "./pages/BeginnerGrammar";
+import { BeginnerGrammarLesson } from "./pages/BeginnerGrammarLesson";
+import { BeginnerSkills } from "./pages/BeginnerSkills";
+import { BeginnerRank } from "./pages/BeginnerRank";
 import { BeginnerFlashcardDetail } from "./pages/Flashcard/BeginnerFlashcardDetail";
 import { QuizCreate } from "./pages/Quiz/QuizCreate";
 import { QuizRoom } from "./pages/Quiz/QuizRoom";
@@ -58,6 +63,8 @@ import Friends from "./pages/Friends";
 import SkillPracticeRoom from "./pages/SkillPracticeRoom";
 import BotConfigPage from "./pages/Admin/BotConfigPage";
 import { SystemLogs } from "./pages/Admin/SystemLogs";
+import { AdminAIUsage } from "./pages/Admin/AdminAIUsage";
+import { AdminBotJobs } from "./pages/Admin/AdminBotJobs";
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import { ZaloGo } from "./pages/ZaloAuth/ZaloGo";
 import { ZaloAuthorize } from "./pages/ZaloAuth/ZaloAuthorize";
@@ -232,6 +239,9 @@ function MainLayout() {
   );
 }
 
+import { LandingPage } from "./pages/LandingPage";
+import { BeginnerLessonPractice } from "./pages/BeginnerLessonPractice";
+
 function AppContent() {
   const { user, loading, isIpBanned } = useAuth();
   const { levelUpData, clearLevelUp } = useUserStore();
@@ -264,6 +274,8 @@ function AppContent() {
           <Route path="quiz-history" element={<AdminQuizHistory />} />
           <Route path="bot-config" element={<BotConfigPage />} />
           <Route path="system-logs" element={<SystemLogs />} />
+          <Route path="ai-usage" element={<AdminAIUsage />} />
+          <Route path="bot-jobs" element={<AdminBotJobs />} />
           <Route path="community-posts" element={<AdminCommunityPosts />} />
           <Route path="banned-ips" element={<AdminBannedIPs />} />
         </Route>
@@ -273,11 +285,12 @@ function AppContent() {
         <Route path="/go/:id" element={<ZaloGo />} />
         <Route path="/authorize/:id" element={<ZaloAuthorize />} />
 
-        <Route path="/" element={<MainLayout />}>
-          {/* Public routes */}
-          <Route index element={<Dashboard />} />
-          <Route path="beginner" element={<Beginner />} />
-          <Route path="beginner/flashcard/:id" element={<BeginnerFlashcardDetail />} />
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
+        <Route element={<MainLayout />}>
+          {/* Main App Routes */}
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="flashcards" element={<Flashcards />} />
           <Route path="flashcard/:id" element={<FlashcardDetail />} />
           <Route path="quiz" element={<Quiz />} />
@@ -296,8 +309,6 @@ function AppContent() {
 
           {/* Protected routes */}
           <Route element={<ProtectedRouteLayout />}>
-            <Route path="beginner/flashcard/:id/practice" element={<FlashcardPractice />} />
-            <Route path="beginner/skills/:mode" element={<SkillPracticeRoom />} />
             <Route path="flashcard/:id/practice" element={<FlashcardPractice />} />
             <Route path="quiz/create" element={<QuizCreate />} />
             <Route path="quiz/room/:code" element={<QuizRoom />} />
@@ -316,6 +327,22 @@ function AppContent() {
             <Route path="notifications" element={<Notifications />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+
+        {/* Beginner Layout - No sidebars */}
+        <Route element={<BeginnerLayout />}>
+          <Route element={<ProtectedRouteLayout />}>
+            <Route path="beginner" element={<Beginner />} />
+            <Route path="beginner/grammar" element={<BeginnerGrammar />} />
+            <Route path="beginner/grammar/:topicId" element={<BeginnerGrammarLesson />} />
+            <Route path="beginner/skills" element={<BeginnerSkills />} />
+            <Route path="beginner/rank" element={<BeginnerRank />} />
+            <Route path="beginner/lesson/:topicId/:lessonIndex" element={<BeginnerLessonPractice />} />
+            {/* Keeping old routes temporarily so it doesn't break */}
+            <Route path="beginner/flashcard/:id" element={<BeginnerFlashcardDetail />} />
+            <Route path="beginner/flashcard/:id/practice" element={<FlashcardPractice />} />
+            <Route path="beginner/skills/:mode" element={<SkillPracticeRoom />} />
+          </Route>
         </Route>
       </Routes>
       {levelUpData && <LevelUpModal newLevel={levelUpData.newLevel} onClose={clearLevelUp} />}

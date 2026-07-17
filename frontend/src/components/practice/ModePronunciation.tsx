@@ -134,6 +134,22 @@ function mapPhonemesToChars(word: string, phonemes: { phoneme: string; correct: 
 }
 
 function pickWords(result: any): WordResult[] {
+  // Support custom backend format
+  if (result?.is_letter_correct_all_words && result?.real_transcripts) {
+    const words = String(result.real_transcripts).split(" ");
+    const flags = String(result.is_letter_correct_all_words).trim().split(" ");
+    
+    return words.map((word, i) => {
+      const flagStr = flags[i] || "";
+      const chars = word.split("").map((c, j) => ({
+        char: c,
+        correct: flagStr[j] === "1" ? true : flagStr[j] === "0" ? false : null
+      }));
+      const correct = chars.every(c => c.correct !== false);
+      return { word, correct, score: null, chars };
+    });
+  }
+
   // Try NBest[].Words[] (Azure SDK shape)
   const nBest = result?.NBest ?? result?.nBest ?? result?.nbest;
   const wordsArray = (Array.isArray(nBest) && nBest[0]?.Words) || (Array.isArray(nBest) && nBest[0]?.words) || result?.Words || result?.words || null;

@@ -1,21 +1,17 @@
+import axiosInstance from "./axiosConfig";
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
-async function request(endpoint: string, options: RequestInit = {}) {
-  const response = await fetch(`${API_URL}/api/friends${endpoint}`, {
-    ...options,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
+async function request(endpoint: string, options: any = {}) {
+  const method = options.method || "GET";
+  const data = options.body ? JSON.parse(options.body) : undefined;
+
+  const response = await axiosInstance({
+    url: `/api/friends${endpoint}`,
+    method,
+    data,
   });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.error || error.message || "Có lỗi xảy ra.");
-  }
-
-  return response.json();
+  return response.data;
 }
 
 export type FriendStatus = "none" | "sent" | "received" | "friend";
@@ -104,5 +100,5 @@ export const friendsService = {
   },
   getOnlineFriends(): Promise<FriendUser[]> {
     return request("/online");
-  }
+  },
 };

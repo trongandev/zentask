@@ -1,6 +1,5 @@
 import { create } from "zustand";
-
-const API_URL = import.meta.env.VITE_API_BACKEND;
+import axiosInstance from "./axiosConfig";
 
 export interface SystemLevel {
   level: number;

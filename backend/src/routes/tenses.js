@@ -1,7 +1,8 @@
 import { Router } from "express";
 import User from "../models/User.js";
 import { TensesTest } from "../models/Schemas.js";
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
+import { generateAIContent } from "../services/ai.service.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { consumeDailyLimit } from "../../utils/usageLimits.js";
@@ -69,17 +70,6 @@ router.post(
 
     const tensesProgress = user.tensesProgress || { maxStage: 1, totalCorrect: 0, totalWrong: 0, completedStages: [], recentLogs: [] };
 
-    const availableKeys = [];
-    for (let i = 1; i <= 10; i++) {
-      const k = process.env[`API_KEY_AI_${i}`];
-      if (k) availableKeys.push({ index: i, key: k });
-    }
-
-    if (availableKeys.length === 0) {
-      return res.status(500).json({ error: "No AI keys configured" });
-    }
-    const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
-
     let recentMistakesStr = "";
     if (tensesProgress.recentLogs && tensesProgress.recentLogs.length > 0) {
       const recentMistakes = tensesProgress.recentLogs.filter((log) => !log.isCorrect).slice(-10);
@@ -103,59 +93,50 @@ Nội dung bằng tiếng Việt, hướng dẫn rõ ràng.`;
 
     let testData = null;
 
-    for (const { index, key } of shuffledKeys) {
-      try {
-        const ai = new GoogleGenAI({ apiKey: key });
-        const response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: promptText,
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                title: { type: Type.STRING, description: "Tiêu đề bài kiểm tra cá nhân hóa" },
-                description: { type: Type.STRING, description: "Mô tả ngắn gọn" },
-                exercises: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      id: { type: Type.STRING },
-                      type: { type: Type.STRING, description: "Một trong các dạng: conjugation, multiple_choice, scramble, error_identification, transformation" },
-                      question: { type: Type.STRING },
-                      explanation: { type: Type.STRING },
-                      options: { type: Type.ARRAY, items: { type: Type.STRING } },
-                      hint: { type: Type.STRING },
-                      correctAnswerString: { type: Type.STRING, description: "Đáp án đúng dành cho conjugation, multiple_choice, error_identification, transformation" },
-                      correctAnswerArray: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Đáp án đúng dạng mảng (các từ theo đúng thứ tự) dành cho scramble" },
-                    },
-                    required: ["id", "type", "question"],
-                  },
+    try {
+      testData = await generateAIContent({
+        prompt: promptText,
+        feature: "tenses_generate",
+        uid: req.user.uid,
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING, description: "Tiêu đề bài kiểm tra cá nhân hóa" },
+            description: { type: Type.STRING, description: "Mô tả ngắn gọn" },
+            exercises: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  id: { type: Type.STRING },
+                  type: { type: Type.STRING, description: "Một trong các dạng: conjugation, multiple_choice, scramble, error_identification, transformation" },
+                  question: { type: Type.STRING },
+                  explanation: { type: Type.STRING },
+                  options: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  hint: { type: Type.STRING },
+                  correctAnswerString: { type: Type.STRING, description: "Đáp án đúng dành cho conjugation, multiple_choice, error_identification, transformation" },
+                  correctAnswerArray: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Đáp án đúng dạng mảng (các từ theo đúng thứ tự) dành cho scramble" },
                 },
+                required: ["id", "type", "question"],
               },
-              required: ["title", "description", "exercises"],
             },
           },
-        });
-
-        testData = JSON.parse(response.text);
-
-        if (testData.exercises) {
-          testData.exercises = testData.exercises.map((ex) => {
-            if (ex.type === "scramble" && ex.correctAnswerArray) {
-              ex.correctAnswer = ex.correctAnswerArray;
-            } else if (ex.correctAnswerString) {
-              ex.correctAnswer = ex.correctAnswerString;
-            }
-            return ex;
-          });
+          required: ["title", "description", "exercises"],
         }
+      });
 
-        break;
-      } catch (err) {
-        console.warn(`[Tenses AI] Key API_KEY_AI_${index} failed:`, err.message);
+      if (testData.exercises) {
+        testData.exercises = testData.exercises.map((ex) => {
+          if (ex.type === "scramble" && ex.correctAnswerArray) {
+            ex.correctAnswer = ex.correctAnswerArray;
+          } else if (ex.correctAnswerString) {
+            ex.correctAnswer = ex.correctAnswerString;
+          }
+          return ex;
+        });
       }
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to generate custom tenses test." });
     }
 
     if (!testData) {

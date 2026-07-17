@@ -1,8 +1,6 @@
 import { create } from "zustand";
-import toastService from "@/src/services/toastService";
 import { useConfigStore } from "./configService";
-
-const API_URL = import.meta.env.VITE_API_BACKEND;
+import axiosInstance from "./axiosConfig";
 
 interface StudyStat {
   date: string;
@@ -86,46 +84,8 @@ export const useUserStore = create<UserState>((set, get) => ({
 
   checkIn: async () => {
     set({ loading: true });
-    try {
-      const res = await fetch(`${API_URL}/api/user/checkin`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Lỗi khi điểm danh");
-      const data = await res.json();
-
-      if (data.status === "already_checked_in") {
-        toastService.success("Bạn đã điểm danh hôm nay rồi!");
-      } else {
-        toastService.success(`Điểm danh thành công! Chuỗi: ${data.streak} ngày`);
-        if (data.levelUp) {
-          set({ levelUpData: { newLevel: data.level } });
-        }
-      }
-
-      if (data.taskProgress) {
-        useConfigStore.getState().setTaskProgress(data.taskProgress);
-      }
-
-      // Update the local stats array to instantly turn today's check-in dot green
-      if (data.lastCheckInDate) {
-        set((state) => {
-          const newStats = [...state.stats];
-          const todayIndex = newStats.findIndex((s) => s.date === data.lastCheckInDate);
-          if (todayIndex !== -1) {
-            newStats[todayIndex].isCheckedIn = true;
-          }
-          return { stats: newStats };
-        });
-      }
-
-      return data;
-    } catch (err: any) {
-      toastService.error(err.message || "Lỗi khi điểm danh");
-      return null;
-    } finally {
-      set({ loading: false });
-    }
+    const res = await axiosInstance.post(`/api/user/checkin`);
+      return res.data;
   },
 
   logStudyTime: async (minutes: number) => {

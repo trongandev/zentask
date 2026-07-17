@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import toastService from "@/src/services/toastService";
 import { assertPublicContentSafe } from "../utils/publicContentGuard";
-
-const API_URL = import.meta.env.VITE_API_BACKEND;
+import axiosInstance from "./axiosConfig";
 
 export interface UserSnippet {
   uid: string;
@@ -32,23 +31,6 @@ export interface Comment {
   user: UserSnippet;
 }
 
-const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_URL}/api${endpoint}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-    credentials: "include",
-  });
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || err.message || `HTTP error! status: ${response.status}`);
-  }
-  return response.json();
-};
-
 interface CommunityState {
   loading: boolean;
   posts: Post[];
@@ -72,12 +54,11 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   getPosts: async (tags?: string, background = false) => {
     if (!background) set({ loading: true });
     try {
-      const url = tags ? `/community/posts?tags=${tags}` : `/community/posts`;
-      const data = await fetchApi(url);
-      set({ posts: data, loading: false });
-      return data;
+      const url = tags ? `/api/community/posts?tags=${tags}` : `/api/community/posts`;
+      const res = await axiosInstance.get(url);
+      set({ posts: res.data, loading: false });
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
       set({ loading: false });
       return [];
     }
@@ -87,15 +68,12 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
     try {
       assertPublicContentSafe(content, "Bài viết");
       tags.forEach((tag) => assertPublicContentSafe(tag, "Hashtag"));
-      const result = await fetchApi("/community/posts", {
-        method: "POST",
-        body: JSON.stringify({ content, tags }),
-      });
+      const res = await axiosInstance.post("/api/community/posts", { content, tags });
       get().getPosts(undefined, true);
       toastService.success("Đăng bài thành công");
-      return result;
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
+      if (!error.isAxiosError) toastService.error(error.message);
       return null;
     }
   },
@@ -104,51 +82,41 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
     try {
       assertPublicContentSafe(content, "Bài viết");
       tags.forEach((tag) => assertPublicContentSafe(tag, "Hashtag"));
-      const result = await fetchApi(`/community/posts/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({ content, tags }),
-      });
+      const res = await axiosInstance.put(`/api/community/posts/${id}`, { content, tags });
       get().getPosts(undefined, true);
       toastService.success("Cập nhật bài viết thành công");
-      return result;
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
+      if (!error.isAxiosError) toastService.error(error.message);
       return null;
     }
   },
 
   deletePost: async (id: string) => {
     try {
-      const result = await fetchApi(`/community/posts/${id}`, {
-        method: "DELETE",
-      });
+      const res = await axiosInstance.delete(`/api/community/posts/${id}`);
       set((state) => ({ posts: state.posts.filter((p) => p.id !== id) }));
       toastService.success("Xóa bài viết thành công");
-      return result;
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
       return null;
     }
   },
 
   togglePostLike: async (id: string) => {
     try {
-      const result = await fetchApi(`/community/posts/${id}/like`, {
-        method: "POST",
-      });
-      return result;
+      const res = await axiosInstance.post(`/api/community/posts/${id}/like`);
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
       return null;
     }
   },
 
   getComments: async (postId: string) => {
     try {
-      const data = await fetchApi(`/community/posts/${postId}/comments`);
-      return data;
+      const res = await axiosInstance.get(`/api/community/posts/${postId}/comments`);
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
       return [];
     }
   },
@@ -156,25 +124,19 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   createComment: async (postId: string, content: string, parentId?: string) => {
     try {
       assertPublicContentSafe(content, "Bình luận");
-      const result = await fetchApi(`/community/posts/${postId}/comments`, {
-        method: "POST",
-        body: JSON.stringify({ content, parentId }),
-      });
-      return result;
+      const res = await axiosInstance.post(`/api/community/posts/${postId}/comments`, { content, parentId });
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
+      if (!error.isAxiosError) toastService.error(error.message);
       return null;
     }
   },
 
   toggleCommentLike: async (commentId: string) => {
     try {
-      const result = await fetchApi(`/community/comments/${commentId}/like`, {
-        method: "POST",
-      });
-      return result;
+      const res = await axiosInstance.post(`/api/community/comments/${commentId}/like`);
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
       return null;
     }
   },
@@ -182,13 +144,10 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   updateComment: async (commentId: string, content: string) => {
     try {
       assertPublicContentSafe(content, "Bình luận");
-      const result = await fetchApi(`/community/comments/${commentId}`, {
-        method: "PUT",
-        body: JSON.stringify({ content }),
-      });
-      return result;
+      const res = await axiosInstance.put(`/api/community/comments/${commentId}`, { content });
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
+      if (!error.isAxiosError) toastService.error(error.message);
       return null;
     }
   },

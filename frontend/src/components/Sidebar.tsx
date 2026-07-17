@@ -65,7 +65,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const menuGroups = [
     {
       label: "",
-      items: [{ icon: Home, label: "Tổng quan", to: "/" }],
+      items: [{ icon: Home, label: "Tổng quan", to: "/dashboard" }],
     },
     {
       label: "NHÓM HỌC TẬP",

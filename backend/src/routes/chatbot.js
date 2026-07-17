@@ -6,9 +6,10 @@ import { OpenAI } from "openai";
 import fs from "fs";
 import path from "path";
 import sizeOf from "image-size";
+dotenv.config();
 const THREADID_NOT_REPLY = [, "4730750718637283891" /** Quizzet cộng đồng học từ vựng */];
 const ZALOID_BANNED = [];
-dotenv.config();
+const GROUP_ACTIVE_REPLY = process.env.QUIZ_GROUP_THREAD_ID;
 
 async function imageMetadataGetter(filePath) {
   const data = await fs.promises.readFile(filePath);
@@ -41,7 +42,7 @@ import ChatbotUtil from "../../utils/chatbot.js";
 import { verifyToken } from "../middleware/auth.js";
 import User from "../models/User.js";
 import { addXpToUser } from "./user.js";
-import { startChatbotJobs } from "../../utils/chatbotJobs.js";
+import { initJobs } from "../../utils/jobManager.js";
 import { activeQuizzes, activeFlashDrops, sendQuiz, generateDailyQuizzes } from "../services/quizBot.service.js";
 import { parseMarkdownToZalo } from "../../utils/util.js";
 import crypto from "crypto";
@@ -80,7 +81,7 @@ async function startZaloBot() {
       const isAudioFile = message.data?.content?.href?.includes(".aac");
       const isFriendAccept = message.data?.content?.title?.includes("Bạn vừa kết bạn với");
 
-      if (typeof message.data.content !== "string" && message.type !== "event" && message.type !== 2 && !isAudioFile && !isFriendAccept && message.threadId !== "190076593393622327") {
+      if (typeof message.data.content !== "string" && message.type !== "event" && message.type !== 2 && !isAudioFile && !isFriendAccept && message.threadId !== GROUP_ACTIVE_REPLY) {
         console.log(message.data.content?.title || "Received media/sticker");
         const textRequests = [
           "Ủa alo? Gửi ảnh với sticker rồi bắt em hiểu là sao? Người đẹp gõ chữ ra giùm em đi ạ, mãi iu! 😙",
@@ -123,7 +124,7 @@ async function startZaloBot() {
       const contentString = typeof message.data.content === "string" ? message.data.content.toLowerCase() : "";
       const isCallingBot = isMentioningBot || contentString.includes("@lopy zentask");
 
-      if (isCallingBot && message.threadId === "190076593393622327") {
+      if (isCallingBot && message.threadId === GROUP_ACTIVE_REPLY) {
         const imagePath = path.resolve("./src/images/lopy-zentask-bot.png");
         if (fs.existsSync(imagePath)) {
           return api.sendMessage(
@@ -350,7 +351,7 @@ async function startZaloBot() {
     console.log("Zalo bot started successfully.");
 
     // Bật các tiến trình Cron jobs cho Mentor Bot
-    startChatbotJobs(api);
+    initJobs(api);
   } catch (error) {
     console.error("Error starting Zalo bot:", error);
   }

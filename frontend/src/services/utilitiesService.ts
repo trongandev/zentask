@@ -1,3 +1,5 @@
+import axiosInstance from "./axiosConfig";
+
 export interface CalculatorHistoryItem {
   id: string;
   expression: string;

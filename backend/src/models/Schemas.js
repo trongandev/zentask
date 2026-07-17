@@ -256,7 +256,29 @@ export const TranslationHistorySchema = new Schema({
   sourceText: { type: String, required: true },
   translatedText: { type: String, required: true },
   source: { type: String, default: "auto" },
-  target: { type: String, default: "en" }
+}, { timestamps: true });
+
+export const AITokenUsageSchema = new Schema({
+  uid: { type: Schema.Types.ObjectId, ref: 'User' },
+  feature: { type: String, required: true },
+  model: { type: String, required: true },
+  promptTokens: { type: Number, default: 0 },
+  completionTokens: { type: Number, default: 0 },
+  totalTokens: { type: Number, default: 0 },
+  status: { type: String, enum: ['success', 'error'], required: true },
+  errorMessage: { type: String }
+}, { timestamps: true });
+
+export const BotJobScheduleSchema = new Schema({
+  jobId: { type: String, required: true, unique: true },
+  cronExpression: { type: String, required: true },
+  isActive: { type: Boolean, default: true },
+}, { timestamps: true });
+
+export const BeginnerProgressSchema = new Schema({
+  uid: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  completedGrammarTopics: [{ type: String }],
+  completedSkills: [{ type: String }],
 }, { timestamps: true });
 
 export const UserActivitySchema = new Schema({
@@ -391,3 +413,6 @@ export const BannedIP = mongoose.models.BannedIP || mongoose.model('BannedIP', B
 export const AttackerFeedback = mongoose.models.AttackerFeedback || mongoose.model('AttackerFeedback', AttackerFeedbackSchema);
 export const ZaloAuth = mongoose.models.ZaloAuth || mongoose.model('ZaloAuth', ZaloAuthSchema);
 export const BotQuiz = mongoose.models.BotQuiz || mongoose.model('BotQuiz', BotQuizSchema);
+export const AITokenUsage = mongoose.models.AITokenUsage || mongoose.model('AITokenUsage', AITokenUsageSchema);
+export const BotJobSchedule = mongoose.models.BotJobSchedule || mongoose.model('BotJobSchedule', BotJobScheduleSchema);
+export const BeginnerProgress = mongoose.models.BeginnerProgress || mongoose.model('BeginnerProgress', BeginnerProgressSchema);

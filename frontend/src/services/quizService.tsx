@@ -1,23 +1,20 @@
 import { create } from "zustand";
 import toastService from "@/src/services/toastService";
+import axiosInstance from "./axiosConfig";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 
-const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_URL}/api${endpoint}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-    credentials: "include",
+const fetchApi = async (endpoint: string, options: any = {}) => {
+  const method = options.method || "GET";
+  const data = options.body ? JSON.parse(options.body) : undefined;
+
+  const response = await axiosInstance({
+    url: `/api${endpoint}`,
+    method,
+    data,
   });
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || err.message || `HTTP error! status: ${response.status}`);
-  }
-  return response.json();
+
+  return response.data;
 };
 
 export interface QuizQuestion {

@@ -1,27 +1,8 @@
 import { create } from "zustand";
-import toastService from "@/src/services/toastService";
-
-const API_URL = import.meta.env.VITE_API_BACKEND;
-
-const fetchApi = async (path: string, options: RequestInit = {}) => {
-  const response = await fetch(`${API_URL}/api${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-    credentials: "include",
-  });
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || err.message || `HTTP error! status: ${response.status}`);
-  }
-  return response.json();
-};
+import axiosInstance from "./axiosConfig";
 
 interface EtcState {
   loading: boolean;
-
   getLeaderboard: (type: "week" | "month" | "all", force?: boolean) => Promise<any[]>;
   preloadedWeeklyLeaderboard: any[] | null;
   setPreloadedWeeklyLeaderboard: (leaderboard: any[]) => void;
@@ -48,19 +29,19 @@ export const useEtcStore = create<EtcState>((set, get) => ({
 
     set({ loading: true });
     try {
-      const data = await fetchApi(`/leaderboard?type=${type}${force ? "&force=true" : ""}`);
-      set({ loading: false });
-      return data;
+      const res = await axiosInstance.get(`/api/leaderboard?type=${type}${force ? "&force=true" : ""}`);
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
-      set({ loading: false });
       return [];
+    } finally {
+      set({ loading: false });
     }
   },
 
   checkLeaderboardRewards: async () => {
     try {
-      return await fetchApi("/leaderboard/rewards");
+      const res = await axiosInstance.get("/api/leaderboard/rewards");
+      return res.data;
     } catch (error: any) {
       return [];
     }
@@ -69,29 +50,24 @@ export const useEtcStore = create<EtcState>((set, get) => ({
   claimLeaderboardReward: async (type, period) => {
     set({ loading: true });
     try {
-      const res = await fetchApi("/leaderboard/claim", {
-        method: "POST",
-        body: JSON.stringify({ type, period }),
-      });
-      set({ loading: false });
-      return res;
+      const res = await axiosInstance.post("/api/leaderboard/claim", { type, period });
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
-      set({ loading: false });
       throw error;
+    } finally {
+      set({ loading: false });
     }
   },
 
   getUserProfile: async (uid) => {
     set({ loading: true });
     try {
-      const data = await fetchApi(`/user/profile/${uid}`);
-      set({ loading: false });
-      return data;
+      const res = await axiosInstance.get(`/api/user/profile/${uid}`);
+      return res.data;
     } catch (error: any) {
-      toastService.error(error.message);
-      set({ loading: false });
       return null;
+    } finally {
+      set({ loading: false });
     }
   },
 
@@ -102,7 +78,6 @@ export const useEtcStore = create<EtcState>((set, get) => ({
       const audioBlob = await response.blob();
       return URL.createObjectURL(audioBlob);
     } catch (error: any) {
-      toastService.error(error.message);
       throw error;
     }
   },

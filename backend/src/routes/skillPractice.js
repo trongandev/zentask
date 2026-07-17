@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
+import { generateAIContent } from "../services/ai.service.js";
 import { SkillPracticeCache, SkillPracticeDaily, UserActivity } from "../models/Schemas.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
@@ -282,25 +283,9 @@ function validateExercise(mode, data) {
   return normalizeReflexExercise(data || fallback);
 }
 
-const getAiKey = () => {
-  const keys = [];
-  for (let i = 1; i <= 20; i++) {
-    if (process.env[`API_KEY_AI_${i}`]) keys.push(process.env[`API_KEY_AI_${i}`]);
-  }
-  if (process.env.GEMINI_API_KEY) keys.push(process.env.GEMINI_API_KEY);
-  if (process.env.GEMINI_API_KEYS)
-    keys.push(
-      ...process.env.GEMINI_API_KEYS.split(",")
-        .map((v) => v.trim())
-        .filter(Boolean),
-    );
-  return keys[Math.floor(Math.random() * keys.length)] || null;
-};
 
-async function generateExercise(mode) {
-  const key = getAiKey();
-  if (!key) return fallbackExercise(mode);
 
+async function generateExercise(mode, uid = null) {
   const prompt = `Bạn là trợ lý tạo bài luyện tiếng Anh cho học viên Việt Nam. Hãy tổng hợp MỘT bài mới, không sao chép nguyên văn, lấy cảm hứng từ phong cách học tiếng Anh công khai như VOA Learning English và British Council LearnEnglish.
 Mode cần tạo: ${mode}.
 Yêu cầu:
@@ -314,33 +299,30 @@ Yêu cầu:
 - Nếu mode=reflex: tạo question, 4 options mới, correctAnswer nằm trong options. Các đáp án phải khớp với câu hỏi hiện tại. Nếu question là dạng điền từ có dấu ________, options phải là các từ/cụm từ tiếng Anh phù hợp ngữ pháp. Nếu question hỏi nghĩa tiếng Việt của một từ tiếng Anh, options phải là các nghĩa tiếng Việt. Tuyệt đối không trộn câu hỏi điền từ tiếng Anh với đáp án tiếng Việt không liên quan.`;
 
   try {
-    const ai = new GoogleGenAI({ apiKey: key });
-    const response = await ai.models.generateContent({
+    const parsed = await generateAIContent({
+      prompt,
+      feature: "skill_practice_generate",
       model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            mode: { type: Type.STRING },
-            title: { type: Type.STRING },
-            instruction: { type: Type.STRING },
-            sourceHint: { type: Type.STRING },
-            level: { type: Type.STRING },
-            passage: { type: Type.STRING },
-            targetAnswer: { type: Type.STRING },
-            sentence: { type: Type.STRING },
-            blankSentence: { type: Type.STRING },
-            question: { type: Type.STRING },
-            options: { type: Type.ARRAY, items: { type: Type.STRING } },
-            correctAnswer: { type: Type.STRING },
-          },
-          required: ["mode", "title", "instruction", "sourceHint", "level"],
+      uid,
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          mode: { type: Type.STRING },
+          title: { type: Type.STRING },
+          instruction: { type: Type.STRING },
+          sourceHint: { type: Type.STRING },
+          level: { type: Type.STRING },
+          passage: { type: Type.STRING },
+          targetAnswer: { type: Type.STRING },
+          sentence: { type: Type.STRING },
+          blankSentence: { type: Type.STRING },
+          question: { type: Type.STRING },
+          options: { type: Type.ARRAY, items: { type: Type.STRING } },
+          correctAnswer: { type: Type.STRING },
         },
+        required: ["mode", "title", "instruction", "sourceHint", "level"],
       },
     });
-    const parsed = JSON.parse(response.text || "{}");
     return validateExercise(mode, parsed);
   } catch (error) {
     console.warn("[SkillPractice] AI generation failed:", error.message);
@@ -355,7 +337,7 @@ router.get(
     if (!MODES.includes(mode)) return res.status(400).json({ error: "Mode không hợp lệ" });
 
     res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-    const payload = await generateExercise(mode);
+    const payload = await generateExercise(mode, req.user.uid);
     const cache = await SkillPracticeCache.create({ mode, payload, sourceHint: payload.sourceHint || "AI tổng hợp" });
     res.json({ id: String(cache._id), ...payload });
   }),

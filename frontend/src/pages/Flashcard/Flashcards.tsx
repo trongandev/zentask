@@ -892,15 +892,9 @@ export function Flashcards() {
                     )}
                   </div>
                   {set.creator?.displayName && <p className="mb-5 text-xs font-semibold text-gray-400">Tác giả: {set.creator.displayName}</p>}
-                  <div className="mt-auto grid grid-cols-2 gap-3">
+                  <div className="mt-auto grid grid-cols-1 gap-3">
                     <button onClick={() => navigate(`/flashcard/${set.id}`)} className="rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-600 hover:bg-blue-100 transition-colors">
                       Xem trước
-                    </button>
-                    <button
-                      onClick={() => handleClonePublicSet(set.id)}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 transition-colors"
-                    >
-                      <Copy className="w-4 h-4" /> Lưu
                     </button>
                   </div>
                 </div>

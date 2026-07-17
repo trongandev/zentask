@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useQuizStore } from "../../services/quizService";
 import { useAuth } from "../../contexts/AuthContext";
 import toastService from "@/src/services/toastService";
+import { Modal } from "../../components/shared/Modal";
 
 export function Quiz() {
   const {
@@ -24,6 +25,9 @@ export function Quiz() {
   } = useQuizStore();
   const { user } = useAuth();
   const [roomCode, setRoomCode] = useState("");
+  const [roomCodeDigits, setRoomCodeDigits] = useState(["", "", "", "", "", ""]);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [joinError, setJoinError] = useState("");
   const [activeTab, setActiveTab] = useState<"mine" | "builtin" | "public">("mine");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createIsPublic, setCreateIsPublic] = useState(true);
@@ -120,11 +124,65 @@ export function Quiz() {
   }, [activeTab]);
 
   const handleJoinRoom = async () => {
-    if (!roomCode.trim()) return toastService.error("Vui lòng nhập mã phòng");
-    const room = await getRoomByCode(roomCode);
-    if (room) {
-      navigate(`/quiz/room/${room.roomCode}`);
+    const codeToJoin = roomCodeDigits.join("").trim() || roomCode.trim();
+    if (!codeToJoin) {
+      setJoinError("Vui lòng nhập mã phòng");
+      return;
     }
+    if (codeToJoin.length < 6) {
+      setJoinError("Mã phòng phải có 6 ký tự");
+      return;
+    }
+    
+    setJoinError("");
+    const room = await getRoomByCode(codeToJoin);
+    if (room) {
+      setIsJoinModalOpen(false);
+      navigate(`/quiz/room/${room.roomCode}`);
+    } else {
+      setJoinError("Mã phòng không tồn tại hoặc đã đóng");
+    }
+  };
+
+  const handleDigitChange = (index: number, value: string) => {
+    setJoinError("");
+    const cleanValue = value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    if (cleanValue.length > 1) {
+      const pasted = cleanValue.slice(0, 6).split("");
+      const newDigits = [...roomCodeDigits];
+      for (let i = 0; i < pasted.length; i++) {
+        newDigits[i] = pasted[i];
+      }
+      setRoomCodeDigits(newDigits);
+      const focusIndex = Math.min(5, pasted.length - 1);
+      document.getElementById(`room-code-${focusIndex}`)?.focus();
+      return;
+    }
+
+    const newDigits = [...roomCodeDigits];
+    newDigits[index] = cleanValue;
+    setRoomCodeDigits(newDigits);
+
+    if (cleanValue && index < 5) {
+      document.getElementById(`room-code-${index + 1}`)?.focus();
+    }
+  };
+
+  const handleDigitKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !roomCodeDigits[index] && index > 0) {
+      document.getElementById(`room-code-${index - 1}`)?.focus();
+    } else if (e.key === "Enter") {
+      handleJoinRoom();
+    }
+  };
+
+  const openJoinModal = () => {
+    setJoinError("");
+    setRoomCodeDigits(["", "", "", "", "", ""]);
+    setIsJoinModalOpen(true);
+    setTimeout(() => {
+      document.getElementById("room-code-0")?.focus();
+    }, 100);
   };
 
   const openCreateQuizModal = () => {
@@ -179,19 +237,12 @@ export function Quiz() {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3">
-          <div className="relative w-full sm:w-auto">
-            <input
-              type="text"
-              placeholder="Nhập mã phòng..."
-              value={roomCode}
-              onChange={(e) => setRoomCode(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleJoinRoom()}
-              className="w-full sm:w-48 pl-4 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl font-bold text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none uppercase placeholder:normal-case"
-            />
-            <button onClick={handleJoinRoom} className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
-              <LogIn className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            onClick={openJoinModal}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white border-2 border-blue-100 text-blue-600 px-5 py-2.5 rounded-xl font-bold hover:bg-blue-50 transition-all"
+          >
+            <LogIn className="w-5 h-5" /> Nhập mã phòng
+          </button>
           <button
             onClick={openCreateQuizModal}
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold hover:shadow-lg hover:scale-105 transition-all"
@@ -459,6 +510,38 @@ export function Quiz() {
           </div>
         </div>
       )}
+
+      <Modal isOpen={isJoinModalOpen} onClose={() => setIsJoinModalOpen(false)} title="Vào phòng thi" desc="Nhập mã phòng gồm 6 ký tự để bắt đầu.">
+        <div className="p-6">
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6">
+            {roomCodeDigits.map((digit, idx) => (
+              <input
+                key={idx}
+                id={`room-code-${idx}`}
+                type="text"
+                maxLength={6}
+                value={digit}
+                onChange={(e) => handleDigitChange(idx, e.target.value)}
+                onKeyDown={(e) => handleDigitKeyDown(idx, e)}
+                className={`w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-extrabold text-blue-700 bg-blue-50 border-2 rounded-xl focus:ring-4 outline-none transition-all uppercase ${
+                  joinError ? "border-red-300 focus:border-red-500 focus:ring-red-500/20" : "border-blue-100 focus:border-blue-500 focus:ring-blue-500/20"
+                }`}
+              />
+            ))}
+          </div>
+          {joinError && (
+            <div className="text-center text-red-500 text-sm font-bold mb-6 bg-red-50 py-2 rounded-lg">
+              {joinError}
+            </div>
+          )}
+          <button
+            onClick={handleJoinRoom}
+            className="w-full bg-blue-600 text-white font-bold text-lg py-3.5 rounded-xl hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+          >
+            <LogIn className="w-5 h-5" /> Tìm phòng
+          </button>
+        </div>
+      </Modal>
 
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/50 p-4">

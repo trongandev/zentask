@@ -2,14 +2,8 @@ import { create } from "zustand";
 import toastService from "@/src/services/toastService";
 import { useConfigStore } from "./configService";
 import { useUserStore } from "./userService";
-
+import axiosInstance from "./axiosConfig";
 const API_URL = import.meta.env.VITE_API_BACKEND;
-
-const readApiError = async (res: Response, fallback: string) => {
-  const data = await res.json().catch(() => null);
-  return data?.error || data?.message || fallback;
-};
-
 export interface FlashcardFolder {
   id: string;
   name: string;
@@ -167,9 +161,9 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
 
   fetchFolders: async () => {
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/folders`, { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
+      const res = await axiosInstance.get(`/api/flashcard/folders`);
+      if (res) {
+        const data = await res.data;
         set({ folders: data });
       }
     } catch (err) {
@@ -179,9 +173,9 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
 
   fetchCategories: async () => {
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/categories`, { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
+      const res = await axiosInstance.get(`/api/flashcard/categories`);
+      if (res) {
+        const data = await res.data;
         set({ categories: data });
       }
     } catch (err) {
@@ -191,14 +185,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
 
   createCategory: async (name, color = "bg-slate-500", description = "") => {
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/category`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name, color, description }),
-      });
-      if (!res.ok) throw new Error(await readApiError(res, "Không tạo được đề mục"));
-      const data = await res.json();
+      const res = await axiosInstance.post(`/api/flashcard/category`, { name, color, description });
+      const data = await res.data;
       set((state) => ({ categories: [data, ...state.categories.filter((c) => c.id !== data.id)] }));
       toastService.success("Đã tạo đề mục");
       return data;
@@ -210,14 +198,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
 
   updateCategory: async (categoryId, data) => {
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/category/${categoryId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error(await readApiError(res, "Không cập nhật được đề mục"));
-      const updated = await res.json();
+      const res = await axiosInstance.patch(`/api/flashcard/category/${categoryId}`, data);
+      const updated = await res.data;
       set((state) => ({ categories: state.categories.map((c) => (c.id === categoryId ? updated : c)) }));
       toastService.success("Đã cập nhật đề mục");
       return updated;
@@ -229,11 +211,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
 
   deleteCategory: async (categoryId) => {
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/category/${categoryId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error(await readApiError(res, "Không xóa được đề mục"));
+      const res = await axiosInstance.delete(`/api/flashcard/category/${categoryId}`);
       set((state) => ({
         categories: state.categories.filter((c) => c.id !== categoryId),
         sets: state.sets.map((set) => (set.categoryId === categoryId ? { ...set, categoryId: null, categoryName: "" } : set)),
@@ -247,14 +225,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   createFolder: async (name, color = "bg-blue-500") => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/folder`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name, color }),
-      });
-      if (!res.ok) throw new Error("Failed to create folder");
-      const data = await res.json();
+      const res = await axiosInstance.post(`/api/flashcard/folder`, { name, color });
+      const data = await res.data;
       set((state) => ({ folders: [data, ...state.folders] }));
       toastService.success("Đã tạo thư mục");
       return data;
@@ -269,14 +241,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   updateFolder: async (folderId, data) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/folder/${folderId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to update folder");
-      const resData = await res.json();
+      const res = await axiosInstance.patch(`/api/flashcard/folder/${folderId}`, data);
+      const resData = await res.data;
       set((state) => ({
         folders: state.folders.map((f) => (f.id === folderId ? { ...f, ...resData.updates } : f)),
       }));
@@ -293,11 +259,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   deleteFolder: async (folderId, deleteSets = false) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/folder/${folderId}?deleteSets=${deleteSets}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to delete folder");
+      const res = await axiosInstance.delete(`/api/flashcard/folder/${folderId}?deleteSets=${deleteSets}`);
       set((state) => ({
         folders: state.folders.filter((f) => f.id !== folderId),
         sets: deleteSets ? state.sets.filter((s) => s.folderId !== folderId) : state.sets.map((s) => (s.folderId === folderId ? { ...s, folderId: null } : s)),
@@ -313,11 +275,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   fetchSets: async () => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/list`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch sets");
-      const data = await res.json();
+      const res = await axiosInstance.get(`/api/flashcard/list`);
+      const data = await res.data;
       set({ sets: data });
     } catch (err: any) {
       toastService.error(err.message || "Lỗi khi tải danh sách bộ thẻ");
@@ -329,11 +288,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   fetchPublicSets: async () => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/public`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch public sets");
-      const data = await res.json();
+      const res = await axiosInstance.get(`/api/flashcard/public`);
+      const data = await res.data;
       set({ publicSets: data });
     } catch (err: any) {
       toastService.error(err.message || "Lỗi khi tải bộ thẻ công khai");
@@ -345,9 +301,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   fetchBuiltinSets: async () => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/builtin`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch built-in sets");
-      const data = await res.json();
+      const res = await axiosInstance.get(`/api/flashcard/builtin`);
+      const data = await res.data;
       set({ builtinSets: data });
     } catch (err: any) {
       toastService.error(err.message || "Lỗi khi tải bộ thẻ có sẵn");
@@ -359,9 +314,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   cloneBuiltinSet: async (setId) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/builtin/${setId}/clone`, { method: "POST", credentials: "include" });
-      if (!res.ok) throw new Error(await readApiError(res, "Không lưu được bộ thẻ có sẵn"));
-      const data = await res.json();
+      const res = await axiosInstance.post(`/api/flashcard/builtin/${setId}/clone`);
+      const data = await res.data;
       set((state) => ({ sets: [data, ...state.sets] }));
       toastService.success("Đã lưu vào bộ thẻ của tôi");
       return data;
@@ -376,14 +330,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   createSet: async (title, description = "", color = "bg-blue-500", isPublic = true, categoryId = null, language = "en") => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/set`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ title, description, color, isPublic, categoryId, language }),
-      });
-      if (!res.ok) throw new Error(await readApiError(res, "Failed to create set"));
-      const data = await res.json();
+      const res = await axiosInstance.post(`/api/flashcard/set`, { title, description, color, isPublic, categoryId, language });
+      const data = await res.data;
       set((state) => ({ sets: [data, ...state.sets] }));
       toastService.success("Tạo bộ thẻ thành công");
       return data;
@@ -398,11 +346,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   deleteSet: async (setId) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/set/${setId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to delete set");
+      const res = await axiosInstance.delete(`/api/flashcard/set/${setId}`);
       set((state) => ({ sets: state.sets.filter((s) => s.id !== setId) }));
       toastService.success("Đã xóa bộ thẻ");
     } catch (err: any) {
@@ -415,14 +359,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   updateSet: async (setId, data) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/set/${setId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error(await readApiError(res, "Failed to update set"));
-      const resData = await res.json();
+      const res = await axiosInstance.patch(`/api/flashcard/set/${setId}`, data);
+      const resData = await res.data;
 
       set((state) => ({
         sets: state.sets.map((s) => (s.id === setId ? { ...s, ...resData.updates } : s)),
@@ -443,11 +381,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     set({ loading: true });
     try {
       const endpoint = String(setId).startsWith("builtin_") ? `${API_URL}/api/flashcard/builtin/${setId}/cards` : `${API_URL}/api/flashcard/set/${setId}/cards`;
-      const res = await fetch(endpoint, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch cards");
-      const data = await res.json();
+      const res = await axiosInstance.get(endpoint);
+      const data = await res.data;
       set({ currentSet: data.set, cards: data.cards });
     } catch (err: any) {
       toastService.error(err.message || "Lỗi khi tải danh sách thẻ");
@@ -459,14 +394,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   createCard: async (setId, cardData) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/set/${setId}/card`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(cardData),
-      });
-      if (!res.ok) throw new Error("Failed to create card");
-      const data = await res.json();
+      const res = await axiosInstance.post(`/api/flashcard/set/${setId}/card`, cardData);
+      const data = await res.data;
 
       set((state) => ({
         cards: [data, ...state.cards],
@@ -496,11 +425,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   deleteCard: async (cardId) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/card/${cardId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to delete card");
+      const res = await axiosInstance.delete(`/api/flashcard/card/${cardId}`);
       set((state) => ({
         cards: state.cards.filter((c) => c.id !== cardId),
         currentSet: state.currentSet ? { ...state.currentSet, cardCount: state.currentSet.cardCount - 1 } : null,
@@ -516,14 +441,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   generateAI: async (term, setId) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/generate-ai`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ term, setId }),
-      });
-      if (!res.ok) throw new Error("Lỗi khi gọi AI");
-      return await res.json();
+      const res = await axiosInstance.post(`/api/flashcard/generate-ai`, { term, setId });
+      return await res.data;
     } catch (err: any) {
       toastService.error(err.message || "Lỗi khi tạo bằng AI");
       return null;
@@ -535,12 +454,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   cloneSet: async (setId) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/set/${setId}/clone`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to clone set");
-      const data = await res.json();
+      const res = await axiosInstance.post(`/api/flashcard/set/${setId}/clone`);
+      const data = await res.data;
       set((state) => ({ sets: [data, ...state.sets] }));
       toastService.success("Đã sao chép bộ thẻ");
       return data;
@@ -560,11 +475,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       return;
     }
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/set/${setId}/progress`, {
-        credentials: "include",
-      });
-      if (!res.ok) return;
-      const data = await res.json();
+      const res = await axiosInstance.get(`/api/flashcard/set/${setId}/progress`);
+      const data = await res.data;
       set({ cardProgress: data });
     } catch (err) {
       console.error("fetchProgress error:", err);
@@ -596,14 +508,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     set({ pendingUpdates: [] });
 
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/progress/batch`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ updates: pendingUpdates }),
-      });
-      if (!res.ok) throw new Error("Failed to flush progress");
-      const data = await res.json();
+      const res = await axiosInstance.post(`/api/flashcard/progress/batch`, { updates: pendingUpdates });
+      const data = await res.data;
 
       // Update local cardProgress state
       if (data.results) {
@@ -659,13 +565,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     set({ pendingBeginnerUpdates: [] });
 
     try {
-      const res = await fetch(`${API_URL}/api/user/beginner-progress`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ wordIds: pendingBeginnerUpdates }),
-      });
-      if (!res.ok) throw new Error("Failed to flush beginner progress");
+      const res = await axiosInstance.post(`/api/user/beginner-progress`, { wordIds: pendingBeginnerUpdates });
     } catch (err) {
       console.error("flushBeginnerProgress error:", err);
       // Restore on failure
@@ -683,14 +583,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     const quality = qualityMap[level];
 
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/progress/manual`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ cardId, setId, level }),
-      });
-      if (!res.ok) throw new Error("Failed to set manual progress");
-      const data = await res.json();
+      const res = await axiosInstance.post(`/api/flashcard/progress/manual`, { cardId, setId, level });
+      const data = await res.data;
 
       set((state) => ({
         cardProgress: {
@@ -724,14 +618,7 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   updateSetPrivacy: async (setId, isPublic) => {
     set({ loading: true });
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/set/${setId}/privacy`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ isPublic }),
-      });
-      if (!res.ok) throw new Error(await readApiError(res, "Failed to update privacy"));
-
+      const res = await axiosInstance.patch(`/api/flashcard/set/${setId}/privacy`, { isPublic });
       set((state) => ({
         sets: state.sets.map((s) => (s.id === setId ? { ...s, isPublic } : s)),
         currentSet: state.currentSet?.id === setId ? { ...state.currentSet, isPublic } : state.currentSet,
@@ -752,11 +639,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       return preloadedDueCards;
     }
     try {
-      const res = await fetch(`${API_URL}/api/flashcard/due`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch due cards");
-      return await res.json();
+      const res = await axiosInstance.get(`/api/flashcard/due`);
+      return await res.data;
     } catch (err: any) {
       console.error("Lỗi khi tải từ vựng cần học:", err);
       return [];

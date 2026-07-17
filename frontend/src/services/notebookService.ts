@@ -1,3 +1,4 @@
+import axiosInstance from "./axiosConfig";
 import toastService from "@/src/services/toastService";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;

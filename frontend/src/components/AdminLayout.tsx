@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet, Navigate, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Shield, Users, ListTodo, LogOut, ArrowLeft, BookOpen, Type, HelpCircle, History, Bot, Activity, LayoutDashboard, MessageSquare } from "lucide-react";
+import { Shield, Users, ListTodo, LogOut, ArrowLeft, BookOpen, Type, HelpCircle, History, Bot, Activity, LayoutDashboard, MessageSquare, Clock } from "lucide-react";
 
 export function AdminLayout() {
   const { user } = useAuth();
@@ -13,7 +13,7 @@ export function AdminLayout() {
         <Shield className="w-16 h-16 text-red-500 mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Quyền truy cập bị từ chối</h2>
         <p className="text-gray-500">Bạn không có quyền truy cập vào khu vực này.</p>
-        <NavLink to="/" className="mt-6 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-colors">
+        <NavLink to="/dashboard" className="mt-6 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-colors">
           Về trang chủ
         </NavLink>
       </div>
@@ -36,6 +36,8 @@ export function AdminLayout() {
     { path: "/admin/community-posts", label: "Bài cộng đồng", icon: MessageSquare },
     { path: "/admin/banned-ips", label: "Honeypot", icon: Shield },
     { path: "/admin/bot-config", label: "Cấu hình Bot", icon: Bot },
+    { path: "/admin/bot-jobs", label: "Lịch trình Bot", icon: Clock },
+    { path: "/admin/ai-usage", label: "AI Usage", icon: Activity },
     { path: "/admin/system-logs", label: "System Logs", icon: Activity },
   ];
 
@@ -64,7 +66,7 @@ export function AdminLayout() {
         </nav>
 
         <div className="p-4 border-t border-gray-100 space-y-2">
-          <NavLink to="/" className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all w-full">
+          <NavLink to="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all w-full">
             <ArrowLeft className="w-5 h-5" />
             Về ứng dụng
           </NavLink>

@@ -114,16 +114,10 @@ router.post(
         body: data,
         payload: buildSafeDebug(payload),
       });
-
-      const upstreamMessage = data?.message || data?.error || data?.raw || "Không chấm được phát âm.";
-      const userMessage =
-        upstreamRes.status >= 500 ? "API chấm phát âm bên ngoài đang trả lỗi. Backend đã gửi đúng payload data:audio/webm;base64. Hãy kiểm tra API key hoặc log Lambda/API Gateway." : upstreamMessage;
+      const upstreamMessage = "Âm thanh quá nhỏ hoặc nhiều tạp âm. Hãy thử lại.";
 
       return res.status(upstreamRes.status >= 500 ? 502 : upstreamRes.status).json({
-        error: userMessage,
-        upstreamStatus: upstreamRes.status,
-        details: data,
-        payloadDebug: buildSafeDebug(payload),
+        error: upstreamMessage,
       });
     }
 

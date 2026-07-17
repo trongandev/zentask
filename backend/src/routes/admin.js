@@ -1,8 +1,9 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { DailyTask, FlashcardSet, Flashcard, Quiz, QuizResult, BotConfig, SystemLog, CommunityPost, BannedIP, AttackerFeedback } from "../models/Schemas.js";
+import { DailyTask, FlashcardSet, Flashcard, Quiz, QuizResult, BotConfig, SystemLog, CommunityPost, BannedIP, AttackerFeedback, AITokenUsage, BotJobSchedule } from "../models/Schemas.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
+import { reloadJob, triggerJob } from "../../utils/jobManager.js";
 
 const router = Router();
 
@@ -23,6 +24,40 @@ const authenticateAdmin = asyncHandler(async (req, res, next) => {
 
 router.use(verifyToken);
 router.use(authenticateAdmin);
+
+// BOT JOBS CRUD
+router.get("/bot-jobs", asyncHandler(async (req, res) => {
+  const jobs = await BotJobSchedule.find().sort({ jobId: 1 }).lean();
+  res.json(jobs);
+}));
+
+router.put("/bot-jobs/:jobId", asyncHandler(async (req, res) => {
+  const { cronExpression, isActive } = req.body;
+  const { jobId } = req.params;
+  
+  const updated = await BotJobSchedule.findOneAndUpdate(
+    { jobId },
+    { $set: { cronExpression, isActive } },
+    { new: true }
+  ).lean();
+  
+  if (!updated) return res.status(404).json({ error: "Job not found" });
+  
+  // Reload schedule in jobManager
+  await reloadJob(jobId);
+  
+  res.json({ success: true, data: updated });
+}));
+
+router.post("/bot-jobs/:jobId/trigger", asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+  try {
+    const result = await triggerJob(jobId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}));
 
 // BANNED IPS CRUD
 router.get("/banned-ips", asyncHandler(async (req, res) => {
@@ -492,6 +527,38 @@ router.get(
       totalPages,
     });
   }),
+);
+
+router.get(
+  "/ai-usage",
+  asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const total = await AITokenUsage.countDocuments();
+    const totalPages = Math.ceil(total / limit);
+
+    const usages = await AITokenUsage.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("uid", "displayName zaloId email")
+      .lean();
+
+    const formattedUsages = usages.map(u => ({
+      ...u,
+      id: u._id,
+      createdAt: u.createdAt ? u.createdAt.toISOString() : null,
+    }));
+
+    res.json({
+      items: formattedUsages,
+      total,
+      page,
+      totalPages,
+    });
+  })
 );
 
 export default router;

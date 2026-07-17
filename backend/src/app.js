@@ -37,8 +37,9 @@ import friendsRoutes from "./routes/friends.js";
 import pronunciationRoutes from "./routes/pronunciation.js";
 import skillPracticeRoutes from "./routes/skillPractice.js";
 import publicRoutes from "./routes/public.js";
-import chatbotAuthRoutes from "./routes/chatbotAuth.js";
 import chatbotRoutes from "./routes/chatbot.js";
+import beginnerRoutes from "./routes/beginner.js";
+import chatbotAuthRoutes from "./routes/chatbotAuth.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 
@@ -140,7 +141,7 @@ const limiter = rateLimit({
           clientIp = clientIp.substring(7);
         }
       }
-      
+
       const { getApi } = await import("./routes/chatbot.js");
       const User = (await import("./models/User.js")).default;
       const api = getApi();
@@ -152,11 +153,11 @@ const limiter = rateLimit({
           api.sendMessage({ msg: alertMsg }, admin.zaloId, 0).catch(() => {});
         }
       }
-    } catch(e) {
+    } catch (e) {
       console.error("Lỗi khi gửi cảnh báo spam/DDOS qua Zalo:", e);
     }
     return res.status(options.statusCode).send(options.message);
-  }
+  },
 });
 app.use(limiter);
 
@@ -209,6 +210,7 @@ app.use("/api/pronunciation", pronunciationRoutes);
 app.use("/api/skill-practice", skillPracticeRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/chatbot-auth", chatbotAuthRoutes);
+app.use("/api/beginner", beginnerRoutes);
 
 app.use(errorHandler);
 

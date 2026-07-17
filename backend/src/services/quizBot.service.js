@@ -1,4 +1,5 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
+import { generateAIContent } from "./ai.service.js";
 import { BotQuiz, ZaloAuth } from "../models/Schemas.js";
 import crypto from "crypto";
 import { parseMarkdownToZalo } from "../../utils/util.js";
@@ -26,9 +27,6 @@ export const activeFlashDrops = new Map();
  */
 export async function generateDailyQuizzes() {
   try {
-    const availableKeys = getAvailableKeys();
-    const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
-
     const prompt = `Hãy đóng vai một chuyên gia giảng dạy tiếng Anh. Tạo ra 10 câu trắc nghiệm tiếng Anh ngẫu nhiên, kiến thức trải dài từ lớp 6 tới lớp 12 (ngữ pháp, từ vựng, giới từ...).
 Đảm bảo câu hỏi có độ khó đa dạng.
 Bạn cần trả về một mảng JSON chứa 10 object. Mỗi object bao gồm các trường sau:
@@ -38,37 +36,29 @@ Bạn cần trả về một mảng JSON chứa 10 object. Mỗi object bao gồ
 - explanation: Lời giải thích tại sao lại chọn đáp án đó (viết bằng tiếng Việt).`;
 
     let generatedData = null;
-    for (const { index, key } of shuffledKeys) {
-      try {
-        const ai = new GoogleGenAI({ apiKey: key });
-        const response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: prompt,
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  question: { type: Type.STRING },
-                  options: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                  },
-                  correctAnswerIndex: { type: Type.INTEGER },
-                  explanation: { type: Type.STRING },
-                },
-                required: ["question", "options", "correctAnswerIndex", "explanation"],
+    try {
+      generatedData = await generateAIContent({
+        prompt,
+        feature: "bot_quiz_generate",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              question: { type: Type.STRING },
+              options: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
               },
+              correctAnswerIndex: { type: Type.INTEGER },
+              explanation: { type: Type.STRING },
             },
+            required: ["question", "options", "correctAnswerIndex", "explanation"],
           },
-        });
-        generatedData = JSON.parse(response.text);
-        break;
-      } catch (err) {
-        console.warn(`[QuizBot Generation] Key API_KEY_AI_${index} failed:`, err.message);
-      }
+        }
+      });
+    } catch (err) {
+      console.warn(`[QuizBot Generation] failed:`, err.message);
     }
 
     if (generatedData && generatedData.length > 0) {

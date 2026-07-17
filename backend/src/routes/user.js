@@ -1,6 +1,6 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { DailyTask, UserDailyStat, LeaderboardWeekly, LeaderboardMonthly, UserFollow, FlashcardProgress, QuizResult, UserActivity } from "../models/Schemas.js";
+import { DailyTask, UserDailyStat, LeaderboardWeekly, LeaderboardMonthly, UserFollow, FlashcardProgress, QuizResult, UserActivity, BeginnerProgress } from "../models/Schemas.js";
 import { SYSTEM_LEVELS } from "../config/system.js";
 import { getWeekString, getMonthString } from "../../utils/dateUtils.js";
 import { createNotification } from "../../utils/notifications.js";
@@ -413,50 +413,40 @@ router.get(
   }),
 );
 
-// Get learned beginner words
+// Get learned beginner lessons
 router.get(
   "/beginner-progress",
   asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user.uid).lean();
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json({ learnedWords: user.learnedBeginnerWords || [] });
+    const records = await BeginnerProgress.find({ userId: req.user.uid }).lean();
+    const completedLessons = records.map(r => r.lessonId);
+    res.json({ completedLessons });
   }),
 );
 
-// Mark word as learned
+// Mark lesson as learned
 router.post(
   "/beginner-progress",
   asyncHandler(async (req, res) => {
-    const { wordId, wordIds } = req.body;
-    if (!wordId && (!wordIds || !Array.isArray(wordIds) || wordIds.length === 0)) {
-      return res.status(400).json({ error: "wordId or valid wordIds array is required" });
+    const { lessonId } = req.body;
+    if (!lessonId || typeof lessonId !== "string") {
+      return res.status(400).json({ error: "lessonId string is required" });
     }
 
-    const updates = wordIds ? wordIds : [wordId];
-
-    const user = await User.findById(req.user.uid);
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    const currentLearned = user.learnedBeginnerWords || [];
-    let newWordsCount = 0;
-
-    for (const word of updates) {
-      if (!currentLearned.includes(word)) {
-        newWordsCount++;
-        currentLearned.push(word);
-      }
+    const existing = await BeginnerProgress.findOne({ userId: req.user.uid, lessonId });
+    if (existing) {
+      return res.json({ status: "success", xpResult: null, message: "Already completed" });
     }
 
-    let xpResult = null;
-    if (newWordsCount > 0) {
-      user.learnedBeginnerWords = currentLearned;
-      await user.save();
+    await BeginnerProgress.create({
+      userId: req.user.uid,
+      lessonId,
+      score: 100 // default score
+    });
 
-      const xpToAdd = newWordsCount * 1; // 1 XP per word
-      xpResult = await addXpToUser(req.user.uid, xpToAdd);
-    }
+    // 20 XP per lesson (5 words * 4 XP)
+    const xpResult = await addXpToUser(req.user.uid, 20);
 
-    res.json({ status: "success", xpResult, newWordsAdded: newWordsCount });
+    res.json({ status: "success", xpResult, newLessonAdded: true });
   }),
 );
 

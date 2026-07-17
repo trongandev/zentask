@@ -1,3 +1,5 @@
+import axiosInstance from "./axiosConfig";
+
 const API_BASE = import.meta.env.VITE_API_BACKEND || "http://localhost:3001";
 
 export type AIChatRole = "user" | "assistant" | "model";

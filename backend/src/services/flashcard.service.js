@@ -2,7 +2,8 @@ import User from "../models/User.js";
 import { FlashcardProgress, FlashcardFolder, FlashcardCategory, FlashcardSet, Flashcard, Vocabulary, UserActivity } from "../models/Schemas.js";
 import { BUILTIN_FLASHCARD_SETS, getBuiltinFlashcardSetById } from "../data/builtinLearning/index.js";
 import { addXpToUser, incrementDailyTask } from "../routes/user.js";
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
+import { generateAIContent } from "./ai.service.js";
 import { checkAchievements } from "../../utils/achievements.js";
 import { consumeDailyLimit } from "../../utils/usageLimits.js";
 import { cleanAndValidatePublicText, validatePublicObject } from "../../utils/moderation.js";
@@ -250,6 +251,9 @@ class FlashcardService {
     const set = getBuiltinFlashcardSetById(setId);
     if (!set) throw { statusCode: 404, message: "Không tìm thấy bộ thẻ có sẵn" };
 
+    const existingSet = await FlashcardSet.findOne({ userId, builtinId: set.id });
+    if (existingSet) throw { statusCode: 400, message: "Bạn đã lưu bộ thẻ này rồi" };
+
     const newSet = await FlashcardSet.create({
       userId,
       title: `${set.title} (Bản của tôi)`,
@@ -261,21 +265,9 @@ class FlashcardService {
       isPublic: false,
       categoryName: set.categoryName || set.category || "",
       clonedFrom: null,
+      builtinId: set.id,
     });
 
-    if (set.words?.length) {
-      await Flashcard.insertMany(
-        set.words.map((word) => ({
-          setId: newSet._id,
-          userId,
-          term: word.term,
-          phonetic: word.phonetic || "",
-          translation: word.translation || "",
-          examples: word.examples || [],
-          notes: word.notes || "",
-        })),
-      );
-    }
     const setObj = newSet.toObject();
     return { id: setObj._id, ...setObj };
   }
@@ -411,7 +403,28 @@ class FlashcardService {
       set.isNew = false;
       await set.save();
     }
-    const cards = await Flashcard.find({ setId }).sort({ createdAt: -1 }).lean();
+    
+    let cards = [];
+    if (set.builtinId) {
+      const builtinData = getBuiltinFlashcardSetById(set.builtinId);
+      if (builtinData && builtinData.words) {
+        cards = builtinData.words.map((word) => ({
+          _id: word.id || word.term,
+          setId: set._id,
+          userId: set.userId,
+          term: word.term,
+          phonetic: word.phonetic || "",
+          translation: word.translation || "",
+          examples: word.examples || [],
+          notes: word.notes || "",
+          isLearned: false,
+          isBuiltIn: true,
+        }));
+      }
+    } else {
+      cards = await Flashcard.find({ setId }).sort({ createdAt: -1 }).lean();
+    }
+    
     const setObj = set.toObject();
     return {
       set: { id: setObj._id, ...setObj },
@@ -423,6 +436,7 @@ class FlashcardService {
     const { term, phonetic, translation, examples, notes } = data;
     const set = await FlashcardSet.findById(setId);
     if (!set || set.userId.toString() !== userId) throw { statusCode: 404, message: "Flashcard set not found" };
+    if (set.builtinId) throw { statusCode: 403, message: "Cannot add cards to a built-in set" };
 
     await validatePublicObject({ term, translation, examples, notes }, "Nội dung flashcard");
     await consumeDailyLimit({
@@ -526,13 +540,6 @@ class FlashcardService {
       return { source: "cache", ...vocabDoc, ok: true, message: "Lưu thành công!" };
     }
 
-    const availableKeys = [];
-    for (let i = 1; i <= 10; i++) {
-      const k = process.env[`API_KEY_AI_${i}`];
-      if (k) availableKeys.push({ index: i, key: k });
-    }
-    if (availableKeys.length === 0) throw { statusCode: 500, message: "No AI API Keys configured" };
-
     const LANGUAGE_PROMPTS = {
       en: {
         dict: "Anh-Việt",
@@ -563,7 +570,6 @@ class FlashcardService {
     };
 
     const langConfig = LANGUAGE_PROMPTS[targetLang] || LANGUAGE_PROMPTS.en;
-    const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
     const prompt = `Hãy đóng vai một từ điển ${langConfig.dict}. Từ/cụm từ cần tra cứu là: "${safeTerm}".
 Vui lòng trả về kết quả JSON với các thông tin sau:
 - term: ${langConfig.termInstruction}
@@ -573,32 +579,25 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
 - examples: ${langConfig.exampleInstruction}`;
 
     let generatedData = null;
-    for (const { index, key } of shuffledKeys) {
-      try {
-        const ai = new GoogleGenAI({ apiKey: key });
-        const response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: prompt,
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                term: { type: Type.STRING },
-                phonetic: { type: Type.STRING },
-                translation: { type: Type.STRING },
-                notes: { type: Type.STRING },
-                examples: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { en: { type: Type.STRING }, vi: { type: Type.STRING } }, required: ["en", "vi"] } },
-              },
-              required: ["term", "phonetic", "translation", "examples"],
-            },
+    try {
+      generatedData = await generateAIContent({
+        prompt,
+        feature: "flashcard_generate",
+        uid: userId,
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            term: { type: Type.STRING },
+            phonetic: { type: Type.STRING },
+            translation: { type: Type.STRING },
+            notes: { type: Type.STRING },
+            examples: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { en: { type: Type.STRING }, vi: { type: Type.STRING } }, required: ["en", "vi"] } },
           },
-        });
-        generatedData = JSON.parse(response.text);
-        break;
-      } catch (err) {
-        console.warn(`[AI Generation] Key API_KEY_AI_${index} failed:`, err.message);
-      }
+          required: ["term", "phonetic", "translation", "examples"],
+        }
+      });
+    } catch (err) {
+      console.warn(`[AI Generation] failed:`, err.message);
     }
 
     if (!generatedData) throw { statusCode: 500, message: "All AI API keys failed to generate content or parse response." };

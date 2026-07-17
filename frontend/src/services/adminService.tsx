@@ -1,359 +1,146 @@
-import toastService from "@/src/services/toastService";
-
-const API_URL = import.meta.env.VITE_API_BACKEND;
+import axiosInstance from "./axiosConfig";
 
 export const adminService = {
   // Users
   getUsers: async (page = 1, limit = 10) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/users?page=${page}&limit=${limit}`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch users");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return { users: [], total: 0, page: 1, totalPages: 1 };
-    }
+    const res = await axiosInstance.get(`/api/admin/users?page=${page}&limit=${limit}`);
+    return res.data;
   },
 
   updateUserRole: async (uid: string, role: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/users/${uid}/role`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to update role");
-      toastService.success("Cập nhật quyền thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.put(`/api/admin/users/${uid}/role`, { role });
+    return true;
   },
 
   banUser: async (uid: string, isBanned: boolean) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/users/${uid}/ban`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isBanned }),
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update ban status");
-      toastService.success(isBanned ? "Đã khoá tài khoản!" : "Đã mở khoá tài khoản!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.put(`/api/admin/users/${uid}/ban`, { isBanned });
+    return true;
   },
 
   // Tasks
   getTasks: async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/tasks`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to fetch tasks");
-      const data = await res.json();
-      return data.tasks;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return [];
-    }
+    const res = await axiosInstance.get(`/api/admin/tasks`);
+    return res.data;
   },
 
   createTask: async (taskData: any) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(taskData),
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to create task");
-      toastService.success("Thêm nhiệm vụ thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.post(`/api/admin/tasks`, taskData);
+    return true;
   },
 
   updateTask: async (id: string, taskData: any) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/tasks/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(taskData),
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to update task");
-      toastService.success("Cập nhật nhiệm vụ thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.put(`/api/admin/tasks/${id}`, taskData);
+    return true;
   },
 
   deleteTask: async (id: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/tasks/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to delete task");
-      toastService.success("Xóa nhiệm vụ thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.delete(`/api/admin/tasks/${id}`);
+    return true;
   },
 
   // Vocab Sets
   getVocabSets: async (page = 1, limit = 10) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/vocab-sets?page=${page}&limit=${limit}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch vocab sets");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return { items: [], total: 0, page: 1, totalPages: 1 };
-    }
+    const res = await axiosInstance.get(`/api/admin/vocab-sets?page=${page}&limit=${limit}`);
+    return res.data;
   },
   deleteVocabSet: async (id: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/vocab-sets/${id}`, { method: "DELETE", credentials: "include" });
-      if (!res.ok) throw new Error("Failed to delete vocab set");
-      toastService.success("Xóa bộ từ vựng thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.delete(`/api/admin/vocab-sets/${id}`);
+    return true;
   },
 
   // Vocab
   getVocab: async (page = 1, limit = 10) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/vocab?page=${page}&limit=${limit}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch vocab");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return { items: [], total: 0, page: 1, totalPages: 1 };
-    }
+    const res = await axiosInstance.get(`/api/admin/vocab?page=${page}&limit=${limit}`);
+    return res.data;
   },
   deleteVocab: async (id: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/vocab/${id}`, { method: "DELETE", credentials: "include" });
-      if (!res.ok) throw new Error("Failed to delete vocab");
-      toastService.success("Xóa từ vựng thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.delete(`/api/admin/vocab/${id}`);
+    return true;
   },
 
   // Quizzes
   getQuizzes: async (page = 1, limit = 10) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/quizzes?page=${page}&limit=${limit}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch quizzes");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return { items: [], total: 0, page: 1, totalPages: 1 };
-    }
+    const res = await axiosInstance.get(`/api/admin/quizzes?page=${page}&limit=${limit}`);
+    return res.data;
   },
   deleteQuiz: async (id: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/quizzes/${id}`, { method: "DELETE", credentials: "include" });
-      if (!res.ok) throw new Error("Failed to delete quiz");
-      toastService.success("Xóa quiz thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.delete(`/api/admin/quizzes/${id}`);
+    return true;
   },
 
   // Quiz History
   getQuizHistory: async (page = 1, limit = 10) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/quiz-history?page=${page}&limit=${limit}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch quiz history");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return { items: [], total: 0, page: 1, totalPages: 1 };
-    }
+    const res = await axiosInstance.get(`/api/admin/quiz-history?page=${page}&limit=${limit}`);
+    return res.data;
   },
 
   // Bot Configs
   getBotConfigs: async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/bot-config`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch bot configs");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return { items: [] };
-    }
+    const res = await axiosInstance.get(`/api/admin/bot-config`);
+    return res.data;
   },
   saveBotConfig: async (config: any) => {
-    try {
-      const id = config.id || config._id;
-      const url = id ? `${API_URL}/api/admin/bot-config/${id}` : `${API_URL}/api/admin/bot-config`;
-      const method = id ? "PUT" : "POST";
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config),
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to save bot config");
-      return await res.json();
-    } catch (error: any) {
-      throw error;
+    const id = config.id || config._id;
+    if (id) {
+      const res = await axiosInstance.put(`/api/admin/bot-config/${id}`, config);
+      return res.data;
+    } else {
+      const res = await axiosInstance.post(`/api/admin/bot-config`, config);
+      return res.data;
     }
   },
   deleteBotConfig: async (id: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/bot-config/${id}`, { method: "DELETE", credentials: "include" });
-      if (!res.ok) throw new Error("Failed to delete bot config");
-      return true;
-    } catch (error: any) {
-      throw error;
-    }
+    await axiosInstance.delete(`/api/admin/bot-config/${id}`);
+    return true;
   },
 
   // System Logs
   getSystemLogs: async (page = 1, limit = 20) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/system-logs?page=${page}&limit=${limit}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch system logs");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return { items: [], total: 0, page: 1, totalPages: 1 };
-    }
+    const res = await axiosInstance.get(`/api/admin/system-logs?page=${page}&limit=${limit}`);
+    return res.data;
   },
 
   // Analytics
   getAnalyticsOverview: async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/analytics/overview`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch analytics");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return null;
-    }
+    const res = await axiosInstance.get(`/api/admin/analytics/overview`);
+    return res.data;
   },
 
   // Community Posts
   getCommunityPosts: async (page = 1, limit = 10) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/community-posts?page=${page}&limit=${limit}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch posts");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return { items: [], total: 0, page: 1, totalPages: 1 };
-    }
+    const res = await axiosInstance.get(`/api/admin/community-posts?page=${page}&limit=${limit}`);
+    return res.data;
   },
 
   deleteCommunityPost: async (id: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/community-posts/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to delete post");
-      toastService.success("Xoá bài viết thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.delete(`/api/admin/community-posts/${id}`);
+    return true;
   },
 
   // Banned IPs
   getBannedIps: async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/banned-ips`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch banned IPs");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return [];
-    }
+    const res = await axiosInstance.get(`/api/admin/banned-ips`);
+    return res.data;
   },
 
   addBannedIp: async (ip: string, reason: string, isHoneypot: boolean) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/banned-ips`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ ip, reason, isHoneypot }),
-      });
-      if (!res.ok) throw new Error("Failed to ban IP");
-      toastService.success("Đã cấm IP thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.post(`/api/admin/banned-ips`, { ip, reason, isHoneypot });
+    return true;
   },
 
   deleteBannedIp: async (id: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/banned-ips/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to unban IP");
-      toastService.success("Đã gỡ cấm IP thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.delete(`/api/admin/banned-ips/${id}`);
+    return true;
   },
 
   // Attacker Feedbacks
   getAttackerFeedbacks: async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/attacker-feedbacks`, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch feedbacks");
-      return await res.json();
-    } catch (error: any) {
-      toastService.error(error.message);
-      return [];
-    }
+    const res = await axiosInstance.get(`/api/admin/attacker-feedbacks`);
+    return res.data;
   },
 
   deleteAttackerFeedback: async (id: string) => {
-    try {
-      const res = await fetch(`${API_URL}/api/admin/attacker-feedbacks/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Failed to delete feedback");
-      toastService.success("Xoá feedback thành công!");
-      return true;
-    } catch (error: any) {
-      toastService.error(error.message);
-      return false;
-    }
+    await axiosInstance.delete(`/api/admin/attacker-feedbacks/${id}`);
+    return true;
   },
 };

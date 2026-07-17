@@ -2,7 +2,8 @@ import { Router } from "express";
 import User from "../models/User.js";
 import { Quiz, QuizCategory, QuizResult, QuizRoom, UserActivity } from "../models/Schemas.js";
 import { BUILTIN_QUIZZES, getBuiltinQuizById } from "../data/builtinLearning/index.js";
-import { GoogleGenAI, Type } from "@google/genai";
+import { Type } from "@google/genai";
+import { generateAIContent } from "../services/ai.service.js";
 import crypto from "crypto";
 import { checkAchievements } from "../../utils/achievements.js";
 import { addXpToUser, incrementDailyTask } from "./user.js";
@@ -392,18 +393,6 @@ router.post(
       message: "Bạn đã tạo đủ 3 quiz hôm nay. Nâng VIP để tạo không giới hạn.",
     });
 
-    const availableKeys = [];
-    for (let i = 1; i <= 10; i++) {
-      const k = process.env[`API_KEY_AI_${i}`];
-      if (k) availableKeys.push({ index: i, key: k });
-    }
-
-    if (availableKeys.length === 0) {
-      return res.status(500).json({ error: "No AI keys configured" });
-    }
-
-    const shuffledKeys = availableKeys.sort(() => Math.random() - 0.5);
-
     const promptText = `Tạo một bài thi trắc nghiệm dựa trên yêu cầu sau: "${safePrompt}".
 Số lượng câu hỏi cần tạo: đúng ${numQuestions} câu.
 Độ khó: ${difficulty}.
@@ -411,60 +400,47 @@ Nội dung phải là tiếng Việt, logic, mang tính giáo dục.`;
 
     let quizData = null;
 
-    for (const { index, key } of shuffledKeys) {
-      try {
-        const ai = new GoogleGenAI({ apiKey: key });
-        const response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite",
-          contents: promptText,
-          config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                title: { type: Type.STRING },
-                description: { type: Type.STRING },
-                questions: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      text: { type: Type.STRING, description: "Nội dung câu hỏi" },
-                      options: {
-                        type: Type.ARRAY,
-                        items: { type: Type.STRING },
-                        description: "Mảng chứa đúng 4 đáp án",
-                      },
-                      correctAnswer: { type: Type.STRING, description: "Đáp án đúng chính xác" },
-                      explanation: { type: Type.STRING, description: "Giải thích ngắn gọn tại sao đúng" },
-                    },
-                    required: ["text", "options", "correctAnswer", "explanation"],
+    try {
+      quizData = await generateAIContent({
+        prompt: promptText,
+        feature: "quiz_generate",
+        uid: req.user.uid,
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING },
+            description: { type: Type.STRING },
+            questions: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  text: { type: Type.STRING, description: "Nội dung câu hỏi" },
+                  options: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Mảng chứa đúng 4 đáp án",
                   },
+                  correctAnswer: { type: Type.STRING, description: "Đáp án đúng chính xác" },
+                  explanation: { type: Type.STRING, description: "Giải thích ngắn gọn tại sao đúng" },
                 },
+                required: ["text", "options", "correctAnswer", "explanation"],
               },
-              required: ["title", "description", "questions"],
             },
           },
-        });
+          required: ["title", "description", "questions"],
+        }
+      });
 
-        quizData = JSON.parse(response.text);
-
-        quizData.questions = quizData.questions.map((q) => {
-          if (!q.options || q.options.length < 4) {
-            const newOpts = [...(q.options || [])];
-            while (newOpts.length < 4) newOpts.push("...");
-            q.options = newOpts;
-          }
-          return q;
-        });
-
-        break;
-      } catch (err) {
-        console.warn(`[Quiz AI] Key API_KEY_AI_${index} failed:`, err.message);
-      }
-    }
-
-    if (!quizData) {
+      quizData.questions = quizData.questions.map((q) => {
+        if (!q.options || q.options.length < 4) {
+          const newOpts = [...(q.options || [])];
+          while (newOpts.length < 4) newOpts.push("...");
+          q.options = newOpts;
+        }
+        return q;
+      });
+    } catch (err) {
       return res.status(500).json({ error: "All AI API keys failed to generate content." });
     }
 
