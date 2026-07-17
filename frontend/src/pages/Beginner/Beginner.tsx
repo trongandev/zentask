@@ -147,7 +147,7 @@ export function Beginner() {
           </svg>
         </div>
 
-        {/* Render danh sách nodes */}
+        {/* Render danh sách nodes.*/}
         {nodes.map((node, index) => {
           // Gắn Unit Header (Rank / Tier separator)
           const showHeader = index === 0 || nodes[index - 1].rankName !== node.rankName || nodes[index - 1].tierName !== node.tierName;
