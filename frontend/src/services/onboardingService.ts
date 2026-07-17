@@ -1,5 +1,5 @@
 import axiosInstance from "./axiosConfig";
-
+const API_URL = import.meta.env.VITE_API_BACKEND;
 export type OnboardingState = {
   completed?: boolean;
   completedAt?: string | null;
