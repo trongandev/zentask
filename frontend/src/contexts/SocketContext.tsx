@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./AuthContext";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { ArenaChallengeModal } from "../pages/Arena/components/ArenaChallengeModal";
+import toastService from "../services/toastService";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -113,7 +113,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         rankId: user.rankId || 1,
         tier: user.tier || 3,
         level: user.level,
-      }
+      },
     });
     setIncomingChallenge(null);
     navigate("/arena");

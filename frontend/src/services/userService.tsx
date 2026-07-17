@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { useConfigStore } from "./configService";
 import axiosInstance from "./axiosConfig";
-
+const API_URL = import.meta.env.VITE_API_BACKEND;
 interface StudyStat {
   date: string;
   name: string; // T2, T3, etc.
@@ -85,7 +85,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   checkIn: async () => {
     set({ loading: true });
     const res = await axiosInstance.post(`/api/user/checkin`);
-      return res.data;
+    return res.data;
   },
 
   logStudyTime: async (minutes: number) => {
