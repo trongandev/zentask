@@ -1,6 +1,5 @@
 import { CheckCircle, XCircle } from "lucide-react";
 import { cn } from "../../../lib/utils";
-import { Word } from "../../../config/rankTopicConfig";
 import { ArenaGameRenderer } from "../../ArenaGameRenderer";
 import { UserAvatar } from "../../../components/UserAvatar";
 
@@ -14,8 +13,8 @@ interface ArenaPlayingHUDProps {
   timeLeft: number;
   currentQuestionIndex: number;
   totalQuestions: number;
-  currentCard: Word;
-  matchData: { modes?: string[]; mode?: string; cards: Word[]; x2Indices: number[] };
+  currentCard: any;
+  matchData: { modes?: string[]; mode?: string; cards: any[]; x2Indices: number[] };
   isX2: boolean;
   lastAnswerCorrect: boolean | null;
   arenaMode: "solo" | "team2v2" | "tournament";
@@ -60,9 +59,7 @@ export function ArenaPlayingHUD({
           <div className="text-[10px] font-bold text-gray-400 mb-1 uppercase tracking-wider">
             Thời gian ({currentQuestionIndex + 1}/{totalQuestions})
           </div>
-          <div className={cn("text-3xl font-black", timeLeft <= 3 ? "text-red-500 animate-pulse" : "text-white")}>
-            {timeLeft}s
-          </div>
+          <div className={cn("text-3xl font-black", timeLeft <= 3 ? "text-red-500 animate-pulse" : "text-white")}>{timeLeft}s</div>
         </div>
 
         <div className="flex justify-between items-center w-full md:w-auto gap-2 flex-1">
@@ -70,25 +67,24 @@ export function ArenaPlayingHUD({
           <div
             className={cn(
               "flex items-center gap-2 md:gap-4 border p-1 md:p-2 pr-4 md:pr-6 rounded-full backdrop-blur-md transition-colors",
-              hasAnswered 
-                ? (lastAnswerCorrect ? "border-green-500 bg-green-950/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]" : "border-red-500 bg-red-950/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-shake") 
+              hasAnswered
+                ? lastAnswerCorrect
+                  ? "border-green-500 bg-green-950/50 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+                  : "border-red-500 bg-red-950/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-shake"
                 : "border-blue-500/30 bg-blue-950/50",
             )}
           >
-            <UserAvatar
-              src={user?.photoURL || "/mascot/Lopy (1).png"}
-              level={user?.level || 1}
-              disableLink
-              className="w-10 h-10 md:w-14 md:h-14 shrink-0"
-              avatarClassName="border-2 border-blue-400"
-            />
+            <UserAvatar src={user?.photoURL || "/mascot/Lopy (1).png"} level={user?.level || 1} disableLink className="w-10 h-10 md:w-14 md:h-14 shrink-0" avatarClassName="border-2 border-blue-400" />
             <div>
               <div className={cn("text-[10px] md:text-sm hidden md:block", hasAnswered && !lastAnswerCorrect ? "text-red-200" : "text-blue-200")}>Điểm của bạn</div>
               <div className="text-lg md:text-2xl font-black text-white flex items-center gap-1 md:gap-2">
                 {userScore}
-                {hasAnswered && (
-                  lastAnswerCorrect ? <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-500 animate-in zoom-in" /> : <XCircle className="w-4 h-4 md:w-5 md:h-5 text-red-500 animate-in zoom-in" />
-                )}
+                {hasAnswered &&
+                  (lastAnswerCorrect ? (
+                    <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-500 animate-in zoom-in" />
+                  ) : (
+                    <XCircle className="w-4 h-4 md:w-5 md:h-5 text-red-500 animate-in zoom-in" />
+                  ))}
               </div>
             </div>
           </div>
@@ -98,9 +94,7 @@ export function ArenaPlayingHUD({
             <div className="text-sm font-bold text-gray-400 mb-1 uppercase tracking-wider">
               Thời gian ({currentQuestionIndex + 1}/{totalQuestions})
             </div>
-            <div className={cn("text-5xl font-black", timeLeft <= 3 ? "text-red-500 animate-pulse" : "text-white")}>
-              {timeLeft}s
-            </div>
+            <div className={cn("text-5xl font-black", timeLeft <= 3 ? "text-red-500 animate-pulse" : "text-white")}>{timeLeft}s</div>
           </div>
 
           {/* Opponent Score */}

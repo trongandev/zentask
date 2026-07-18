@@ -67,7 +67,7 @@ async function startZaloBot() {
     chatbotUtil = new ChatbotUtil(api);
 
     async function handleMessage(message) {
-      console.log(message.data.uidFrom, message.data.dName);
+      console.log(message.data.uidFrom, message.data.dName, message?.data?.content);
       if (ZALOID_BANNED.includes(message.threadId)) {
         await api.sendMessage(
           { msg: "Tài khoản của bạn đã bị khóa nhắn tin do nghi ngờ spam tin nhắn với tốc độ cao!, vui lòng liên hệ với admin trong group Zentask để mở khóa" },

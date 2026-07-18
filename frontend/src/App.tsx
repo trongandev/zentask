@@ -239,6 +239,7 @@ function MainLayout() {
 
 import { LandingPage } from "./pages/LandingPage";
 import { BeginnerLessonPractice } from "./pages/Beginner/BeginnerLessonPractice";
+import { AdminCourses } from "./pages/Admin/AdminCourses";
 
 function AppContent() {
   const { user, loading, isIpBanned } = useAuth();
@@ -264,6 +265,7 @@ function AppContent() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="courses" element={<AdminCourses />} />
           <Route path="daily-task" element={<AdminTasks />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="vocab-sets" element={<AdminVocabSets />} />

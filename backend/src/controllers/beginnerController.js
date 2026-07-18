@@ -1,4 +1,5 @@
-import { BeginnerProgress, Course, CourseRank, CourseTier, CourseLesson } from "../models/Schemas.js";
+import { BeginnerProgress } from "../models/Schemas.js";
+import { Course, CourseRank, CourseTier, CourseLesson } from "../models/Course.js";
 
 export const getBeginnerProgress = async (req, res) => {
   try {
@@ -54,28 +55,27 @@ export const seedBeginnerData = async (req, res) => {
     if (!course) {
       course = await Course.create({ name: courseName, languageCode });
     } else {
-      const ranks = await CourseRank.find({ courseId: course._id });
-      for (const rank of ranks) {
-        const tiers = await CourseTier.find({ rankId: rank._id });
-        for (const tier of tiers) {
-          await CourseLesson.deleteMany({ tierId: tier._id });
-        }
-        await CourseTier.deleteMany({ rankId: rank._id });
+      const oldTiers = await CourseTier.find({ courseId: course._id });
+      for (const tier of oldTiers) {
+        await CourseLesson.deleteMany({ tierId: tier._id });
       }
-      await CourseRank.deleteMany({ courseId: course._id });
+      await CourseTier.deleteMany({ courseId: course._id });
     }
 
     for (const rankId of Object.keys(data)) {
       const rankData = data[rankId];
-      const rank = await CourseRank.create({
-        courseId: course._id,
-        rankId: parseInt(rankId),
-        name: rankData.name,
-      });
+      let rank = await CourseRank.findOne({ rankId: parseInt(rankId) });
+      if (!rank) {
+        rank = await CourseRank.create({
+          rankId: parseInt(rankId),
+          name: rankData.name,
+        });
+      }
 
       for (const tierNum of Object.keys(rankData.tiers)) {
         const tierData = rankData.tiers[tierNum];
         const tier = await CourseTier.create({
+          courseId: course._id,
           rankId: rank._id,
           tierNum: parseInt(tierNum),
           cefr: tierData.cefr,
@@ -89,6 +89,7 @@ export const seedBeginnerData = async (req, res) => {
               lessonId: lesson.id,
               title: lesson.title,
               category: lesson.category,
+              wordCount: (lesson.words || []).length,
               words: lesson.words,
             });
           }
@@ -109,16 +110,16 @@ export const getBeginnerRanks = async (req, res) => {
     const course = await Course.findOne({ languageCode });
     if (!course) return res.status(404).json({ message: "Course not found" });
 
-    const ranks = await CourseRank.find({ courseId: course._id }).lean();
+    const ranks = await CourseRank.find().sort({ rankId: 1 }).lean();
 
     // We need to build the hierarchy
     const result = {};
     for (const rank of ranks) {
-      const tiers = await CourseTier.find({ rankId: rank._id }).lean();
+      const tiers = await CourseTier.find({ courseId: course._id, rankId: rank._id }).lean();
 
       const tiersObj = {};
       for (const tier of tiers) {
-        const lessons = await CourseLesson.find({ tierId: tier._id }).select("lessonId title category words").lean();
+        const lessons = await CourseLesson.find({ tierId: tier._id }).select("lessonId title category wordCount").lean();
         tiersObj[tier.tierNum] = {
           cefr: tier.cefr,
           topics: tier.topics,
@@ -126,7 +127,7 @@ export const getBeginnerRanks = async (req, res) => {
             id: l.lessonId,
             title: l.title,
             category: l.category,
-            words: l.words || [],
+            wordCount: l.wordCount || 0,
           })),
         };
       }

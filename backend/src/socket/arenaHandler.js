@@ -1,4 +1,5 @@
-import { ArenaTournamentRoom, Flashcard, BotConfig, CourseRank, CourseTier, CourseLesson } from "../models/Schemas.js";
+import { ArenaTournamentRoom, Flashcard, BotConfig } from "../models/Schemas.js";
+import { CourseRank, CourseTier, CourseLesson } from "../models/Course.js";
 import { BUILTIN_FLASHCARD_SETS } from "../data/builtinLearning/index.js";
 import User from "../models/User.js";
 import { arenaQueue, activeArenaRooms, tournamentLobbies, userSockets } from "./state.js";

@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -85,6 +91,85 @@ const seedBotConfigs = async () => {
   }
 };
 
+const seedBeginnerCourseAndRanks = async () => {
+  try {
+    const { Course, CourseRank } = await import("../models/Course.js");
+    const { RANK_NAMES } = await import("./system.js");
+
+    // Seed global ranks
+    for (const [id, name] of Object.entries(RANK_NAMES)) {
+      const rankId = parseInt(id);
+      let rank = await CourseRank.findOne({ rankId });
+      if (!rank) {
+        await CourseRank.create({ rankId, name });
+        console.log(`Seeded CourseRank: ${name}`);
+      }
+    }
+
+    // Seed default English course
+    let course = await Course.findOne({ languageCode: "en" });
+    let isNewCourse = false;
+    if (!course) {
+      course = await Course.create({ name: "Tiếng Anh", languageCode: "en" });
+      console.log("Seeded default English course.");
+      isNewCourse = true;
+    }
+
+    const { CourseTier, CourseLesson } = await import("../models/Course.js");
+    const existingTiers = await CourseTier.countDocuments({ courseId: course._id });
+
+    if (existingTiers === 0 || isNewCourse) {
+      const dataPath = path.join(__dirname, "rankDataEN.json");
+      if (fs.existsSync(dataPath)) {
+        console.log("Seeding beginner English data from JSON...");
+        const rawData = fs.readFileSync(dataPath, "utf8");
+        const data = JSON.parse(rawData);
+
+        for (const rankId of Object.keys(data)) {
+          const rankData = data[rankId];
+          const rank = await CourseRank.findOne({ rankId: parseInt(rankId) });
+          if (!rank) continue;
+
+          for (const tierNum of Object.keys(rankData.tiers)) {
+            const tierData = rankData.tiers[tierNum];
+            const tier = await CourseTier.create({
+              courseId: course._id,
+              rankId: rank._id,
+              tierNum: parseInt(tierNum),
+              cefr: tierData.cefr,
+              topics: tierData.topics,
+            });
+
+            if (tierData.data) {
+              for (const lesson of tierData.data) {
+                // Keep only 1 example to save space
+                const processedWords = (lesson.words || []).map((w) => {
+                  if (w.examples && Array.isArray(w.examples) && w.examples.length > 0) {
+                    w.examples = [w.examples[0]];
+                  }
+                  return w;
+                });
+
+                await CourseLesson.create({
+                  tierId: tier._id,
+                  lessonId: lesson.id,
+                  title: lesson.title,
+                  category: lesson.category,
+                  wordCount: processedWords.length,
+                  words: processedWords,
+                });
+              }
+            }
+          }
+        }
+        console.log("Successfully seeded English data from JSON.");
+      }
+    }
+  } catch (error) {
+    console.error("Error seeding beginner data:", error.message);
+  }
+};
+
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
@@ -95,6 +180,7 @@ const connectDB = async () => {
     // Run seeders
     await seedDailyTasks();
     await seedBotConfigs();
+    await seedBeginnerCourseAndRanks();
   } catch (error) {
     console.error(`Error connecting to MongoDB: ${error.message}`);
     process.exit(1);

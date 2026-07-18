@@ -20,14 +20,12 @@ interface LessonNode {
   tierName: string;
   status: "locked" | "current" | "completed";
   color: string;
-  words: any[];
   rewardClaimed: boolean; // x2 XP relearn bonus already claimed
 }
 
 export function Beginner() {
   const navigate = useNavigate();
   const { user } = useAuth();
-
   const API_URL = import.meta.env.VITE_API_BACKEND;
 
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
@@ -87,13 +85,12 @@ export function Beginner() {
           if (!tierTyped.data) continue;
 
           for (const topic of tierTyped.data) {
-            const words = topic.words || [];
+            const wordCount = topic.wordCount || 0;
             const WORDS_PER_LESSON = 5;
-            const totalLessons = Math.ceil(words.length / WORDS_PER_LESSON) || 1;
+            const totalLessons = Math.ceil(wordCount / WORDS_PER_LESSON) || 1;
 
             for (let i = 0; i < totalLessons; i++) {
-              const count = i === totalLessons - 1 ? words.length - i * WORDS_PER_LESSON : WORDS_PER_LESSON;
-              const lessonWords = words.slice(i * WORDS_PER_LESSON, i * WORDS_PER_LESSON + count);
+              const count = i === totalLessons - 1 ? wordCount - i * WORDS_PER_LESSON : WORDS_PER_LESSON;
               generatedNodes.push({
                 id: `${topic.id}_${i}`,
                 topicId: topic.id,
@@ -106,7 +103,6 @@ export function Beginner() {
                 tierName: `Tier ${tierId}`,
                 status: "locked", // Will evaluate below
                 color: topic.category || "from-blue-500 to-cyan-400",
-                words: lessonWords,
                 rewardClaimed: false, // Will evaluate below
               });
             }
@@ -173,7 +169,8 @@ export function Beginner() {
             <h2 className="text-2xl font-bold text-slate-800 mb-3">Nội dung đang được cập nhật</h2>
             <p className="text-slate-600 leading-relaxed">
               Xin lỗi bạn, hệ thống chưa có nội dung lộ trình cho ngôn ngữ này. Vui lòng chờ admin cập nhật trong thời gian tới nhé!
-              <br /><br />
+              <br />
+              <br />
               Trong lúc chờ đợi, bạn có thể bấm vào lá cờ phía trên cùng tay phải để chuyển tạm qua học <span className="font-bold text-blue-600">Tiếng Anh</span> nhé.
             </p>
           </div>
@@ -291,16 +288,11 @@ export function Beginner() {
               Phần {selectedNode.lessonIndex + 1}/{selectedNode.totalLessonsInTopic}
             </p>
 
-            <div className="space-y-2 mb-8 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-              {selectedNode.words.map((w: any, idx: number) => (
-                <div key={idx} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-blue-100 transition-colors">
-                  <div>
-                    <p className="font-bold text-slate-700 text-lg leading-tight">{w.term}</p>
-                    <p className="text-sm text-slate-400 font-medium">{w.phonetic}</p>
-                  </div>
-                  <p className="font-bold text-slate-600 text-right max-w-[50%] truncate">{w.translation}</p>
-                </div>
-              ))}
+            <div className="mb-8 text-center bg-blue-50 py-4 rounded-2xl border border-blue-100">
+              <p className="text-blue-800 font-bold text-lg">
+                Bài học này gồm {selectedNode.wordCount} từ vựng
+              </p>
+              <p className="text-blue-600 text-sm mt-1">Bấm nút bên dưới để bắt đầu luyện tập!</p>
             </div>
 
             <button

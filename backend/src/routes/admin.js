@@ -4,6 +4,13 @@ import { DailyTask, FlashcardSet, Flashcard, Quiz, QuizResult, BotConfig, System
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { reloadJob, triggerJob } from "../../utils/jobManager.js";
+import {
+  getAdminCourseTree,
+  getAdminLesson,
+  createAdminLesson,
+  updateAdminLesson,
+  deleteAdminLesson
+} from "../controllers/adminCourseController.js";
 
 const router = Router();
 
@@ -24,6 +31,13 @@ const authenticateAdmin = asyncHandler(async (req, res, next) => {
 
 router.use(verifyToken);
 router.use(authenticateAdmin);
+
+// COURSE RESOURCES CRUD
+router.get("/courses/tree", getAdminCourseTree);
+router.get("/courses/lesson/:id", getAdminLesson);
+router.post("/courses/tier/:tierId/lesson", createAdminLesson);
+router.put("/courses/lesson/:id", updateAdminLesson);
+router.delete("/courses/lesson/:id", deleteAdminLesson);
 
 // BOT JOBS CRUD
 router.get("/bot-jobs", asyncHandler(async (req, res) => {

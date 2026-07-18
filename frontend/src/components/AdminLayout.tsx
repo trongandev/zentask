@@ -29,6 +29,7 @@ export function AdminLayout() {
     { path: "/admin/dashboard", label: "Tổng quan", icon: LayoutDashboard },
     { path: "/admin/daily-task", label: "Nhiệm vụ", icon: ListTodo },
     { path: "/admin/users", label: "Người dùng", icon: Users },
+    { path: "/admin/courses", label: "Lộ trình học", icon: BookOpen },
     { path: "/admin/vocab-sets", label: "Bộ từ vựng", icon: BookOpen },
     { path: "/admin/vocab", label: "Từ vựng", icon: Type },
     { path: "/admin/quizzes", label: "Quiz", icon: HelpCircle },

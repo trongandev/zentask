@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSocket } from "../../contexts/SocketContext";
-import { Word } from "../../config/rankTopicConfig";
 
 const RANK_NAMES: Record<number, string> = {
   1: "Bạc",
@@ -21,7 +20,6 @@ import { ArenaSurrenderModal } from "./components/ArenaSurrenderModal";
 import { ArenaTournamentBracket } from "./components/ArenaTournamentBracket";
 import { ArenaChallengeModal } from "./components/ArenaChallengeModal";
 import { Modal } from "../../components/shared/Modal";
-import { useEtcStore } from "../../services/etcService";
 import { toastService } from "../../services/toastService";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 
@@ -34,7 +32,7 @@ export function Arena() {
 
   // Core game state
   const [matchState, setMatchState] = useState<"selecting" | "lobby" | "searching" | "found" | "playing" | "finished" | "tournament_bracket">("selecting");
-  const [matchData, setMatchData] = useState<{ modes?: string[]; mode?: string; cards: Word[]; x2Indices: number[] } | null>(null);
+  const [matchData, setMatchData] = useState<{ modes?: string[]; mode?: string; cards: any[]; x2Indices: number[] } | null>(null);
   const [opponent, setOpponent] = useState<any>(null);
   const [arenaMode, setArenaMode] = useState<"solo" | "team2v2" | "tournament">("solo");
   const [arenaPlayers, setArenaPlayers] = useState<any[]>([]);
