@@ -91,3 +91,11 @@ export const SYSTEM_BADGES = [
   { id: 8, name: "Kẻ huỷ diệt", description: "Vượt qua 100 bài Quiz", icon: "/achievement/destroyer.png" },
   { id: 9, name: "Ngôi sao hy vọng", description: "Học bù sau khi mất chuỗi", icon: "/achievement/star-of-hope.png" },
 ];
+
+export const RANK_NAMES = {
+  1: "Bạc",
+  2: "Lục bảo",
+  3: "Tinh Anh",
+  4: "Kim cương",
+  5: "Cao Thủ",
+};

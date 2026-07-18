@@ -166,6 +166,19 @@ export function Beginner() {
           </svg>
         </div>
 
+        {/* Thông báo chưa có bài học */}
+        {nodes.length === 0 && rankConfig && Object.keys(rankConfig).length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 px-4 text-center z-10 bg-white rounded-3xl shadow-sm border border-slate-100 my-8 w-full max-w-lg mx-auto">
+            <div className="text-7xl mb-6">🚧</div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-3">Nội dung đang được cập nhật</h2>
+            <p className="text-slate-600 leading-relaxed">
+              Xin lỗi bạn, hệ thống chưa có nội dung lộ trình cho ngôn ngữ này. Vui lòng chờ admin cập nhật trong thời gian tới nhé!
+              <br /><br />
+              Trong lúc chờ đợi, bạn có thể bấm vào lá cờ phía trên cùng tay phải để chuyển tạm qua học <span className="font-bold text-blue-600">Tiếng Anh</span> nhé.
+            </p>
+          </div>
+        )}
+
         {/* Render danh sách nodes*/}
         {nodes.map((node, index) => {
           // Gắn Unit Header (Rank / Tier separator)

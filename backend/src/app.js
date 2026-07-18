@@ -121,6 +121,8 @@ app.use(async (req, res, next) => {
   next();
 });
 
+const alertThrottle = new Map();
+
 const limiter = rateLimit({
   windowMs: 2 * 60 * 1000, // 2 phút
   max: 100, // Giới hạn mỗi IP 100 requests mỗi 2 phút
@@ -145,10 +147,17 @@ const limiter = rateLimit({
       const api = getApi();
 
       if (api) {
-        const admins = await User.find({ role: "admin", zaloId: { $ne: null } });
-        const alertMsg = `🚨 **CẢNH BÁO HỆ THỐNG** 🚨\n\nPhát hiện spam/DDoS API.\n- IP: ${clientIp}\n- Endpoint: ${req.method} ${req.originalUrl}\n\nGõ \`/ban-ip ${clientIp}\` để cấm IP này.`;
-        for (const admin of admins) {
-          api.sendMessage({ msg: alertMsg }, admin.zaloId, 0).catch(() => {});
+        const now = Date.now();
+        const lastAlert = alertThrottle.get(clientIp) || 0;
+        // Gửi thông báo tối đa 1 lần mỗi 15 phút cho cùng 1 IP
+        if (now - lastAlert > 15 * 60 * 1000) {
+          alertThrottle.set(clientIp, now);
+
+          const admins = await User.find({ role: "admin", zaloId: { $ne: null } });
+          const alertMsg = `🚨 **CẢNH BÁO HỆ THỐNG** 🚨\n\nPhát hiện spam/DDoS API.\n- IP: ${clientIp}\n- Endpoint: ${req.method} ${req.originalUrl}\n\nGõ \`/ban-ip ${clientIp}\` để cấm IP này.`;
+          for (const admin of admins) {
+            api.sendMessage({ msg: alertMsg }, admin.zaloId, 0).catch(() => {});
+          }
         }
       }
     } catch (e) {

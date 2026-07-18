@@ -23,11 +23,13 @@ interface LanguageOverlayProps {
 }
 
 export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOpen, canClose = false, onClose }) => {
-  if (!isOpen) return null;
-
+  const [isLoading, setIsLoading] = React.useState(false);
   const { updateUser } = useAuth();
 
+  if (!isOpen) return null;
+
   const handleSelectLanguage = async (code: string) => {
+    setIsLoading(true);
     try {
       const res = await axiosInstance.put("/api/user/language", { language: code });
       if (res.data.status === "success") {
@@ -36,11 +38,20 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
       }
     } catch (error) {
       console.error("Lỗi khi chuyển ngôn ngữ", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={() => canClose && onClose && onClose()} hideCloseButton={!canClose} className="max-w-3xl p-8">
+    <Modal isOpen={isOpen} onClose={() => !isLoading && canClose && onClose && onClose()} hideCloseButton={!canClose || isLoading} className="max-w-3xl p-8 relative overflow-hidden">
+      {isLoading && (
+        <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-slate-700 font-medium">Đang thiết lập hệ thống...</p>
+        </div>
+      )}
+      
       <div className="text-center mb-10">
         <h2 className="text-3xl font-extrabold text-slate-800 mb-3">Bạn muốn học ngôn ngữ nào?</h2>
         <p className="text-slate-500 text-lg">Chọn một ngôn ngữ để bắt đầu. Bạn có thể thay đổi sau.</p>
