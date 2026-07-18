@@ -6,9 +6,11 @@ import { getWeekString, getMonthString } from "../../utils/dateUtils.js";
 import { createNotification } from "../../utils/notifications.js";
 import { checkAchievements } from "../../utils/achievements.js";
 import { verifyToken } from "../middleware/auth.js";
-import { asyncHandler } from "../middleware/asyncHandler.js";
+import fs from "fs";
+import path from "path";
 import { cleanAndValidatePublicText } from "../../utils/moderation.js";
-
+import { Course, CourseTier } from "../models/Course.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 const router = Router();
 
 // Use our new JWT verify token middleware
@@ -296,38 +298,134 @@ router.put(
   }),
 );
 
-// Switch or set target language
+// Switch or set target language and level
 router.put(
-  "/language",
+  "/language-level",
   asyncHandler(async (req, res) => {
-    const { language } = req.body;
-    if (!language || typeof language !== "string") {
-      return res.status(400).json({ error: "Invalid language" });
+    const { languageCode, level } = req.body;
+    if (!languageCode || typeof languageCode !== "string") {
+      return res.status(400).json({ error: "Invalid languageCode" });
     }
 
     const user = await User.findById(req.user.uid);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    user.targetLanguage = language;
-    if (!user.learningLanguages.includes(language)) {
-      user.learningLanguages.push(language);
+    user.targetLanguage = languageCode;
+    if (!user.learningLanguages.includes(languageCode)) {
+      user.learningLanguages.push(languageCode);
     }
+
+    let targetRankId = 1;
+    let targetTier = 3;
+
+    if (level && level !== "Beginner") {
+      // Find the corresponding tier for this language and cefr
+      const course = await Course.findOne({ languageCode });
+      if (course) {
+        // Query the tier matching the cefr level
+        const tier = await CourseTier.findOne({ courseId: course._id, cefr: level }).populate("rankId");
+        if (tier && tier.rankId) {
+          targetRankId = tier.rankId.rankId;
+          targetTier = tier.tierNum;
+          // Set user's languageLevels map
+          if (!user.languageLevels) user.languageLevels = new Map();
+          user.languageLevels.set(languageCode, level);
+        }
+      }
+    }
+
     await user.save();
 
-    // Check if progress exists for this language, if not create it
-    const existingProgress = await UserLanguageProgress.findOne({ uid: user._id, language });
-    if (!existingProgress) {
-      await UserLanguageProgress.create({
+    // Upsert UserLanguageProgress
+    let progress = await UserLanguageProgress.findOne({ uid: user._id, language: languageCode });
+    if (!progress) {
+      progress = await UserLanguageProgress.create({
         uid: user._id,
-        language,
-        rankId: 1,
-        tier: 3,
+        language: languageCode,
+        rankId: targetRankId,
+        tier: targetTier,
         stars: 0,
-        arenaMatchesPlayed: 0
+        arenaMatchesPlayed: 0,
       });
+    } else {
+      // Update progress if jumping to higher level
+      if (targetRankId > progress.rankId || (targetRankId === progress.rankId && targetTier < progress.tier)) {
+        progress.rankId = targetRankId;
+        progress.tier = targetTier;
+        await progress.save();
+      }
     }
 
-    res.json({ status: "success", targetLanguage: language, learningLanguages: user.learningLanguages });
+    res.json({
+      status: "success",
+      targetLanguage: languageCode,
+      learningLanguages: user.learningLanguages,
+      rankId: progress.rankId,
+      tier: progress.tier,
+      level: user.languageLevels?.get(languageCode),
+    });
+  }),
+);
+
+// Placement Test Generate
+router.get(
+  "/placement-test",
+  asyncHandler(async (req, res) => {
+    const { lang } = req.query;
+    if (!lang) return res.status(400).json({ error: "Missing language" });
+
+    if (lang !== "en") {
+      return res.status(400).json({ error: "Bài test hiện tại chỉ hỗ trợ tiếng Anh." });
+    }
+
+    const user = await User.findById(req.user.uid);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.placementTestCount >= 2) {
+      return res.status(403).json({ error: "Bạn đã vượt quá số lần làm bài kiểm tra (tối đa 2 lần)." });
+    }
+
+    try {
+      const dataPath = path.join(process.cwd(), "data", "en_placement.json");
+      const testData = JSON.parse(fs.readFileSync(dataPath, "utf-8"));
+      // We don't send the answers to the frontend to prevent cheating.
+      // Wait, we need to evaluate in the frontend for adaptive logic, so we DO send answers.
+      res.json({ status: "success", data: testData });
+    } catch (err) {
+      res.status(500).json({ error: "Không thể tải bài test" });
+    }
+  }),
+);
+
+// Placement Test Evaluate
+router.post(
+  "/placement-test/evaluate",
+  asyncHandler(async (req, res) => {
+    const { lang, finalLevelId, totalScore } = req.body;
+    if (!lang || !finalLevelId) return res.status(400).json({ error: "Missing data" });
+
+    const user = await User.findById(req.user.uid);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.placementTestCount >= 2) {
+      return res.status(403).json({ error: "Bạn đã vượt quá số lần làm bài kiểm tra." });
+    }
+
+    try {
+      user.placementTestCount = (user.placementTestCount || 0) + 1;
+      await user.save();
+
+      res.json({
+        status: "success",
+        evaluation: {
+          levelId: finalLevelId,
+          score: totalScore || 0,
+          feedback: "Đánh giá trình độ hoàn tất dựa trên kết quả của bạn.",
+        },
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
   }),
 );
 
@@ -394,10 +492,10 @@ router.get(
     ]);
 
     const totalStudyHours = studyStats.length > 0 ? Math.round(studyStats[0].totalMinutes / 60) : 0;
-    
+
     let activeProgress = { rankId: 1, tier: 3, stars: 0 };
     if (user.targetLanguage) {
-      const prog = languageProgressList.find(p => p.language === user.targetLanguage);
+      const prog = languageProgressList.find((p) => p.language === user.targetLanguage);
       if (prog) activeProgress = prog;
     }
 

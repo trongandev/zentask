@@ -61,7 +61,7 @@ export function BeginnerGrammarLesson() {
 
   const finishLesson = async () => {
     try {
-      await axiosInstance.post("/beginner/grammar/complete", { topicId });
+      await axiosInstance.post("/api/beginner/grammar/complete", { topicId });
       toastService.success("Chúc mừng bạn đã nắm vững điểm ngữ pháp này!");
       localStorage.removeItem(storageKey);
       navigate("/beginner/grammar");

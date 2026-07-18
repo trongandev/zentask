@@ -3,55 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BookOpen, CheckCircle, Lock, Play, Star } from "lucide-react";
 import { cn } from "../../lib/utils";
 import axiosInstance from "../../services/axiosConfig";
-
-const GRAMMAR_CATEGORIES = [
-  {
-    title: "1. Nền tảng câu",
-    topics: [
-      {
-        id: "c1-1",
-        title: "Cấu trúc S-V-O & Động từ To-be",
-        description: "Hiểu cấu trúc cốt lõi và khắc phục lỗi quên 'to be' ('Tôi mệt' vs 'I am tired').",
-        progress: 100,
-        isLocked: false,
-        icon: "🏗️",
-      },
-      { id: "c1-2", title: "Danh từ số ít/số nhiều (-s/-es)", description: "Nắm vững quy tắc số lượng để tránh lỗi thiếu 's' cực kỳ phổ biến.", progress: 30, isLocked: false, icon: "🍎" },
-      { id: "c1-3", title: "Mạo từ cơ bản (a/an/the)", description: "Hiểu rõ khi nào dùng a, an, the để câu chuẩn xác hơn.", progress: 0, isLocked: false, icon: "🏷️" },
-    ],
-  },
-  {
-    title: "2. Thì cơ bản (Ưu tiên tần suất)",
-    topics: [
-      { id: "c2-1", title: "Hiện Tại Đơn", description: "Diễn đạt thói quen, sự thật — thì được sử dụng nhiều nhất.", progress: 0, isLocked: true, icon: "🌞" },
-      { id: "c2-2", title: "Hiện Tại Tiếp Diễn", description: "Nói về việc đang xảy ra ngay lúc này.", progress: 0, isLocked: true, icon: "🏃" },
-      { id: "c2-3", title: "Quá Khứ Đơn", description: "Kể chuyện, tường thuật những gì đã qua.", progress: 0, isLocked: true, icon: "⏪" },
-      { id: "c2-4", title: "Tương Lai Gần (going to/will)", description: "Diễn đạt dự định, kế hoạch cho tương lai.", progress: 0, isLocked: true, icon: "🔮" },
-    ],
-  },
-  {
-    title: "3. Từ nối câu cơ bản",
-    topics: [
-      { id: "c3-1", title: "Đại từ nhân xưng & Sở hữu", description: "Nền tảng bắt buộc trước khi ghép câu phức (I/my, you/your...).", progress: 0, isLocked: true, icon: "👤" },
-      { id: "c3-2", title: "Giới từ chỉ Thời gian/Nơi chốn", description: "Luyện tập in/on/at để không bị lẫn lộn.", progress: 0, isLocked: true, icon: "📍" },
-      { id: "c3-3", title: "Liên từ cơ bản (and/but/so/because)", description: "Ghép ý để thoát khỏi câu đơn rời rạc.", progress: 0, isLocked: true, icon: "🔗" },
-    ],
-  },
-  {
-    title: "4. Câu hỏi & Phủ định",
-    topics: [
-      { id: "c4-1", title: "Câu hỏi Yes/No & Wh-", description: "Làm quen với cấu trúc đảo ngữ (do/does/did) hoàn toàn xa lạ với tiếng Việt.", progress: 0, isLocked: true, icon: "❓" },
-      { id: "c4-2", title: "Câu Phủ định", description: "Cách dùng don't/doesn't/didn't một cách chính xác.", progress: 0, isLocked: true, icon: "❌" },
-    ],
-  },
-  {
-    title: "5. So sánh & Tính từ",
-    topics: [
-      { id: "c5-1", title: "Trật tự tính từ", description: "Đặt tính từ trước danh từ thay vì phía sau như tiếng Việt.", progress: 0, isLocked: true, icon: "🎨" },
-      { id: "c5-2", title: "So sánh Hơn & Nhất", description: "Cấu trúc dễ luyện tập qua ví dụ thực tế.", progress: 0, isLocked: true, icon: "📏" },
-    ],
-  },
-];
+import { GRAMMAR_CATEGORIES } from "@/src/data/beginner/grammarData";
 
 export function BeginnerGrammar() {
   const navigate = useNavigate();

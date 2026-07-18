@@ -103,11 +103,20 @@ const userSchema = new mongoose.Schema(
     },
     targetLanguage: {
       type: String,
-      default: null,
+      default: 'en',
     },
     learningLanguages: {
       type: [String],
-      default: [],
+      default: ['en'],
+    },
+    languageLevels: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    placementTestCount: {
+      type: Number,
+      default: 0,
     },
     appSettings: {
       theme: { type: String, default: 'light' },

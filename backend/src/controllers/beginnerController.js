@@ -3,7 +3,7 @@ import { Course, CourseRank, CourseTier, CourseLesson } from "../models/Course.j
 
 export const getBeginnerProgress = async (req, res) => {
   try {
-    const uid = req.user.id;
+    const uid = req.user.uid;
     let progress = await BeginnerProgress.findOne({ uid });
 
     if (!progress) {
@@ -23,7 +23,8 @@ export const getBeginnerProgress = async (req, res) => {
 
 export const completeGrammarTopic = async (req, res) => {
   try {
-    const uid = req.user.id;
+    console.log(req.user);
+    const uid = req.user.uid;
     const { topicId } = req.body;
 
     if (!topicId) {

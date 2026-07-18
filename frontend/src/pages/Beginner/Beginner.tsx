@@ -4,6 +4,7 @@ import { Check, Star, Lock, BookOpen, X } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../contexts/AuthContext";
 import { SEO } from "../../components/SEO";
+import axiosInstance from "../../services/axiosConfig";
 
 // Các mức offset theo chu kỳ để tạo đường đi zigzag
 const PATH_OFFSETS = [0, -30, -60, -30, 0, 30, 60, 30];
@@ -34,38 +35,36 @@ export function Beginner() {
   const [selectedNode, setSelectedNode] = useState<LessonNode | null>(null);
 
   const [rankConfig, setRankConfig] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchRanks = async () => {
+      setIsLoading(true);
       try {
-        const res = await fetch(`${API_URL}/api/beginner/ranks`, { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          setRankConfig(data);
-        }
+        const res = await axiosInstance.get("/api/beginner/ranks");
+        setRankConfig(res.data);
       } catch (error) {
         console.error("Failed to fetch ranks", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchRanks();
-  }, [API_URL]);
+  }, []);
 
   useEffect(() => {
     const fetchProgress = async () => {
       if (!user) return;
       try {
-        const res = await fetch(`${API_URL}/api/user/beginner-progress`, { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          setCompletedLessons(data.completedLessons || []);
-          setRewardClaimedLessons(data.rewardClaimedLessons || []);
-        }
-      } catch (err) {
-        console.error("Failed to fetch progress", err);
+        const res = await axiosInstance.get("/api/user/beginner-progress");
+        setCompletedLessons(res.data.completedLessons || []);
+        setRewardClaimedLessons(res.data.rewardClaimedLessons || []);
+      } catch (error) {
+        console.error("Failed to fetch progress", error);
       }
     };
     fetchProgress();
-  }, [user, API_URL]);
+  }, [user]);
 
   useEffect(() => {
     const buildPath = () => {
@@ -162,22 +161,30 @@ export function Beginner() {
           </svg>
         </div>
 
+        {/* Đang tải */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-20 px-4 text-center z-10 w-full max-w-lg mx-auto">
+            <img src="/mascot/Lopy (1).png" alt="Loading Mascot" className="w-40 h-40 object-contain mb-6 animate-bounce" />
+            <h2 className="text-2xl font-black text-slate-800 animate-pulse">Đang tải lộ trình...</h2>
+            <p className="text-slate-500 mt-2 font-medium">Vui lòng đợi một chút nhé!</p>
+          </div>
+        )}
+
         {/* Thông báo chưa có bài học */}
-        {nodes.length === 0 && rankConfig && Object.keys(rankConfig).length === 0 && (
+        {!isLoading && nodes.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 px-4 text-center z-10 bg-white rounded-3xl shadow-sm border border-slate-100 my-8 w-full max-w-lg mx-auto">
             <div className="text-7xl mb-6">🚧</div>
             <h2 className="text-2xl font-bold text-slate-800 mb-3">Nội dung đang được cập nhật</h2>
-            <p className="text-slate-600 leading-relaxed">
-              Xin lỗi bạn, hệ thống chưa có nội dung lộ trình cho ngôn ngữ này. Vui lòng chờ admin cập nhật trong thời gian tới nhé!
+            <p className="text-slate-600 leading-relaxed font-medium">
+              Hiện tại ngôn ngữ này đang cập nhật nội dung và sớm sẽ ra mắt.
               <br />
-              <br />
-              Trong lúc chờ đợi, bạn có thể bấm vào lá cờ phía trên cùng tay phải để chuyển tạm qua học <span className="font-bold text-blue-600">Tiếng Anh</span> nhé.
+              Trong quá trình chờ, bạn có thể chuyển qua ngôn ngữ <span className="font-bold text-blue-600">Tiếng Anh</span> để học thử nhé!
             </p>
           </div>
         )}
 
         {/* Render danh sách nodes*/}
-        {nodes.map((node, index) => {
+        {!isLoading && nodes.map((node, index) => {
           // Gắn Unit Header (Rank / Tier separator)
           const showHeader = index === 0 || nodes[index - 1].rankName !== node.rankName || nodes[index - 1].tierName !== node.tierName;
 

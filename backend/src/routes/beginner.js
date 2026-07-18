@@ -9,24 +9,12 @@ const router = express.Router();
 // Since verifyToken is used on router.use, we will put the seed route BEFORE verifyToken so it can be called easily from a script.
 router.post("/seed", seedBeginnerData);
 
-import jwt from "jsonwebtoken";
-
-const optionalAuth = (req, res, next) => {
-  const token = req.cookies?.token || req.headers?.authorization?.split(" ")[1];
-  if (token) {
-    try {
-      req.user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    } catch (err) {}
-  }
-  next();
-};
-
-router.get("/ranks", optionalAuth, getBeginnerRanks);
-router.get("/lesson/:lessonId", getBeginnerLesson);
+router.get("/ranks", verifyToken, getBeginnerRanks);
+router.get("/lesson/:lessonId", verifyToken, getBeginnerLesson);
 
 router.use(verifyToken);
 
-router.get("/progress", getBeginnerProgress);
-router.post("/grammar/complete", completeGrammarTopic);
+router.get("/progress", verifyToken, getBeginnerProgress);
+router.post("/grammar/complete", verifyToken, completeGrammarTopic);
 
 export default router;

@@ -1,0 +1,678 @@
+{
+  "phase1": [
+    {
+      "id": "p1_1",
+      "type": "vocab",
+      "question": "Can you ___ me a favor?",
+      "options": [
+        "make",
+        "do",
+        "take",
+        "give"
+      ],
+      "answer": "do"
+    },
+    {
+      "id": "p1_2",
+      "type": "grammar",
+      "question": "If I ___ you, I wouldn't do that.",
+      "options": [
+        "am",
+        "was",
+        "were",
+        "been"
+      ],
+      "answer": "were"
+    },
+    {
+      "id": "p1_3",
+      "type": "reading",
+      "question": "Read this: 'Dear John, I am writing to inform you that our meeting is postponed.' What does postponed mean?",
+      "options": [
+        "Canceled",
+        "Delayed",
+        "Moved earlier",
+        "Confirmed"
+      ],
+      "answer": "Delayed"
+    },
+    {
+      "id": "p1_4",
+      "type": "grammar",
+      "question": "She is used to ___ early.",
+      "options": [
+        "waking up",
+        "wake up",
+        "woken up",
+        "wakes up"
+      ],
+      "answer": "waking up"
+    },
+    {
+      "id": "p1_5",
+      "type": "listening",
+      "question": "What is the main topic of this sentence?",
+      "options": [
+        "Weather",
+        "Travel",
+        "Food",
+        "Work"
+      ],
+      "answer": "Weather",
+      "audioText": "It looks like it's going to rain heavily this afternoon, so take your umbrella."
+    },
+    {
+      "id": "p1_6",
+      "type": "vocab",
+      "question": "The company ___ a lot of money last year.",
+      "options": [
+        "did",
+        "earned",
+        "made",
+        "won"
+      ],
+      "answer": "made"
+    }
+  ],
+  "phase2": {
+    "A1_A2": [
+      {
+        "id": "p2_a_1",
+        "type": "vocab",
+        "question": "I eat an ___ every day.",
+        "options": [
+          "apple",
+          "banana",
+          "bread",
+          "milk"
+        ],
+        "answer": "apple"
+      },
+      {
+        "id": "p2_a_2",
+        "type": "grammar",
+        "question": "She ___ to the store yesterday.",
+        "options": [
+          "go",
+          "goes",
+          "went",
+          "going"
+        ],
+        "answer": "went"
+      },
+      {
+        "id": "p2_a_3",
+        "type": "grammar",
+        "question": "They ___ playing soccer now.",
+        "options": [
+          "is",
+          "am",
+          "are",
+          "be"
+        ],
+        "answer": "are"
+      },
+      {
+        "id": "p2_a_4",
+        "type": "reading",
+        "question": "Message: 'See you at 5 PM at the park.' Where are they meeting?",
+        "options": [
+          "Home",
+          "Park",
+          "School",
+          "Store"
+        ],
+        "answer": "Park"
+      },
+      {
+        "id": "p2_a_5",
+        "type": "listening",
+        "question": "What does the person want?",
+        "options": [
+          "Water",
+          "Coffee",
+          "Tea",
+          "Juice"
+        ],
+        "answer": "Coffee",
+        "audioText": "Can I have a cup of coffee, please?"
+      },
+      {
+        "id": "p2_a_6",
+        "type": "vocab",
+        "question": "The ___ is bright and yellow.",
+        "options": [
+          "moon",
+          "star",
+          "sun",
+          "cloud"
+        ],
+        "answer": "sun"
+      },
+      {
+        "id": "p2_a_7",
+        "type": "grammar",
+        "question": "I don't have ___ money.",
+        "options": [
+          "some",
+          "any",
+          "no",
+          "many"
+        ],
+        "answer": "any"
+      },
+      {
+        "id": "p2_a_8",
+        "type": "vocab",
+        "question": "He is wearing a red ___.",
+        "options": [
+          "shirt",
+          "shoes",
+          "pants",
+          "socks"
+        ],
+        "answer": "shirt"
+      }
+    ],
+    "A2_B1": [
+      {
+        "id": "p2_b_1",
+        "type": "context",
+        "question": "A: Did you enjoy the movie? B: Yes, it was absolutely ___!",
+        "options": [
+          "fascinating",
+          "bored",
+          "tiring",
+          "interested"
+        ],
+        "answer": "fascinating"
+      },
+      {
+        "id": "p2_b_2",
+        "type": "grammar",
+        "question": "I have lived here ___ 2010.",
+        "options": [
+          "since",
+          "for",
+          "in",
+          "from"
+        ],
+        "answer": "since"
+      },
+      {
+        "id": "p2_b_3",
+        "type": "reading",
+        "question": "Read: 'Despite the heavy rain, the event was a huge success.' How was the event?",
+        "options": [
+          "Canceled",
+          "Successful",
+          "Failed",
+          "Delayed"
+        ],
+        "answer": "Successful"
+      },
+      {
+        "id": "p2_b_4",
+        "type": "vocab",
+        "question": "Please ___ your seatbelts.",
+        "options": [
+          "tie",
+          "fasten",
+          "close",
+          "lock"
+        ],
+        "answer": "fasten"
+      },
+      {
+        "id": "p2_b_5",
+        "type": "listening",
+        "question": "Why is the person calling?",
+        "options": [
+          "To cancel",
+          "To book a table",
+          "To complain",
+          "To ask for directions"
+        ],
+        "answer": "To book a table",
+        "audioText": "Hello, I'd like to reserve a table for two tonight at 8 PM."
+      },
+      {
+        "id": "p2_b_6",
+        "type": "grammar",
+        "question": "He asked me what ___.",
+        "options": [
+          "was I doing",
+          "am I doing",
+          "I was doing",
+          "I am doing"
+        ],
+        "answer": "I was doing"
+      },
+      {
+        "id": "p2_b_7",
+        "type": "vocab",
+        "question": "The internet connection is very ___ today.",
+        "options": [
+          "weak",
+          "slow",
+          "heavy",
+          "hard"
+        ],
+        "answer": "slow"
+      },
+      {
+        "id": "p2_b_8",
+        "type": "grammar",
+        "question": "If it rains tomorrow, we ___ at home.",
+        "options": [
+          "stay",
+          "will stay",
+          "would stay",
+          "stayed"
+        ],
+        "answer": "will stay"
+      }
+    ],
+    "B1_B2": [
+      {
+        "id": "p2_c_1",
+        "type": "context",
+        "question": "Email: 'We regret to inform you that your application has been ___.'",
+        "options": [
+          "accepted",
+          "rejected",
+          "approved",
+          "received"
+        ],
+        "answer": "rejected"
+      },
+      {
+        "id": "p2_c_2",
+        "type": "grammar",
+        "question": "By this time next year, I ___ my degree.",
+        "options": [
+          "will finish",
+          "will have finished",
+          "have finished",
+          "finish"
+        ],
+        "answer": "will have finished"
+      },
+      {
+        "id": "p2_c_3",
+        "type": "reading",
+        "question": "Read: 'The committee reached a consensus after hours of fierce debate.' What does consensus mean?",
+        "options": [
+          "Disagreement",
+          "Argument",
+          "Agreement",
+          "Conclusion"
+        ],
+        "answer": "Agreement"
+      },
+      {
+        "id": "p2_c_4",
+        "type": "vocab",
+        "question": "She has a ___ for remembering names.",
+        "options": [
+          "talent",
+          "knack",
+          "skill",
+          "ability"
+        ],
+        "answer": "knack"
+      },
+      {
+        "id": "p2_c_5",
+        "type": "listening",
+        "question": "What is the tone of the speaker?",
+        "options": [
+          "Angry",
+          "Excited",
+          "Apologetic",
+          "Bored"
+        ],
+        "answer": "Apologetic",
+        "audioText": "I am so sorry for the delay, we ran into some unexpected issues."
+      },
+      {
+        "id": "p2_c_6",
+        "type": "grammar",
+        "question": "Not only ___ the exam, but she also got the highest score.",
+        "options": [
+          "did she pass",
+          "she passed",
+          "she did pass",
+          "passed she"
+        ],
+        "answer": "did she pass"
+      },
+      {
+        "id": "p2_c_7",
+        "type": "vocab",
+        "question": "The project was hindered by a lack of ___.",
+        "options": [
+          "funds",
+          "money",
+          "capital",
+          "wealth"
+        ],
+        "answer": "funds"
+      },
+      {
+        "id": "p2_c_8",
+        "type": "grammar",
+        "question": "I wish I ___ harder when I was young.",
+        "options": [
+          "studied",
+          "had studied",
+          "study",
+          "would study"
+        ],
+        "answer": "had studied"
+      }
+    ]
+  },
+  "phase3": {
+    "A1": [
+      {
+        "id": "p3_a1_1",
+        "type": "vocab",
+        "question": "My ___ is John.",
+        "options": [
+          "name",
+          "age",
+          "book",
+          "car"
+        ],
+        "answer": "name"
+      },
+      {
+        "id": "p3_a1_2",
+        "type": "grammar",
+        "question": "I ___ a student.",
+        "options": [
+          "am",
+          "is",
+          "are",
+          "be"
+        ],
+        "answer": "am"
+      },
+      {
+        "id": "p3_a1_3",
+        "type": "reading",
+        "question": "Sign: 'No Smoking'. What does this mean?",
+        "options": [
+          "You can smoke",
+          "You cannot smoke",
+          "Buy cigarettes",
+          "Fire hazard"
+        ],
+        "answer": "You cannot smoke"
+      },
+      {
+        "id": "p3_a1_4",
+        "type": "grammar",
+        "question": "He ___ a dog.",
+        "options": [
+          "have",
+          "has",
+          "having",
+          "had"
+        ],
+        "answer": "has"
+      },
+      {
+        "id": "p3_a1_5",
+        "type": "listening",
+        "question": "How old is the person?",
+        "options": [
+          "20",
+          "25",
+          "30",
+          "35"
+        ],
+        "answer": "25",
+        "audioText": "I am twenty-five years old."
+      },
+      {
+        "id": "p3_a1_6",
+        "type": "vocab",
+        "question": "The sky is ___.",
+        "options": [
+          "blue",
+          "green",
+          "red",
+          "yellow"
+        ],
+        "answer": "blue"
+      }
+    ],
+    "A2": [
+      {
+        "id": "p3_a2_1",
+        "type": "vocab",
+        "question": "I need to buy some ___ at the bakery.",
+        "options": [
+          "meat",
+          "bread",
+          "milk",
+          "vegetables"
+        ],
+        "answer": "bread"
+      },
+      {
+        "id": "p3_a2_2",
+        "type": "grammar",
+        "question": "Did you ___ TV last night?",
+        "options": [
+          "watch",
+          "watches",
+          "watched",
+          "watching"
+        ],
+        "answer": "watch"
+      },
+      {
+        "id": "p3_a2_3",
+        "type": "reading",
+        "question": "Email: 'Let's have lunch at 12 PM.' When is lunch?",
+        "options": [
+          "Morning",
+          "Noon",
+          "Evening",
+          "Night"
+        ],
+        "answer": "Noon"
+      },
+      {
+        "id": "p3_a2_4",
+        "type": "grammar",
+        "question": "There are ___ apples on the table.",
+        "options": [
+          "much",
+          "many",
+          "a lot",
+          "any"
+        ],
+        "answer": "many"
+      },
+      {
+        "id": "p3_a2_5",
+        "type": "listening",
+        "question": "What is the weather like?",
+        "options": [
+          "Sunny",
+          "Rainy",
+          "Snowy",
+          "Windy"
+        ],
+        "answer": "Rainy",
+        "audioText": "Don't forget your umbrella, it's pouring outside."
+      },
+      {
+        "id": "p3_a2_6",
+        "type": "vocab",
+        "question": "He works in a hospital. He is a ___.",
+        "options": [
+          "teacher",
+          "doctor",
+          "pilot",
+          "farmer"
+        ],
+        "answer": "doctor"
+      }
+    ],
+    "B1": [
+      {
+        "id": "p3_b1_1",
+        "type": "vocab",
+        "question": "I was very ___ when I heard the news.",
+        "options": [
+          "surprise",
+          "surprised",
+          "surprising",
+          "surprisingly"
+        ],
+        "answer": "surprised"
+      },
+      {
+        "id": "p3_b1_2",
+        "type": "grammar",
+        "question": "If I had money, I ___ buy a car.",
+        "options": [
+          "will",
+          "would",
+          "can",
+          "may"
+        ],
+        "answer": "would"
+      },
+      {
+        "id": "p3_b1_3",
+        "type": "reading",
+        "question": "Notice: 'Staff only beyond this point.' Who can enter?",
+        "options": [
+          "Anyone",
+          "Customers",
+          "Employees",
+          "Managers only"
+        ],
+        "answer": "Employees"
+      },
+      {
+        "id": "p3_b1_4",
+        "type": "grammar",
+        "question": "The book ___ was written by him is famous.",
+        "options": [
+          "who",
+          "which",
+          "whom",
+          "whose"
+        ],
+        "answer": "which"
+      },
+      {
+        "id": "p3_b1_5",
+        "type": "listening",
+        "question": "What did they forget?",
+        "options": [
+          "Keys",
+          "Wallet",
+          "Phone",
+          "Bag"
+        ],
+        "answer": "Wallet",
+        "audioText": "Oh no, I left my wallet at the restaurant!"
+      },
+      {
+        "id": "p3_b1_6",
+        "type": "vocab",
+        "question": "She made a ___ to study harder.",
+        "options": [
+          "promise",
+          "promising",
+          "promised",
+          "promises"
+        ],
+        "answer": "promise"
+      }
+    ],
+    "B2": [
+      {
+        "id": "p3_b2_1",
+        "type": "vocab",
+        "question": "The new policy will have a significant ___ on the economy.",
+        "options": [
+          "affect",
+          "effect",
+          "result",
+          "outcome"
+        ],
+        "answer": "effect"
+      },
+      {
+        "id": "p3_b2_2",
+        "type": "grammar",
+        "question": "I'd rather you ___ here.",
+        "options": [
+          "don't smoke",
+          "didn't smoke",
+          "not smoke",
+          "won't smoke"
+        ],
+        "answer": "didn't smoke"
+      },
+      {
+        "id": "p3_b2_3",
+        "type": "reading",
+        "question": "Read: 'The CEO stepped down amidst allegations of fraud.' What happened to the CEO?",
+        "options": [
+          "Promoted",
+          "Resigned",
+          "Fired",
+          "Arrested"
+        ],
+        "answer": "Resigned"
+      },
+      {
+        "id": "p3_b2_4",
+        "type": "grammar",
+        "question": "Hardly ___ when the phone rang.",
+        "options": [
+          "I had arrived",
+          "had I arrived",
+          "I arrived",
+          "arrived I"
+        ],
+        "answer": "had I arrived"
+      },
+      {
+        "id": "p3_b2_5",
+        "type": "listening",
+        "question": "What is the speaker's opinion?",
+        "options": [
+          "Strongly agree",
+          "Partially agree",
+          "Strongly disagree",
+          "Neutral"
+        ],
+        "answer": "Strongly disagree",
+        "audioText": "I completely reject that notion; it makes absolutely no sense."
+      },
+      {
+        "id": "p3_b2_6",
+        "type": "vocab",
+        "question": "The evidence was ___, proving his guilt beyond doubt.",
+        "options": [
+          "inconclusive",
+          "compelling",
+          "irrelevant",
+          "ambiguous"
+        ],
+        "answer": "compelling"
+      }
+    ]
+  }
+}
