@@ -104,7 +104,7 @@ interface QuizState {
   deleteQuizCategory: (categoryId: string) => Promise<void>;
   getQuizHistory: () => Promise<QuizResult[]>;
   getQuizById: (id: string) => Promise<Quiz | null>;
-  createQuiz: (data: Partial<Quiz>) => Promise<{ id: string; status: string } | null>;
+  createQuiz: (data: Partial<Quiz>) => Promise<Quiz | null>;
   generateQuizByAI: (prompt: string, numQuestions?: number, difficulty?: string, isPublic?: boolean, categoryId?: string | null) => Promise<Quiz | null>;
   submitQuiz: (quizId: string, answers: Record<string, string>, usedRebirth?: boolean, roomId?: string) => Promise<any | null>;
   createRoom: (quizId: string, settings: QuizRoomSettings) => Promise<{ id: string; roomCode: string; status: string } | null>;

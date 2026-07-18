@@ -8,6 +8,7 @@ import { useUserStore } from "../services/userService";
 import { useSocket } from "../contexts/SocketContext";
 import { timeAgo } from "../lib/utils";
 import { getNotificationStyles, getNotificationLink } from "../config/notificationConfig";
+import { LanguageOverlay } from "./common/LanguageOverlay";
 
 interface HeaderProps {
   isLeftSidebarOpen: boolean;
@@ -21,6 +22,7 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
   const { todayMinutes, initTodayMinutes, incrementLocalMinutes, syncStudyTime } = useUserStore();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
   const [showExtensionAd, setShowExtensionAd] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -178,6 +180,16 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
         </div>
 
         <div className="flex items-center gap-4 lg:gap-6">
+          {user && user.targetLanguage && (
+            <button 
+              onClick={() => setIsLanguageOpen(true)}
+              className="w-8 h-6 rounded overflow-hidden shadow-sm hover:scale-110 transition-transform"
+              title="Đổi ngôn ngữ"
+            >
+              <img src={`/flag/${user.targetLanguage}.svg`} alt="Current Language" className="w-full h-full object-cover" />
+            </button>
+          )}
+
           <button className="text-gray-400 hover:text-gray-600 transition-colors">
             <Search className="w-5" />
           </button>
@@ -298,6 +310,14 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
           )}
         </div>
       </header>
+      {user && (
+        <LanguageOverlay 
+          isOpen={isLanguageOpen || !user.targetLanguage} 
+          canClose={!!user.targetLanguage} 
+          onClose={() => setIsLanguageOpen(false)} 
+          onSelect={(code) => setIsLanguageOpen(false)} 
+        />
+      )}
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { ModeQuiz } from "../../components/practice/ModeQuiz";
 import { ModeFillBlank } from "../../components/practice/ModeFillBlank";
 import { ModeListening } from "../../components/practice/ModeListening";
 import { ModePronunciation } from "../../components/practice/ModePronunciation";
-import { getBeginnerSetById } from "../../config/rankTopicConfig";
+
 import { ModeMatch } from "../../components/practice/ModeMatch";
 import { ModeBubble } from "../../components/practice/ModeBubble";
 import { ModeGuess } from "../../components/practice/ModeGuess";
@@ -88,31 +88,35 @@ export function FlashcardPractice() {
   useEffect(() => {
     if (id) {
       if (isBeginner) {
-        const set = getBeginnerSetById(id);
-        if (set) {
-          setBeginnerSet(set);
-          setBeginnerAllCards(set.words || []);
+        fetch(`${API_URL}/api/beginner/lesson/${id}`)
+          .then((res) => (res.ok ? res.json() : null))
+          .then((set) => {
+            if (set) {
+              setBeginnerSet(set);
+              setBeginnerAllCards(set.words || []);
 
-          // Fetch learned words and filter them out
-          if (user) {
-            fetch(`${API_URL}/api/user/beginner-progress`, { credentials: "include" })
-              .then((res) => (res.ok ? res.json() : { learnedWords: [] }))
-              .then((data) => {
-                const learnedWords = data.learnedWords || [];
-                const unlearnedCards = (set.words || []).filter((w: any) => !learnedWords.includes(w.id));
-                setBeginnerCards(unlearnedCards);
-                setPracticeSessionKey((key) => key + 1);
-              })
-              .catch((err) => {
-                console.error("Failed to fetch beginner progress", err);
+              // Fetch learned words and filter them out
+              if (user) {
+                fetch(`${API_URL}/api/user/beginner-progress`, { credentials: "include" })
+                  .then((res) => (res.ok ? res.json() : { learnedWords: [] }))
+                  .then((data) => {
+                    const learnedWords = data.learnedWords || [];
+                    const unlearnedCards = (set.words || []).filter((w: any) => !learnedWords.includes(w.id));
+                    setBeginnerCards(unlearnedCards);
+                    setPracticeSessionKey((key) => key + 1);
+                  })
+                  .catch((err) => {
+                    console.error("Failed to fetch beginner progress", err);
+                    setBeginnerCards(set.words || []);
+                    setPracticeSessionKey((key) => key + 1);
+                  });
+              } else {
                 setBeginnerCards(set.words || []);
                 setPracticeSessionKey((key) => key + 1);
-              });
-          } else {
-            setBeginnerCards(set.words || []);
-            setPracticeSessionKey((key) => key + 1);
-          }
-        }
+              }
+            }
+          })
+          .catch((err) => console.error("Failed to fetch beginner set:", err));
       } else {
         fetchCards(id);
         fetchProgress(id);

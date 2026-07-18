@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Star, Lock, BookOpen, X } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { RANK_TOPIC_CONFIG } from "../../config/rankTopicConfig";
 import { useAuth } from "../../contexts/AuthContext";
 import { SEO } from "../../components/SEO";
 
@@ -36,6 +35,23 @@ export function Beginner() {
   const [nodes, setNodes] = useState<LessonNode[]>([]);
   const [selectedNode, setSelectedNode] = useState<LessonNode | null>(null);
 
+  const [rankConfig, setRankConfig] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchRanks = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/beginner/ranks`, { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setRankConfig(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch ranks", error);
+      }
+    };
+    fetchRanks();
+  }, [API_URL]);
+
   useEffect(() => {
     const fetchProgress = async () => {
       if (!user) return;
@@ -51,23 +67,26 @@ export function Beginner() {
       }
     };
     fetchProgress();
-  }, [user]);
+  }, [user, API_URL]);
 
   useEffect(() => {
     const buildPath = () => {
+      if (!rankConfig) return;
       const generatedNodes: LessonNode[] = [];
 
       // Lặp qua tất cả các rank
-      for (const [rankId, rankData] of Object.entries(RANK_TOPIC_CONFIG)) {
+      for (const [rankId, rankData] of Object.entries(rankConfig as any)) {
         // Tiers thường được sắp xếp giảm dần 5->1 hoặc 3->1 trong config,
         // để hiển thị từ dễ đến khó (dưới lên trên), ta lật ngược lại hoặc theo đúng thứ tự logic.
         // Trong cấu trúc, tier số lớn = thấp nhất (dễ nhất).
-        const sortedTiers = Object.entries(rankData.tiers).sort(([a], [b]) => Number(b) - Number(a)); // 3 -> 1
+        const rankDataTyped = rankData as any;
+        const sortedTiers = rankDataTyped.tiers ? Object.entries(rankDataTyped.tiers).sort(([a], [b]) => Number(b) - Number(a)) : [];
 
         for (const [tierId, tier] of sortedTiers) {
-          if (!tier.data) continue;
+          const tierTyped = tier as any;
+          if (!tierTyped.data) continue;
 
-          for (const topic of tier.data) {
+          for (const topic of tierTyped.data) {
             const words = topic.words || [];
             const WORDS_PER_LESSON = 5;
             const totalLessons = Math.ceil(words.length / WORDS_PER_LESSON) || 1;
@@ -81,12 +100,12 @@ export function Beginner() {
                 lessonIndex: i,
                 totalLessonsInTopic: totalLessons,
                 wordCount: count,
-                title: topic.title,
+                title: topic.title || "",
                 rankId,
-                rankName: rankData.name,
+                rankName: (rankData as any).name,
                 tierName: `Tier ${tierId}`,
                 status: "locked", // Will evaluate below
-                color: topic.color || "from-blue-500 to-cyan-400",
+                color: topic.category || "from-blue-500 to-cyan-400",
                 words: lessonWords,
                 rewardClaimed: false, // Will evaluate below
               });
@@ -118,7 +137,7 @@ export function Beginner() {
     };
 
     buildPath();
-  }, [completedLessons, rewardClaimedLessons]);
+  }, [completedLessons, rewardClaimedLessons, rankConfig]);
 
   const handleNodeClick = (node: LessonNode) => {
     if (node.status === "locked") return;
@@ -178,7 +197,7 @@ export function Beginner() {
               )}
 
               {/* Node Button */}
-              <div className="w-full flex flex-col items-center relative z-10">
+              <div className={`w-full flex flex-col items-center relative z-10 ${index === 0 ? "mt-20" : ""}`}>
                 <div className="relative my-4 " style={{ transform: `translateX(${offset}px)` }}>
                   {/* Tooltip khi đang học */}
                   {isCurrent && (
@@ -217,7 +236,7 @@ export function Beginner() {
                   {/* Nhãn bài học bên cạnh */}
                   <div
                     className={cn(
-                      "absolute top-1/2 -translate-y-1/2 whitespace-nowrap opacity-0 md:opacity-100 font-bold text-sm",
+                      "absolute top-1/2 -translate-y-1/2 whitespace-nowrap  font-bold text-xs md:text-sm",
                       offset >= 0 ? "right-[100%] mr-4 text-right" : "left-[100%] ml-4 text-left",
                       isLocked ? "text-slate-400" : "text-slate-700",
                     )}

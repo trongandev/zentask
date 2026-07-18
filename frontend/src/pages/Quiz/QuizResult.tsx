@@ -4,6 +4,7 @@ import { Award, Flame, CheckCircle2, XCircle, ArrowRight, Loader2, Sparkles } fr
 import { useQuizStore, QuizResult as ResultType, Quiz } from "../../services/quizService";
 import confetti from "canvas-confetti";
 import toastService from "@/src/services/toastService";
+import toast from "react-hot-toast";
 
 export function QuizResult() {
   const { resultId } = useParams<{ resultId: string }>();

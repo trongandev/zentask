@@ -20,7 +20,7 @@ export const adminService = {
   // Tasks
   getTasks: async () => {
     const res = await axiosInstance.get(`/api/admin/tasks`);
-    return res.data;
+    return res.data.tasks;
   },
 
   createTask: async (taskData: any) => {
@@ -94,9 +94,29 @@ export const adminService = {
     return true;
   },
 
+  // Bot Jobs
+  getBotJobs: async () => {
+    const res = await axiosInstance.get(`/api/admin/bot-jobs`);
+    return res.data;
+  },
+  updateBotJob: async (jobId: string, data: any) => {
+    const res = await axiosInstance.put(`/api/admin/bot-jobs/${jobId}`, data);
+    return res.data;
+  },
+  triggerBotJob: async (jobId: string) => {
+    const res = await axiosInstance.post(`/api/admin/bot-jobs/${jobId}/trigger`);
+    return res.data;
+  },
+
   // System Logs
   getSystemLogs: async (page = 1, limit = 20) => {
     const res = await axiosInstance.get(`/api/admin/system-logs?page=${page}&limit=${limit}`);
+    return res.data;
+  },
+
+  // AI Usage
+  getAIUsage: async (page = 1, limit = 20) => {
+    const res = await axiosInstance.get(`/api/admin/ai-usage?page=${page}&limit=${limit}`);
     return res.data;
   },
 

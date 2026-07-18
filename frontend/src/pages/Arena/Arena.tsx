@@ -3,7 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSocket } from "../../contexts/SocketContext";
-import { generateArenaDeck, Word, RANK_TOPIC_CONFIG } from "../../config/rankTopicConfig";
+import { Word } from "../../config/rankTopicConfig";
+
+const RANK_NAMES: Record<number, string> = {
+  1: "Bạc",
+  2: "Lục bảo",
+  3: "Tinh Anh",
+  4: "Kim cương",
+  5: "Cao Thủ",
+};
 
 import { ArenaModeSelector } from "./components/ArenaModeSelector";
 import { ArenaLobby } from "./components/ArenaLobby";
@@ -536,9 +544,7 @@ export function Arena() {
     if (!socket || !user) return;
     const rankId = user.rankId || 1;
     const tierNum = user.tier || 3;
-    const deck = generateArenaDeck(rankId, tierNum);
-    const rankConfig = RANK_TOPIC_CONFIG[rankId as keyof typeof RANK_TOPIC_CONFIG];
-    const rankName = rankConfig?.name || "Bạc";
+    const rankName = RANK_NAMES[rankId] || "Bạc";
     const tierText = rankId === 5 ? "" : ` ${["I", "II", "III", "IV", "V"][tierNum - 1] || tierNum}`;
     const readableRankInfo = `${rankName}${tierText}`;
 
@@ -560,7 +566,6 @@ export function Arena() {
         slotIndex: arenaPlayers.find((p) => p.uid === user.uid)?.slotIndex,
         team: arenaPlayers.find((p) => p.uid === user.uid)?.team,
       },
-      matchData: deck,
     });
 
     setSearchElapsed(0);
@@ -760,8 +765,6 @@ export function Arena() {
 
     // Generate match data for the challenge
     const rankId = Number(user.rankId) || 1;
-    const tierNum = Number(user.tier) || 3;
-    const deck = generateArenaDeck(rankId, 10, true, arenaMode);
 
     socket.emit("arena_challenge_invite", {
       targetUid: friendUid,
@@ -769,7 +772,7 @@ export function Arena() {
         uid: user.uid,
         name: user.displayName || "User",
         avatar: user.photoURL || "",
-        rankInfo: `${RANK_TOPIC_CONFIG[(user.rankId || 1) as keyof typeof RANK_TOPIC_CONFIG]?.name || "Bạc"}`,
+        rankInfo: RANK_NAMES[user.rankId || 1] || "Bạc",
         rankId: user.rankId || 1,
         tier: user.tier || 3,
         level: user.level || 1,
@@ -777,7 +780,6 @@ export function Arena() {
         team: arenaPlayers.find((p) => p.uid === user.uid)?.team,
       },
       mode: arenaMode,
-      matchData: deck,
       roomCode: roomCode || undefined,
       targetSlotIndex,
     });

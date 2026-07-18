@@ -2,7 +2,7 @@ import { Router } from "express";
 import User from "../models/User.js";
 import { cleanAndValidatePublicText } from "../../utils/moderation.js";
 import { verifyRecaptchaFromRequest } from "../../utils/recaptcha.js";
-import { DailyTask, UserDailyStat, Notification, FlashcardProgress, Flashcard, LeaderboardWeekly, GrammarTest, TensesTest } from "../models/Schemas.js";
+import { DailyTask, UserDailyStat, Notification, FlashcardProgress, Flashcard, LeaderboardWeekly, GrammarTest, TensesTest, UserLanguageProgress } from "../models/Schemas.js";
 import jwt from "jsonwebtoken";
 import { SYSTEM_LEVELS, SYSTEM_BADGES } from "../config/system.js";
 import { getWeekString } from "../../utils/dateUtils.js";
@@ -166,6 +166,23 @@ router.get("/me", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
     const userProfile = userProfileDoc.toJSON();
+
+    if (userProfile.targetLanguage) {
+      const prog = await UserLanguageProgress.findOne({ uid: uid, language: userProfile.targetLanguage }).lean();
+      if (prog) {
+        userProfile.rankId = prog.rankId;
+        userProfile.tier = prog.tier;
+        userProfile.stars = prog.stars;
+      } else {
+        userProfile.rankId = 1;
+        userProfile.tier = 3;
+        userProfile.stars = 0;
+      }
+    } else {
+      userProfile.rankId = 1;
+      userProfile.tier = 3;
+      userProfile.stars = 0;
+    }
 
     // Fetch custom grammar tests
     try {

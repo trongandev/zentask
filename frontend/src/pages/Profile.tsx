@@ -31,10 +31,12 @@ import { useAuth } from "../contexts/AuthContext";
 import { useConfigStore } from "../services/configService";
 import { useEtcStore } from "../services/etcService";
 import { useUserStore } from "../services/userService";
-import { RANK_TOPIC_CONFIG } from "../config/rankTopicConfig";
+import { RANK_NAMES } from "../config/rankTopicConfig";
 import toastService from "@/src/services/toastService";
 import { friendsService } from "../services/friendsService";
 import { Modal } from "../components/shared/Modal";
+
+const API_URL = import.meta.env.VITE_API_BACKEND;
 
 const RECENT_ACTIVITIES = [
   { id: 1, action: "Đã hoàn thành bài Quiz", target: "Ngữ pháp cơ bản - Thì Hiện Tại", time: "2 giờ trước", icon: Target, color: "text-green-500" },
@@ -61,6 +63,19 @@ export function Profile() {
   const [showFriendMenu, setShowFriendMenu] = useState(false);
   const [showUnfriendModal, setShowUnfriendModal] = useState(false);
   const [friendsList, setFriendsList] = useState<any[]>([]);
+
+  const [rankConfig, setRankConfig] = useState<any>(null);
+
+  useEffect(() => {
+    if (activeTab === "ranks" && !rankConfig) {
+      fetch(`${API_URL}/api/beginner/ranks?lang=en`)
+        .then(res => (res.ok ? res.json() : null))
+        .then(data => {
+          if (data) setRankConfig(data);
+        })
+        .catch(console.error);
+    }
+  }, [activeTab, rankConfig]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -852,9 +867,9 @@ export function Profile() {
                 },
                 { id: 5, name: "Cao Thủ", src: "/rank/5.png", color: "text-rose-600", border: "border-rose-400", bg: "bg-rose-50", ring: "ring-rose-200", badge: "bg-rose-100 text-rose-700" },
               ].map((rankInfo, index) => {
-                const rankData = RANK_TOPIC_CONFIG[rankInfo.id as keyof typeof RANK_TOPIC_CONFIG];
+                const rankData = rankConfig ? rankConfig[rankInfo.id] : null;
                 // Sort tiers from lowest (highest number) to highest (lowest number)
-                const tiersKeys = Object.keys(rankData.tiers).sort((a, b) => Number(b) - Number(a));
+                const tiersKeys = rankData?.tiers ? Object.keys(rankData.tiers).sort((a, b) => Number(b) - Number(a)) : [];
                 const isCurrentRank = user.rankId === rankInfo.id;
 
                 return (
@@ -885,8 +900,8 @@ export function Profile() {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {tiersKeys.map((tierKey) => {
-                          const tier = rankData.tiers[Number(tierKey) as keyof typeof rankData.tiers];
+                        {rankData && tiersKeys.map((tierKey) => {
+                          const tier = rankData.tiers[tierKey];
                           const isCurrentTier = isCurrentRank && user.tier === Number(tierKey);
 
                           return (
@@ -913,8 +928,8 @@ export function Profile() {
                               <div className="text-xs text-gray-600 mt-2 flex-1">
                                 <span className="font-semibold text-gray-700 block mb-1">Chủ đề:</span>
                                 <ul className="list-disc pl-4 space-y-1">
-                                  {tier.topics.map((topic, i) => (
-                                    <li key={i}>{topic}</li>
+                                  {tier.data && tier.data.map((topic: any, i: number) => (
+                                    <li key={i}>{topic.title}</li>
                                   ))}
                                 </ul>
                               </div>

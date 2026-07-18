@@ -206,13 +206,13 @@ export const morning_motivation = async (api) => {
 
     const prompt = `Tạo một câu châm ngôn (Quote) nổi tiếng bằng tiếng Anh mang tính truyền cảm hứng về học tập/sự cố gắng, kèm lời dịch tiếng Việt. Và 1 Idiom (thành ngữ tiếng Anh) ngắn ngẫu nhiên thú vị với giải nghĩa. Format vui vẻ, tràn đầy năng lượng buổi sáng. Không dùng markdown phức tạp ngoài in đậm (**).`;
 
-    const content = await generateAIContent({ 
-      prompt, 
-      feature: "chatbot_morning_motivation" 
+    const content = await generateAIContent({
+      prompt,
+      feature: "chatbot_morning_motivation",
     });
     if (content) {
       const msg = `🌅 **CHÚC MỌI NGƯỜI BUỔI SÁNG TỐT LÀNH!** 🌅\n\n${content}\n\n👉 Khởi động ngày mới, đừng quên vào ZenTask làm Daily Tasks nha! Lopy chúc các bạn một ngày siêu năng suất! 🚀`;
-      await api.sendMessage({ msg }, threadId, 1);
+      await api.sendMessage(parseMarkdownToZalo(msg), threadId, 1);
     }
   } catch (error) {
     console.error("[Chatbot Jobs] Lỗi tạo Morning Motivation:", error);

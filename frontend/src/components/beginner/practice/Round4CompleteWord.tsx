@@ -151,8 +151,8 @@ export function Round4CompleteWord({ currentWord, isCorrect, onCheckAnswer }: Ro
               className={cn(
                 "w-12 h-14 md:w-14 md:h-16 flex items-center justify-center text-2xl font-extrabold rounded-xl border-2 transition-all duration-200 select-none",
                 slotClass,
-                isCorrect === true ? "bg-green-500 border-green-600 text-white" : "",
-                isCorrect === false && slot.isHidden && slot.filledWithId ? "bg-red-500 border-red-600 text-white" : ""
+                isCorrect === true ? "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/30 transform scale-[1.02] animate-shake" : "",
+                isCorrect === false && slot.isHidden && slot.filledWithId ? "bg-red-500 border-red-600 text-white shadow-lg shadow-red-500/30 transform scale-95 animate-shake" : ""
               )}
             >
               {displayChar}

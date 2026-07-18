@@ -1,6 +1,6 @@
 import { useFlashcardStore } from "../services/flashcardService";
-import { getBeginnerSetById } from "../config/rankTopicConfig";
 import { useAuth } from "../contexts/AuthContext";
+import { useLocation } from "react-router-dom";
 import type { PracticeMode } from "../pages/Flashcard/FlashcardPractice";
 
 /**
@@ -79,7 +79,8 @@ function getSelectionQuality(isCorrect: boolean, responseMs?: number): number {
 export function useSM2(setId: string) {
   const { recordAnswer, flushProgress, recordBeginnerAnswer } = useFlashcardStore();
   const { user } = useAuth();
-  const isBeginnerSet = !!getBeginnerSetById(setId);
+  const location = useLocation();
+  const isBeginnerSet = location.pathname.includes("/beginner/");
 
   /**
    * @param cardId   - ID của thẻ

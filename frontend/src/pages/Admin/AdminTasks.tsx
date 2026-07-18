@@ -98,9 +98,10 @@ export function AdminTasks() {
     },
   ];
 
-  const totalTasks = tasks.items.length;
-  const highXpTasks = tasks.items.filter((t: any) => (t.xpPerItem || t.xpReward) >= 20).length;
-  const multiStepTasks = tasks.items.filter((t: any) => t.total > 1).length;
+  const tasksItems = Array.isArray(tasks?.items) ? tasks.items : [];
+  const totalTasks = tasksItems.length;
+  const highXpTasks = tasksItems.filter((t: any) => (t.xpPerItem || t.xpReward) >= 20).length;
+  const multiStepTasks = tasksItems.filter((t: any) => t.total > 1).length;
 
   const stats = [
     { title: "Tổng nhiệm vụ", value: totalTasks, icon: ListTodo, color: "text-blue-600", bg: "bg-blue-50" },
@@ -131,7 +132,7 @@ export function AdminTasks() {
       <AdminStatCards stats={stats} />
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
-        <DataTable columns={columns} data={tasks.items} loading={tasks.loading} />
+        <DataTable columns={columns} data={tasksItems} loading={tasks.loading} />
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={isEditingTask ? "Chỉnh sửa nhiệm vụ" : "Thêm nhiệm vụ mới"}>

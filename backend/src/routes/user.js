@@ -1,6 +1,6 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { DailyTask, UserDailyStat, LeaderboardWeekly, LeaderboardMonthly, UserFollow, FlashcardProgress, QuizResult, UserActivity, BeginnerProgress } from "../models/Schemas.js";
+import { DailyTask, UserDailyStat, LeaderboardWeekly, LeaderboardMonthly, UserFollow, FlashcardProgress, QuizResult, UserActivity, BeginnerProgress, UserLanguageProgress } from "../models/Schemas.js";
 import { SYSTEM_LEVELS } from "../config/system.js";
 import { getWeekString, getMonthString } from "../../utils/dateUtils.js";
 import { createNotification } from "../../utils/notifications.js";
@@ -296,6 +296,41 @@ router.put(
   }),
 );
 
+// Switch or set target language
+router.put(
+  "/language",
+  asyncHandler(async (req, res) => {
+    const { language } = req.body;
+    if (!language || typeof language !== "string") {
+      return res.status(400).json({ error: "Invalid language" });
+    }
+
+    const user = await User.findById(req.user.uid);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    user.targetLanguage = language;
+    if (!user.learningLanguages.includes(language)) {
+      user.learningLanguages.push(language);
+    }
+    await user.save();
+
+    // Check if progress exists for this language, if not create it
+    const existingProgress = await UserLanguageProgress.findOne({ uid: user._id, language });
+    if (!existingProgress) {
+      await UserLanguageProgress.create({
+        uid: user._id,
+        language,
+        rankId: 1,
+        tier: 3,
+        stars: 0,
+        arenaMatchesPlayed: 0
+      });
+    }
+
+    res.json({ status: "success", targetLanguage: language, learningLanguages: user.learningLanguages });
+  }),
+);
+
 // Update checkin time
 router.put(
   "/checkin-time",
@@ -350,14 +385,21 @@ router.get(
       return res.status(404).json({ error: "User not found" });
     }
 
-    const [flashcardsCount, quizzesCount, studyStats, activities] = await Promise.all([
+    const [flashcardsCount, quizzesCount, studyStats, activities, languageProgressList] = await Promise.all([
       FlashcardProgress.countDocuments({ userId: uid }),
       QuizResult.countDocuments({ uid: uid }),
       UserDailyStat.aggregate([{ $match: { userId: user._id } }, { $group: { _id: null, totalMinutes: { $sum: "$studyMinutes" } } }]),
       UserActivity.find({ uid: uid }).sort({ createdAt: -1 }).limit(10).lean(),
+      UserLanguageProgress.find({ uid: uid }).lean(),
     ]);
 
     const totalStudyHours = studyStats.length > 0 ? Math.round(studyStats[0].totalMinutes / 60) : 0;
+    
+    let activeProgress = { rankId: 1, tier: 3, stars: 0 };
+    if (user.targetLanguage) {
+      const prog = languageProgressList.find(p => p.language === user.targetLanguage);
+      if (prog) activeProgress = prog;
+    }
 
     res.json({
       uid: user._id,
@@ -369,9 +411,11 @@ router.get(
       level: user.level || 1,
       xp: user.xp || 0,
       streak: user.streak || 0,
-      rankId: user.rankId || 1,
-      tier: user.tier || 3,
-      stars: user.stars || 0,
+      targetLanguage: user.targetLanguage || null,
+      learningLanguages: user.learningLanguages || [],
+      rankId: activeProgress.rankId,
+      tier: activeProgress.tier,
+      stars: activeProgress.stars,
       achievedBadges: user.achievedBadges || [],
       followers: user.followers || 0,
       following: user.following || 0,
@@ -412,7 +456,8 @@ router.get(
 router.get(
   "/beginner-progress",
   asyncHandler(async (req, res) => {
-    const records = await BeginnerProgress.find({ userId: req.user.uid }).lean();
+    const uid = req.user.uid || req.user.id || req.user._id;
+    const records = await BeginnerProgress.find({ $or: [{ uid: uid }, { userId: uid }] }).lean();
     const completedLessons = records.map((r) => r.lessonId);
     const rewardClaimedLessons = records.filter((r) => r.rewardClaimed).map((r) => r.lessonId);
     res.json({ completedLessons, rewardClaimedLessons });
@@ -428,31 +473,34 @@ router.post(
       return res.status(400).json({ error: "lessonId string is required" });
     }
 
-    const existing = await BeginnerProgress.findOne({ userId: req.user.uid, lessonId });
+    const uid = req.user.uid || req.user.id || req.user._id;
+    if (!uid) return res.status(401).json({ error: "User ID not found in token" });
+
+    const existing = await BeginnerProgress.findOne({ $or: [{ uid: uid }, { userId: uid }], lessonId });
     if (existing) {
       if (existing.rewardClaimed) {
         // Already received relearn bonus before — no more XP
         return res.json({ status: "success", xpResult: null, message: "Already relearned, no XP" });
       }
       // First relearn: award x2 XP (20 XP) and mark as claimed
-      const xpResult = await addXpToUser(req.user.uid, 20);
+      const xpResult = await addXpToUser(uid, 20);
       await BeginnerProgress.updateOne({ _id: existing._id }, { $set: { rewardClaimed: true } });
       return res.json({ status: "success", xpResult, message: "Relearned, awarded 20 XP" });
     }
 
     await BeginnerProgress.create({
-      userId: req.user.uid,
+      uid: uid,
+      userId: uid,
       lessonId,
       score: 100, // default score
     });
 
     // 10 XP for the first time learning
-    const xpResult = await addXpToUser(req.user.uid, 10);
+    const xpResult = await addXpToUser(uid, 10);
 
     res.json({ status: "success", xpResult, newLessonAdded: true });
   }),
 );
-
 
 // Follow / Unfollow User
 router.post(

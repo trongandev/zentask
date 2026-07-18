@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { RANK_TOPIC_CONFIG, getBeginnerSetById } from "../../config/rankTopicConfig";
 import { Volume2, Mic, ArrowRight, Check, X, SkipForward, Loader2 } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { usePronunciationAssessment, pickWords } from "../../hooks/usePronunciationAssessment";
 import { cn } from "../../lib/utils";
 import toastService from "@/src/services/toastService";
+import { beginnerService } from "../../services/beginnerService";
 
 import { Round1Listen } from "../../components/beginner/practice/Round1Listen";
 import { Round2ChooseMeaning } from "../../components/beginner/practice/Round2ChooseMeaning";
@@ -22,7 +22,7 @@ type RoundType = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export function BeginnerLessonPractice() {
   const { topicId, lessonIndex } = useParams();
   const navigate = useNavigate();
-  const { playAudio } = useTTSAudio();
+  const { playAudio, preloadAudio } = useTTSAudio();
 
   const [words, setWords] = useState<any[]>([]);
   const [currentRound, setCurrentRound] = useState<RoundType>(1);
@@ -32,6 +32,7 @@ export function BeginnerLessonPractice() {
 
   const [mistakes, setMistakes] = useState<{ word: any; round: RoundType }[]>([]);
   const [isReviewPhase, setIsReviewPhase] = useState(false);
+  const [skipCount, setSkipCount] = useState(0);
 
   // States for interactive inputs
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -53,27 +54,40 @@ export function BeginnerLessonPractice() {
         setKnownWordIds(parsed.knownWordIds);
         if (parsed.mistakes) setMistakes(parsed.mistakes);
         if (parsed.isReviewPhase) setIsReviewPhase(parsed.isReviewPhase);
+        if (parsed.skipCount !== undefined) setSkipCount(parsed.skipCount);
         return;
       } catch (e) {
         console.error("Failed to parse saved state", e);
       }
     }
 
-    // Extract 5 words for this lesson if no saved state
-    const set = getBeginnerSetById(topicId || "");
-    if (set && set.words) {
-      const idx = Number(lessonIndex) || 0;
-      const startIndex = idx * 5;
-      const lessonWords = set.words.slice(startIndex, startIndex + 5);
+    const fetchLessonData = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/beginner/lesson/${topicId}`);
+        if (res.ok) {
+          const set = await res.json();
+          if (set && set.words) {
+            const idx = Number(lessonIndex) || 0;
+            const startIndex = idx * 5;
+            const lessonWords = set.words.slice(startIndex, startIndex + 5);
 
-      if (lessonWords.length === 0) {
+            if (lessonWords.length === 0) {
+              navigate("/beginner");
+            } else {
+              setWords([...lessonWords].sort(() => Math.random() - 0.5));
+            }
+          }
+        } else {
+          navigate("/beginner");
+        }
+      } catch (err) {
+        console.error("Failed to fetch lesson data", err);
         navigate("/beginner");
-      } else {
-        // Randomize initial array
-        setWords([...lessonWords].sort(() => Math.random() - 0.5));
       }
-    }
-  }, [topicId, lessonIndex, navigate]);
+    };
+    
+    fetchLessonData();
+  }, [topicId, lessonIndex, navigate, API_URL]);
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
@@ -86,9 +100,10 @@ export function BeginnerLessonPractice() {
       knownWordIds,
       mistakes,
       isReviewPhase,
+      skipCount,
     };
     localStorage.setItem(`beginner_lesson_progress_${lessonId}`, JSON.stringify(stateToSave));
-  }, [words, currentRound, currentWordIndex, knownWordIds, topicId, lessonIndex, mistakes, isReviewPhase]);
+  }, [words, currentRound, currentWordIndex, knownWordIds, topicId, lessonIndex, mistakes, isReviewPhase, skipCount]);
 
   const activeWords = useMemo(() => {
     let filtered = words.filter((w) => !knownWordIds.includes(w.id));
@@ -101,20 +116,32 @@ export function BeginnerLessonPractice() {
   const currentWord = isReviewPhase && mistakes.length > 0 ? mistakes[0].word : activeWords[currentWordIndex];
   const activeRound = isReviewPhase && mistakes.length > 0 ? mistakes[0].round : currentRound;
 
+  useEffect(() => {
+    if (currentWord) {
+      preloadAudio(currentWord.term);
+    }
+  }, [currentWord, preloadAudio]);
+
   // Helper to move to next word or next round
-  const nextStep = () => {
+  const proceedToNext = (isSkipped: boolean) => {
     let newMistakes = [...mistakes];
 
-    if (isReviewPhase) {
-      if (isCorrect === true) {
-        newMistakes.shift();
-      } else if (isCorrect === false) {
-        const failed = newMistakes.shift();
-        if (failed) newMistakes.push(failed);
+    if (!isSkipped) {
+      if (isReviewPhase) {
+        if (isCorrect === true) {
+          newMistakes.shift();
+        } else if (isCorrect === false) {
+          const failed = newMistakes.shift();
+          if (failed) newMistakes.push(failed);
+        }
+      } else {
+        if (isCorrect === false) {
+          newMistakes.push({ word: currentWord, round: currentRound });
+        }
       }
     } else {
-      if (isCorrect === false) {
-        newMistakes.push({ word: currentWord, round: currentRound });
+      if (isReviewPhase) {
+        newMistakes.shift();
       }
     }
 
@@ -151,16 +178,18 @@ export function BeginnerLessonPractice() {
     }
   };
 
+  const nextStep = () => proceedToNext(false);
+  const skipStep = () => {
+    if (skipCount >= 5) return;
+    setSkipCount((prev) => prev + 1);
+    proceedToNext(true);
+  };
+
   const finishLesson = async () => {
     setIsSubmitting(true);
     try {
       const lessonId = `${topicId}_${lessonIndex}`;
-      await fetch(`${API_URL}/api/user/beginner-progress`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lessonId }),
-        credentials: "include",
-      });
+      await beginnerService.saveLessonProgress(lessonId);
       // Delete progress from localStorage after success
       localStorage.removeItem(`beginner_lesson_progress_${lessonId}`);
       toastService.success("Chúc mừng bạn đã hoàn thành bài học!");
@@ -202,8 +231,10 @@ export function BeginnerLessonPractice() {
   const checkAnswer = (correct: boolean) => {
     if (isCorrect !== null) return;
     setIsCorrect(correct);
+    if (currentWord) {
+      playAudio(currentWord.term, undefined, correct ? "correct" : "wrong");
+    }
   };
-  console.log(currentWord);
   return (
     <div className="max-w-xl mx-auto w-full pt-8 px-4 flex flex-col min-h-[80vh]">
       {/* Progress Bar */}
@@ -225,6 +256,7 @@ export function BeginnerLessonPractice() {
           <Round2ChooseMeaning
             topicId={topicId}
             currentWord={currentWord}
+            allLessonWords={words}
             isCorrect={isCorrect}
             onCheckAnswer={(answer, correct) => {
               setSelectedAnswer(answer);
@@ -241,6 +273,7 @@ export function BeginnerLessonPractice() {
           <Round5FillBlank
             topicId={topicId}
             currentWord={currentWord}
+            allLessonWords={words}
             isCorrect={isCorrect}
             onCheckAnswer={(answer, correct) => {
               setSelectedAnswer(answer);
@@ -253,6 +286,7 @@ export function BeginnerLessonPractice() {
           <Round6ReverseQuiz
             topicId={topicId}
             currentWord={currentWord}
+            allLessonWords={words}
             isCorrect={isCorrect}
             onCheckAnswer={(answer, correct) => {
               setSelectedAnswer(answer);
@@ -278,7 +312,7 @@ export function BeginnerLessonPractice() {
             <div
               className={cn(
                 "w-full flex items-center justify-between p-4 rounded-2xl transition-all",
-                isCorrect === true ? "bg-green-100 text-green-800" : isCorrect === false ? "bg-red-100 text-red-800" : "bg-transparent",
+                isCorrect === true ? "bg-green-100 text-green-800 animate-in slide-in-from-bottom-2" : isCorrect === false ? "bg-red-100 text-red-800 animate-shake" : "bg-transparent",
               )}
             >
               <div className="flex flex-col">
@@ -293,15 +327,29 @@ export function BeginnerLessonPractice() {
                   </span>
                 )}
               </div>
-              <button
-                onClick={nextStep}
-                className={cn(
-                  "font-bold px-8 py-3 rounded-2xl flex items-center gap-2",
-                  isCorrect === null ? "text-white bg-blue-500 hover:bg-blue-600" : isCorrect === true ? "text-white bg-green-500 hover:bg-green-600" : "text-white bg-red-500 hover:bg-red-600",
+              <div className="flex items-center gap-3">
+                {isCorrect === null && (
+                  <button 
+                    onClick={skipStep} 
+                    disabled={skipCount >= 5}
+                    className={cn(
+                      "font-bold px-6 py-3 rounded-2xl transition-all",
+                      skipCount >= 5 ? "text-slate-300 bg-slate-50 cursor-not-allowed" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                    )}
+                  >
+                    Bỏ qua {skipCount < 5 ? `(${5 - skipCount})` : "(Hết lượt)"}
+                  </button>
                 )}
-              >
-                {isCorrect === null ? "Kiểm tra" : "Tiếp tục"}
-              </button>
+                <button
+                  onClick={nextStep}
+                  className={cn(
+                    "font-bold px-8 py-3 rounded-2xl flex items-center gap-2",
+                    isCorrect === null ? "text-white bg-blue-500 hover:bg-blue-600" : isCorrect === true ? "text-white bg-green-500 hover:bg-green-600" : "text-white bg-red-500 hover:bg-red-600",
+                  )}
+                >
+                  {isCorrect === null ? "Kiểm tra" : "Tiếp tục"}
+                </button>
+              </div>
             </div>
           )}
         </div>

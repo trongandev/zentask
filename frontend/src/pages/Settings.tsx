@@ -579,7 +579,6 @@ export function Settings() {
 
             <div className="p-6">
               <textarea
-                type="text"
                 placeholder="https://example.com/avatar.jpg"
                 value={tempPhotoURL}
                 onChange={(e) => setTempPhotoURL(e.target.value)}

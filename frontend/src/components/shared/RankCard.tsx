@@ -2,7 +2,7 @@ import React from "react";
 import { Medal, Target } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { RANK_TOPIC_CONFIG } from "../../config/rankTopicConfig";
+import { RANK_NAMES } from "../../config/rankTopicConfig";
 import { cn } from "../../lib/utils";
 
 interface RankCardProps {
@@ -22,14 +22,13 @@ export function RankCard({ showButton = false, buttonText = "Bắt đầu đấu
   const tier = rankUser?.tier || 3;
   const stars = rankUser?.stars || 0;
 
-  const rankConfig = RANK_TOPIC_CONFIG[rankId as keyof typeof RANK_TOPIC_CONFIG];
+  const rankName = RANK_NAMES[rankId as keyof typeof RANK_NAMES] || "Bạc";
 
   // Fake config to match existing code logic for maxStars.
   // In reality, it should be fetched from the backend or shared config.
   // We'll use 3 for Bac, 4 for Luc Bao, 5 for Tinh Anh, 5 for Kim Cuong, 99 for Cao Thu
   const maxStars = rankId === 1 ? 3 : rankId === 2 ? 4 : rankId === 3 || rankId === 4 ? 5 : 99;
 
-  const rankName = rankConfig?.name || "Bạc";
   const tierText = rankId === 5 ? "" : ` ${["I", "II", "III", "IV", "V"][tier - 1] || tier}`;
 
   if (!authUser && !propUser) {

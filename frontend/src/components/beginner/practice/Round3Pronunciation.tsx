@@ -16,7 +16,7 @@ export function Round3Pronunciation({ currentWord, isCorrect, setIsCorrect }: Ro
   const { status, result, mainScore, startRecording, stopRecording, resetState } = usePronunciationAssessment({
     targetText: currentWord?.term || "",
     onSuccess: (score) => {
-      setIsCorrect(score >= 70);
+      setIsCorrect(true); // Always let them pass
     },
     onError: () => {
       setIsCorrect(false);
@@ -54,9 +54,10 @@ export function Round3Pronunciation({ currentWord, isCorrect, setIsCorrect }: Ro
 
         {mainScore !== null && (
           <div className="text-center mt-2">
-            <p className={cn("text-2xl font-black", mainScore >= 70 ? "text-green-500" : "text-red-500")}>
+            <p className={cn("text-2xl font-black", mainScore >= 50 ? "text-green-500" : "text-yellow-500")}>
               {mainScore}/100
             </p>
+            {mainScore < 50 && <p className="text-yellow-500 font-medium mt-1">Cần cố gắng thêm nhé!</p>}
 
             <div className="flex gap-2 justify-center mt-4 text-xl font-bold">
               {pickWords(result).map((wResult: any, i: number) => {

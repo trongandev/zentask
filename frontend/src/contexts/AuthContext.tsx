@@ -39,6 +39,8 @@ interface UserProfile {
   achievedBadges?: number[];
   appSettings?: AppSettings;
   onboarding?: OnboardingState;
+  targetLanguage?: string | null;
+  learningLanguages?: string[];
 }
 
 interface AuthContextType {

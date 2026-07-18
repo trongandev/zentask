@@ -1,4 +1,4 @@
-import { ArenaTournamentRoom, Flashcard, BotConfig } from "../models/Schemas.js";
+import { ArenaTournamentRoom, Flashcard, BotConfig, CourseRank, CourseTier, CourseLesson } from "../models/Schemas.js";
 import { BUILTIN_FLASHCARD_SETS } from "../data/builtinLearning/index.js";
 import User from "../models/User.js";
 import { arenaQueue, activeArenaRooms, tournamentLobbies, userSockets } from "./state.js";
@@ -148,6 +148,41 @@ const buildTournamentMatchData = async (playerAUid, playerBUid) => {
   };
 };
 
+const buildArenaDeck = async (rankId, tierNum) => {
+  let validWords = [];
+  try {
+    const ranks = await CourseRank.find({ rankId: Number(rankId) }).lean();
+    if (ranks && ranks.length > 0) {
+      const rank = ranks[0];
+      const tier = await CourseTier.findOne({ rankId: rank._id, tierNum: Number(tierNum) }).lean();
+      if (tier) {
+        const lessons = await CourseLesson.find({ tierId: tier._id }).lean();
+        lessons.forEach((l) => {
+          if (l.words && Array.isArray(l.words)) {
+            validWords.push(...l.words);
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error("[Arena] Error building deck:", error);
+  }
+
+  if (validWords.length < 10) {
+    validWords = getBuiltinTournamentWords();
+  }
+
+  const selectedCards = shuffleArray(validWords).slice(0, 10);
+  const validModes = ["quiz", "fill_blank", "listening", "guess", "typing"];
+  const modes = Array.from({ length: 10 }, (_, idx) => validModes[idx % validModes.length]);
+  const x2Indices = pickItems(
+    Array.from({ length: 10 }, (_, i) => i),
+    2,
+  );
+
+  return { cards: selectedCards, modes: shuffleArray(modes), x2Indices };
+};
+
 const emitTournamentLobbyUpdate = async (code, io) => {
   const lobby = tournamentLobbies.get(code);
   const room = await ArenaTournamentRoom.findOne({ code }).lean();
@@ -265,7 +300,7 @@ const startBotFallbackTimer = (entry, onTimeout) => {
     if (!liveEntry) return;
     liveEntry.socket.emit("arena_queue_timeout", {
       message: "Hiện tại hệ thống không có ai đang online, bạn có muốn chuyển qua đấu với bot không?",
-      botRank: liveEntry.user.rankId
+      botRank: liveEntry.user.rankId,
     });
   }, BOT_MATCH_DELAY_MS);
 };
@@ -319,8 +354,8 @@ const scheduleArenaBots = (room, io) => {
     let isCorrect = Math.random() < Number(bot.botAccuracy || 0);
 
     if (config) {
-      isCorrect = Math.random() < (config.correctRate / 100);
-      
+      isCorrect = Math.random() < config.correctRate / 100;
+
       const randTime = Math.random() * 100;
       let cumulative = 0;
       let matchedSecond = null;
@@ -344,7 +379,9 @@ const scheduleArenaBots = (room, io) => {
         // Fallback fast response
         delay = Math.random() * 9900; // 0 to 9.9s
       }
-      console.log(`[Arena Bot Debug] Bot ${bot.name} (Rank ${bot.rankId}) - isCorrect: ${isCorrect}, randTime: ${randTime.toFixed(2)}%, matchedSecond: ${matchedSecond}, delay: ${Math.round(delay)}ms`);
+      console.log(
+        `[Arena Bot Debug] Bot ${bot.name} (Rank ${bot.rankId}) - isCorrect: ${isCorrect}, randTime: ${randTime.toFixed(2)}%, matchedSecond: ${matchedSecond}, delay: ${Math.round(delay)}ms`,
+      );
     }
 
     const timer = setTimeout(() => {
@@ -373,19 +410,19 @@ const createArenaRoom = (players, matchData, mode = "solo", io) => {
     const uid = String(player.uid || "");
     if (!uid || usedUids.has(uid)) return;
     usedUids.add(uid);
-    
+
     // Default team logic if not specified
     const team = player.team || (mode === "team2v2" ? (index % 2 === 0 ? "blue" : "red") : index === 0 ? "blue" : "red");
-    
+
     // Default slotIndex logic if not specified
     let slotIndex = player.slotIndex;
     if (slotIndex === undefined) {
       if (mode === "team2v2") {
-         // assign 0, 1 for blue, 2, 3 for red
-         if (team === "blue") slotIndex = (normalizedPlayers.filter(p => p.team === "blue").length) % 2;
-         else slotIndex = 2 + ((normalizedPlayers.filter(p => p.team === "red").length) % 2);
+        // assign 0, 1 for blue, 2, 3 for red
+        if (team === "blue") slotIndex = normalizedPlayers.filter((p) => p.team === "blue").length % 2;
+        else slotIndex = 2 + (normalizedPlayers.filter((p) => p.team === "red").length % 2);
       } else {
-         slotIndex = team === "blue" ? 0 : 2;
+        slotIndex = team === "blue" ? 0 : 2;
       }
     }
 
@@ -393,7 +430,7 @@ const createArenaRoom = (players, matchData, mode = "solo", io) => {
       ...player,
       uid,
       team,
-      slotIndex
+      slotIndex,
     });
   });
 
@@ -592,7 +629,7 @@ export function registerArenaHandlers(io, socket) {
   });
 
   socket.on("find_arena_match", async ({ user, matchData, mode, matchMode, botRankOverride, targetSlotIndex } = {}) => {
-    if (!user || !matchData) return;
+    if (!user) return;
     touchArenaSocket(socket);
     cleanupArenaQueue();
 
@@ -624,10 +661,12 @@ export function registerArenaHandlers(io, socket) {
       arenaMatchesPlayed: Number(freshProfile?.arenaMatchesPlayed || user.arenaMatchesPlayed || 0),
     };
 
+    const serverDeck = await buildArenaDeck(entryUser.rankId, entryUser.tier);
+
     // If user explicitly chose a bot rank, create bot match immediately
     const safeBotRankOverride = botRankOverride != null ? Number(botRankOverride) : null;
     if (safeBotRankOverride && safeBotRankOverride >= 1 && safeBotRankOverride <= 5 && arenaMode === "solo") {
-      const entry = enqueueArenaEntry({ socket, user: entryUser, matchData, mode: arenaMode, timer: null });
+      const entry = enqueueArenaEntry({ socket, user: entryUser, matchData: serverDeck, mode: arenaMode, timer: null });
       startSoloBotMatch(entry, io, safeBotRankOverride);
       return;
     }
@@ -635,7 +674,7 @@ export function registerArenaHandlers(io, socket) {
     const entry = enqueueArenaEntry({
       socket,
       user: entryUser,
-      matchData,
+      matchData: serverDeck,
       mode: arenaMode,
       targetSlotIndex,
       timer: null,
@@ -757,7 +796,7 @@ export function registerArenaHandlers(io, socket) {
 
   socket.on("cancel_arena_search", () => {
     removeArenaSocketFromQueue(socket);
-    
+
     if (socket.currentArenaRoom) {
       const roomCode = socket.currentArenaRoom;
       const room = activeArenaRooms.get(roomCode);
@@ -766,23 +805,21 @@ export function registerArenaHandlers(io, socket) {
         socket.currentArenaRoom = null;
         socket.currentArenaQueued = false;
         socket.currentArenaQueueToken = null;
-        
-        const playerIndex = room.players.findIndex(p => p.socket?.id === socket.id || p.uid === socket.currentUid);
+
+        const playerIndex = room.players.findIndex((p) => p.socket?.id === socket.id || p.uid === socket.currentUid);
         if (playerIndex !== -1) {
           room.players.splice(playerIndex, 1);
         }
-        
-        if (room.players.filter(p => !p.isBot).length === 0) {
-           clearArenaBotTimers(room);
-           activeArenaRooms.delete(roomCode);
+
+        if (room.players.filter((p) => !p.isBot).length === 0) {
+          clearArenaBotTimers(room);
+          activeArenaRooms.delete(roomCode);
         } else {
-           io.to(roomCode).emit("arena_opponent_left", { reason: "cancelled", mode: room.mode });
+          io.to(roomCode).emit("arena_opponent_left", { reason: "cancelled", mode: room.mode });
         }
       }
     }
   });
-
-
 
   socket.on("arena_answer", ({ roomCode, uid, timeRemaining, isCorrect }) => {
     const room = activeArenaRooms.get(roomCode);
@@ -811,14 +848,14 @@ export function registerArenaHandlers(io, socket) {
       name: socket.user?.displayName || "Người chơi",
       avatar: socket.user?.photoURL,
       text,
-      time: Date.now()
+      time: Date.now(),
     });
   });
 
   socket.on("arena_kick_player", ({ roomCode, targetUid }) => {
     const room = activeArenaRooms.get(roomCode);
     if (!room) return;
-    
+
     // Only host can kick
     if (socket.id !== room.hostSocketId) return;
 
@@ -847,12 +884,12 @@ export function registerArenaHandlers(io, socket) {
   socket.on("arena_move_slot", ({ roomCode, targetSlotIndex }) => {
     const room = activeArenaRooms.get(roomCode);
     if (!room || room.status !== "waiting") return;
-    
-    const player = room.players.find(p => p.uid === socket.currentUid);
+
+    const player = room.players.find((p) => p.uid === socket.currentUid);
     if (!player) return;
 
     // Check if slot is taken
-    const slotTaken = room.players.some(p => p.slotIndex === targetSlotIndex);
+    const slotTaken = room.players.some((p) => p.slotIndex === targetSlotIndex);
     if (slotTaken) return; // slot is already taken
 
     player.slotIndex = targetSlotIndex;
@@ -865,23 +902,23 @@ export function registerArenaHandlers(io, socket) {
   socket.on("arena_swap_slots", ({ roomCode, targetUid }) => {
     const room = activeArenaRooms.get(roomCode);
     if (!room || room.status !== "waiting") return;
-    
+
     // Only host can swap others, or a player can swap with someone else if they want (simple approach: anyone can swap with anyone for now, or maybe only host can do it, but let's allow the user who clicks to swap with target)
-    const p1Index = room.players.findIndex(p => p.uid === socket.currentUid);
-    const p2Index = room.players.findIndex(p => p.uid === targetUid);
-    
+    const p1Index = room.players.findIndex((p) => p.uid === socket.currentUid);
+    const p2Index = room.players.findIndex((p) => p.uid === targetUid);
+
     if (p1Index === -1 || p2Index === -1) return;
-    
+
     const p1 = room.players[p1Index];
     const p2 = room.players[p2Index];
-    
+
     // Swap slots and teams
     const tempSlot = p1.slotIndex;
     const tempTeam = p1.team;
-    
+
     p1.slotIndex = p2.slotIndex;
     p1.team = p2.team;
-    
+
     p2.slotIndex = tempSlot;
     p2.team = tempTeam;
 
@@ -891,7 +928,7 @@ export function registerArenaHandlers(io, socket) {
   socket.on("arena_add_bot", ({ roomCode, botRankId, targetSlotIndex }) => {
     const room = activeArenaRooms.get(roomCode);
     if (!room || room.status !== "waiting") return;
-    
+
     // Only host can add bot
     if (socket.id !== room.hostSocketId) return;
 
@@ -918,7 +955,7 @@ export function registerArenaHandlers(io, socket) {
     const bot = createArenaBot(botUser, room.players.length + 1, newTeam);
     if (targetSlotIndex !== undefined) bot.slotIndex = targetSlotIndex;
     else bot.slotIndex = newTeam === "blue" ? 1 : 3; // fallback for bots if no slot given
-    
+
     room.players.push(bot);
     room.scores[bot.uid] = 0;
     room.answered[bot.uid] = false;
@@ -1001,7 +1038,7 @@ export function registerArenaHandlers(io, socket) {
   const pendingChallenges = socket._arenaPendingChallenges || new Map();
   socket._arenaPendingChallenges = pendingChallenges;
 
-  socket.on("arena_challenge_invite", async ({ targetUid, challenger, mode, matchData, roomCode, targetSlotIndex } = {}) => {
+  socket.on("arena_challenge_invite", async ({ targetUid, challenger, mode, matchMode, botRankOverride, targetSlotIndex, roomCode } = {}) => {
     if (!targetUid || !challenger?.uid) return;
     const targetSocketId = userSockets.get(String(targetUid));
     if (!targetSocketId) {
@@ -1026,15 +1063,17 @@ export function registerArenaHandlers(io, socket) {
       }
     }, 30000);
 
-    pendingChallenges.set(challengeId, { 
-      challengerUid: challenger.uid, 
-      targetUid: String(targetUid), 
-      timeout, 
+    const serverDeck = await buildArenaDeck(challenger.rankId || 1, challenger.tier || 3);
+
+    pendingChallenges.set(challengeId, {
+      challengerUid: challenger.uid,
+      targetUid: String(targetUid),
+      timeout,
       challengerSocket: socket,
       mode,
-      matchData,
+      matchData: serverDeck,
       roomCode,
-      targetSlotIndex
+      targetSlotIndex,
     });
 
     // Send challenge to target
@@ -1042,11 +1081,11 @@ export function registerArenaHandlers(io, socket) {
       ...challenger,
       challengeId,
       challengeMode: mode,
-      matchData,
+      matchData: serverDeck,
     });
     // Store on target socket too for response lookup
     if (!targetSocket._arenaIncomingChallenges) targetSocket._arenaIncomingChallenges = new Map();
-    targetSocket._arenaIncomingChallenges.set(challengeId, { challengerSocket: socket, challenger, timeout, mode, matchData, roomCode, targetSlotIndex });
+    targetSocket._arenaIncomingChallenges.set(challengeId, { challengerSocket: socket, challenger, timeout, mode, matchData: serverDeck, roomCode, targetSlotIndex });
 
     console.log(`[Arena] Challenge sent from ${challenger.name} to uid ${targetUid}`);
   });
@@ -1070,7 +1109,7 @@ export function registerArenaHandlers(io, socket) {
     // Clear timeout and remove
     if (foundEntry.timeout) clearTimeout(foundEntry.timeout);
     incomingChallenges.delete(foundId);
-    
+
     // Remove from challenger's pending map to prevent expiration event
     if (foundEntry.challengerSocket && foundEntry.challengerSocket._arenaPendingChallenges) {
       foundEntry.challengerSocket._arenaPendingChallenges.delete(foundId);
@@ -1087,80 +1126,80 @@ export function registerArenaHandlers(io, socket) {
     const { challengerSocket, mode, matchData, challenger, roomCode: challengeRoomCode, targetSlotIndex } = foundEntry;
 
     if (challengerSocket && challengerSocket.connected) {
-      challengerSocket.emit("arena_challenge_result", { 
-        targetUid: socket.currentUid, 
-        accepted: true, 
-        mode 
+      challengerSocket.emit("arena_challenge_result", {
+        targetUid: socket.currentUid,
+        accepted: true,
+        mode,
       });
-      
+
       const responderUser = {
-        socket, 
-        uid: socket.currentUid, 
-        name: responder?.name || "Đối thủ", 
-        avatar: responder?.avatar, 
+        socket,
+        uid: socket.currentUid,
+        name: responder?.name || "Đối thủ",
+        avatar: responder?.avatar,
         rankInfo: responder?.rankInfo,
         rankId: responder?.rankId,
         tier: responder?.tier,
         level: responder?.level,
-        isBot: false
+        isBot: false,
       };
 
       if (challengeRoomCode && activeArenaRooms.has(challengeRoomCode)) {
         // Join existing room
         const room = activeArenaRooms.get(challengeRoomCode);
-        
+
         let finalSlot = targetSlotIndex;
         let finalTeam = "red";
 
         if (room.mode === "team2v2") {
-          const takenSlots = new Set(room.players.map(p => p.slotIndex));
+          const takenSlots = new Set(room.players.map((p) => p.slotIndex));
           if (room.players.length >= 4) {
-             socket.emit("arena_matchmaking_error", { message: "Phòng đã đầy" });
-             return;
+            socket.emit("arena_matchmaking_error", { message: "Phòng đã đầy" });
+            return;
           }
           if (finalSlot === undefined || takenSlots.has(finalSlot)) {
-             // Find first empty slot
-             for (let i = 0; i < 4; i++) {
-               if (!takenSlots.has(i)) {
-                 finalSlot = i;
-                 break;
-               }
-             }
+            // Find first empty slot
+            for (let i = 0; i < 4; i++) {
+              if (!takenSlots.has(i)) {
+                finalSlot = i;
+                break;
+              }
+            }
           }
           if (finalSlot === 0 || finalSlot === 1) finalTeam = "blue";
           else finalTeam = "red";
         } else {
           // Solo
           if (room.players.length >= 2) {
-             socket.emit("arena_matchmaking_error", { message: "Phòng đã đầy" });
-             return;
+            socket.emit("arena_matchmaking_error", { message: "Phòng đã đầy" });
+            return;
           }
           finalTeam = room.players[0].team === "blue" ? "red" : "blue";
           finalSlot = finalTeam === "blue" ? 0 : 2;
         }
-        
+
         responderUser.team = finalTeam;
         responderUser.slotIndex = finalSlot;
-        
+
         room.players.push(responderUser);
         room.scores[responderUser.uid] = 0;
         room.answered[responderUser.uid] = false;
-        
+
         removeArenaSocketFromQueue(socket);
         socket.join(challengeRoomCode);
         socket.currentArenaRoom = challengeRoomCode;
         socket.currentArenaMode = room.mode;
-        
+
         // Emit update to everyone in room
         io.to(challengeRoomCode).emit("arena_player_added", { player: responderUser, players: room.players });
-        
+
         // Send initial match data to the new player
         socket.emit("arena_match_found", {
           roomCode: challengeRoomCode,
           arenaMode: room.mode,
           mode: room.mode,
-          p1: room.players.find(p => p.uid === socket.currentUid),
-          p2: room.players.find(p => p.team !== responderUser.team),
+          p1: room.players.find((p) => p.uid === socket.currentUid),
+          p2: room.players.find((p) => p.team !== responderUser.team),
           players: room.players,
           myTeam: responderUser.team,
           matchData: room.matchData,
@@ -1170,33 +1209,32 @@ export function registerArenaHandlers(io, socket) {
         setTimeout(() => {
           createArenaRoom(
             [
-              { 
-                socket: challengerSocket, 
-                uid: challenger.uid, 
-                name: challenger.name, 
-                avatar: challenger.avatar, 
+              {
+                socket: challengerSocket,
+                uid: challenger.uid,
+                name: challenger.name,
+                avatar: challenger.avatar,
                 rankInfo: challenger.rankInfo,
                 rankId: challenger.rankId,
                 tier: challenger.tier,
                 level: challenger.level,
-                isBot: false, 
+                isBot: false,
                 team: "blue",
-                slotIndex: 0
+                slotIndex: 0,
               },
-              { 
+              {
                 ...responderUser,
                 team: "red",
-                slotIndex: 2
-              }
+                slotIndex: 2,
+              },
             ],
             matchData,
             mode,
-            io
+            io,
           );
         }, 1000);
       }
     }
-
   });
 
   socket.on("arena_leave", ({ roomCode } = {}) => {

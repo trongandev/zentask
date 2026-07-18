@@ -101,6 +101,14 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    targetLanguage: {
+      type: String,
+      default: null,
+    },
+    learningLanguages: {
+      type: [String],
+      default: [],
+    },
     appSettings: {
       theme: { type: String, default: 'light' },
       accentColor: { type: String, default: 'blue' },

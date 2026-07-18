@@ -5,7 +5,7 @@ import { cn } from "../../../lib/utils";
 import { UserAvatar } from "../../../components/UserAvatar";
 import { UserLevelBadge } from "../../../components/UserLevelBadge";
 import { ArenaBotSelector } from "./ArenaBotSelector";
-import { RANK_TOPIC_CONFIG } from "../../../config/rankTopicConfig";
+import { RANK_NAMES } from "../../../config/rankTopicConfig";
 import { toastService } from "../../../services/toastService";
 
 const API = import.meta.env.VITE_API_BACKEND || "http://localhost:3001";
@@ -130,7 +130,7 @@ function PlayerSlot({
             {player?.rankId && <img src={`/rank/${player.rankId}.png`} alt="Rank" className="w-4 h-4 md:w-5 md:h-5 object-contain drop-shadow-md" />}
             <p className={cn("font-bold text-[10px] md:text-xs text-center line-clamp-1", textColor)}>
               {player?.rankId
-                ? `${RANK_TOPIC_CONFIG[player.rankId as keyof typeof RANK_TOPIC_CONFIG]?.name || "Bạc"} ${["I", "II", "III"][Math.max(0, Math.min(2, (player.tier || 3) - 1))]}`
+                ? `${RANK_NAMES[player.rankId] || "Bạc"} ${["I", "II", "III"][Math.max(0, Math.min(2, (player.tier || 3) - 1))]}`
                 : player?.rankInfo}
             </p>
           </div>
@@ -701,9 +701,7 @@ export function ArenaLobby({
                   {allOthersReady && !isReady && isHost && (
                     <span className="text-emerald-400 text-sm font-bold animate-pulse mt-2 bg-black/60 px-3 py-1 rounded-full border border-emerald-500/30">Mọi người đã sẵn sàng!</span>
                   )}
-                  {opponentReady && !isReady && !isHost && mode === "solo" && (
-                    <span className="text-emerald-400 text-sm font-bold animate-pulse mt-2 bg-black/60 px-3 py-1 rounded-full border border-emerald-500/30">Đối thủ đã sẵn sàng!</span>
-                  )}
+
                 </div>
               ) : (
                 <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center shadow-2xl border border-white/10">

@@ -1,18 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Bot,
-  Image as ImageIcon,
-  Lightbulb,
-  Loader2,
-  MessageCircle,
-  Paperclip,
-  RefreshCcw,
-  Send,
-  Sparkles,
-  Trash2,
-  Wand2,
-  X,
-} from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Bot, Image as ImageIcon, Lightbulb, Loader2, MessageCircle, Paperclip, RefreshCcw, Send, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { checkAIBackend, chatWithGemini, generateImageWithHuggingFace, type AIChatMessagePayload } from "../services/aiChatService";
 
 const quickPrompts = [
@@ -82,7 +69,7 @@ function renderInlineRichText(text: string) {
 
 function renderMessageContent(content: string) {
   const lines = content.replace(/\r/g, "").split("\n");
-  const blocks: JSX.Element[] = [];
+  const blocks: React.JSX.Element[] = [];
   let pendingList: string[] = [];
 
   const flushList = () => {
@@ -170,11 +157,7 @@ export function AIChat() {
     try {
       setStatus("Đang kiểm tra kết nối...");
       const data = await checkAIBackend();
-      setStatus(
-        `Trò chuyện: ${data?.gemini?.configured ? "sẵn sàng" : "chưa sẵn sàng"} • Tạo ảnh: ${
-          data?.huggingFace?.configured ? "sẵn sàng" : "chưa sẵn sàng"
-        }`,
-      );
+      setStatus(`Trò chuyện: ${data?.gemini?.configured ? "sẵn sàng" : "chưa sẵn sàng"} • Tạo ảnh: ${data?.huggingFace?.configured ? "sẵn sàng" : "chưa sẵn sàng"}`);
     } catch (error: any) {
       setStatus(`Không thể kết nối lúc này: ${error?.message || error}`);
     }
@@ -285,8 +268,7 @@ export function AIChat() {
           content:
             `Mình đã tạo xong ảnh minh họa theo mô tả của bạn.
 
-` +
-            `**Mô tả đã dùng:** ${result.translatedPrompt || imagePrompt.trim()}`,
+` + `**Mô tả đã dùng:** ${result.translatedPrompt || imagePrompt.trim()}`,
           generatedImage: result.image,
           meta: result.translated ? "Đã tự chuyển mô tả sang tiếng Anh" : "Ảnh minh họa mới",
         },
@@ -334,9 +316,7 @@ export function AIChat() {
             <Sparkles className="h-4 w-4" /> Không gian hỗ trợ học tập
           </div>
           <h1 className="mb-3 text-3xl font-extrabold tracking-tight md:text-4xl">Trò chuyện cùng AI cho ZenTask</h1>
-          <p className="leading-relaxed text-blue-50">
-            Hỏi bài, sửa câu tiếng Anh, nhờ AI xem nội dung trong ảnh hoặc tạo ảnh minh họa nhanh ngay trong cùng một nơi.
-          </p>
+          <p className="leading-relaxed text-blue-50">Hỏi bài, sửa câu tiếng Anh, nhờ AI xem nội dung trong ảnh hoặc tạo ảnh minh họa nhanh ngay trong cùng một nơi.</p>
         </div>
       </div>
 
@@ -364,11 +344,7 @@ export function AIChat() {
             <div className="flex flex-wrap items-center gap-2">
               <label className="flex h-9 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-500">
                 Cách trả lời
-                <select
-                  value={String(temperature)}
-                  onChange={(event) => setTemperature(Number(event.target.value))}
-                  className="bg-transparent font-semibold text-gray-800 outline-none"
-                >
+                <select value={String(temperature)} onChange={(event) => setTemperature(Number(event.target.value))} className="bg-transparent font-semibold text-gray-800 outline-none">
                   {replyStyles.map((item) => (
                     <option key={item.label} value={item.value}>
                       {item.label}
@@ -440,7 +416,11 @@ export function AIChat() {
 
             <div className="flex items-end gap-3">
               <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(event) => handlePickImages(event.target.files)} />
-              <button onClick={() => fileInputRef.current?.click()} className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200" title="Thêm hình ảnh">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200"
+                title="Thêm hình ảnh"
+              >
                 <Paperclip className="h-5 w-5" />
               </button>
               <textarea
@@ -528,7 +508,10 @@ export function AIChat() {
                     <span className="font-bold">Mô tả tiếng Anh đã dùng:</span> {generatedEnglishPrompt}
                   </div>
                 )}
-                <button onClick={() => downloadDataUrl(generatedImage, "zentask-ai-image.png")} className="mt-3 h-10 w-full rounded-xl bg-gray-900 text-sm font-bold text-white transition-colors hover:bg-gray-800">
+                <button
+                  onClick={() => downloadDataUrl(generatedImage, "zentask-ai-image.png")}
+                  className="mt-3 h-10 w-full rounded-xl bg-gray-900 text-sm font-bold text-white transition-colors hover:bg-gray-800"
+                >
                   Tải ảnh PNG
                 </button>
               </div>

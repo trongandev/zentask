@@ -47,8 +47,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         ...state.users,
         loading: false,
         totalItems: data.total || 0,
-        pages: { ...state.users.pages, [page]: { items: data.users || [], totalPages: data.totalPages || 1 } }
-      }
+        pages: { ...state.users.pages, [page]: { items: data.users || [], totalPages: data.totalPages || 1 } },
+      },
     }));
   },
 
@@ -58,7 +58,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
     set({ tasks: { items: tasks.items, loading: true } });
     const data = await adminService.getTasks();
-    set({ tasks: { items: data, loading: false } });
+    const itemsArray = Array.isArray(data) ? data : data.items || data.data || [];
+    set({ tasks: { items: itemsArray, loading: false } });
   },
 
   fetchVocabSets: async (page, forceRefresh = false) => {
@@ -72,8 +73,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         ...state.vocabSets,
         loading: false,
         totalItems: data.total || 0,
-        pages: { ...state.vocabSets.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } }
-      }
+        pages: { ...state.vocabSets.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } },
+      },
     }));
   },
 
@@ -88,8 +89,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         ...state.vocab,
         loading: false,
         totalItems: data.total || 0,
-        pages: { ...state.vocab.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } }
-      }
+        pages: { ...state.vocab.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } },
+      },
     }));
   },
 
@@ -104,8 +105,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         ...state.quizzes,
         loading: false,
         totalItems: data.total || 0,
-        pages: { ...state.quizzes.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } }
-      }
+        pages: { ...state.quizzes.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } },
+      },
     }));
   },
 
@@ -120,8 +121,8 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         ...state.quizHistory,
         loading: false,
         totalItems: data.total || 0,
-        pages: { ...state.quizHistory.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } }
-      }
+        pages: { ...state.quizHistory.pages, [page]: { items: data.items || [], totalPages: data.totalPages || 1 } },
+      },
     }));
   },
 
@@ -134,5 +135,5 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       quizzes: { ...initialCacheState },
       quizHistory: { ...initialCacheState },
     });
-  }
+  },
 }));

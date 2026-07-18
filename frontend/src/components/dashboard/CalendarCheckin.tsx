@@ -21,7 +21,7 @@ export function CalendarCheckin() {
       setLoading(true);
       try {
         const res = await fetch(`${API_URL}/api/user/calendar-stats?year=${year}&month=${month}`, {
-          credentials: "include"
+          credentials: "include",
         });
         if (res.ok) {
           const data = await res.json();
@@ -67,16 +67,16 @@ export function CalendarCheckin() {
     const res = await checkIn();
     if (res) {
       const updates: any = { streak: res.streak, lastCheckInDate: res.lastCheckInDate };
-      if (res.xpResult) {
-        updates.xp = res.xpResult.xp;
-        updates.level = res.xpResult.level;
+      if ((res as any).xpResult) {
+        updates.xp = (res as any).xpResult.xp;
+        updates.level = (res as any).xpResult.level;
       }
       updateUser(updates);
       // Re-fetch stats to update calendar
       setLoading(true);
       try {
         const resStats = await fetch(`${API_URL}/api/user/calendar-stats?year=${year}&month=${month}`, {
-          credentials: "include"
+          credentials: "include",
         });
         if (resStats.ok) {
           const data = await resStats.json();
@@ -98,7 +98,7 @@ export function CalendarCheckin() {
         <CalendarIcon className="w-12 h-12 text-gray-300 mb-4" />
         <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Lịch Điểm Danh</h3>
         <p className="text-gray-500 mb-6 text-center text-sm">Vui lòng đăng nhập để theo dõi tiến độ và nhận điểm danh mỗi ngày!</p>
-        <button onClick={() => window.location.href = '/auth'} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
+        <button onClick={() => (window.location.href = "/auth")} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
           Đăng nhập ngay
         </button>
       </div>
@@ -113,14 +113,20 @@ export function CalendarCheckin() {
           Lịch Điểm Danh
         </h3>
         <div className="flex items-center gap-4">
-          <button onClick={() => changeMonth(-1)} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 font-bold">&lt;</button>
-          <span className="font-bold text-gray-800 w-24 text-center">Tháng {month}/{year}</span>
-          <button onClick={() => changeMonth(1)} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 font-bold">&gt;</button>
+          <button onClick={() => changeMonth(-1)} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 font-bold">
+            &lt;
+          </button>
+          <span className="font-bold text-gray-800 w-24 text-center">
+            Tháng {month}/{year}
+          </span>
+          <button onClick={() => changeMonth(1)} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 font-bold">
+            &gt;
+          </button>
         </div>
       </div>
 
       <div className="grid grid-cols-7 gap-2 mb-2">
-        {weekDays.map(day => (
+        {weekDays.map((day) => (
           <div key={day} className="text-center text-xs font-bold text-gray-400 py-2">
             {day}
           </div>
@@ -131,18 +137,18 @@ export function CalendarCheckin() {
         {Array.from({ length: emptyDays }).map((_, i) => (
           <div key={`empty-${i}`} className="aspect-square"></div>
         ))}
-        {days.map(day => {
+        {days.map((day) => {
           const stat = getDayStat(day);
           const checkedIn = stat?.isCheckedIn;
           const today = isToday(day);
 
           return (
-            <div 
-              key={day} 
+            <div
+              key={day}
               className={cn(
                 "aspect-square rounded-2xl flex flex-col items-center justify-center border-2 transition-all relative",
                 checkedIn ? "bg-orange-50 border-orange-200" : today ? "border-blue-500 text-blue-600 bg-blue-50/30" : "border-gray-100 text-gray-500",
-                loading ? "opacity-50" : "opacity-100"
+                loading ? "opacity-50" : "opacity-100",
               )}
             >
               <span className={cn("font-bold text-sm", checkedIn ? "text-orange-600" : "")}>{day}</span>

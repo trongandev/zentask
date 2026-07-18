@@ -93,7 +93,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
           let friend = onlineFriends.find((f) => f.friendId === payload.senderId);
           if (!friend) {
             try {
-              const allFriends = await friendsService.list();
+              const allFriends = await (friendsService as any).list();
               friend = allFriends.find((f: any) => f.friendId === payload.senderId);
             } catch (err) {}
           }
@@ -121,7 +121,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
   };
 
   const tasks = dailyTasks.map((t) => {
-    const taskId = t.type;
+    const taskId = (t as any).type;
     let current = taskProgress[taskId] || 0;
     if (taskId === "daily_checkin") {
       const ts = new Date();
@@ -263,9 +263,9 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                       const res = await checkIn();
                       if (res) {
                         const updates: any = { streak: res.streak, lastCheckInDate: res.lastCheckInDate };
-                        if (res.xpResult) {
-                          updates.xp = res.xpResult.xp;
-                          updates.level = res.xpResult.level;
+                        if ((res as any).xpResult) {
+                          updates.xp = (res as any).xpResult.xp;
+                          updates.level = (res as any).xpResult.level;
                         }
                         updateUser(updates);
                       }

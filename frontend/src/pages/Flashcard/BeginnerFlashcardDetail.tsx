@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Play, Volume2, LayoutGrid, AlignJustify, Rows3, ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
-import { getBeginnerSetById } from "../../config/rankTopicConfig";
+
 import { cn } from "../../lib/utils";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useAuth } from "../../contexts/AuthContext";
@@ -16,7 +16,25 @@ type ViewMode = "line" | "grid" | "compact";
 export function BeginnerFlashcardDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const currentSet = getBeginnerSetById(id!);
+  const [currentSet, setCurrentSet] = useState<any>(null);
+  const [loadingSet, setLoadingSet] = useState(true);
+
+  React.useEffect(() => {
+    const fetchSet = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/beginner/lesson/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentSet(data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingSet(false);
+      }
+    };
+    if (id) fetchSet();
+  }, [id, API_URL]);
 
   const { playAudio, isLoading, loadingText } = useTTSAudio();
   const [viewMode, setViewMode] = useState<ViewMode>("line");
@@ -36,6 +54,10 @@ export function BeginnerFlashcardDetail() {
         .catch(console.error);
     }
   }, [user]);
+
+  if (loadingSet) {
+    return <div className="text-center py-12">Loading...</div>;
+  }
 
   if (!currentSet) {
     return (
@@ -61,7 +83,7 @@ export function BeginnerFlashcardDetail() {
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <h3 className="text-xl font-bold text-gray-900">{card.term}</h3>
-            {learnedWords.includes(card.id) && <Check className="w-5 h-5 text-green-500" title="Đã thuộc" />}
+            {learnedWords.includes(card.id) && <Check className="w-5 h-5 text-green-500" />}
             <button onClick={() => handlePlayAudio(card.term)} disabled={isLoading && loadingText === card.term} className="text-gray-400 hover:text-blue-500 transition-colors disabled:opacity-50">
               {isLoading && loadingText === card.term ? <div className="w-5 h-5 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-4 h-4" />}
             </button>
@@ -109,7 +131,7 @@ export function BeginnerFlashcardDetail() {
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <h3 className="text-lg font-bold text-gray-900 truncate">{card.term}</h3>
-            {learnedWords.includes(card.id) && <Check className="w-4 h-4 text-green-500 shrink-0" title="Đã thuộc" />}
+            {learnedWords.includes(card.id) && <Check className="w-4 h-4 text-green-500 shrink-0" />}
             <button
               onClick={() => handlePlayAudio(card.term)}
               disabled={isLoading && loadingText === card.term}
@@ -167,7 +189,7 @@ export function BeginnerFlashcardDetail() {
           <p className="font-bold text-gray-900 text-sm truncate">{card.term}</p>
           <p className="text-blue-600 text-xs truncate">{card.translation}</p>
         </div>
-        {learnedWords.includes(card.id) && <Check className="w-4 h-4 text-green-500 shrink-0" title="Đã thuộc" />}
+        {learnedWords.includes(card.id) && <Check className="w-4 h-4 text-green-500 shrink-0" />}
       </div>
     </div>
   );

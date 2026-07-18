@@ -1,25 +1,25 @@
 import React, { useMemo, useState } from "react";
-import { Volume2 } from "lucide-react";
+import { Volume2, CheckCircle } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
-import { getBeginnerSetById } from "../../../config/rankTopicConfig";
+
 
 interface Round6ReverseQuizProps {
   topicId: string | undefined;
   currentWord: any;
+  allLessonWords: any[];
   isCorrect: boolean | null;
   onCheckAnswer: (selectedText: string, isCorrect: boolean) => void;
 }
 
-export function Round6ReverseQuiz({ topicId, currentWord, isCorrect, onCheckAnswer }: Round6ReverseQuizProps) {
+export function Round6ReverseQuiz({ topicId, currentWord, allLessonWords, isCorrect, onCheckAnswer }: Round6ReverseQuizProps) {
   const { playAudio } = useTTSAudio();
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
   const options = useMemo(() => {
     if (!currentWord) return [];
-    // Select 3 random incorrect answers from the entire topic configuration
-    const allTopicWords = getBeginnerSetById(topicId || "")?.words || [];
-    const incorrect = allTopicWords.filter((w) => w.id !== currentWord.id).sort(() => Math.random() - 0.5);
+    // Select 3 random incorrect answers from the entire lesson
+    const incorrect = allLessonWords.filter((w) => w.id !== currentWord.id).sort(() => Math.random() - 0.5);
     const chosen = incorrect.slice(0, 3);
     const combined = [...chosen, currentWord];
     return combined.sort(() => Math.random() - 0.5);
@@ -41,33 +41,36 @@ export function Round6ReverseQuiz({ topicId, currentWord, isCorrect, onCheckAnsw
       </div>
 
       <div className="grid grid-cols-2 gap-4 w-full max-w-lg">
-        {options.map((opt) => (
-          <button
-            key={opt.id}
-            onClick={() => handleSelect(opt.term)}
-            disabled={isCorrect !== null}
-            className={cn(
-              "p-6 rounded-2xl border-2 font-bold text-2xl transition-all shadow-sm active:scale-95 flex flex-col items-center justify-center gap-2",
-              selectedAnswer === opt.term
-                ? isCorrect
-                  ? "bg-green-100 border-green-500 text-green-700"
-                  : "bg-red-100 border-red-500 text-red-700"
-                : "bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-blue-600",
-            )}
-          >
-            {opt.term}
-            {selectedAnswer === opt.term && isCorrect && (
-               <button onClick={(e) => { e.stopPropagation(); playAudio(opt.term); }} className="text-green-600 hover:bg-green-200 p-1 rounded-full">
-                 <Volume2 className="w-5 h-5" />
-               </button>
-            )}
-            {isCorrect !== null && opt.term === currentWord.term && selectedAnswer !== opt.term && (
-               <button onClick={(e) => { e.stopPropagation(); playAudio(opt.term); }} className="text-blue-500 hover:bg-blue-100 p-1 rounded-full absolute bottom-2 right-2">
-                 <Volume2 className="w-4 h-4" />
-               </button>
-            )}
-          </button>
-        ))}
+        {options.map((opt) => {
+          let stateClass = "bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-blue-600";
+          if (isCorrect !== null) {
+            if (opt.term === currentWord.term) {
+              stateClass = "bg-green-500 border-green-600 text-white shadow-lg shadow-green-500/30 transform scale-[1.02] animate-shake";
+            } else if (opt.term === selectedAnswer) {
+              stateClass = "bg-red-500 border-red-600 text-white shadow-lg shadow-red-500/30 transform scale-95 animate-shake";
+            } else {
+              stateClass = "bg-white border-gray-200 text-gray-300 opacity-50";
+            }
+          }
+          return (
+            <button
+              key={opt.id}
+              onClick={() => handleSelect(opt.term)}
+              disabled={isCorrect !== null}
+              className={cn(
+                "p-6 rounded-2xl border-2 font-bold text-2xl transition-all duration-300 shadow-sm flex flex-col items-center justify-center gap-2 relative overflow-hidden",
+                stateClass
+              )}
+            >
+              {opt.term}
+              {isCorrect !== null && opt.term === currentWord.term && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 animate-in fade-in zoom-in">
+                  <CheckCircle className="w-6 h-6 opacity-80" />
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

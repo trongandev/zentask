@@ -59,13 +59,13 @@ export function QuizCreate() {
       setLoading(true);
       const quiz = await generateQuizByAI(aiPrompt, aiNumQuestions, aiDifficulty, isPublic, selectedCategoryId || null);
       if (quiz) {
-        if (quiz.taskProgress) {
-          useConfigStore.getState().setTaskProgress(quiz.taskProgress);
+        if ((quiz as any).taskProgress) {
+          useConfigStore.getState().setTaskProgress((quiz as any).taskProgress);
         }
-        if (quiz.xpResult) {
-          window.dispatchEvent(new CustomEvent("xp_updated", { detail: quiz.xpResult }));
-          if (quiz.xpResult.levelUp) {
-            useUserStore.getState().triggerLevelUp(quiz.xpResult.level);
+        if ((quiz as any).xpResult) {
+          window.dispatchEvent(new CustomEvent("xp_updated", { detail: (quiz as any).xpResult }));
+          if ((quiz as any).xpResult.levelUp) {
+            useUserStore.getState().triggerLevelUp((quiz as any).xpResult.level);
           }
         }
         toastService.success("Tạo quiz thành công!");
@@ -99,13 +99,13 @@ export function QuizCreate() {
         categoryId: selectedCategoryId || null,
       });
       if (res) {
-        if (res.taskProgress) {
-          useConfigStore.getState().setTaskProgress(res.taskProgress);
+        if ((res as any).taskProgress) {
+          useConfigStore.getState().setTaskProgress((res as any).taskProgress);
         }
-        if (res.xpResult) {
-          window.dispatchEvent(new CustomEvent("xp_updated", { detail: res.xpResult }));
-          if (res.xpResult.levelUp) {
-            useUserStore.getState().triggerLevelUp(res.xpResult.level);
+        if ((res as any).xpResult) {
+          window.dispatchEvent(new CustomEvent("xp_updated", { detail: (res as any).xpResult }));
+          if ((res as any).xpResult.levelUp) {
+            useUserStore.getState().triggerLevelUp((res as any).xpResult.level);
           }
         }
         navigate(`/quiz/${res.id}`);

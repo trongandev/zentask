@@ -91,7 +91,7 @@ export function Leaderboard() {
 
   const fetchLeaderboardData = async (force = false) => {
     setLoading(true);
-    const data = await getLeaderboard(timeframe, force);
+    const data = await getLeaderboard(timeframe as any, force);
     const enrichedData = data.map((item: any) => ({
       ...item,
       isUser: user ? item.id === user.uid : false,
@@ -317,50 +317,50 @@ export function Leaderboard() {
               </div>
 
               <Link to="/profile" className="flex items-center gap-3 md:gap-6 p-3 md:p-4 rounded-2xl transition-all border bg-blue-50/50 border-blue-200 shadow-sm">
-              {/* Rank */}
-              <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-                <div className="w-10 flex justify-center">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center font-bold text-blue-700 border border-blue-200">-</div>
+                {/* Rank */}
+                <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+                  <div className="w-10 flex justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center font-bold text-blue-700 border border-blue-200">-</div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Avatar & Info */}
-              <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                <UserAvatar
-                  src={user?.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
-                  level={user?.level || 1}
-                  className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0"
-                />
-                <div className="min-w-0 flex-1 flex flex-col justify-center">
-                  <h3 className="font-bold text-sm md:text-base truncate text-blue-700 mb-0.5">{user?.displayName || "Bạn"} (Bạn)</h3>
-                  <div className="flex items-center">
-                    <UserLevelBadge level={user?.level || 1} size="sm" />
-                  </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <div className="flex items-center gap-1">
-                      {timeframe === "rank" ? (
-                        <>
-                          <span className="font-extrabold text-sm md:text-base text-blue-700">{(user as any)?.stars || 0}</span>
-                          <span className="text-[10px] md:text-xs font-bold text-yellow-500">⭐</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="font-extrabold text-sm md:text-base text-blue-700">{user?.xp?.toLocaleString() || "0"}</span>
-                          <span className="text-[10px] md:text-xs font-bold text-yellow-500">XP</span>
-                        </>
-                      )}
+                {/* Avatar & Info */}
+                <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                  <UserAvatar
+                    src={user?.photoURL || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg"}
+                    level={user?.level || 1}
+                    className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0"
+                  />
+                  <div className="min-w-0 flex-1 flex flex-col justify-center">
+                    <h3 className="font-bold text-sm md:text-base truncate text-blue-700 mb-0.5">{user?.displayName || "Bạn"} (Bạn)</h3>
+                    <div className="flex items-center">
+                      <UserLevelBadge level={user?.level || 1} size="sm" />
                     </div>
-                    <span className="text-gray-300">|</span>
-                    <span className="text-[10px] uppercase font-bold text-gray-500">
-                      {RANK_NAMES[user?.rankId || 1]} {TIER_NAMES[user?.tier || 3]}
-                    </span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <div className="flex items-center gap-1">
+                        {timeframe === "rank" ? (
+                          <>
+                            <span className="font-extrabold text-sm md:text-base text-blue-700">{(user as any)?.stars || 0}</span>
+                            <span className="text-[10px] md:text-xs font-bold text-yellow-500">⭐</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="font-extrabold text-sm md:text-base text-blue-700">{user?.xp?.toLocaleString() || "0"}</span>
+                            <span className="text-[10px] md:text-xs font-bold text-yellow-500">XP</span>
+                          </>
+                        )}
+                      </div>
+                      <span className="text-gray-300">|</span>
+                      <span className="text-[10px] uppercase font-bold text-gray-500">
+                        {RANK_NAMES[user?.rankId || 1]} {TIER_NAMES[user?.tier || 3]}
+                      </span>
+                    </div>
                   </div>
+                  <img src={`/rank/${user?.rankId || 1}.png`} alt="Rank" className="w-10 object-contain drop-shadow-sm" />
                 </div>
-                <img src={`/rank/${user?.rankId || 1}.png`} alt="Rank" className="w-10 object-contain drop-shadow-sm" />
-              </div>
-            </Link>
-          </>
-        )}
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

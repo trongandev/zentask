@@ -1,7 +1,7 @@
 import { Router } from "express";
 import User from "../models/User.js";
 import { verifyToken } from "../middleware/auth.js";
-import { UserActivity } from "../models/Schemas.js";
+import { UserActivity, UserLanguageProgress } from "../models/Schemas.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { incrementDailyTask, addXpToUser } from "./user.js";
 
@@ -23,7 +23,16 @@ router.post(
     const user = await User.findById(req.user.uid);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    let { rankId = 1, tier = 3, stars = 0 } = user;
+    let progress = await UserLanguageProgress.findOne({ uid: user._id, language: user.targetLanguage });
+    if (!progress) {
+      progress = await UserLanguageProgress.create({
+        uid: user._id,
+        language: user.targetLanguage,
+        rankId: 1, tier: 3, stars: 0, arenaMatchesPlayed: 0
+      });
+    }
+
+    let { rankId = 1, tier = 3, stars = 0 } = progress;
     const config = RANK_CONFIG[rankId];
 
     // Cao thủ (Rank 5) just adds stars
@@ -47,11 +56,11 @@ router.post(
       }
     }
 
-    user.rankId = rankId;
-    user.tier = tier;
-    user.stars = stars;
-    user.arenaMatchesPlayed = (user.arenaMatchesPlayed || 0) + 1;
-    await user.save();
+    progress.rankId = rankId;
+    progress.tier = tier;
+    progress.stars = stars;
+    progress.arenaMatchesPlayed = (progress.arenaMatchesPlayed || 0) + 1;
+    await progress.save();
 
     const taskResult = await incrementDailyTask(req.user.uid, "winning", 1);
     let xpResult = null;
@@ -74,7 +83,7 @@ router.post(
       rankId, 
       tier, 
       stars, 
-      arenaMatchesPlayed: user.arenaMatchesPlayed,
+      arenaMatchesPlayed: progress.arenaMatchesPlayed,
       xpResult,
       taskProgress: taskResult.success ? { winning: taskResult.progress } : {}
     });
@@ -87,13 +96,22 @@ router.post(
     const user = await User.findById(req.user.uid);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    let { rankId = 1, tier = 3, stars = 0 } = user;
+    let progress = await UserLanguageProgress.findOne({ uid: user._id, language: user.targetLanguage });
+    if (!progress) {
+      progress = await UserLanguageProgress.create({
+        uid: user._id,
+        language: user.targetLanguage,
+        rankId: 1, tier: 3, stars: 0, arenaMatchesPlayed: 0
+      });
+    }
+
+    let { rankId = 1, tier = 3, stars = 0 } = progress;
     const config = RANK_CONFIG[rankId];
 
     // Rank 1 lose protection
     if (config.loseProtection && rankId === 1) {
-      user.arenaMatchesPlayed = (user.arenaMatchesPlayed || 0) + 1;
-      await user.save();
+      progress.arenaMatchesPlayed = (progress.arenaMatchesPlayed || 0) + 1;
+      await progress.save();
       
       await UserActivity.create({
         uid: req.user.uid,
@@ -103,7 +121,7 @@ router.post(
         xpEarned: 0
       });
 
-      return res.json({ status: "protected", message: "Không bị trừ sao ở Rank Đồng", rankId, tier, stars, arenaMatchesPlayed: user.arenaMatchesPlayed });
+      return res.json({ status: "protected", message: "Không bị trừ sao ở Rank Đồng", rankId, tier, stars, arenaMatchesPlayed: progress.arenaMatchesPlayed });
     }
 
     if (stars > 0) {
@@ -145,11 +163,11 @@ router.post(
       }
     }
 
-    user.rankId = rankId;
-    user.tier = tier;
-    user.stars = stars;
-    user.arenaMatchesPlayed = (user.arenaMatchesPlayed || 0) + 1;
-    await user.save();
+    progress.rankId = rankId;
+    progress.tier = tier;
+    progress.stars = stars;
+    progress.arenaMatchesPlayed = (progress.arenaMatchesPlayed || 0) + 1;
+    await progress.save();
 
     await UserActivity.create({
       uid: req.user.uid,
@@ -159,7 +177,7 @@ router.post(
       xpEarned: 0
     });
 
-    res.json({ status: "success", rankId, tier, stars, arenaMatchesPlayed: user.arenaMatchesPlayed });
+    res.json({ status: "success", rankId, tier, stars, arenaMatchesPlayed: progress.arenaMatchesPlayed });
   }),
 );
 
