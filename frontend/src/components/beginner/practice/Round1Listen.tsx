@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Volume2 } from "lucide-react";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
 
@@ -8,6 +8,12 @@ interface Round1ListenProps {
 
 export function Round1Listen({ currentWord }: Round1ListenProps) {
   const { playAudio } = useTTSAudio();
+
+  useEffect(() => {
+    if (currentWord) {
+      playAudio(currentWord?.examples?.[0]?.en || currentWord?.term);
+    }
+  }, [currentWord]);
 
   return (
     <div className="space-y-6 animate-in slide-in-from-right">
