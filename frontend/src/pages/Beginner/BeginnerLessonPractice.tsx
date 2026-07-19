@@ -191,7 +191,7 @@ export function BeginnerLessonPractice() {
             await beginnerService.saveLessonProgress(lessonId);
             // Delete progress from localStorage after success
             localStorage.removeItem(`beginner_lesson_progress_${lessonId}`);
-            toastService.success("Chúc mừng bạn đã hoàn thành bài học!");
+            toastService.success("Chúc mừng bạn đã hoàn thành bài học! + 10XP");
             navigate("/beginner");
         } catch (err) {
             console.error(err);

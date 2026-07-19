@@ -671,6 +671,10 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
     return { success: true, isPublic: publicFlag };
   }
 
+  async getProgressSet(userId, setId) {
+    return await FlashcardProgress.find({ userId, setId }).lean();
+  }
+
   async batchUpdateProgress(userId, updates, reqApp) {
     if (!updates || !Array.isArray(updates) || updates.length === 0) {
       throw { statusCode: 400, message: "updates array is required" };

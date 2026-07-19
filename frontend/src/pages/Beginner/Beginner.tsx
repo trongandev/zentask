@@ -86,23 +86,20 @@ export function Beginner() {
                         const WORDS_PER_LESSON = 5;
                         const totalLessons = Math.ceil(wordCount / WORDS_PER_LESSON) || 1;
 
-                        for (let i = 0; i < totalLessons; i++) {
-                            const count = i === totalLessons - 1 ? wordCount - i * WORDS_PER_LESSON : WORDS_PER_LESSON;
-                            generatedNodes.push({
-                                id: `${topic.id}_${i}`,
-                                topicId: topic.id,
-                                lessonIndex: i,
-                                totalLessonsInTopic: totalLessons,
-                                wordCount: count,
-                                title: topic.title || "",
-                                rankId,
-                                rankName: (rankData as any).name,
-                                tierName: `Tier ${tierId}`,
-                                status: "locked", // Will evaluate below
-                                color: topic.category || "from-blue-500 to-cyan-400",
-                                rewardClaimed: false, // Will evaluate below
-                            });
-                        }
+                        generatedNodes.push({
+                            id: topic.id,
+                            topicId: topic.id,
+                            lessonIndex: 0,
+                            totalLessonsInTopic: totalLessons,
+                            wordCount: wordCount,
+                            title: topic.title || "",
+                            rankId,
+                            rankName: (rankData as any).name,
+                            tierName: `Tier ${tierId}`,
+                            status: "locked",
+                            color: topic.category || "from-blue-500 to-cyan-400",
+                            rewardClaimed: false,
+                        });
                     }
                 }
             }
@@ -111,16 +108,40 @@ export function Beginner() {
             // Mặc định node đầu tiên là Current nếu chưa học gì
             let firstUncompletedFound = false;
             const evaluatedNodes = generatedNodes.map((node) => {
-                const isCompleted = completedLessons.includes(node.id);
-                const rewardClaimed = rewardClaimedLessons.includes(node.id);
+                let currentLessonIndex = -1;
+                let allRewardClaimed = true;
+                
+                for (let i = 0; i < node.totalLessonsInTopic; i++) {
+                    const lessonId = `${node.topicId}_${i}`;
+                    if (completedLessons.includes(lessonId)) {
+                        if (!rewardClaimedLessons.includes(lessonId)) {
+                            allRewardClaimed = false;
+                        }
+                    } else {
+                        if (currentLessonIndex === -1) {
+                            currentLessonIndex = i;
+                        }
+                        allRewardClaimed = false;
+                    }
+                }
+
+                const isCompleted = currentLessonIndex === -1;
+                const finalLessonIndex = isCompleted ? node.totalLessonsInTopic - 1 : currentLessonIndex;
+                
+                const WORDS_PER_LESSON = 5;
+                let currentLessonWordCount = WORDS_PER_LESSON;
+                if (finalLessonIndex === node.totalLessonsInTopic - 1) {
+                    currentLessonWordCount = node.wordCount - (finalLessonIndex * WORDS_PER_LESSON);
+                    if (currentLessonWordCount <= 0) currentLessonWordCount = WORDS_PER_LESSON;
+                }
 
                 if (isCompleted) {
-                    return { ...node, status: "completed" as const, rewardClaimed };
+                    return { ...node, status: "completed" as const, rewardClaimed: allRewardClaimed, lessonIndex: finalLessonIndex, wordCount: currentLessonWordCount };
                 } else if (!firstUncompletedFound) {
                     firstUncompletedFound = true;
-                    return { ...node, status: "current" as const, rewardClaimed: false };
+                    return { ...node, status: "current" as const, rewardClaimed: false, lessonIndex: finalLessonIndex, wordCount: currentLessonWordCount };
                 } else {
-                    return { ...node, status: "locked" as const, rewardClaimed: false };
+                    return { ...node, status: "locked" as const, rewardClaimed: false, lessonIndex: finalLessonIndex, wordCount: currentLessonWordCount };
                 }
             });
 
@@ -323,7 +344,7 @@ export function Beginner() {
                                     </>
                                 )
                             ) : (
-                                "Bắt đầu học"
+                                "Bắt đầu +10XP"
                             )}
                         </button>
                     </div>

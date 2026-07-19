@@ -113,4 +113,9 @@ router.post(
   asyncHandler(async (req, res) => res.json(await FlashcardService.batchUpdateProgress(req.user.uid, req.body.updates, req.app))),
 );
 
+router.get(
+  "/set/:setId/progress",
+  asyncHandler(async (req, res) => res.json(await FlashcardService.getProgressSet(req.user.uid, req.params.setId))),
+);
+
 export default router;
