@@ -175,6 +175,11 @@ app.use((req, res, next) => {
     if (bodyClone.password) delete bodyClone.password;
     if (bodyClone.oldPassword) delete bodyClone.oldPassword;
     if (bodyClone.newPassword) delete bodyClone.newPassword;
+    
+    const requestUrl = req.originalUrl || req.url;
+    if (requestUrl && requestUrl.includes("/api/pronunciation/assess") && bodyClone.base64Audio) {
+      bodyClone.base64Audio = "Hệ thống đã tự động xóa trường này";
+    }
 
     let clientIp = req.headers["cf-connecting-ip"] || req.headers["x-real-ip"] || req.headers["x-forwarded-for"] || req.ip || req.socket.remoteAddress || "";
     if (typeof clientIp === "string") {
