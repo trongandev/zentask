@@ -100,6 +100,11 @@ router.post(
 );
 
 router.post(
+  "/generate-ai-list",
+  asyncHandler(async (req, res) => res.json(await FlashcardService.generateAiFlashcardList(req.user.uid, req.body))),
+);
+
+router.post(
   "/set/:setId/clone",
   asyncHandler(async (req, res) => res.json(await FlashcardService.clonePublicSet(req.user.uid, req.params.setId))),
 );

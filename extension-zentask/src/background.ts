@@ -115,6 +115,34 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
         });
     });
     return true;
+  } else if (request.action === "GENERATE_FLASHCARD_AI_LIST") {
+    const { words, setId } = request.payload;
+    chrome.storage.local.get(["token"]).then(({ token }) => {
+      if (!token) {
+        sendResponse({ ok: false, message: "Vui lòng đăng nhập" });
+        return;
+      }
+      fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/flashcard/generate-ai-list`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ words, setId }),
+      })
+        .then((res) => res.json().then((data) => ({ status: res.status, ok: res.ok, data })))
+        .then(({ ok, data }) => {
+          if (ok && data.ok !== false) {
+            sendResponse({ ok: true, data });
+          } else {
+            sendResponse({ ok: false, message: data.error || data.message || "Có lỗi từ server" });
+          }
+        })
+        .catch((e) => {
+          sendResponse({ ok: false, message: e.message || "Kết nối API thất bại" });
+        });
+    });
+    return true;
   } else if (request.action === "ENHANCE_WITH_AI") {
     const { text, target_language } = request.payload;
     chrome.storage.local.get(["token"]).then(({ token }) => {

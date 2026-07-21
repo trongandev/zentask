@@ -403,7 +403,7 @@ class FlashcardService {
       set.isNew = false;
       await set.save();
     }
-    
+
     let cards = [];
     if (set.builtinId) {
       const builtinData = getBuiltinFlashcardSetById(set.builtinId);
@@ -424,7 +424,7 @@ class FlashcardService {
     } else {
       cards = await Flashcard.find({ setId }).sort({ createdAt: -1 }).lean();
     }
-    
+
     const setObj = set.toObject();
     return {
       set: { id: setObj._id, ...setObj },
@@ -594,7 +594,7 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
             examples: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { en: { type: Type.STRING }, vi: { type: Type.STRING } }, required: ["en", "vi"] } },
           },
           required: ["term", "phonetic", "translation", "examples"],
-        }
+        },
       });
     } catch (err) {
       console.warn(`[AI Generation] failed:`, err.message);
@@ -625,6 +625,168 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
     });
 
     return { source: "ai", ...newVocab, ok: true, message: "Lưu thành công!", xpResult, taskProgress: taskResult.success ? { flashcard_master: taskResult.progress } : {} };
+  }
+
+  async generateAiFlashcardList(userId, { words, setId }) {
+    if (!words || !Array.isArray(words)) throw { statusCode: 400, message: "Danh sách từ là bắt buộc và phải là một mảng" };
+    if (words.length > 10) throw { statusCode: 400, message: "Tối đa 10 từ mỗi lần" };
+
+    const safeTerms = words.map((term) => normalizeLearningTerm(term)).filter(Boolean);
+    if (safeTerms.length === 0) throw { statusCode: 400, message: "Không có từ hợp lệ" };
+
+    await consumeDailyLimit({
+      uid: userId,
+      key: "flashcard_words",
+      amount: safeTerms.length,
+      message: "Bạn đã tạo đủ lượt flashcard hôm nay. Nâng VIP để tạo không giới hạn.",
+    });
+
+    let targetLang = "en";
+    let targetSet = null;
+    if (setId) {
+      targetSet = await FlashcardSet.findById(setId).lean();
+      if (targetSet && targetSet.language) targetLang = targetSet.language;
+    }
+
+    const saveToUserSet = async (vocabData) => {
+      if (!setId) return;
+      const set = await FlashcardSet.findById(setId);
+      if (set && set.userId.toString() === userId) {
+        const existingCard = await Flashcard.findOne({ setId: setId, term: vocabData.term });
+        if (!existingCard) {
+          await validateFlashcardOnlyWhenPublic(vocabData, set);
+          await Flashcard.create({
+            setId: setId,
+            userId,
+            language: targetLang,
+            term: vocabData.term,
+            phonetic: vocabData.phonetic || "",
+            translation: vocabData.translation,
+            examples: vocabData.examples || [],
+            notes: vocabData.notes || "",
+          });
+          set.cardCount += 1;
+          await set.save();
+        }
+      }
+    };
+
+    const results = [];
+    const missingTerms = [];
+
+    // Check cache
+    for (const term of safeTerms) {
+      const lowercaseTerm = term.trim().toLowerCase();
+      const vocabDoc = await Vocabulary.findOne({ term: lowercaseTerm, language: targetLang }).lean();
+      if (vocabDoc) {
+        await saveToUserSet(vocabDoc);
+        results.push({ source: "cache", ...vocabDoc, ok: true });
+      } else {
+        missingTerms.push(term);
+      }
+    }
+
+    if (missingTerms.length > 0) {
+      const LANGUAGE_PROMPTS = {
+        en: {
+          dict: "Anh-Việt",
+          termInstruction: "nếu là tiếng việt thì chuyển nó về tiếng anh (viết hoa chữ cái đầu tiên nhé)",
+          phoneticInstruction: "Phiên âm quốc tế (IPA)",
+          notesInstruction: "Ghi chú ngữ pháp (viết bằng tiếng Việt)",
+          exampleInstruction: 'Mảng 3 ví dụ, mỗi cái có "en" và "vi".',
+        },
+        zh: {
+          dict: "Trung-Việt",
+          termInstruction: "từ/cụm từ tiếng Trung (cả Pinyin nếu cần)",
+          phoneticInstruction: "Phiên âm Pinyin",
+          notesInstruction: "Ghi chú",
+          exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Trung) và "vi".',
+        },
+        ko: { dict: "Hàn-Việt", termInstruction: "từ tiếng Hàn", phoneticInstruction: "Romanization", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Hàn) và "vi".' },
+        ja: { dict: "Nhật-Việt", termInstruction: "từ tiếng Nhật", phoneticInstruction: "Romaji", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Nhật) và "vi".' },
+        de: { dict: "Đức-Việt", termInstruction: "từ tiếng Đức", phoneticInstruction: "IPA", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Đức) và "vi".' },
+        fr: { dict: "Pháp-Việt", termInstruction: "từ tiếng Pháp", phoneticInstruction: "IPA", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Pháp) và "vi".' },
+        es: {
+          dict: "Tây Ban Nha-Việt",
+          termInstruction: "từ tiếng Tây Ban Nha",
+          phoneticInstruction: "IPA",
+          notesInstruction: "Ghi chú",
+          exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Tây Ban Nha) và "vi".',
+        },
+        th: { dict: "Thái-Việt", termInstruction: "từ tiếng Thái", phoneticInstruction: "Romanization", notesInstruction: "Ghi chú", exampleInstruction: 'Mảng 3 ví dụ, "en" (tiếng Thái) và "vi".' },
+      };
+
+      const langConfig = LANGUAGE_PROMPTS[targetLang] || LANGUAGE_PROMPTS.en;
+      const termsString = missingTerms.map((t) => `"${t}"`).join(", ");
+      const prompt = `Hãy đóng vai một từ điển ${langConfig.dict}. Các từ/cụm từ cần tra cứu là: [${termsString}].
+Vui lòng trả về kết quả là một mảng JSON các đối tượng (mỗi đối tượng cho một từ/cụm từ). Mỗi đối tượng cần có:
+- term: ${langConfig.termInstruction}
+- phonetic: ${langConfig.phoneticInstruction}
+- translation: Nghĩa tiếng Việt của từ này.
+- notes: ${langConfig.notesInstruction}
+- examples: ${langConfig.exampleInstruction}`;
+
+      let generatedData = null;
+      try {
+        generatedData = await generateAIContent({
+          prompt,
+          feature: "flashcard_generate",
+          uid: userId,
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                term: { type: Type.STRING },
+                phonetic: { type: Type.STRING },
+                translation: { type: Type.STRING },
+                notes: { type: Type.STRING },
+                examples: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { en: { type: Type.STRING }, vi: { type: Type.STRING } }, required: ["en", "vi"] } },
+              },
+              required: ["term", "phonetic", "translation", "examples"],
+            },
+          },
+        });
+      } catch (err) {
+        console.warn(`[AI Generation List] failed:`, err.message);
+      }
+
+      if (generatedData && Array.isArray(generatedData)) {
+        for (const data of generatedData) {
+          const newVocab = normalizeGeneratedFlashcard(data, data.term);
+          if (newVocab.term && newVocab.translation) {
+            const lowercaseTerm = newVocab.term.trim().toLowerCase();
+            await Vocabulary.findOneAndUpdate({ term: lowercaseTerm, language: targetLang }, { $setOnInsert: { ...newVocab, language: targetLang } }, { upsert: true, new: true });
+            await saveToUserSet(newVocab);
+            results.push({ source: "ai", ...newVocab, ok: true });
+          }
+        }
+      }
+    }
+
+    const taskResult = await incrementDailyTask(userId, "flashcard_master", safeTerms.length);
+    let xpResult = null;
+    if (taskResult.success && taskResult.xpToAdd > 0) {
+      xpResult = await addXpToUser(userId, taskResult.xpToAdd);
+    }
+
+    if (missingTerms.length > 0) {
+      await UserActivity.create({
+        uid: userId,
+        action: "Tạo danh sách Flashcard bằng AI",
+        target: `Tạo ${missingTerms.length} từ mới`,
+        type: "flashcard",
+        xpEarned: taskResult.success ? taskResult.xpToAdd : 0,
+      });
+    }
+
+    return {
+      success: true,
+      results,
+      ok: true,
+      xpResult,
+      taskProgress: taskResult.success ? { flashcard_master: taskResult.progress } : {},
+    };
   }
 
   async clonePublicSet(userId, setId) {

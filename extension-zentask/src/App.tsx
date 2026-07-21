@@ -276,38 +276,51 @@ export default function App() {
 
     if (wordsToSave.length > 0) {
       try {
-        await etcService.createFlashcardWithAI(
-          "/flashcards/create-ai-list",
+        chrome.runtime.sendMessage(
           {
-            words: wordsToSave,
-            list_flashcard_id: listFlashcardId._id,
-            language: listFlashcardId?.language,
+            action: "GENERATE_FLASHCARD_AI_LIST",
+            payload: {
+              words: wordsToSave,
+              setId: listFlashcardId?._id || listFlashcardId?.id || listFlashcardId,
+            },
           },
-          userToken,
-        );
+          async (res) => {
+            if (res && res.ok !== false) {
+              // Update bookmarks in local storage to set isFlashcard = true
+              const updatedBookmarks = bookmarks.map((b) => {
+                if (selectedBookmarks.includes(b.id)) {
+                  return { ...b, isFlashcard: true };
+                }
+                return b;
+              });
+              setBookmarks(updatedBookmarks);
+              await chrome.storage.local.set({ quizzet_bookmarks: updatedBookmarks });
 
-        // Update bookmarks in local storage to set isFlashcard = true
-        const updatedBookmarks = bookmarks.map((b) => {
-          if (selectedBookmarks.includes(b.id)) {
-            return { ...b, isFlashcard: true };
+              toast.success(`Đã lưu ${wordsToSave.length} từ vào Flashcard`, {
+                id: "save-selected",
+              });
+            } else {
+              toast.error(res?.message || "Có lỗi từ server", {
+                id: "save-selected",
+              });
+            }
+            setIsSavingSelected(false);
+            setSelectedBookmarks([]);
+            setIsSelectingBookmarks(false);
           }
-          return b;
-        });
-        setBookmarks(updatedBookmarks);
-        await chrome.storage.local.set({ quizzet_bookmarks: updatedBookmarks });
-
-        toast.success(`Đã lưu ${wordsToSave.length} từ vào Flashcard`, {
-          id: "save-selected",
-        });
-      } catch (e) {
-        console.error(e);
-        toast.error("Có lỗi xảy ra khi lưu", { id: "save-selected" });
+        );
+      } catch (e: any) {
+        console.error("Save to flashcard failed", e);
+        toast.error(e.message || "Kết nối API thất bại", { id: "save-selected" });
+        setIsSavingSelected(false);
+        setSelectedBookmarks([]);
+        setIsSelectingBookmarks(false);
       }
+    } else {
+      setIsSavingSelected(false);
+      setSelectedBookmarks([]);
+      setIsSelectingBookmarks(false);
     }
-
-    setIsSavingSelected(false);
-    setSelectedBookmarks([]);
-    setIsSelectingBookmarks(false);
   };
 
   const handleCopyOutputs = (position: number) => {
