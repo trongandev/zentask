@@ -37,6 +37,7 @@ export function BeginnerArena() {
   const roomCodeRef = useRef(roomCode);
   const searchTimerRef = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
+  const prepIntervalRef = useRef<number | null>(null);
   const isLeavingArenaRef = useRef(false);
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export function BeginnerArena() {
       if (matchStateRef.current !== "lobby") {
           cleanupArenaSession("leave");
       }
+      if (prepIntervalRef.current) clearInterval(prepIntervalRef.current);
     };
   }, [cleanupArenaSession]);
 
@@ -95,11 +97,12 @@ export function BeginnerArena() {
       
       setPrepCountdown(7);
       let countdown = 7;
-      const prepInterval = setInterval(() => {
+      if (prepIntervalRef.current) clearInterval(prepIntervalRef.current);
+      prepIntervalRef.current = window.setInterval(() => {
         countdown--;
         setPrepCountdown(countdown);
         if (countdown <= 0) {
-          clearInterval(prepInterval);
+          if (prepIntervalRef.current) clearInterval(prepIntervalRef.current);
           socket.emit("arena_ready", { roomCode: data.roomCode });
         }
       }, 1000);
@@ -268,11 +271,20 @@ export function BeginnerArena() {
         </div>
 
         {matchState === "found" && (
-          <div className="mt-16 text-center">
+          <div className="mt-16 text-center flex flex-col items-center">
             <p className="text-slate-400 mb-2 font-bold uppercase tracking-widest">Trận đấu bắt đầu sau</p>
-            <div className="text-6xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
+            <div className="text-6xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] mb-8">
               {prepCountdown}
             </div>
+            <button
+              onClick={() => {
+                if (prepIntervalRef.current) clearInterval(prepIntervalRef.current);
+                socket?.emit("arena_ready", { roomCode });
+              }}
+              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors shadow-lg shadow-indigo-600/30"
+            >
+              Bắt đầu ngay
+            </button>
           </div>
         )}
       </div>
@@ -315,6 +327,45 @@ export function BeginnerArena() {
           onSendTeamHint={() => {}}
           onAnswer={handleAnswer}
         />
+      )}
+
+      {import.meta.env.VITE_NODE === "development" && matchState === "playing" && (
+        <div className="absolute bottom-4 left-4 flex gap-2 z-50">
+          <button
+            onClick={async () => {
+              stopTimer();
+              setMatchState("finished");
+              setUserScore(999);
+              setOpponentScore(0);
+              const res = await axiosInstance.post(`/api/rank/win`);
+              if (res.status === 200) {
+                const d = await res.data;
+                setRankUpdateStatus("win");
+                updateUser({ rankId: d.rankId, tier: d.tier, stars: d.stars });
+              }
+            }}
+            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded shadow-lg"
+          >
+            Thắng ngay
+          </button>
+          <button
+            onClick={async () => {
+              stopTimer();
+              setMatchState("finished");
+              setUserScore(0);
+              setOpponentScore(999);
+              const res = await axiosInstance.post(`/api/rank/lose`);
+              if (res.status === 200) {
+                const d = await res.data;
+                setRankUpdateStatus(d.status === "protected" ? "protected" : "lose");
+                updateUser({ rankId: d.rankId, tier: d.tier, stars: d.stars });
+              }
+            }}
+            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded shadow-lg"
+          >
+            Thua ngay
+          </button>
+        </div>
       )}
 
       {matchState === "finished" && opponent && (

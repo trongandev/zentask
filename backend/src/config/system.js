@@ -104,6 +104,6 @@ export const RANK_CONFIG = {
   1: { name: "Bạc", maxTiers: 3, starsPerTier: 3, loseProtection: true, winStreakBonus: false },
   2: { name: "Lục bảo", maxTiers: 4, starsPerTier: 4, loseProtection: false, winStreakBonus: false },
   3: { name: "Tinh Anh", maxTiers: 5, starsPerTier: 5, loseProtection: false, winStreakBonus: true },
-  4: { name: "Kim Cương", maxTiers: 5, starsPerTier: 5, loseProtection: true, winStreakBonus: true },
-  5: { name: "Cao Thủ", maxTiers: 1, starsPerTier: Infinity, loseProtection: true, winStreakBonus: false },
+  4: { name: "Kim Cương", maxTiers: 5, starsPerTier: 5, loseProtection: false, winStreakBonus: true },
+  5: { name: "Cao Thủ", maxTiers: 1, starsPerTier: Infinity, loseProtection: false, winStreakBonus: false },
 };

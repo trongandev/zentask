@@ -68,7 +68,7 @@ export function ArenaResult({ user, opponent, userScore, opponentScore, rankUpda
       </div>
 
       <div className="mt-8 md:mt-12 flex flex-col md:flex-row gap-4 w-full md:w-auto">
-        <button onClick={() => navigate("/")} className="w-full md:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all text-center">
+        <button onClick={() => navigate("/beginner")} className="w-full md:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all text-center">
           Về trang chủ
         </button>
         <button

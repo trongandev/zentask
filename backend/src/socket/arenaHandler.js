@@ -152,10 +152,8 @@ const buildTournamentMatchData = async (playerAUid, playerBUid) => {
 const buildArenaDeck = async (rankId, tierNum, languageCode = "en") => {
   let validWords = [];
   try {
-    console.log(`[Arena Debug Deck] languageCode: ${languageCode}, rankId: ${rankId}, tierNum: ${tierNum}`);
     const course = await Course.findOne({ languageCode }).lean();
     if (course) {
-      console.log(`[Arena Debug Deck] Found course: ${course._id}`);
       const rank = await CourseRank.findOne({ rankId: Number(rankId) }).lean();
       if (rank) {
         const tier = await CourseTier.findOne({ rankId: rank._id, tierNum: Number(tierNum), courseId: course._id }).lean();
@@ -166,35 +164,25 @@ const buildArenaDeck = async (rankId, tierNum, languageCode = "en") => {
               validWords.push(...l.words);
             }
           });
-          console.log(`[Arena Debug Deck] Found ${validWords.length} words in specific tier ${tier._id}`);
-        } else {
-          console.log(`[Arena Debug Deck] Tier ${tierNum} not found in rank ${rank._id} for course ${course._id}`);
         }
-      } else {
-        console.log(`[Arena Debug Deck] Rank ${rankId} not found in DB`);
       }
-
       if (validWords.length < 10) {
-        console.log(`[Arena Debug Deck] Fallback to entire course lessons for ${languageCode}`);
         const allTiers = await CourseTier.find({ courseId: course._id }).lean();
-        const allTierIds = allTiers.map(t => t._id);
+        const allTierIds = allTiers.map((t) => t._id);
         const allLessons = await CourseLesson.find({ tierId: { $in: allTierIds } }).lean();
         allLessons.forEach((l) => {
           if (l.words && Array.isArray(l.words)) {
             validWords.push(...l.words);
           }
         });
-        console.log(`[Arena Debug Deck] Aggregated ${validWords.length} words from entire course ${languageCode}`);
       }
-    } else {
-      console.log(`[Arena Debug Deck] Course not found for languageCode: ${languageCode}`);
     }
   } catch (error) {
     console.error("[Arena] Error building deck:", error);
   }
 
   const uniqueWordsMap = new Map();
-  validWords.forEach(w => uniqueWordsMap.set(w.id || w.term, w));
+  validWords.forEach((w) => uniqueWordsMap.set(w.id || w.term, w));
   validWords = Array.from(uniqueWordsMap.values());
 
   if (validWords.length < 10) {
@@ -562,7 +550,7 @@ const tryCreateSoloRoom = (entry, io) => {
 
 const tryCreateTeam2v2Room = (forceEntry = null, io) => {
   const liveTeamQueue = getLiveArenaQueue("team2v2");
-  
+
   const languageGroups = {};
   for (const entry of liveTeamQueue) {
     const lang = entry.language || "en";
@@ -589,7 +577,7 @@ const tryCreateTeam2v2Room = (forceEntry = null, io) => {
   }
 
   if (forceEntry && isQueueEntryAlive(forceEntry) && isBotEligible(forceEntry.user)) {
-    const liveQueue = getLiveArenaQueue("team2v2").filter(item => item.language === forceEntry.language);
+    const liveQueue = getLiveArenaQueue("team2v2").filter((item) => item.language === forceEntry.language);
     const pickedEntries = [];
     const forceLive = liveQueue.find((entry) => entry.queueToken === forceEntry.queueToken) || forceEntry;
     if (forceLive && isQueueEntryAlive(forceLive)) pickedEntries.push(forceLive);
