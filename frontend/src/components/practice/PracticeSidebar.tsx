@@ -1,5 +1,5 @@
 import React from "react";
-import { Layers, HelpCircle, FormInput, Headphones, Shuffle, Target, Lock, Keyboard, Mic } from "lucide-react";
+import { Layers, HelpCircle, FormInput, Headphones, Shuffle, Target, Lock, Keyboard, Mic, LayoutGrid } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { PracticeMode } from "../../pages/Flashcard/FlashcardPractice";
 
@@ -21,6 +21,7 @@ export function PracticeSidebar({ activeMode, onChangeMode, cardCount, language 
     { id: "bubble", title: "Bong bóng", icon: Target, desc: "Bắn bong bóng mang từ đúng", minCards: 5 },
     { id: "guess", title: "Đoán từ", icon: FormInput, desc: "Đoán các kí tự còn thiếu của từ", minCards: 1 },
     { id: "typing", title: "Gõ từ", icon: Keyboard, desc: "Bảo vệ căn cứ bằng cách gõ từ đúng", minCards: 1 },
+    { id: "arrange", title: "Sắp xếp", icon: LayoutGrid, desc: "Sắp xếp các chữ cái để tạo thành từ đúng", minCards: 1 },
   ];
 
   return (

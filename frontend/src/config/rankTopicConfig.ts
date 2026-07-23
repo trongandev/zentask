@@ -13,3 +13,10 @@ export const RANK_CONFIG = {
   4: { name: "Kim Cương", maxTiers: 5, starsPerTier: 5, loseProtection: true, winStreakBonus: true },
   5: { name: "Cao Thủ", maxTiers: 1, starsPerTier: Infinity, loseProtection: true, winStreakBonus: false },
 };
+
+export const getRankName = (rankId: number, tier: number): string => {
+  const config = RANK_CONFIG[rankId as keyof typeof RANK_CONFIG] || RANK_CONFIG[1];
+  const romanNumerals = ["I", "II", "III", "IV", "V"];
+  const tierText = rankId === 5 ? "" : ` ${romanNumerals[tier - 1] || tier}`;
+  return `${config.name}${tierText}`;
+};

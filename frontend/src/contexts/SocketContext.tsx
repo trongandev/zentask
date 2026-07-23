@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ArenaChallengeModal } from "../pages/Arena/components/ArenaChallengeModal";
 import toastService from "../services/toastService";
 import axiosInstance from "@/src/services/axiosConfig";
+import { getRankName } from "../config/rankTopicConfig";
 
 const API_URL = import.meta.env.VITE_API_BACKEND;
 interface SocketContextType {
@@ -67,7 +68,13 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         });
 
         newSocket.on("connect", () => {
-            newSocket.emit("register", user.uid);
+            newSocket.emit("register", {
+                uid: user.uid,
+                name: user.displayName || user.email || "Học viên",
+                level: user.level || 1,
+                rankId: user.rankId || 1,
+                rankName: getRankName(user.rankId || 1, user.tier || 3)
+            });
         });
 
         newSocket.on("new_notification", (notification) => {
@@ -104,7 +111,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
                 uid: user.uid,
                 name: user.displayName || "Bạn",
                 avatar: user.photoURL || "",
-                rankInfo: `${(user as any)?.rankInfo || ""}`,
+                rankInfo: getRankName(user.rankId || 1, user.tier || 3),
                 rankId: user.rankId || 1,
                 tier: user.tier || 3,
                 level: user.level,
