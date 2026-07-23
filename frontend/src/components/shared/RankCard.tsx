@@ -2,7 +2,7 @@ import React from "react";
 import { Medal, Target } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { RANK_NAMES } from "../../config/rankTopicConfig";
+import { RANK_CONFIG } from "../../config/rankTopicConfig";
 import { cn } from "../../lib/utils";
 
 interface RankCardProps {
@@ -17,19 +17,16 @@ export function RankCard({ showButton = false, buttonText = "Bắt đầu đấu
   const navigate = useNavigate();
 
   const rankUser = propUser || authUser;
-
   const rankId = rankUser?.rankId || 1;
-  const tier = rankUser?.tier || 3;
+  const tier = rankUser?.tier || 1; // Default tier is usually 1 (lowest)
   const stars = rankUser?.stars || 0;
 
-  const rankName = RANK_NAMES[rankId as keyof typeof RANK_NAMES] || "Bạc";
+  const config = RANK_CONFIG[rankId as keyof typeof RANK_CONFIG] || RANK_CONFIG[1];
+  const rankName = config.name;
+  const maxStars = config.starsPerTier;
 
-  // Fake config to match existing code logic for maxStars.
-  // In reality, it should be fetched from the backend or shared config.
-  // We'll use 3 for Bac, 4 for Luc Bao, 5 for Tinh Anh, 5 for Kim Cuong, 99 for Cao Thu
-  const maxStars = rankId === 1 ? 3 : rankId === 2 ? 4 : rankId === 3 || rankId === 4 ? 5 : 99;
-
-  const tierText = rankId === 5 ? "" : ` ${["I", "II", "III", "IV", "V"][tier - 1] || tier}`;
+  const romanNumerals = ["I", "II", "III", "IV", "V"];
+  const tierText = rankId === 5 ? "" : ` ${romanNumerals[tier - 1] || tier}`;
 
   if (!authUser && !propUser) {
     return (
@@ -75,14 +72,14 @@ export function RankCard({ showButton = false, buttonText = "Bắt đầu đấu
           <div className="flex justify-between text-xs font-bold text-blue-200">
             <span>Số sao</span>
             <span>
-              {stars} / {maxStars === 99 ? "∞" : maxStars}
+              {stars} / {maxStars === Infinity ? "∞" : maxStars}
             </span>
           </div>
           <div className="flex gap-1">
-            {maxStars === 99 ? (
+            {maxStars === Infinity ? (
               <div className="flex-1 h-3 rounded-full bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
             ) : (
-              Array.from({ length: maxStars }).map((_, i) => (
+              Array.from({ length: maxStars as number }).map((_, i) => (
                 <div key={i} className={cn("flex-1 h-3 rounded-full transition-all", i < stars ? "bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]" : "bg-slate-700")} />
               ))
             )}
@@ -97,7 +94,7 @@ export function RankCard({ showButton = false, buttonText = "Bắt đầu đấu
 
           {showButton && (
             <button
-              onClick={() => navigate("/arena")}
+              onClick={() => navigate("/beginner/arena")}
               className="w-full bg-yellow-500 hover:bg-yellow-400 text-yellow-950 font-bold py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg"
             >
               <Target className="w-5 h-5" />

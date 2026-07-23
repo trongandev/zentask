@@ -1,0 +1,624 @@
+##zh
+#TIER|1|1
+#TOPIC|t1_trangphuc|Trang phục|
+#WORD|衣服|yīfu|Quần áo|我买一件衣服。~Tôi mua một bộ quần áo。|N2
+#WORD|裤子|kùzi|Quần|这条裤子很长。~Cái quần này rất dài。|N2
+#WORD|鞋子|xiézi|Giày|我的鞋子是新的。~Giày của tôi là giày mới。|N2
+#WORD|帽子|màozi|Mũ|他戴着一顶帽子。~Anh ấy đội một chiếc mũ。|N2
+#WORD|裙子|qúnzi|Váy|这条裙子很漂亮。~Chiếc váy này rất đẹp。|N2
+#WORD|衣服|yīfu|Áo quần|我喜欢这件衣服。~Tôi thích bộ áo này。|N2
+#WORD|袜子|wàzi|Tất, vớ|我有白色的袜子。~Tôi có tất màu trắng。|N2
+#WORD|大衣|dàyī|Áo khoác dài|冬天穿大衣。~Mùa đông mặc áo khoác。|N2
+#WORD|眼镜|yǎnjìng|Kính mắt|她戴着眼镜。~Cô ấy đeo kính。|N2
+#WORD|手套|shǒutào|Găng tay|戴上你的手套。~Đeo găng tay của bạn vào。|N2
+#TOPIC|t1_nhacua|Nhà cửa & Phòng ốc|
+#WORD|家|jiā|Nhà|这是我的家。~Đây là nhà của tôi。|N2
+#WORD|房间|fángjiān|Phòng|我的房间很干净。~Phòng của tôi rất sạch。|N2
+#WORD|客厅|kètīng|Phòng khách|我们在客厅聊天。~Chúng tôi trò chuyện ở phòng khách。|N2
+#WORD|厨房|chúfáng|Phòng bếp|妈妈在厨房做饭。~Mẹ đang nấu ăn ở bếp。|N2
+#WORD|卧室|wòshì|Phòng ngủ|卧室里有一张床。~Trong phòng ngủ có một chiếc giường。|N2
+#WORD|门|mén|Cửa|请把门关上。~Xin hãy đóng cửa lại。|N2
+#WORD|窗户|chuānghu|Cửa sổ|打开窗户吧。~Mở cửa sổ ra đi。|N2
+#WORD|桌子|zhuōzi|Cái bàn|书在桌子上。~Sách ở trên bàn。|N2
+#WORD|椅子|yǐzi|Ghế|请坐在椅子上。~Xin ngồi lên ghế。|N2
+#WORD|床|chuáng|Giường|累了就要上床。~Mệt rồi thì lên giường。|N2
+#TOPIC|t1_hoatdong|Hoạt động hàng ngày|
+#WORD|起床|qǐchuáng|Thức dậy|我每天六点起床。~Tôi thức dậy sáu giờ。|V
+#WORD|吃饭|chīfàn|Ăn cơm|我们开始吃饭吧。~Chúng ta bắt đầu ăn cơm。|V
+#WORD|睡觉|shuìjiào|Đi ngủ|我准备去睡觉。~Tôi chuẩn bị đi ngủ。|V
+#WORD|洗澡|xǐzǎo|Tắm|他每天洗澡。~Anh ấy ngày nào cũng tắm。|V
+#WORD|刷牙|shuāyá|Đánh răng|早晚要刷牙。~Sáng tối đều phải đánh răng。|V
+#WORD|上班|shàngbān|Đi làm|爸爸去上班。~Bố đi làm。|V
+#WORD|回家|huíjiā|Về nhà|我放学回家。~Tôi tan học về nhà。|V
+#WORD|看书|kànshū|Đọc sách|弟弟在看书。~Em trai đang đọc sách。|V
+#WORD|听歌|tīnggē|Nghe nhạc|我喜欢听歌。~Tôi thích nghe nhạc。|V
+#WORD|走路|zǒulù|Đi bộ|我们一起走路。~Chúng ta cùng đi bộ。|V
+#TOPIC|t1_dongvat|Động vật hoang dã|
+#WORD|老虎|lǎohǔ|Con hổ|老虎很危险。~Con hổ rất nguy hiểm。|N2
+#WORD|狮子|shīzi|Con sư tử|狮子是森林之王。~Sư tử là vua rừng xanh。|N2
+#WORD|大象|dàxiàng|Con voi|大象鼻子很长。~Voi có cái vòi rất dài。|N2
+#WORD|猴子|hóuzi|Con khỉ|猴子喜欢吃香蕉。~Khỉ thích ăn chuối。|N2
+#WORD|熊猫|xióngmāo|Gấu trúc|熊猫是中国国宝。~Gấu trúc là quốc bảo TQ。|N2
+#WORD|长颈鹿|chángjǐnglù|Hươu cao cổ|长颈鹿脖子长。~Hươu cao cổ cổ dài。|N2
+#WORD|斑马|bānmǎ|Ngựa vằn|斑马有黑白条纹。~Ngựa vằn có vằn đen trắng。|N2
+#WORD|狼|láng|Con sói|狼在森林里叫。~Sói kêu trong rừng。|N2
+#WORD|狐狸|húli|Con cáo|狐狸很狡猾。~Con cáo rất ranh mãnh。|N2
+#WORD|蛇|shé|Con rắn|草里有一条蛇。~Trong cỏ có một con rắn。|N2
+#TIER|1|2
+#TOPIC|t2_giadinh|Gia đình|
+#WORD|爸爸|bàba|Bố|我爸爸是工人。~Bố tôi là công nhân。|N1
+#WORD|妈妈|māma|Mẹ|妈妈在做饭。~Mẹ đang nấu ăn。|N1
+#WORD|哥哥|gēge|Anh trai|哥哥比我高。~Anh trai cao hơn tôi。|N1
+#WORD|弟弟|dìdi|Em trai|弟弟很可爱。~Em trai rất đáng yêu。|N1
+#WORD|姐姐|jiějie|Chị gái|姐姐喜欢唱歌。~Chị gái thích hát。|N1
+#WORD|妹妹|mèimei|Em gái|妹妹在学习。~Em gái đang học bài。|N1
+#WORD|爷爷|yéye|Ông nội|爷爷身体很好。~Ông nội sức khỏe rất tốt。|N1
+#WORD|奶奶|nǎinai|Bà nội|奶奶做菜很好吃。~Bà nấu ăn rất ngon。|N1
+#WORD|儿子|érzi|Con trai|这是我的儿子。~Đây là con trai tôi。|N1
+#WORD|女儿|nǚ'ér|Con gái|女儿在上学。~Con gái đang đi học。|N1
+#TOPIC|t2_thucung|Động vật nuôi|
+#WORD|狗|gǒu|Con chó|我家有一只狗。~Nhà tôi có một con chó。|N2
+#WORD|猫|māo|Con mèo|猫在捉老鼠。~Mèo đang bắt chuột。|N2
+#WORD|鸟|niǎo|Con chim|树上有小鸟。~Trên cây có chim non。|N2
+#WORD|鱼|yú|Con cá|水里有很多鱼。~Trong nước có rất nhiều cá。|N2
+#WORD|兔子|tùzi|Con thỏ|兔子爱吃萝卜。~Thỏ thích ăn củ cải。|N2
+#WORD|乌龟|wūguī|Con rùa|乌龟爬得很慢。~Con rùa bò rất chậm。|N2
+#WORD|鸭子|yāzi|Con vịt|池塘有鸭子。~Ao có vịt。|N2
+#WORD|鸡|jī|Con gà|农场有很多鸡。~Nông trại có nhiều gà。|N2
+#WORD|猪|zhū|Con heo|农场里有猪。~Trong nông trại có heo。|N2
+#WORD|马|mǎ|Con ngựa|马跑得很快。~Ngựa chạy rất nhanh。|N2
+#TOPIC|t2_doan|Đồ ăn & Thức uống|
+#WORD|米饭|mǐfàn|Cơm|我喜欢吃米饭。~Tôi thích ăn cơm。|N2
+#WORD|面条|miàntiáo|Mì sợi|午饭吃面条。~Bữa trưa ăn mì sợi。|N2
+#WORD|苹果|píngguǒ|Quả táo|苹果很甜。~Quả táo rất ngọt。|N2
+#WORD|水|shuǐ|Nước|请给我水。~Xin cho tôi nước。|N2
+#WORD|茶|chá|Trà|中国人爱喝茶。~Người Trung Quốc thích uống trà。|N2
+#WORD|咖啡|kāfēi|Cà phê|我喝一杯咖啡。~Tôi uống một cốc cà phê。|N2
+#WORD|牛奶|niúnǎi|Sữa tươi|每天喝牛奶。~Mỗi ngày uống sữa tươi。|N2
+#WORD|面包|miànbāo|Bánh mì|早餐吃面包。~Bữa sáng ăn bánh mì。|N2
+#WORD|鸡蛋|jīdàn|Trứng gà|吃一个鸡蛋。~Ăn một quả trứng gà。|N2
+#WORD|肉|ròu|Thịt|今天吃猪肉。~Hôm nay ăn thịt heo。|N2
+#TOPIC|t2_thoitiet|Thời tiết|
+#WORD|天气|tiānqì|Thời tiết|今天天气很好。~Hôm nay thời tiết rất tốt。|N2
+#WORD|雨|yǔ|Mưa|外面下雨了。~Bên ngoài mưa rồi。|N2
+#WORD|雪|xuě|Tuyết|冬天会下雪。~Mùa đông sẽ có tuyết rơi。|N2
+#WORD|风|fēng|Gió|今天风很大。~Hôm nay gió rất lớn。|N2
+#WORD|云|yún|Mây|天上有很多云。~Trên trời có nhiều mây。|N2
+#WORD|太阳|tàiyáng|Mặt trời|太阳出来了。~Mặt trời mọc rồi。|N2
+#WORD|热|rè|Nóng|夏天很热。~Mùa hè rất nóng。|ADJ
+#WORD|冷|lěng|Lạnh|冬天很冷。~Mùa đông rất lạnh。|ADJ
+#WORD|晴|qíng|Nắng, quang đãng|明天是晴天。~Ngày mai trời quang。|ADJ
+#WORD|阴|yīn|Âm u|今天阴天。~Hôm nay trời âm u。|ADJ
+#TIER|1|3
+#TOPIC|t3_chaohoi|Chào hỏi & Giới thiệu|
+#WORD|你好|nǐhǎo|Xin chào|你好，很高兴见到你。~Xin chào, rất vui gặp bạn。|V
+#WORD|再见|zàijiàn|Tạm biệt|明天见，再见。~Hẹn ngày mai, tạm biệt。|V
+#WORD|谢谢|xièxie|Cảm ơn|谢谢你的帮助。~Cảm ơn sự giúp đỡ của bạn。|V
+#WORD|不客气|búkèqi|Không có chi|不客气，小事。~Không có chi, chuyện nhỏ。|V
+#WORD|对不起|duìbuqǐ|Xin lỗi|对不起，我迟到了。~Xin lỗi, tôi đến muộn。|V
+#WORD|没关系|méiguānxi|Không sao|没关系，别担心。~Không sao, đừng lo lắng。|V
+#WORD|早上好|zǎoshanghǎo|Chào buổi sáng|老师，早上好。~Thầy ơi, chào buổi sáng。|V
+#WORD|晚安|wǎn'ān|Chúc ngủ ngon|妈妈，晚安。~Mẹ ơi, chúc ngủ ngon。|V
+#WORD|请|qǐng|Xin mời|请进，请坐。~Xin mời vào, mời ngồi。|V
+#WORD|名字|míngzi|Tên|你的名字是什么？~Tên của bạn là gì?|N2
+#TOPIC|t3_sodem|Số đếm & Màu sắc|
+#WORD|一|yī|Số một|这是一个苹果。~Đây là một quả táo。|NUM
+#WORD|二|èr|Số hai|我有两本书。~Tôi có hai quyển sách。|NUM
+#WORD|三|sān|Số ba|三个人在说话。~Ba người đang nói chuyện。|NUM
+#WORD|四|sì|Số bốn|桌上有四个杯子。~Trên bàn có bốn cái cốc。|NUM
+#WORD|五|wǔ|Số năm|今天是五号。~Hôm nay là mùng năm。|NUM
+#WORD|红|hóng|Màu đỏ|我喜欢红色的花。~Tôi thích hoa màu đỏ。|ADJ
+#WORD|蓝|lán|Màu xanh dương|天空是蓝色的。~Bầu trời màu xanh dương。|ADJ
+#WORD|白|bái|Màu trắng|云是白色的。~Mây có màu trắng。|ADJ
+#WORD|黑|hēi|Màu đen|这件衣服是黑的。~Áo này màu đen。|ADJ
+#WORD|黄|huáng|Màu vàng|香蕉是黄色的。~Quả chuối màu vàng。|ADJ
+#TOPIC|t3_cothe|Các bộ phận cơ thể|
+#WORD|头|tóu|Đầu|头有点疼。~Đầu hơi đau một chút。|N2
+#WORD|眼睛|yǎnjing|Mắt|眼睛是心灵之窗。~Mắt là cửa sổ tâm hồn。|N2
+#WORD|鼻子|bízi|Mũi|鼻子闻到香味。~Mũi ngửi thấy mùi thơm。|N2
+#WORD|嘴巴|zuǐba|Miệng|闭上你的嘴巴。~Ngậm miệng của bạn lại。|N2
+#WORD|耳朵|ěrduo|Tai|用耳朵听音乐。~Dùng tai nghe âm nhạc。|N2
+#WORD|手|shǒu|Tay|洗一洗你的手。~Rửa đôi tay của bạn đi。|N2
+#WORD|脚|jiǎo|Chân|脚跑得很累。~Chân chạy rất mỏi。|N2
+#WORD|牙齿|yáchǐ|Răng|每天刷牙齿。~Mỗi ngày đánh răng。|N2
+#WORD|头发|tóufa|Tóc|她的头发很长。~Tóc cô ấy rất dài。|N2
+#WORD|脸|liǎn|Mặt|洗脸刷牙。~Rửa mặt đánh răng。|N2
+#WORD|t3_dodunghoctap|Đồ dùng học tập|Dụng cụ học tập hàng ngày||
+#WORD|书|shū|Sách|这是一本中文书。~Đây là sách tiếng Trung。|N2
+#WORD|笔|bǐ|Bút|我有两支笔。~Tôi có hai cái bút。|N2
+#WORD|本子|běnzi|Vở|写在本子上。~Viết vào trong vở。|N2
+#WORD|尺子|chǐzi|Thước kẻ|用尺子画线。~Dùng thước kẻ vẽ đường。|N2
+#WORD|橡皮|xiàngpí|Cục tẩy|借我一块橡皮。~Cho tôi mượn cục tẩy。|N2
+#WORD|书包|shūbāo|Cặp sách|书包很重。~Cặp sách rất nặng。|N2
+#WORD|桌子|zhuōzi|Bàn học|坐在桌子前。~Ngồi trước bàn học。|N2
+#WORD|椅子|yǐzi|Ghế ngồi|椅子坏了。~Ghế bị hỏng rồi。|N2
+#WORD|字典|zìdiǎn|Từ điển|查字典学汉字。~Tra từ điển học chữ Hán。|N2
+#WORD|白板|báibǎn|Bảng trắng|看白板。~Nhìn bảng trắng。|N2
+#TIER|2|1
+#TOPIC|t4_lehoi|Lễ hội & Văn hóa|
+#WORD|春节|chūnjié|Tết Nguyên Đán|春节是中国大节。~Tết là đại lễ TQ。|N2
+#WORD|中秋|zhōngqiū|Tết Trung Thu|中秋吃月饼。~Trung thu ăn bánh trung thu。|N2
+#WORD|端午|duānwǔ|Tết Đoan Ngọ|端午吃粽子。~Đoan ngọ ăn bánh ú。|N2
+#WORD|元宵|yuánxiāo|Tết Nguyên Tiêu|元宵吃汤圆。~Nguyên tiêu ăn trôi nước。|N2
+#WORD|灯笼|dēnglong|Đèn lồng|挂红灯笼。~Treo đèn lồng đỏ。|N2
+#WORD|红包|hóngbāo|Lì xì|长辈给红包。~Trưởng bối cho lì xì。|N2
+#WORD|饺子|jiǎozi|Sủi cảo|过年吃饺子。~Ăn tết ăn sủi cảo。|N2
+#WORD|舞狮|wǔshī|Múa lân|外面在舞狮。~Bên ngoài đang múa lân。|V
+#WORD|寺庙|sìmiào|Chùa chiền|去寺庙上香。~Đi chùa thắp nhang。|N2
+#WORD|习俗|xísú|Phong tục|了解当地习俗。~Hiểu phong tục địa phương。|N2
+#TOPIC|t4_congviec|Công việc cơ bản|
+#WORD|工作|gōngzuò|Công việc|我喜欢这份工作。~Tôi thích công việc này。|N2
+#WORD|老板|lǎobǎn|Ông chủ|老板人很好。~Ông chủ rất tốt tính。|N1
+#WORD|同事|tóngshì|Đồng nghiệp|同事帮助我。~Đồng nghiệp giúp tôi。|N1
+#WORD|开会|kāihuì|Họp|经理在开会。~Giám đốc đang họp。|V
+#WORD|合同|hétóng|Hợp đồng|签合同。~Ký hợp đồng。|N2
+#WORD|工资|gōngzī|Lương|下个月发工资.~Tháng sau phát lương。|N2
+#WORD|加班|jiābān|Tăng ca|今天需要加班。~Hôm nay cần tăng ca。|V
+#WORD|休息|xiūxi|Nghỉ ngơi|工作后休息。~Làm việc xong nghỉ ngơi。|V
+#WORD|请假|qǐngjià|Xin nghỉ phép|我明天请假。~Tôi ngày mai xin phép。|V
+#WORD|项目|xiàngmù|Dự án|这个项目很大。~Dự án này rất lớn。|N2
+#TOPIC|t4_truyenthong|Phương tiện truyền thông|
+#WORD|新闻|xīnwén|Tin tức|看早间新闻。~Xem tin tức buổi sáng。|N2
+#WORD|电视|diànshì|Tiền hình|打开电视看。~Bật tivi xem đi。|N2
+#WORD|广播|guǎngbō|Phát thanh|听广播节目。~Nghe chương trình phát thanh。|N2
+#WORD|报纸|bàozhǐ|Báo giấy|买一份报纸。~Mua một tờ báo giấy。|N2
+#WORD|杂志|zázhì|Tạp chí|读时尚杂志。~Đọc tạp chí thời trang。|N2
+#WORD|广告|guǎnggào|Quảng cáo|看电视广告。~Xem quảng cáo tivi。|N2
+#WORD|网络|wǎngluò|Mạng internet|网络很慢。~Mạng internet rất chậm。|N2
+#WORD|手机|shǒujī|Điện thoại|玩手机游戏。~Chơi game điện thoại。|N2
+#WORD|邮件|yóujiàn|Thư điện tử|发一封邮件。~Gửi một bức thư điện tử。|N2
+#WORD|媒体|méitǐ|Truyền thông|大众媒体。~Truyền thông đại chúng。|N2
+#TIER|2|2
+#TOPIC|t5_dulich|Du lịch & Khách sạn|
+#WORD|旅游|lǚyóu|Du lịch|暑假去旅游。~Kỳ nghỉ hè đi du lịch。|V
+#WORD|酒店|jiǔdiàn|Khách sạn|预订酒店房间。~Đặt phòng khách sạn。|N2
+#WORD|机票|jīpiào|Vé máy bay|买机票回家。~Mua vé máy bay về nhà。|N2
+#WORD|护照|hùzhào|Hộ chiếu|检查护照。~Kiểm tra hộ chiếu。|N2
+#WORD|行李|xíngli|Hành lý|收拾行李。~Thu dọn hành lý。|N2
+#WORD|导游|dǎoyóu|Hướng dẫn viên|导游带路。~Hướng dẫn viên dẫn đường。|N1
+#WORD|景点|jǐngdiǎn|Danh lam thắng cảnh|参观著名景点。~Tham quan danh lam。|N2
+#WORD|地图|dìtú|Bản đồ|看旅游地图。~Xem bản đồ du lịch。|N2
+#WORD|退房|tuìfáng|Trả phòng|明天早上退房。~Sáng mai trả phòng。|V
+#WORD|前台|qiántái|Quầy lễ tân|去前台问路。~Ra lễ tân hỏi đường。|N2
+#TOPIC|t5_suckhoe|Sức khỏe & Lối sống|
+#WORD|健康|jiànkāng|Sức khỏe|保持身体健康。~Giữ gìn sức khỏe。|ADJ
+#WORD|生病|shēngbìng|Bố ốm|他感冒生病了。~Anh ấy cảm cúm ốm rồi。|V
+#WORD|吃药|chīyào|Uống thuốc|生病要吃药。~Ốm phải uống thuốc。|V
+#WORD|医生|yīshēng|Bác sĩ|去看医生。~Đi khám bác sĩ。|N1
+#WORD|医院|yīyuàn|Bệnh viện|去医院检查。~Đi bệnh viện kiểm tra。|N2
+#WORD|运动|yùndòng|Vận động|经常做运动。~Thường xuyên vận động。|V
+#WORD|跑步|pǎobù|Chạy bộ|早上跑步。~Chạy bộ buổi sáng。|V
+#WORD|睡眠|shuìmián|Giấc ngủ|保证充足睡眠。~Đảm bảo ngủ đủ giấc。|N2
+#WORD|减肥|jiǎnféi|Giảm cân|她正在减肥。~Cô ấy đang giảm cân。|V
+#WORD|压力|yālì|Áp lực|工作压力大。~Áp lực công việc lớn。|N2
+#TOPIC|t5_camxuc|Cảm xúc & Tâm trạng|
+#WORD|高兴|gāoxìng|Vui vẻ|听到好消息很高兴。~Nghe tin vui rất vui。|ADJ
+#WORD|伤心|shāngxīn|Buồn bã|别为他伤心。~Đừng vì anh ấy buồn。|ADJ
+#WORD|生气|shēngqì|Tức giận|不要生我的气。~Đừng giận tôi nhé。|ADJ
+#WORD|害怕|hàipà|Sợ hãi|我害怕黑。~Tôi sợ bóng tối。|V
+#WORD|紧张|jǐnzhāng|Căng thẳng|考试前很紧张。~Trước khi thi rất căng thẳng。|ADJ
+#WORD|兴奋|xīngfèn|Phấn khích|大家都很兴奋。~Mọi người đều rất phấn khích。|ADJ
+#WORD|感动|gǎndòng|Cảm động|这个电影很感感动。~Phim này rất cảm động。|ADJ
+#WORD|无聊|wúliáo|Nhàm chán|在家觉得无聊。~Ở nhà thấy nhàm chán。|ADJ
+#WORD|满意|mǎnyì|Hài lòng|我对结果满意。~Tôi hài lòng với kết quả。|ADJ
+#WORD|担心|dānxīn|Lo lắng|妈妈很担心。~Mẹ rất lo lắng。|V
+#TIER|2|3
+#TOPIC|t6_muasam|Mua sắm & Giá cả|
+#WORD|买|mǎi|Mua|我想买这个。~Tôi muốn mua cái này。|V
+#WORD|卖|mài|Bán|这家店卖衣服。~Cửa hàng này bán quần áo。|V
+#WORD|多少|duōshǎo|Bao nhiêu|这个多少钱？~Cái này bao nhiêu tiền?|PR
+#WORD|贵|guì|Đắt|太贵了，便宜点。~Đắt quá, rẻ chút đi。|ADJ
+#WORD|便宜|piányi|Rẻ|这件很便宜。~Cái này rất rẻ。|ADJ
+#WORD|钱|qián|Tiền|我没有带钱。~Tôi không mang tiền。|N2
+#WORD|刷卡|shuākǎ|Quẹt thẻ|可以刷卡吗?~Có thể quẹt thẻ không?|V
+#WORD|现金|xiànjīn|Tiền mặt|付现金。~Thanh toán tiền mặt。|N2
+#WORD|打折|dǎzhé|Giảm giá|现在打八折。~Hiện đang giảm 20%。|V
+#WORD|发票|fāpiào|Hóa đơn|请给我发票。~Xin cho tôi hóa đơn。|N2
+#TOPIC|t6_mota|Mô tả ngoại hình & Tính cách|
+#WORD|高|gāo|Cao|他长得很高。~Anh ấy cao lớn。|ADJ
+#WORD|矮|ǎi|Thấp|哥哥比我矮。~Anh trai thấp hơn tôi。|ADJ
+#WORD|胖|pàng|Béo|最近我胖了。~Dạo này tôi béo lên。|ADJ
+#WORD|瘦|shòu|Gầy|她很瘦。~Cô ấy rất gầy。|ADJ
+#WORD|漂亮|piàoliang|Xinh đẹp|她是一个漂亮女孩。~Cô ấy là cô gái xinh。|ADJ
+#WORD|帅|shuài|Đẹp trai|那个男得很帅。~Người nam đó rất đẹp trai。|ADJ
+#WORD|善良|shànliáng|Hiền lành|他心地善良。~Anh ấy có lòng tốt。|ADJ
+#WORD|聪明|cōngmíng|Thông minh|这个孩子很聪明。~Đứa trẻ này rất thông minh。|ADJ
+#WORD|老实|lǎoshi|Thật thà|他为人老实。~Anh ấy sống thật thà。|ADJ
+#WORD|幽默|yōumò|Hài hước|老师很幽默。~Thầy giáo rất hài hước。|ADJ
+#TOPIC|t6_thethao|Thể thao|
+#WORD|足球|zúqiú|Bóng đá|我们踢足球。~Chúng ta đá bóng。|N2
+#WORD|篮球|lánqiú|Bóng rổ|他喜欢打篮球。~Anh ấy thích chơi bóng rổ。|N2
+#WORD|游泳|yóuyǒng|Bơi lội|夏天去游泳。~Mùa hè đi bơi lội。|V
+#WORD|跑步|pǎobù|Chạy bộ|每天跑步三公里。~Mỗi ngày chạy 3km。|V
+#WORD|羽毛球|yǔmáoqiú|Cầu lông|打羽毛球。~Đánh cầu lông。|N2
+#WORD|乒乓球|pīngpāngqiú|Bóng bàn|国球是乒乓球。~Bóng bàn là quốc cầu。|N2
+#WORD|网球|wǎngqiú|Quần vợt|学打网球。~Học đánh quần vợt。|N2
+#WORD|骑车|qíchē|Đạp xe|周末去骑车。~Cuối tuần đi đạp xe。|V
+#WORD|登山|dēngshān|Leo núi|去郊外登山。~Đi vùng ngoại ô leo núi。|V
+#WORD|健身|jiànshēn|Thể hình|去健身房。~Đi phòng thể hình。|V
+#TIER|2|4
+#TOPIC|t7_giaothong|Phương tiện giao thông|
+#WORD|汽车|qìchē|Xe ô tô|开汽车上班。~Lái ô tô đi làm。|N2
+#WORD|公交车|gōngjiāochē|Xe buýt|坐公交车去。~Ngồi xe buýt đi。|N2
+#WORD|地铁|dìtiě|Tàu điện ngầm|坐地铁很方便。~Đi tàu điện ngầm tiện。|N2
+#WORD|火车|huǒchē|Tàu hỏa|坐火车旅行。~Đi tàu hỏa du lịch。|N2
+#WORD|飞机|fēijī|Máy bay|坐飞机出国。~Đi máy bay xuất ngoại。|N2
+#WORD|自行车|zìxíngchē|Xe đạp|骑自行车上学。~Đạp xe đi học。|N2
+#WORD|出租车|chūzūchē|Xe taxi|叫一辆出租车。~Gọi một chiếc taxi。|N2
+#WORD|船|chuán|Tàu thủy|坐船过海。~Đi tàu vượt biển。|N2
+#WORD|摩托车|mótuōchē|Xe máy|骑摩托车。~Đi xe máy。|N2
+#WORD|高铁|gāotiě|Tàu cao tốc|坐高铁很快。~Đi tàu cao tốc rất nhanh。|N2
+#TOPIC|t7_diadiem|Địa điểm trong thành phố|
+#WORD|银行|yínháng|Ngân hàng|去银行取钱。~Đến ngân hàng rút tiền。|N2
+#WORD|邮局|yóujú|Bưu điện|去邮局寄信。~Đến bưu điện gửi thư。|N2
+#WORD|超市|chāoshì|Siêu thị|去超市买菜。~Đến siêu thị mua rau。|N2
+#WORD|公园|gōngyuán|Công viên|在公园散步。~Đi dạo trong công viên。|N2
+#WORD|学校|xuéxiào|Trường học|去学校上课。~Đến trường lên lớp。|N2
+#WORD|图书馆|túshūguǎn|Thư viện|在图书馆看书。~Đọc sách ở thư viện。|N2
+#WORD|医院|yīyuàn|Bệnh viện|去医院看病。~Đến viện khám bệnh。|N2
+#WORD|机场|jīchǎng|Sân bay|去机场接人。~Ra sân bay đón người。|N2
+#WORD|车站|chēzhàn|Bến xe|在车站等车。~Đợi xe ở bến xe。|N2
+#WORD|饭馆|fànguǎn|Quán ăn|去饭馆吃饭。~Đến quán ăn cơm。|N2
+#TOPIC|t7_sothich|Sở thích & Giải trí|
+#WORD|爱好|àihào|Sở thích|我的爱好是画画。~Sở thích của tôi vẽ tranh。|N2
+#WORD|音乐|yīnyuè|Âm nhạc|听轻音乐。~Nghe nhạc nhẹ。|N2
+#WORD|电影|diànyǐng|Phim ảnh|看动作电影。~Xem phim hành động。|N2
+#WORD|游戏|yóuxì|Trò chơi|玩电脑游戏。~Chơi game máy tính。|N2
+#WORD|摄影|shèyǐng|Nhiếp ảnh|爱好摄影。~Yêu thích nhiếp ảnh。|N2
+#WORD|旅游|lǚyóu|Du lịch|喜欢旅游。~Thích du lịch。|V
+#WORD|阅读|yuèdú|Đọc sách|阅读小说的习惯。~Thói quen đọc tiểu thuyết。|V
+#WORD|画画|huàhuà|Vẽ tranh|学习画画。~Học vẽ tranh。|V
+#WORD|书法|shūfǎ|Thư pháp|练习中国书法。~Luyện thư pháp Trung Hoa。|N2
+#WORD|烹饪|pēngrèn|Nấu nướng|喜欢烹饪。~Thích nấu nướng。|V
+#TIER|3|1
+#TOPIC|t8_taichinh|Tài chính cá nhân|
+#WORD|存款|cúnkuǎn|Tiền gửi tiết kiệm|银行存款。~Tiền gửi tiết kiệm ngân hàng。|N2
+#WORD|预算|yùsuàn|Ngân sách|制定月预算。~Lập ngân sách tháng。|N2
+#WORD|投资|tōuzī|Đầu tư|理财与投资。~Quản lý tài chính đầu tư。|V
+#WORD|理财|lǐcái|Quản lý tài chính|学习理财。~Học quản lý tài chính。|V
+#WORD|负债|fùzhài|Nợ nần|避免负债。~Tránh nợ nần。|N2
+#WORD|消费|xiāofèi|Tiêu dùng|合理消费。~Tiêu dùng hợp lý。|V
+#WORD|收入|shōurù|Thu nhập|增加收入。~Tăng thu nhập。|N2
+#WORD|支出|zhīchū|Chi tiêu|控制支出。~Kiểm soát chi tiêu。|N2
+#WORD|利息|lìxī|Tiền lãi|银行利息。~Lãi suất ngân hàng。|N2
+#WORD|破产|pòchǎn|Phá sản|面临破产。~Đối mặt với phá sản。|V
+#TOPIC|t8_giaotiep|Giao tiếp công sở|
+#WORD|汇报|huìbào|Báo cáo|向经理汇报。~Báo cáo với giám đốc。|V
+#WORD|沟通|gōutōng|Giao tiếp|团队沟通。~Giao tiếp đội nhóm。|V
+#WORD|协商|xiéshāng|Thương lượng|协商解决。~Thương lượng giải quyết。|V
+#WORD|安排|ānpái|Sắp xếp|安排日程。~Sắp xếp lịch trình。|V
+#WORD|任务|rènwu|Nhiệm vụ|完成任务。~Hoàn thành nhiệm vụ。|N2
+#WORD|职责|zhízé|Trách nhiệm|明确职责。~Làm rõ trách nhiệm。|N2
+#WORD|晋升|jìnshēng|Thăng chức|获得晋升。~Nhận được thăng chức。|V
+#WORD|辞职|cízhí|Từ chức|他决定辞职。~Anh ấy quyết định từ chức。|V
+#WORD|考核|kǎohé|Đánh giá|绩效考核。~Đánh giá hiệu suất。|N2
+#WORD|协作|xiézuò|Hợp tác|部门协作。~Hợp tác bộ phận。|V
+#TOPIC|t8_truyenthongqc|Truyền thông & Quảng cáo|
+#WORD|策划|cèhuà|Lập kế hoạch|活动策划。~Lập kế hoạch sự kiện。|V
+#WORD|宣传|xuānchuán|Tuyên truyền|品牌宣传。~Tuyên truyền thương hiệu。|V
+#WORD|受众|shòuzhòng|Khán giả/Công chúng|分析受众。~Phân tích công chúng。|N1
+#WORD|流量|liúliàng|Lưu lượng|网站流量。~Lưu lượng trang web。|N2
+#WORD|转化|zhuǎnhuà|Chuyển đổi|转化率。~Tỷ lệ chuyển đổi。|V
+#WORD|品牌|pǐnpái|Thương hiệu|知名品牌。~Thương hiệu nổi tiếng。|N2
+#WORD|公关|gōngguān|Quan hệ công chúng|危机公关。~Quan hệ công chúng khủng hoảng。|N2
+#WORD|渠道|qūdào|Kênh phân phối|营销渠道。~Kênh tiếp thị。|N2
+#WORD|代言|dàiyán|Đại diện thương hiệu|明星代言。~Ngôi sao đại diện。|V
+#WORD|视觉|shìjué|Thị giác|视觉效果。~Hiệu ứng thị giác。|N2
+#TIER|3|2
+#TOPIC|t9_luatphap|Luật pháp cơ bản|
+#WORD|法律|fǎlǜ|Pháp luật|遵守法律。~Tuân thủ pháp luật。|N2
+#WORD|合同|hétóng|Hợp đồng|签订合同。~Ký kết hợp đồng。|N2
+#WORD|权利|quánlì|Quyền lợi|合法权利。~Quyền lợi hợp pháp。|N2
+#WORD|义务|yìwù|Nghĩa vụ|公民义务.~Nghĩa vụ công dân。|N2
+#WORD|法院|fǎyuàn|Tòa án|去法院起诉。~Đến tòa án khởi tố。|N2
+#WORD|法官|fǎguān|Thẩm phán|法官审判。~Thẩm phán xét xử。|N1
+#WORD|律师|lǜshī|Luật sư|请律师帮忙。~Mời luật sư giúp đỡ。|N1
+#WORD|犯罪|fànzuì|Phạm tội|打击犯罪。~Đấu tranh tội phạm。|V
+#WORD|证据|zhèngjù|Chứng cứ|收集证据.~Thu thập chứng cứ。|N2
+#WORD|条款|tiáokuǎn|Điều khoản|合同条款。~Điều khoản hợp đồng。|N2
+#TOPIC|t9_kinhdoanh|Kinh doanh & Khởi nghiệp|
+#WORD|创业|chuàngyè|Khởi nghiệp|自主创业。~Tự chủ khởi nghiệp。|V
+#WORD|公司|gōngsī|Công ty|注册公司。~Đăng ký công ty。|N2
+#WORD|市场|shìchǎng|Thị trường|开拓市场。~Khai mở thị trường。|N2
+#WORD|竞争|jìngzhēng|Cạnh tranh|市场竞争。~Cạnh tranh thị trường。|V
+#WORD|盈利|yínglì|Lợi nhuận|企业盈利。~Lợi nhuận doanh nghiệp。|V
+#WORD|风险|fēngxiǎn|Rủi ro|承担风险。~Gánh chịu rủi ro。|N2
+#WORD|策略|cèlüè|Chiến lược|制定策略。~Lập ra chiến lược。|N2
+#WORD|资本|zīběn|Tư bản|吸引资本。~Thu hút tư bản。|N2
+#WORD|模式|móshì|Mô hình|商业模式。~Mô hình kinh doanh。|N2
+#WORD|合作|hézuò|Hợp tác|长期合作。~Hợp tác lâu dài。|V
+#TOPIC|t9_yhoc|Y học phổ thông|
+#WORD|症状|zhèngzhuàng|Triệu chứng|观察症状。~Quan sát triệu chứng。|N2
+#WORD|诊断|zhěnduàn|Chẩn đoán|医生诊断。~Bác sĩ chẩn đoán。|V
+#WORD|治疗|zhìliáo|Điều trị|积极治疗。~Tích cực điều trị。|V
+#WORD|药物|yàowù|Thuốc men|服用药物。~Uống thuốc men。|N2
+#WORD|手术|shǒushù|Phẫu thuật|做手术。~Làm phẫu thuật。|N2
+#WORD|疫苗|yìmiáo|Vắc-xin|接种疫苗。~Tiêm chủng vắc-xin。|N2
+#WORD|感染|gǎnrǎn|Lây nhiễm|防止感染.~Phòng ngừa lây nhiễm。|V
+#WORD|康复|kāngfù|Hồi phục|身体康复。~Sức khỏe hồi phục。|V
+#WORD|体检|tǐjiǎn|Khám sức khỏe|定期体检。~Khám sức khỏe định kỳ。|V
+#WORD|处方|chǔfāng|Đơn thuốc|医生开处方。~Bác sĩ kê đơn thuốc。|N2
+#TIER|3|3
+#TOPIC|t10_nghethuat|Nghệ thuật & Điện ảnh|
+#WORD|艺术|yìshù|Nghệ thuật|行为艺术。~Nghệ thuật trình diễn。|N2
+#WORD|导演|dǎoyǎn|Đạo diễn|著名导演。~Đạo diễn nổi tiếng。|N1
+#WORD|演员|yǎnyuán|Diễn viên|优秀演员。~Diễn viên xuất sắc。|N1
+#WORD|剧本|jùběn|Kịch bản|编写剧本。~Viết kịch bản。|N2
+#WORD|镜头|jìngtóu|Ống kính/Cảnh quay|精彩镜头。~Cảnh quay đặc sắc。|N2
+#WORD|展览|zhǎnlǎn|Triển lãm|美术展览。~Triển lãm mĩ thuật。|N2
+#WORD|雕塑|diāosù|Điêu khắc|现代雕塑。~Điêu khắc hiện đại。|N2
+#WORD|舞台|wǔtái|Sân khấu|登上舞台。~Bước lên sân khấu。|N2
+#WORD|音效|yīnxiào|Hiệu ứng âm thanh|震撼音效。~Hiệu ứng âm thanh mạnh。|N2
+#WORD|首映|shǒuyìng|Công chiếu|电影首映。~Công chiếu phim。|V
+#TOPIC|t10_lichsu|Lịch sử & Sự kiện quốc tế|
+#WORD|历史|lìshǐ|Lịch sử|悠久历史。~Lịch sử lâu đời。|N2
+#WORD|朝代|cháodài|Triều đại|中国朝代。~Các triều đại Trung Quốc。|N2
+#WORD|战争|zhànzhēng|Chiến tranh|世界战争。~Chiến tranh thế giới。|N2
+#WORD|和平|hépíng|Hòa bình|维护和平。~Bảo vệ hòa bình。|ADJ
+#WORD|条约|tiáoyuē|Hiệp ước|签署条约。~Ký kết hiệp ước。|N2
+#WORD|文物|wénwù|Đồ cổ/Di vật|保护文物。~Bảo vệ di vật。|N2
+#WORD|帝国|dìguó|Đế quốc|古代帝国。~Đế quốc cổ đại。|N2
+#WORD|革命|gémìng|Cách mạng|历史革命。~Cách mạng lịch sử。|N2
+#WORD|外交|wàijiāo|Ngoại giao|外交关系。~Quan hệ ngoại giao。|N2
+#WORD|峰会|fēnghuì|Hội nghị thượng đỉnh|国际峰会。~Hội nghị thượng đỉnh quốc tế。|N2
+#TOPIC|t10_amthuc|Ẩm thực thế giới|
+#WORD|风味|fēngwèi|Hương vị|地方风味。~Hương vị địa phương。|N2
+#WORD|原料|yuánliào|Nguyên liệu|新鲜原料。~Nguyên liệu tươi sống。|N2
+#WORD|烹饪|pēngrèn|Nấu nướng|烹饪技巧。~Kỹ năng nấu nướng。|V
+#WORD|营养|yíngyǎng|Dinh dưỡng|营养丰富。~Dinh dưỡng phong phú。|N2
+#WORD|招牌|zhāopái|Món đặc sản|招牌菜。~Món ăn đặc trưng。|N2
+#WORD|甜点|tiándiǎn|Tráng miệng|饭后甜点。~Tráng miệng sau bữa ăn。|N2
+#WORD|调料|tiáoliào|Gia vị|各种调料。~Các loại gia vị。|N2
+#WORD|品尝|pǐncháng|Thưởng thức|品尝美食。~Thưởng thức món ngon。|V
+#WORD|宴席|yànxí|Yến tiệc|婚宴席。~Tiệc cưới hỏi。|N2
+#WORD|清淡|qīngdàn|Thanh đạm|饮食清淡。~Ăn uống thanh đạm。|ADJ
+#TIER|3|4
+#TOPIC|t11_vieclam|Việc làm & Tuyển dụng|
+#WORD|招聘|zhāopìn|Tuyển dụng|企业招聘。~Doanh nghiệp tuyển dụng。|V
+#WORD|应聘|yìngpìn|Ứng tuyển|前来应聘。~Đến ứng tuyển。|V
+#WORD|简历|jiǎnlì|Sơ yếu lý lịch|投递简历.~Gửi sơ yếu lý lịch。|N2
+#WORD|面试|miànshì|Phỏng vấn|参加面试。~Tham gia phỏng vấn。|V
+#WORD|录用|lùyòng|Tuyển dụng/Nhận|被公司录用。~Được công ty nhận。|V
+#WORD|岗位|gǎngwèi|Vị trí công việc|空缺岗位。~Vị trí còn trống。|N2
+#WORD|福利|fúlì|Phúc lợi|优厚福利。~Phúc lợi hậu hĩnh。|N2
+#WORD|试用|shìyòng|Thử việc|试用期满。~Hết hạn thử việc。|V
+#WORD|跳槽|tiàocáo|Nhảy việc|考虑跳槽。~Cân nhắc nhảy việc。|V
+#WORD|猎头|liètou|Săn đầu người|猎头公司。~Công ty săn đầu người。|N1
+#TOPIC|t11_dothi|Đời sống đô thị & Nông thôn|
+#WORD|城市|chéngshì|Thành phố|繁华城市。~Thành phố phồn hoa。|N2
+#WORD|农村|nóngcūn|Nông thôn|美丽农村。~Nông thôn xinh đẹp。|N2
+#WORD|居民|jūmín|Cư dân|城市居民。~Cư dân thành thị。|N1
+#WORD|交通|jiāotōng|Giao thông|交通便利。~Giao thông thuận tiện。|N2
+#WORD|人口|rénkǒu|Dân số|人口密集。~Dân số đông đúc。|N2
+#WORD|设施|shèshī|Cơ sở vật chất|基础设施。~Cơ sở hạ tầng。|N2
+#WORD|宁静|níngjìng|Yên tĩnh|农村宁静。~Nông thôn yên tĩnh。|ADJ
+#WORD|拥挤|yōngjǐ|Đông đúc|道路拥挤。~Đường xá đông đúc。|ADJ
+#WORD|现代化|xiàndàihuà|Hiện đại hóa|城市现代化。~Hiện đại hóa đô thị。|N2
+#WORD|污染|wūrǎn|Ô nhiễm|环境污染。~Ô nhiễm môi trường。|N2
+#TOPIC|t11_khoahoc|Khoa học thường thức|
+#WORD|科学|kēxué|Khoa học|科学实验。~Thí nghiệm khoa học。|N2
+#WORD|物理|wùlǐ|Vật lý|物理定律。~Định luật vật lý。|N2
+#WORD|化学|huàxué|Hóa học|化学反应。~Phản ứng hóa học。|N2
+#WORD|生物|shēngwù|Sinh học|生物多样性。~Đa dạng sinh học。|N2
+#WORD|宇宙|yǔzhòu|Vũ trụ|探索宇宙。~Khám phá vũ trụ。|N2
+#WORD|星球|xīngqiú|Hành tinh|外星星球。~Hành tinh ngoài Trái Đất。|N2
+#WORD|重力|zhònglì|Trọng lực|地球重力。~Trọng lực Trái Đất。|N2
+#WORD|能量|néngliàng|Năng lượng|消耗能量。~Tiêu hao năng lượng。|N2
+#WORD|原子|yuánzǐ|Nguyên tử|原子结构。~Cấu trúc nguyên tử。|N2
+#WORD|进化|jìnhuà|Tiến hóa|人类进化。~Sự tiến hóa của loài người。|V
+#TIER|3|5
+#TOPIC|t12_giaoduc|Giáo dục & Trường học|
+#WORD|教育|jiàoyù|Giáo dục|基础教育。~Giáo dục cơ bản。|N2
+#WORD|学校|xuéxiào|Trường học|高等学校。~Trường đại học。|N2
+#WORD|学生|xuésheng|Học sinh|大学生。~Sinh viên đại học。|N1
+#WORD|老师|lǎoshī|Giáo viên|尊敬老师。~Kính trọng thầy cô。|N1
+#WORD|课程|kèchéng|Khóa học|开设课程。~Mở các khóa học。|N2
+#WORD|考试|kǎoshì|Thi cử|准备考试。~Chuẩn bị thi cử。|V
+#WORD|成绩|chéngjì|Thành tích|学习成绩。~Thành tích học tập。|N2
+#WORD|毕业|bìyè|Tốt nghiệp|大学毕业。~Tốt nghiệp đại học。|V
+#WORD|学位|xuéwèi|Học vị|获得学位.~Nhận học vị。|N2
+#WORD|奖学金|jiǎngxuéjīn|Học bổng|申请奖学金。~Xin học bổng。|N2
+#TOPIC|t12_moitruong|Môi trường & Thiên nhiên|
+#WORD|环境|huánjìng|Môi trường|保护环境。~Bảo vệ môi trường。|N2
+#WORD|自然|zìrán|Tự nhiên|自然风光。~Phong cảnh tự nhiên。|N2
+#WORD|生态|shēngtài|Sinh thái|生态平衡。~Cân bằng sinh thái。|N2
+#WORD|资源|zīyuán|Tài nguyên|水资源。~Tài nguyên nước。|N2
+#WORD|保护|bǎohù|Bảo vệ|保护森林。~Bảo vệ rừng。|V
+#WORD|垃圾|lājī|Rác thải|分类垃圾。~Phân loại rác.|N2
+#WORD|回收|huíshōu|Tái chế|废品回收。~Tái chế phế liệu。|V
+#WORD|气候|qìhòu|Khí hậu|气候变化。~Biến đổi khí hậu。|N2
+#WORD|森林|sēnlín|Rừng|热带森林。~Rừng nhiệt đới。|N2
+#WORD|灾害|zāihài|Thiên tai|自然灾害。~Thiên tai tự nhiên。|N2
+#TOPIC|t12_cntt|Công nghệ thông tin|
+#WORD|电脑|diànnǎo|Máy tính|使用电脑。~Sử dụng máy tính。|N2
+#WORD|软件|ruǎnjiàn|Phần mềm|安装软件。~Cài đặt phần mềm。|N2
+#WORD|硬件|yìngjiàn|Phần cứng|电脑硬件。~Phần cứng máy tính。|N2
+#WORD|程序|chéngxù|Chương trình|编写程序。~Viết chương trình。|N2
+#WORD|数据|shùjù|Dữ liệu|分析数据。~Phân tích dữ liệu。|N2
+#WORD|网络|wǎngluò|Mạng|连接网络。~Kết nối mạng。|N2
+#WORD|病毒|bìngdú|Vi-rút máy tính|杀除病毒.~Diệt vi-rút máy tính。|N2
+#WORD|密码|mìmǎ|Mật khẩu|修改密码。~Sửa đổi mật khẩu。|N2
+#WORD|下载|xiàzài|Tải xuống|下载文件。~Tải xuống tập tin。|V
+#WORD|系统|xìtǒng|Hệ thống|操作系统。~Hệ điều hành。|N2
+#TIER|4|1
+#TOPIC|t13_thanhngu|Thành ngữ Hán Việt (成语)|
+#WORD|一心一意|yīxīnyīyī|Nhất tâm nhất ý|他一心一意学习。~Anh ấy nhất tâm học。|ADJ
+#WORD|五颜六色|wǔyánliùsè|Ngũ sắc rực rỡ|花朵五颜六色。~Hoa ngũ sắc rực rỡ。|ADJ
+#WORD|人山人海|rénshānhrénhǎi|Biển người mênh mông|街上人山人海。~Phố biển người mênh mông。|ADJ
+#WORD|自言自语|zìyánzìyǔ|Tự nói một mình|他在自言自语。~Anh ấy tự nói mình。|V
+#WORD|快快乐乐|kuàikuàilèlè|Vui vẻ hạnh phúc|大家快快乐乐。~Mọi người vui vẻ。|ADJ
+#WORD|十全十美|shíquánshíměi|Thập toàn thập mỹ|世上没有十全十美。~Đời không thập toàn。|ADJ
+#WORD|大 Cần大悟|dàchīdàwù|Đại triệt đại ngộ|他终于大悟。~Anh ấy cuối cùng ngộ。|V
+#WORD|山水相连|shānshuǐxiānglián|Non nước liền nhau|两国山水相连。~Hai nước non nước liền。|ADJ
+#WORD|千方百计|qiānfāngbǎijì|Trăm phương nghìn kế|千方百计解决。~Trăm phương giải quyết。|ADJ
+#WORD|平平安安|píngpíngānān|Bình an vô sự|祝你平平安安。~Chúc bạn bình an vô sự。|ADJ
+#TOPIC|t13_tughepcodinh|Từ ghép cố định|
+#WORD|柴米油盐|cháimǐyóuyán|Củi gạo dầu muối|生活离不开柴米油盐。~Sống cần củi gạo dầu muối。|N2
+#WORD|风雨交加|fēngyǔjiāojiā|Mưa gió bão bùng|外面风雨交加。~Bên ngoài mưa gió bão bùng。|ADJ
+#WORD|接二连三|jiēèrmliánsān|Hết lần này đến lần khác|接二连三发生。~Hết lần này xảy ra。|ADJ
+#WORD|丢三落四|diūsānlàsì|Hay quên trước quên sau|他总是丢三落四。~Anh ấy hay quên trước quên sau。|ADJ
+#WORD|无缘无故|wúyuánwúgù|Không duyên không cớ|无缘无故生气。~Không cớ gì tức giận。|ADJ
+#WORD|筋疲力尽|jīnpílìjìn|Mệt mỏi rã rời|跑完步筋疲力尽。~Chạy xong mệt rã rời。|ADJ
+#WORD|理所当然|lǐsuǒdāngrán|Đương nhiên, phải thế|这是理所当然。~Đây là điều đương nhiên。|ADJ
+#WORD|半途而废|bàntúérfèi|Bỏ dở giữa chừng|做事不能半途而废。~Làm việc chớ bỏ dở。|V
+#WORD|各抒己见|gèshūjǐjiàn|Mỗi người một ý kiến|开会时各抒己见。~Họp mỗi người một ý。|V
+#WORD|微不足道|wēibùzúdào|Nhỏ nhặt không đáng kể|小事微不足道。~Việc nhỏ không đáng kể。|ADJ
+#TOPIC|t13_cautrucnangcao|Cấu trúc câu nâng cao|
+#WORD|不仅……而且……|bùjǐn... érqiě...|Không những... mà còn...|他不仅聪明而且努力。~Anh ấy không những thông minh còn chăm。|PR
+#WORD|虽然……但是……|suīrán... dànshì...|Tuy... nhưng...|虽然累但是很高兴。~Tuy mệt nhưng rất vui。|PR
+#WORD|如果……就……|rúguǒ... jiù...|Nếu... thì...|如果下雨就不去。~Nếu mưa thì không đi。|PR
+#WORD|不但……反而……|búdàn... fǎnér...|Không những không... mà còn...|不但没帮忙反而添乱。~Không những không giúp còn phá。|PR
+#WORD|与其……不如……|yǔqí... bùrú...|Thà... còn hơn...|与其等不如去做。~Thà đợi còn hơn đi làm。|PR
+#WORD|宁可……也……|nìngkě... yě...|Thà rằng... chứ cũng...|宁可失败也不放弃。~Thà thất bại cũng không bỏ。|PR
+#WORD|只有……才……|zhǐyǒu... cái...|Chỉ có... mới...|只有努力才能成功。~Chỉ có nỗ lực mới thành。|PR
+#WORD|除非……否则……|chúfēi... fǒuzé...|Trừ phi... nếu không...|除非你来否则不去。~Trừ phi bạn đến nếu không không đi。|PR
+#WORD|与其……倒不如……|yǔqí... dàobùrú...|Chi bằng... còn hơn...|与其抱怨倒不如行动。~Chi bằng phàn nàn hãy làm。|PR
+#WORD|哪怕……也……|nǎpà... yě...|Cho dù... cũng...|哪怕很远也要去。~Cho dù rất xa cũng đi。|PR
+#TIER|4|2
+#TOPIC|t14_taichinhdoanhnghiep|Tài chính doanh nghiệp|
+#WORD|资产|zīchǎn|Tài sản|固定资产。~Tài sản cố định。|N2
+#WORD|负债|fùzhài|Nợ phải trả|资产负债表。~Bảng cân đối kế toán。|N2
+#WORD|利润|lìrùn|Lợi nhuận|净利润。~Lợi nhuận ròng。|N2
+#WORD|现金流|xiànjīnliú|Dòng tiền|现金流断裂。~Đứt gãy dòng tiền。|N2
+#WORD|审计|shěnjì|Kiểm toán|财务审计。~Kiểm toán tài chính。|V
+#WORD|股权|gǔquán|Cổ phần|股权转让。~Chuyển nhượng cổ phần。|N2
+#WORD|融资|róngzī|Huy động vốn|企业融资。~Huy động vốn doanh nghiệp。|V
+#WORD|财报|cáibào|Báo cáo tài chính|公布财报。~Công bố báo cáo tài chính。|N2
+#WORD|估值|gūzhí|Định giá|公司估值。~Định giá công ty。|N2
+#WORD|分红|fēnhóng|Chia cổ tức|年底分红。~Chia cổ tức cuối năm。|V
+#TOPIC|t14_nluongtainguyen|Năng lượng & Tài nguyên|
+#WORD|化石|huàshí|Năng lượng hóa thạch|化石能源。~Năng lượng hóa thạch。|N2
+#WORD|可再生|kězàishēng|Tái tạo được|可再生能源。~Năng lượng tái tạo。|ADJ
+#WORD|太阳能|tàiyángnéng|Năng lượng mặt trời|利用太阳能。~Sử dụng NL mặt trời。|N2
+#WORD|风能|fēngnéng|Năng lượng gió|风力发电。~Phát điện năng lượng gió。|N2
+#WORD|矿产|kuàngchǎn|Khoáng sản|开采矿产。~Khai thác khoáng sản。|N2
+#WORD|石油|shíyóu|Dầu mỏ|石油价格。~Giá cả dầu mỏ。|N2
+#WORD|天然气|tiānránqì|Khí tự nhiên|天然气管道。~Đường ống khí tự nhiên。|N2
+#WORD|排放|páifàng|Phát thải|减少碳排放。~Giảm phát thải carbon。|V
+#WORD|枯竭|kūjié|Cạn kiệt|资源枯竭。~Tài nguyên cạn kiệt。|ADJ
+#WORD|水电|shuǐdiàn|Thủy điện|水电站。~Trạm thủy điện。|N2
+#TOPIC|t14_yhocchuyensau|Y học chuyên sâu|
+#WORD|临床|línchuáng|Lâm sàng|临床试验。~Thử nghiệm lâm sàng。|N2
+#WORD|病理|bìnglǐ|Bệnh lý|病理分析。~Phân tích bệnh lý。|N2
+#WORD|麻醉|mázuì|Gây mê/Gây tê|局部麻醉。~Gây tê cục bộ。|V
+#WORD|基因|jīyīn|Gen/Di truyền|基因编辑。~Chỉnh sửa gen。|N2
+#WORD|免疫|miǎnyì|Miễn dịch|免疫系统。~Hệ thống miễn dịch。|N2
+#WORD|肿瘤|zhǒngli|Khối u|恶性肿瘤。~Khối u ác tính。|N2
+#WORD|药理|yàolǐ|Dược lý|药理研究。~Nghiên cứu dược lý。|N2
+#WORD|超声|chāoshēng|Siêu âm|超声检查。~Kiểm tra siêu âm。|N2
+#WORD|康复|kāngfù|Phục hồi chức năng|康复中心。~Trung tâm phục hồi。|V
+#WORD|传染|chuánrán|Truyền nhiễm|传染病。~Bệnh truyền nhiễm。|V
+#TIER|4|3
+#TOPIC|t15_tamlyhoc|Tâm lý học hành vi|
+#WORD|认知|rènzhī|Nhận thức|认知偏差。~Độ lệch nhận thức。|N2
+#WORD|潜意识|qiányìshì|Tiềm thức|潜意识心理。~Tâm lý tiềm thức。|N2
+#WORD|焦虑|jiāolǜ|Lo âu|缓解焦虑。~Giảm bớt lo âu。|ADJ
+#WORD|强迫|qiǎngpò|Cưỡng chế|强迫症。~Bệnh rối loạn ám ảnh cưỡng chế。|ADJ
+#WORD|行为|xíngwéi|Hành vi|行为主义。~Chủ nghĩa hành vi。|N2
+#WORD|情绪|qíngxù|Cảm xúc|情绪管理。~Quản lý cảm xúc。|N2
+#WORD|人格|réngé|Nhân cách|人格特质.~Đặc điểm nhân cách。|N2
+#WORD|心理|xīnlǐ|Tâm lý|心理辅导。~Tư vấn tâm lý。|N2
+#WORD|防御|fángyù|Phòng vệ|心理防御。~Cơ chế phòng vệ tâm lý。|N2
+#WORD|共情|gòngqíng|Đồng cảm|缺乏共情。~Thiếu sự đồng cảm。|V
+#TOPIC|t15_luatquocte|Luật pháp quốc tế|
+#WORD|条约|tiáoyuē|Hiệp ước quốc tế|遵守条约。~Tuân thủ hiệp ước。|N2
+#WORD|主权|zhǔquán|Chủ quyền|国家主权。~Chủ quyền quốc gia。|N2
+#WORD|仲裁|zhòngcái|Trọng tài|国际仲裁。~Trọng tài quốc tế。|N2
+#WORD|难民|nànmín|Người tị nạn|难民保护。~Bảo vệ người tị nạn。|N1
+#WORD|制裁|zhìcái|Trừng phạt|经济制裁。~Trừng phạt kinh tế。|V
+#WORD|引渡|yǐndù|Dẫn độ|引渡犯人。~Dẫn độ phạm nhân。|V
+#WORD|公约|gōngyuē|Công ước|国际公约。~Công ước quốc tế。|N2
+#WORD|领土|lǐngtǔ|Lãnh thổ|领土完整。~Toàn vẹn lãnh thổ。|N2
+#WORD|侵略|qīnlüè|Xâm lược|反对侵略。~Phản đối xâm lược。|V
+#WORD|维和|wéihé|Gìn giữ hòa bình|维和部队.~Lực lượng gìn giữ hòa bình。|V
+#TOPIC|t15_nghiencuukhoahoc|Nghiên cứu khoa học|
+#WORD|假设|jiǎshè|Giả thuyết|提出假设。~Đưa ra giả thuyết。|N2
+#WORD|实验|shíyàn|Thí nghiệm|设计实验。~Thiết kế thí nghiệm。|N2
+#WORD|样本|yǎnběn|Mẫu vật|抽取样本。~Lấy mẫu vật。|N2
+#WORD|分析|fēnxī|Phân tích|数据分析。~Phân tích dữ liệu。|V
+#WORD|推论|tuīlùn|Suy luận|逻辑推论。~Suy luận logic。|N2
+#WORD|文献|wénxiàn|Tài liệu tham khảo|查阅文献。~Tra cứu tài liệu。|N2
+#WORD|论证|lùnzhèng|Chứng minh luận điểm|严密论证。~Chứng minh chặt chẽ。|V
+#WORD|成果|chéngguǒ|Thành quả|科研成果。~Thành quả nghiên cứu KH。|N2
+#WORD|评估|pínggū|Đánh giá|客观评估。~Đánh giá khách quan。|V
+#WORD|学术|xuéshù|Học thuật|学术论文。~Bài báo học thuật。|N2
+#TIER|4|4
+#TOPIC|t16_kinhtevimo|Kinh tế vĩ mô|
+#WORD|通货膨胀|tōnghuòpéngzhǎng|Lạm phát|抑制通货膨胀。~Kiềm chế lạm phát。|N2
+#WORD|GDP|gīdīpī|GDP (Tổng sản phẩm quốc nội)|增长GDP。~Tăng trưởng GDP。|N2
+#WORD|财政|cáizhèng|Tài chính công|财政政策。~Chính sách tài khóa。|N2
+#WORD|货币|huòbì|Tiền tệ|货币政策。~Chính sách tiền tệ。|N2
+#WORD|失业率|shīyèlǜ|Tỷ lệ thất nghiệp|降低失业率。~Giảm tỷ lệ thất nghiệp。|N2
+#WORD|汇率|huìlǜ|Tỷ giá hối đoái|汇率波动。~Biến động tỷ giá。|N2
+#WORD|周期|zhōuqī|Chu kỳ kinh tế|经济周期。~Chu kỳ kinh tế。|N2
+#WORD|供给|gōngjǐ|Cung - Cầu|供给侧改革。~Cải cách phía cung。|N2
+#WORD|宏观|hóngguān|Vĩ mô|宏观调控。~Điều tiết vĩ mô。|ADJ
+#WORD|衰退|shuāituì|Suy thoái|经济衰退。~Suy thoái kinh tế。|V
+#TOPIC|t16_vanhocvanhoc|Văn học & Triết học cơ bản|
+#WORD|哲学|zhéxué|Triết học|西方哲学。~Triết học phương Tây。|N2
+#WORD|美学|měixué|Mỹ học|美学理论。~Lý luận mỹ học。|N2
+#WORD|存在主义|cúnzàizhǔyì|Chủ nghĩa hiện sinh|研究存在主义。~Nghiên cứu chủ nghĩa hiện sinh。|N2
+#WORD|悲剧|bēijù|Bi kịch|文学悲剧。~Bi kịch văn học。|N2
+#WORD|史诗|shǐshī|Sử thi|英雄史诗。~Sử thi anh hùng。|N2
+#WORD|意象|yìxiàng|Hình tượng nghệ thuật|诗歌意象。~Hình tượng thơ ca。|N2
+#WORD|批判|pīpàn|Phê phán|批判思维。~Tư duy phản biện。|V
+#WORD|本体论|běntǐlùn|Bản thể luận|哲学本体论。~Bản thể luận triết học。|N2
+#WORD|叙事|xùshì|Tự sự|叙事结构。~Cấu trúc tự sự。|N2
+#WORD|美德|měidé|Đạo đức/Mỹ đức|传统美德。~Mỹ đức truyền thống。|N2
+#TOPIC|t16_biendoikhithu|Biến đổi khí hậu|
+#WORD|变暖|biànnuǎn|Trái đất ấm lên|全球变暖。~Trái đất ấm lên toàn cầu。|V
+#WORD|温室效应|wēnshìxiàoyìng|Hiệu ứng nhà kính|加剧温室效应。~Làm nặng hiệu ứng nhà kính。|N2
+#WORD|极端|jíduān|Cực đoan|极端天气。~Thời tiết cực đoan。|ADJ
+#WORD|海平面|hǎipíngmiàn|Mực nước biển|海平面上升。~Mực nước biển dâng cao。|N2
+#WORD|碳中和|tànzhōnghé|Trung hòa carbon|实现碳中和。~Đạt được trung hòa carbon。|V
+#WORD|冰川|bīngchuān|Sông băng|冰川融化。~Sông băng tan chảy。|N2
+#WORD|减排|jiǎnpái|Cắt giảm phát thải|联合减排。~Hợp tác cắt giảm phát thải。|V
+#WORD|生态|shēngtài|Hệ sinh thái|破坏生态。~Phá hoại hệ sinh thái。|N2
+#WORD|干旱|gānhàn|Hạn hán|严重干旱。~Hạn hán nghiêm trọng。|ADJ
+#WORD|洪涝|hónglào|Lụt lội|防治洪涝。~Phòng chống lụt lội。|N2
+#TIER|4|5
+#TOPIC|t17_chinhtrxh|Chính trị & Xã hội|
+#WORD|政治|zhèngzhì|Chính trị|政治制度。~Chế độ chính trị。|N2
+#WORD|民主|mínzhǔ|Dân chủ|民主选举。~Bầu cử dân chủ。|N2
+#WORD|阶级|jiējí|Giai cấp|社会阶级。~Giai cấp xã hội。|N2
+#WORD|福利|fúlì|Phúc lợi xã hội|社会福利。~Phúc lợi xã hội。|N2
+#WORD|舆论|yúlùn|Dư luận|引导舆论。~Định hướng dư luận。|N2
+#WORD|改革|gǎigé|Cải cách|社会改革。~Cải cách xã hội。|V
+#WORD|分权|fēnquán|Phân quyền|权力分权。~Phân quyền lực。|V
+#WORD|公民|gōngmín|Công dân|公民权利。~Quyền công dân。|N1
+#WORD|腐败|fǔbài|Tham nhũng|反腐败斗争。~Đấu tranh chống tham nhũng。|ADJ
+#WORD|意识形态|yìshíxíngtài|Ý thức hệ|意识形态斗争.~Đấu tranh ý thức hệ。|N2
+#TOPIC|t17_toancauhoa|Toàn cầu hóa|
+#WORD|全球化|quánqiúhuà|Toàn cầu hóa|经济全球化。~Toàn cầu hóa kinh tế。|N2
+#WORD|一体化|yītǐhuà|Hội nhập/Nhất thể hóa|区域一体化。~Nhất thể hóa khu vực。|N2
+#WORD|关税|guānshuì|Thuế quan|取消关税。~Bãi bỏ thuế quan。|N2
+#WORD|倾销|qīngxiāo|Bán phá giá|反倾销。~Chống bán phá giá。|V
+#WORD|供应链|gōngyìngliàn|Chuỗi cung ứng|全球供应链。~Chuỗi cung ứng toàn cầu。|N2
+#WORD|壁垒|bìlěi|Hàng rào (thương mại)|贸易壁垒。~Hàng rào thương mại。|N2
+#WORD|多边|duōbiān|Đa phương|多边贸易。~Thương mại đa phương。|ADJ
+#WORD|跨国|kuàguó|Xuyên quốc gia|跨国公司。~Công ty xuyên quốc gia。|ADJ
+#WORD|外包|wàibāo|Gia công ngoài|服务外包。~Gia công dịch vụ ngoài。|V
+#WORD|依存|yīcún|Phụ thuộc lẫn nhau|相互依存。~Phụ thuộc lẫn nhau。|V
+#WORD|t17_congnghecao|Công nghệ cao (AI, Big Data)|AI, dữ liệu lớn và công nghệ tiên tiến||
+#WORD|人工智能|réngōngzhìnéng|Trí tuệ nhân tạo|发展人工智能。~Phát triển AI。|N2
+#WORD|大数据|dàshùjù|Dữ liệu lớn|分析大数据。~Phân tích dữ liệu lớn。|N2
+#WORD|算法|suànfǎ|Thuật toán|优化算法。~Tối ưu hóa thuật toán。|N2
+#WORD|云计算|yúnjìsuàn|Điện toán đám mây|云计算服务。~Dịch vụ điện toán đám mây。|N2
+#WORD|区块链|qūkuàiliàn|Blockchain|区块链技术.~Công nghệ Blockchain。|N2
+#WORD|物联网|wùliánwǎng|Internet vạn vật|连接物联网。~Kết nối Internet vạn vật。|N2
+#WORD|自动化|zìdònghuà|Tự động hóa|工业自动化。~Tự động hóa công nghiệp。|N2
+#WORD|深度学习|shēndùxuéxí|Học sâu (Deep Learning)|深度学习模型。~Mô hình học sâu。|N2
+#WORD|芯片|xīnpàn|Vi mạch/Chip|制造芯片。~Sản xuất chip。|N2
+#WORD|虚拟现实|xūnǐxiànshí|Thực tế ảo (VR)|体验虚拟现实。~Trải nghiệm thực tế ảo。|N2
+#TIER|5|1
+#TOPIC|t18_tuvunghscc|Từ vựng học thuật HSK cấp cao|
+#WORD|毋庸置疑|wúyōngzhìyí|Không còn nghi ngờ gì nữa|这是毋庸置疑的。~Đây là điều không nghi ngờ。|ADJ
+#WORD|潜移默化|qiányìmòhuà|Mưa dầm thấm lâu|教育是潜移默化的。~Giáo dục là mưa dầm thấm lâu。|V
+#WORD|循序渐进|xúnxùjiànjìn|Tiến hành theo trình tự|学习要循序渐进。~Học phải theo trình tự。|V
+#WORD|杯水车薪|bēishuǐchēxīn|Như muối bỏ bể|这资金是杯水车薪。~Vốn này như muối bỏ bể。|ADJ
+#WORD|如释重负|rúshìzhòngfù|Nhẹ cả người|考完如释重负。~Thi xong nhẹ cả người。|ADJ
+#WORD|相辅相成|xiāngfǔxiāngchéng|Bổ trợ lẫn nhau|理论与实践相辅相成。~Lý thuyết thực tiễn bổ trợ。|V
+#WORD|独具匠心|dújùjiàngxīn|Mang phong cách độc đáo|设计独具匠心。~Thiết kế độc đáo sáng tạo。|ADJ
+#WORD|耳闻目睹|ěrwénmùdǔ|Tai nghe mắt thấy|这是耳闻目睹的。~Đây là tai nghe mắt thấy。|V
+#WORD|迎刃而解|yíngrènérjiě|Dễ dàng giải quyết|问题迎刃而解。~Vấn đề được giải quyết。|V
+#WORD|络绎不绝|luòyìbùjué|Nườm nượp không dứt|游客络绎不绝。~Khách du lịch nườm nượp。|ADJ

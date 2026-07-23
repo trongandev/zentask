@@ -51,6 +51,7 @@ import { BeginnerGrammar } from "./pages/Beginner/BeginnerGrammar";
 import { BeginnerGrammarLesson } from "./pages/Beginner/BeginnerGrammarLesson";
 import { BeginnerSkills } from "./pages/Beginner/BeginnerSkills";
 import { BeginnerRank } from "./pages/Beginner/BeginnerRank";
+import { BeginnerArena } from "./pages/Beginner/BeginnerArena";
 import { BeginnerFlashcardDetail } from "./pages/Flashcard/BeginnerFlashcardDetail";
 import { QuizCreate } from "./pages/Quiz/QuizCreate";
 import { QuizRoom } from "./pages/Quiz/QuizRoom";
@@ -331,6 +332,7 @@ function AppContent() {
             <Route path="beginner/grammar/:topicId" element={<BeginnerGrammarLesson />} />
             <Route path="beginner/skills" element={<BeginnerSkills />} />
             <Route path="beginner/rank" element={<BeginnerRank />} />
+            <Route path="beginner/arena" element={<BeginnerArena />} />
             <Route path="beginner/lesson/:topicId/:lessonIndex" element={<BeginnerLessonPractice />} />
             {/* Keeping old routes temporarily so it doesn't break */}
             <Route path="beginner/flashcard/:id" element={<BeginnerFlashcardDetail />} />

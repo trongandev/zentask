@@ -82,11 +82,18 @@ export function BeginnerRank() {
                         <UserAvatar src={lbUser.avatar} level={lbUser.level} className={cn(isRank1 ? "w-20 h-20 md:w-28 md:h-28" : "w-16 h-16 md:w-20 md:h-20")} />
                       </div>
 
-                      <div className="mt-4 text-center w-full px-1 bg-white/50 backdrop-blur-sm rounded-2xl py-2 shadow-sm border border-slate-100">
-                        <p className="font-black text-slate-800 truncate text-sm md:text-base" title={lbUser.name}>
+                      <div className="mt-4 text-center w-full px-1 bg-white/50 backdrop-blur-sm rounded-2xl py-2 shadow-sm border border-slate-100 flex flex-col items-center">
+                        <p className="font-black text-slate-800 truncate text-sm md:text-base w-full" title={lbUser.name}>
                           {lbUser.name}
                         </p>
-                        <p className="text-yellow-600 font-black text-xs md:text-sm flex items-center justify-center gap-1 mt-1">{lbUser.stars || 0} ⭐</p>
+                        <div className="flex items-center justify-center gap-1 mt-1 text-[10px] md:text-xs text-slate-600 font-medium whitespace-nowrap">
+                          <UserLevelBadge level={lbUser.level} size="sm" showText={false} />
+                          <img src={`/rank/${lbUser.rankId || 1}.png`} alt="Rank" className="w-4 h-4 object-contain ml-0.5" />
+                          <span>
+                            {RANK_NAMES[lbUser.rankId || 1] || "Bạc"} {TIER_NAMES[lbUser.tier || 3] || "III"}
+                          </span>
+                        </div>
+                        <p className="text-yellow-600 font-black text-xs md:text-sm flex items-center justify-center gap-1 mt-0.5">{lbUser.stars || 0} ⭐</p>
                       </div>
                     </div>
                   </div>
@@ -121,9 +128,12 @@ export function BeginnerRank() {
                       <div className="text-xs md:text-sm text-slate-500 mt-1 flex gap-2 items-center">
                         <UserLevelBadge level={lbUser.level} size="sm" showText={true} />
                         <span className="text-slate-300">•</span>
-                        <span className="text-slate-600 font-medium truncate">
-                          {RANK_NAMES[lbUser.rankId || 1] || "Không xác định"} {TIER_NAMES[lbUser.tier || 3] || "III"}
-                        </span>
+                        <div className="flex items-center gap-1 text-slate-600 font-medium truncate">
+                          <img src={`/rank/${lbUser.rankId || 1}.png`} alt="Rank" className="w-5 h-5 md:w-6 md:h-6 object-contain" />
+                          <span>
+                            {RANK_NAMES[lbUser.rankId || 1] || "Không xác định"} {TIER_NAMES[lbUser.tier || 3] || "III"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div className="font-black text-yellow-500 text-base md:text-xl flex items-center gap-1 shrink-0">{lbUser.stars || 0} ⭐</div>

@@ -1,0 +1,657 @@
+##ko
+#TIER|1|1
+#TOPIC|t1_1_1|Trang phục & Phụ kiện|
+#WORD|옷|ot|Quần áo|옷이 예쁩니다.~Quần áo đẹp quá.|N2
+#WORD|바지|baji|Quần|바지를 씁니다.~Mặc quần vào.|N2
+#WORD|치마|chima|Váy|치마가 길어요.~Váy dài quá.|N2
+#WORD|모자|moja|Mũ|모자를 씁니다.~Đội mũ lên.|N2
+#WORD|신발|sinbal|Giày|신발이 작습니다.~Giày nhỏ quá.|N2
+#WORD|가방|gabang|Túi xách, cặp|가방이 무거워요.~Túi xách nặng quá.|N2
+#WORD|안경|angyeong|Kính mắt|안경을 씁니다.~Đeo kính mắt.|N2
+#WORD|시계|sigye|Đồng hồ|시계를 봅니다.~Xem đồng hồ.|N2
+#WORD|목걸이|mokgeori|Dây chuyền|목걸이가 빛나요.~Dây chuyền lấp lánh.|N2
+#WORD|장갑|janggap|Găng tay|장갑을 낍니다.~Đeo găng tay.|N2
+#TOPIC|t1_1_2|Nhà cửa & Đồ đạc|
+#WORD|집|jip|Nhà|집이 큽니다.~Nhà to quá.|N2
+#WORD|방|bang|Phòng|방이 깨끗해요.~Phòng sạch sẽ.|N2
+#WORD|문|mun|Cửa|문을 엽니다.~Mở cửa ra.|N2
+#WORD|침대|chimdae|Giường|침대가 편해요.~Giường thoải mái.|N2
+#WORD|책상|chaeksang|Bàn học|책상이 넓어요.~Bàn học rộng.|N2
+#WORD|의자|uija|Ghế|의자에 앉습니다.~Ngồi lên ghế.|N2
+#WORD|창문|changmun|Cửa sổ|창문을 닫습니다.~Đóng cửa sổ.|N2
+#WORD|냉장고|naengjanggo|Tủ lạnh|냉장고에 물이 있어요.~Trong tủ lạnh có nước.|N2
+#WORD|TV|tibi|Tiêu vi, tivi|TV를 봅니다.~Xem tivi.|N2
+#WORD|에어컨|eeokeon|Điều hòa|에어컨을 켭니다.~Bật điều hòa.|N2
+#TOPIC|t1_1_3|Hoạt động sinh hoạt hằng ngày|
+#WORD|자다|jada|Ngủ|일찍 잡니다.~Đi ngủ sớm.|V
+#WORD|일어나다|ireonada|Thức dậy|아침에 일어납니다.~Thức dậy buổi sáng.|V
+#WORD|먹다|meokda|Ăn|밥을 먹습니다.~Ăn cơm.|V
+#WORD|마시다|masida|Uống|물을 마십니다.~Uống nước.|V
+#WORD|씻다|ssitda|Rửa, tắm|손을 씻습니다.~Rửa tay.|V
+#WORD|보다|boda|Xem, nhìn|영화를 봅니다.~Xem phim.|V
+#WORD|듣다|deutda|Nghe|음악을 듣습니다.~Nghe nhạc.|V
+#WORD|읽다|ikda|Đọc|책을 읽습니다.~Đọc sách.|V
+#WORD|쓰다|sseuda|Viết|이름을 씁니다.~Viết tên.|V
+#WORD|쉬다|swida|Nghỉ ngơi|집에서 쉽니다.~Nghỉ ngơi ở nhà.|V
+#TOPIC|t1_1_4|Động vật quen thuộc|
+#WORD|강아지|gangaji|Chó con|강아지가 귀엽습니다.~Chó con dễ thương.|N2
+#WORD|고양이|goyangi|Mèo|고양이가 잡니다.~Mèo đang ngủ.|N2
+#WORD|새|sae|Chim|새가 납니다.~Chim bay.|N2
+#WORD|물고기|mulgogi|Cá|물고기가 헤엄칩니다.~Cá bơi lội.|N2
+#WORD|소|so|Bò|소가 습니다.~Con bò đứng.|N2
+#WORD|말|mal|Ngựa|말이 달립니다.~Ngựa chạy.|N2
+#WORD|돼지|dwaeji|Lợn, heo|돼지가 먹습니다.~Lợn ăn.|N2
+#WORD|닭|dak|Gà|닭이 웁니다.~Gà gáy.|N2
+#WORD|토끼|tokki|Thỏ|토끼가 뜁니다.~Thỏ nhảy.|N2
+#WORD|쥐|jwi|Chuột|쥐가 숨습니다.~Chuột trốn.|N2
+#TIER|1|2
+#TOPIC|t1_2_1|Thành viên gia đình|
+#WORD|아버지|abeoji|Bố|아버지 회사에 가십니다.~Bố đi công ty.|N1
+#WORD|어머니|eomeoni|Mẹ|어머니 요리를 하십니다.~Mẹ nấu ăn.|N1
+#WORD|형|hyeong|Anh trai (của nam)|형이 공부합니다.~Anh trai học bài.|N1
+#WORD|누나|nuna|Chị gái (của nam)|누나 옷을 삽니다.~Chị gái mua quần áo.|N1
+#WORD|동생|dongsaeng|Em (trai/gái)|동생이 놀습니다.~Em đang chơi đùa.|N1
+#WORD|할아버지|harabeoji|Ông|할아버지 신문 보십니다.~Ông đọc báo.|N1
+#WORD|할머니|halmeoni|Bà|할머니 주무십니다.~Bà đang ngủ.|N1
+#WORD|언니|eonni|Chị gái (của nữ)|언니가 예쁩니다.~Chị gái xinh đẹp.|N1
+#WORD|오빠|oppa|Anh trai (của nữ)|오빠가 습니다.~Anh trai đứng.|N1
+#WORD|아들|adeul|Con trai|아들이 학교 갑니다.~Con trai đi học.|N1
+#TOPIC|t1_2_2|Thú cưng|
+#WORD|반려동물|banryeodongmul|Thú cưng|반려동물을 키웁니다.~Nuôi thú cưng.|N2
+#WORD|사료|saryo|Thức ăn cho thú cưng|사료를 줍니다.~Cho ăn thức ăn thú cưng.|N2
+#WORD|목줄|mokjul|Dây xích chó|목줄을 합니다.~Đeo dây xích chó.|N2
+#WORD|집|jip|Nhà cho thú cưng|개집이 작습니다.~Nhà cho chó nhỏ.|N2
+#WORD|목욕|mogyok|Tắm cho thú cưng|목욕을 시킵니다.~Tắm cho thú cưng.|N2
+#WORD|병원|byeongwon|Bệnh viện thú y|동물병원에 갑니다.~Đến bệnh viện thú y.|N2
+#WORD|장난감|jangnangam|Đồ chơi thú cưng|장난감으로 놉니다.~Chơi với đồ chơi.|N2
+#WORD|털|teol|Lông thú|털이 부드럽습니다.~Lông mềm mại.|N2
+#WORD|훈련|hunryeon|Huấn luyện|훈련을 합니다.~Huấn luyện thú cưng.|N2
+#WORD|간식|gansik|Đồ ăn vặt thú cưng|간식을 먹습니다.~Ăn bánh thưởng.|N2
+#TOPIC|t1_2_3|Đồ ăn & Thức uống|
+#WORD|밥|bap|Cơm|밥을 먹습니다.~Ăn cơm.|N2
+#WORD|물|mul|Nước|물을 마십니다.~Uống nước.|N2
+#WORD|김치|gimchi|Kim chi|김치가 맵습니다.~Kim chi cay.|N2
+#WORD|빵|ppang|Bánh mì|빵을 삽니다.~Mua bánh mì.|N2
+#WORD|우유|uyu|Sữa|우유를 마십니다.~Uống sữa.|N2
+#WORD|사과|sagwa|Táo|사과가 답니다.~Táo ngọt.|N2
+#WORD|고기|gogi|Thịt|고기를 굽습니다.~Nướng thịt.|N2
+#WORD|라면|ramyeon|Mì tôm|라면을 끓입니다.~Nấu mì tôm.|N2
+#WORD|커피|keopi|Cà phê|커피를 마십니다.~Uống cà phê.|N2
+#WORD|차|cha|Trà|차를 마십니다.~Uống trà.|N2
+#TOPIC|t1_2_4|Tình hình thời tiết|
+#WORD|날씨|nalssi|Thời tiết|날씨가 좋습니다.~Thời tiết tốt.|N2
+#WORD|비|bi|Mưa|비가 옵니다.~Trời mưa.|N2
+#WORD|눈|nun|Tuyết|눈이 옵니다.~Trời có tuyết.|N2
+#WORD|바람|baram|Gió|바람이 붑니다.~Gió thổi.|N2
+#WORD|구름|gureum|Mây|구름이 많습니다.~Nhiều mây.|N2
+#WORD|날|nal|Trời nắng|해가 뜹니다.~Mặt trời mọc.|N2
+#WORD|더위|deowi|Nóng|날씨가 더워요.~Trời nóng.|ADJ
+#WORD|추위|chui|Lạnh|날씨가 추워요.~Trời lạnh.|ADJ
+#WORD|맑다|makda|Quang tảng|하늘이 맑습니다.~Bầu trời trong xanh.|ADJ
+#WORD|흐리다|heurida|Âm u|날씨가 흐립니다.~Trời âm u.|ADJ
+#TIER|1|3
+#TOPIC|t1_3_1|Chào hỏi & Giới thiệu bản thân|
+#WORD|안녕하세요|annyeonghaseyo|Xin chào|안녕하세요 선생님.~Xin chào thầy cô.|V
+#WORD|반갑다|bangapda|Vui mừng|만나서 반갑습니다.~Rất vui được gặp.|ADJ
+#WORD|이름|ireum|Tên|이름이 뭡니까?~Tên bạn là gì?|N2
+#WORD|한국인|hangukin|Người Hàn Quốc|저는 한국인입니다.~Tôi là người Hàn.|N1
+#WORD|베트남인|beteunamin|Người Việt Nam|저는 베트남인입니다.~Tôi là người Việt.|N1
+#WORD|학생|haksaeng|Học sinh|저는 학생입니다.~Tôi là học sinh.|N1
+#WORD|선생님|seonsaengnim|Giáo viên|선생님 질문 있어요.~Thưa thầy có câu hỏi.|N1
+#WORD|감사합니다|gamsahamnida|Cảm ơn|도움 감사합니다.~Cảm ơn đã giúp đỡ.|V
+#WORD|죄송합니다|joesonghamnida|Xin lỗi|늦어서 죄송합니다.~Xin lỗi vì đến muộn.|V
+#WORD|안녕히|annyeonghi|Tạm biệt|안녕히 가세요.~Tạm biệt (khách đi).|V
+#TOPIC|t1_3_2|Số đếm & Màu sắc|
+#WORD|하나|hana|Số 1 (thuần Hàn)|사과 하나 주세요.~Cho một quả táo.|NUM
+#WORD|둘|dul|Số 2 (thuần Hàn)|사람 둘이 있어요.~Có hai người.|NUM
+#WORD|셋|set|Số 3 (thuần Hàn)|고양이 세 마리.~Ba con mèo.|NUM
+#WORD|일|il|Số 1 (Hán Hàn)|일층에 갑니다.~Đi tầng một.|NUM
+#WORD|이|i|Số 2 (Hán Hàn)|이과를 봅니다.~Xem bài số hai.|NUM
+#WORD|삼|sam|Số 3 (Hán Hàn)|삼월입니다.~Là tháng ba.|NUM
+#WORD|빨간색|ppalgansaek|Màu đỏ|빨간색 옷.~Quần áo màu đỏ.|N2
+#WORD|파란색|paransaek|Màu xanh dương|파란색 바지.~Quần màu xanh dương.|N2
+#WORD|노란색|noransaek|Màu vàng|노란색 모자.~Mũ màu vàng.|N2
+#WORD|검은색|geomeunsaek|Màu đen|검은색 신발.~Giày màu đen.|N2
+#TOPIC|t1_3_3|Các bộ phận cơ thể|
+#WORD|머리|meori|Đầu, tóc|머리가 아픕니다.~Đau đầu.|N2
+#WORD|눈|nun|Mắt|눈이 예쁩니다.~Mắt đẹp.|N2
+#WORD|코|ko|Mũi|코가 높습니다.~Mũi cao.|N2
+#WORD|입|ip|Miệng|입을 엽니다.~Mở miệng.|N2
+#WORD|귀|gwi|Tai|귀가 큽니다.~Tai to.|N2
+#WORD|손|son|Tay|손을 씻습니다.~Rửa tay.|N2
+#WORD|발|bal|Chân|발이 큽니다.~Chân to.|N2
+#WORD|얼굴|eolgul|Khuôn mặt|얼굴이 하얗습니다.~Khuôn mặt trắng.|N2
+#WORD|배|bae|Bụng|배가 고픕니다.~Đói bụng.|N2
+#WORD|심장|simjang|Trái tim|심장이 뜁니다.~Tim đập.|N2
+#TOPIC|t1_3_4|Đồ dùng học tập|
+#WORD|책|chaek|Sách|책을 읽습니다.~Đọc sách.|N2
+#WORD|공책|gongchaek|Vở|공책에 씁니다.~Viết vào vở.|N2
+#WORD|연필|yeonpil|Bút chì|연필로 씁니다.~Viết bằng bút chì.|N2
+#WORD|볼펜|bolpen|Bút bi|볼펜을 씁니다.~Dùng bút bi.|N2
+#WORD|지우개|jiugae|Cục tẩy|지우개로 지웁니다.~Tẩy bằng cục tẩy.|N2
+#WORD|필통|piltong|Hộp bút|필통이 예쁩니다.~Hộp bút đẹp.|N2
+#WORD|가위|gawi|Kéo|가위로 자릅니다.~Cắt bằng kéo.|N2
+#WORD|풀|pul|Keo dán|풀로 붙입니다.~Dán bằng keo.|N2
+#WORD|자|ja|Thước kẻ|자로 잽니다.~Đo bằng thước.|N2
+#WORD|가방|gabang|Cặp sách|가방에 넣습니다.~Cho vào cặp.|N2
+#TIER|2|1
+#TOPIC|t2_1_1|Lễ hội & Văn hóa truyền thống|
+#WORD|설날|seollal|Tết Nguyên Đán|설날에 쉽니다.~Nghỉ vào Tết Nguyên Đán.|N2
+#WORD|추석|chuseok|Tết Trung Thu|추석에 송편을 먹습니다.~Ăn songpyeon dịp Trung Thu.|N2
+#WORD|한복|hanbok|Hanbok (trang phục truyền thống)|한복을 입습니다.~Mặc trang복 hanbok.|N2
+#WORD|김장|gimjang|Làm kim chi mùa đông|김장을 합니다.~Làm kim chi mùa đông.|N2
+#WORD|세뱃돈|sebaetdon|Tiền lì xì|세뱃돈을 받습니다.~Nhận tiền lì xì.|N2
+#WORD|떡국|tteokguk|Canh bánh gạo|떡국을 먹습니다.~Ăn canh bánh gạo.|N2
+#WORD|제사|jesa|Cúng giỗ|제사를 지냅니다.~Làm lễ cúng giỗ.|N2
+#WORD|민속놀이|minsoknori|Trò chơi dân gian|민속놀이를 합니다.~Chơi trò chơi dân gian.|N2
+#WORD|판소리|pansori|Nhạc kịch truyền thống|판소리를 듣습니다.~Nghe hát Pansori.|N2
+#WORD|탈춤|talchum|Múa mặt nạ|탈춤을 봅니다.~Xem múa mặt nạ.|N2
+#TOPIC|t2_1_2|Công việc làm thêm & Công sở cơ bản|
+#WORD|아르바이트|areubaiteu|Việc làm thêm|아르바이트를 합니다.~Làm việc bán thời gian.|N2
+#WORD|시급|sigeup|Lương theo giờ|시급이 높습니다.~Lương giờ cao.|N2
+#WORD|사장님|sajangnim|Giám đốc, chủ quán|사장님을 만납니다.~Gặp giám đốc.|N1
+#WORD|직장|jikjang|Nơi làm việc|직장에 다닙니다.~Đi làm ở công ty.|N2
+#WORD|출근|chulgeun|Đi làm|출근을 합니다.~Đi làm buổi sáng.|V
+#WORD|퇴근|toegeun|Tan làm|퇴근을 합니다.~Tan làm về nhà.|V
+#WORD|회의|hoee|Cuộc họp|회의를 합니다.~Tổ chức họp.|N2
+#WORD|서류|seoryu|Tài liệu|서류를 작성합니다.~Soạn thảo tài liệu.|N2
+#WORD|휴가|hyuga|Kỳ nghỉ, phép|휴가를 냅니다.~Xin nghỉ phép.|N2
+#WORD|동료|dongnyo|Đồng nghiệp|동료와 쉽습니다.~Nghỉ ngơi cùng đồng nghiệp.|N1
+#TOPIC|t2_1_3|Phương tiện truyền thông xã hội|
+#WORD|SNS|eseu-en-eseu|Mạng xã hội|SNS를 합니다.~Dùng mạng xã hội.|N2
+#WORD|인스타그램|instaguraem|Instagram|인스타그램에 올립니다.~Đăng lên Instagram.|N2
+#WORD|유튜브|yutubeu|YouTube|유튜브를 봅니다.~Xem YouTube.|N2
+#WORD|팔로우|pallou|Theo dõi (Follow)|팔로우를 합니다.~Bấm theo dõi.|N2
+#WORD|좋아요|joayo|Thích (Like)|좋아요를 누릅니다.~Bấm thích.|N2
+#WORD|댓글|daetgeul|Bình luận|댓글을 씁니다.~Viết bình luận.|N2
+#WORD|공유|gongyu|Chia sẻ|영상을 공유합니다.~Chia sẻ video.|N2
+#WORD|검색|geomsaek|Tìm kiếm|인터넷을 검색합니다.~Tìm kiếm internet.|N2
+#WORD|채팅|chaeting|Nhắn tin, chat|친구와 챗팅합니다.~Nhắn tin với bạn.|N2
+#WORD|프로필|puropil|Hồ sơ cá nhân|프로필을 바꿉니다.~Đổi ảnh hồ sơ.|N2
+#TIER|2|2
+#TOPIC|t2_2_1|Du lịch & Đặt phòng khách sạn|
+#WORD|여행|yeohaeng|Du lịch|여행을 갑니다.~Đi du lịch.|N2
+#WORD|호텔|hotel|Khách sạn|호텔을 예약합니다.~Đặt phòng khách sạn.|N2
+#WORD|예약|yeyak|Đặt trước|방을 예약합니다.~Đặt phòng trước.|N2
+#WORD|체크인|chekeuin|Nhận phòng|체크인을 합니다.~Làm thủ tục nhận phòng.|N2
+#WORD|체크아웃|chekeuaut|Trả phòng|체크아웃을 합니다.~Làm thủ tục trả phòng.|N2
+#WORD|여권|yegwon|Hộ chiếu|여권을 보여줍니다.~Xuất trình hộ chiếu.|N2
+#WORD|비자|bija|Visa, thị thực|비자를 받습니다.~Nhận visa.|N2
+#WORD|가이드|gaideu|Hướng dẫn viên|가이드를 따라갑니다.~Đi theo hướng dẫn viên.|N1
+#WORD|지도|jido|Bản đồ|지도를 봅니다.~Xem bản đồ.|N2
+#WORD|면세점|myeonsejeom|Cửa hàng miễn thuế|면세점에서 삽니다.~Mua ở cửa hàng miễn thuế.|N2
+#TOPIC|t2_2_2|Sức khỏe & Chăm sóc cơ thể|
+#WORD|건강|geongang|Sức khỏe|건강이 최고입니다.~Sức khỏe là số một.|N2
+#WORD|병원|byeongwon|Bệnh viện|병원에 갑니다.~Đến bệnh viện.|N2
+#WORD|의사|uisa|Bác sĩ|의사를 만납니다.~Gặp bác sĩ.|N1
+#WORD|약|yak|Thuốc|약을 먹습니다.~Uống thuốc.|N2
+#WORD|감기|gamgi|Cảm cúm|감기에 걸립니다.~Bị cảm cúm.|N2
+#WORD|열|yeol|Sốt|열이 납니다.~Bị sốt.|N2
+#WORD|두통|dutong|Đau đầu|두통이 심합니다.~Đau đầu nặng.|N2
+#WORD|배탈|baetal|Đau bụng|배탈이 났습니다.~Bị đau bụng.|N2
+#WORD|주사|jusa|Tiêm thuốc|주사를 맞습니다.~Tiêm thuốc.|N2
+#WORD|운동|undong|Vận động, tập thể dục|운동을 합니다.~Tập thể dục.|V
+#TOPIC|t2_2_3|Cảm xúc & Biểu đạt tâm trạng|
+#WORD|기쁘다|gippeuda|Vui mừng|마음이 기쁩니다.~Lòng rất vui mừng.|ADJ
+#WORD|슬프다|seulpeuda|Buồn bã|눈물이 슬픕니다.~Nước mắt vì buồn.|ADJ
+#WORD|화나다|hwanada|Tức giận|화가 납니다.~Nổi giận rồi.|V
+#WORD|무섭다|museopda|Sợ hãi|유령이 무섭습니다.~Sợ ma quá.|ADJ
+#WORD|놀라다|nollada|Ngạc nhiên|소리에 놀랍니다.~Giật mình vì tiếng động.|V
+#WORD|심심하다|simsimhada|Buồn chán|집에서 심심합니다.~Chán ở nhà.|ADJ
+#WORD|피곤하다|pigonhada|Mệt mỏi|일해서 피곤합니다.~Mệt vì làm việc.|ADJ
+#WORD|행복하다|haengbokhada|Hạnh phúc|가족과 행복합니다.~Hạnh phúc bên gia đình.|ADJ
+#WORD|외롭다|oeropda|Cô đơn|혼자라 외롭습니다.~Cô đơn vì ở một mình.|ADJ
+#WORD|긴장하다|ginjanghada|Căng thẳng|시험이라 긴장합니다.~Căng thẳng vì thi cử.|V
+#TIER|2|3
+#TOPIC|t2_3_1|Mua sắm & Mặc cả giá cả|
+#WORD|사다|sada|Mua|옷을 삽니다.~Mua quần áo.|V
+#WORD|팔다|palda|Bán|과일을 팝니다.~Bán trái cây.|V
+#WORD|가격|gagyeok|Giá cả|가격이 비쌉니다.~Giá đắt quá.|N2
+#WORD|값|gap|Giá tiền|값이 쌉니다.~Giá rẻ.|N2
+#WORD|할인|harin|Giảm giá|할인을 받습니다.~Được giảm giá.|N2
+#WORD|현금|hyeogeum|Tiền mặt|현금으로 씁니다.~Dùng tiền mặt.|N2
+#WORD|카드|kadeu|Thẻ ngân hàng|카드로 냅니다.~Thanh toán bằng thẻ.|N2
+#WORD|영수증|yeongsujeung|Hóa đơn|영수증을 받습니다.~Nhận hóa đơn.|N2
+#WORD|시장|sijang|Chợ truyền thống|시장에 갑니다.~Đi chợ truyền thống.|N2
+#WORD|백화점|baekhwajeom|Trung tâm thương mại|백화점에서 삽니다.~Mua ở trung tâm thương mại.|N2
+#TOPIC|t2_3_2|Mô tả ngoại hình & Tính cách|
+#WORD|키|ki|Chiều cao|키가 큽니다.~Cao lớn.|N2
+#WORD|날씬하다|nalssinhada|Thon thả|몸이 날씬합니다.~Dáng thon thả.|ADJ
+#WORD|뚱뚱하다|ttungttunghada|Béo, mập|몸이 뚱뚱합니다.~Thân hình mập mạp.|ADJ
+#WORD|잘생다|jalsaengda|Đẹp trai|친구가 잘생겼습니다.~Bạn đẹp trai.|ADJ
+#WORD|예쁘다|yeppeuda|Xinh đẹp|아기가 예쁩니다.~Em bé xinh đẹp.|ADJ
+#WORD|착하다|chakada|Tốt bụng|마음이 착합니다.~Tính tình tốt bụng.|ADJ
+#WORD|성격|seonggyeok|Tính cách|성격이 좋습니다.~Tính cách tốt.|N2
+#WORD|조용하다|joyonghada|Yên lặng|성격이 조용합니다.~Tính trầm lặng.|ADJ
+#WORD|활발하다|hwalbarhada|Hoạt bát|성격이 활발합니다.~Tính hoạt bát.|ADJ
+#WORD|똑똑하다|ttokttokhada|Thông minh|학생이 똑똑합니다.~Học sinh thông minh.|ADJ
+#TOPIC|t2_3_3|Các môn thể thao & Vận động|
+#WORD|축구|chukgu|Bóng đá|축구를 합니다.~Đánh bóng đá.|N2
+#WORD|야구|yagu|Bóng chày|야구를 봅니다.~Xem bóng chày.|N2
+#WORD|농구|nonggu|Bóng rổ|농구를 합니다.~Chơi bóng rổ.|N2
+#WORD|수영|suyeong|Bơi lội|수영을 합니다.~Bơi lội.|N2
+#WORD|달리기|dalligi|Chạy bộ|달리기를 합니다.~Chạy bộ.|N2
+#WORD|등산|deungsan|Leo núi|산에 등산합니다.~Leo núi.|N2
+#WORD|테니스|teniseu|Quần vợt|테니스를 칩니다.~Đánh quần vợt.|N2
+#WORD|골프|golpeu|Golf|골프를 칩니다.~Đánh golf.|N2
+#WORD|요가|yoga|Yoga|요가를 합니다.~Tập yoga.|N2
+#WORD|운동선수|undongseonsu|Vận động viên|운동선수가 뜁니다.~Vận động viên chạy.|N1
+#TIER|2|4
+#TOPIC|t2_4_1|Phương tiện giao thông công cộng|
+#WORD|버스|beoseu|Xe buýt|버스를 타다.~Đi xe buýt.|N2
+#WORD|지하철|jihacheol|Tàu điện ngầm|지하철을 타다.~Đi tàu điện ngầm.|N2
+#WORD|택시|taeksi|Taxi|택시를 잡다.~Bắt taxi.|N2
+#WORD|기차|gicha|Tàu hỏa|기차표를 사다.~Mua vé tàu hỏa.|N2
+#WORD|비행기|bihaenggi|Máy bay|비행기를 타다.~Đi máy bay.|N2
+#WORD|역|yeok|Ga tàu|역에서 내리다.~Xuống ở ga tàu.|N2
+#WORD|정류장|jeongnyujang|Trạm xe buýt|버스정류장이다.~Là trạm xe buýt.|N2
+#WORD|요금|yogeum|Cước phí|요금을 내다.~Trả cước phí.|N2
+#WORD|표|pyo|Vé|표를 끊다.~Mua vé.|N2
+#WORD|환승|hwanseung|Chuyển tuyến|지하철을 환승하다.~Đổi tuyến tàu điện ngầm.|N2
+#TOPIC|t2_4_2|Địa điểm & Phương hướng trong thành phố|
+#WORD|길|gil|Đường đi|길을 잃다.~Bị lạc đường.|N2
+#WORD|오른쪽|oreunjjok|Phía bên phải|오른쪽으로 돌다.~Rẽ phải.|N2
+#WORD|왼쪽|owenjjok|Phía bên trái|왼쪽으로 가다.~Đi bên trái.|N2
+#WORD|앞|ap|Phía trước|건물 앞에 서다.~Đứng trước tòa nhà.|N2
+#WORD|뒤|dwi|Phía sau|집 뒤에 있다.~Ở sau nhà.|N2
+#WORD|위|wi|Phía trên|책상 위에 있다.~Ở trên bàn.|N2
+#WORD|아래|arae|Phía dưới|의자 아래에 있다.~Ở dưới ghế.|N2
+#WORD|건물|geonmul|Tòa nhà|큰 건물이 있다.~Có tòa nhà lớn.|N2
+#WORD|약국|yakguk|Tiệm thuốc|약국에 들르다.~Ghé qua tiệm thuốc.|N2
+#WORD|우체국|ucheguk|Bưu điện|우체국에 가다.~Đi bưu điện.|N2
+#TOPIC|t2_4_3|Sở thích & Hoạt động giải trí|
+#WORD|취미|chwimi|Sở thích|취미가 무엇인가요?~Sở thích của bạn là gì?|N2
+#WORD|영화|yeonghwa|Phim ảnh|영화를 감상하다.~Thưởng thức phim ảnh.|N2
+#WORD|음악|eumak|Âm nhạc|음악을 연주하다.~Biểu diễn âm nhạc.|N2
+#WORD|독서|dokseo|Đọc sách|독서를 즐기다.~Thích đọc sách.|N2
+#WORD|사진|sajin|Chụp ảnh|사진을 찍다.~Chụp ảnh.|N2
+#WORD|여행|yeohaeng|Du lịch|여행을 떠나다.~Lên đường du lịch.|N2
+#WORD|요리|yori|Nấu ăn|요리를 배우다.~Học nấu ăn.|N2
+#WORD|게임|geim|Trò chơi điện tử|게임을 하다.~Chơi game điện tử.|N2
+#WORD|운동|undong|Thể thao|운동을 즐기다.~Thích thể thao.|N2
+#WORD|낚시|nakssi|Câu cá|강에서 낚시하다.~Câu cá ở sông.|N2
+#TIER|3|1
+#TOPIC|t3_1_1|Quản lý tài chính cá nhân|
+#WORD|자산|jasan|Tài sản|자산을 관리하다.~Quản lý tài sản.|N2
+#WORD|예산|yesan|Ngân sách|예산을 세우다.~Lập ngân sách.|N2
+#WORD|저축|jeochuk|Tiết kiệm|저축을 늘리다.~Tăng tiền tiết kiệm.|N2
+#WORD|지출|jichul|Chi tiêu|지출을 줄이다.~Giảm chi tiêu.|N2
+#WORD|투자|tuja|Đầu tư|주식에 투자하다.~Đầu tư chứng khoán.|N2
+#WORD|대출|daechul|Khoản vay|대출을 받다.~Nhận khoản vay.|N2
+#WORD|이자|ija|Tiền lãi|이자가 붙다.~Phát sinh tiền lãi.|N2
+#WORD|가계부|gagyebu|Sổ thu chi|가계부를 쓰다.~Viết sổ thu chi.|N2
+#WORD|소비|sobi|Tiêu dùng|합리적 소비하다.~Tiêu dùng hợp lý.|N2
+#WORD|연금|yengeum|Tiền lương hưu|연금을 받다.~Nhận lương hưu.|N2
+#TOPIC|t3_1_2|Giao tiếp & Thư tín công sở|
+#WORD|공문|gongmun|Công văn|공문을 발송하다.~Gửi công văn.|N2
+#WORD|보고서|bogoseo|Báo cáo|보고서를 제출하다.~Nộp báo cáo.|N2
+#WORD|결재|gyeoljae|Phê duyệt|서류를 결재하다.~Phê duyệt tài liệu.|N2
+#WORD|메일|meil|Thư điện tử|메일을 회신하다.~Phản hồi email.|N2
+#WORD|연락처|yeollakcheo|Thông tin liên hệ|연락처를 남기다.~Để lại liên hệ.|N2
+#WORD|협의|hyeopui|Thảo luận|일정을 협의하다.~Thảo luận lịch trình.|N2
+#WORD|면담|myeondam|Phỏng vấn, trao đổi|부장님과 면담하다.~Trao đổi với trưởng phòng.|N2
+#WORD|건의|geoni|Kiến nghị|의견을 건의하다.~Kiến nghị ý kiến.|N2
+#WORD|공지|gongji|Thông báo|공지사항을 읽다.~Đọc thông báo.|N2
+#WORD|접수|jeopsu|Tiếp nhận|서류를 접수하다.~Tiếp nhận hồ sơ.|N2
+#TOPIC|t3_1_3|Truyền thông & Quảng cáo thương mại|
+#WORD|광고|gwanggo|Quảng cáo|광고를 제작하다.~Sản xuất quảng cáo.|N2
+#WORD|홍보|hongbo|Quảng bá|회사를 홍보하다.~Quảng bá công ty.|N2
+#WORD|매체|maeche|Phương tiện truyền thông|매체를 활용하다.~Tận dụng truyền thông.|N2
+#WORD|시청률|sicheongnyul|Tỷ suất người xem|시청률이 높다.~Tỷ suất người xem cao.|N2
+#WORD|기사|gisa|Bài báo|기사를 작성하다.~Viết bài báo.|N2
+#WORD|언론|eollon|Báo chí, ngôn luận|언론에 보도되다.~Được đưa tin trên báo chí.|N2
+#WORD|브랜드|beuraendeu|Thương hiệu|브랜드 가치다.~Giá trị thương hiệu.|N2
+#WORD|마케팅|maketing|Marketing|마케팅 전략이다.~Là chiến lược marketing.|N2
+#WORD|소비자|sobija|Người tiêu dùng|소비자의 반응이다.~Phản ứng người tiêu dùng.|N1
+#WORD|인플루언서|inpeullueonseo|Người có sức ảnh hưởng|인플루언서와 협업하다.~Hợp tác với KOL.|N1
+#TIER|3|2
+#TOPIC|t3_2_1|Luật pháp & Quy định cơ bản|
+#WORD|법률|beomnyul|Luật pháp|법률을 준수하다.~Tuân thủ pháp luật.|N2
+#WORD|규정|gyujeong|Quy định|규정을 위반하다.~Vi phạm quy định.|N2
+#WORD|권리|gwonli|Quyền lợi|기본 권리를 누리다.~Hưởng quyền lợi cơ bản.|N2
+#WORD|의무|uimu|Nحghĩa vụ|국방의 의무이다.~Là nghĩa vụ quốc phòng.|N2
+#WORD|계약|gyeyak|Hợp đồng|계약을 체결하다.~Ký kết hợp đồng.|N2
+#WORD|소송|sosong|Kiện tụng|소송을 제기하다.~Khởi kiện pháp lý.|N2
+#WORD|판결|pangyeol|Phán quyết|법원이 판결하다.~Tòa án phán quyết.|N2
+#WORD|처벌|cheobeol|Trừng phạt|엄중한 처벌이다.~Trừng phạt nghiêm khắc.|N2
+#WORD|증거|jeunggeo|Chứng cứ|증거를 수집하다.~Thu thập chứng cứ.|N2
+#WORD|변호사|byeonhosa|Luật sư|변호사를 선임다.~Thuê luật sư.|N1
+#TOPIC|t3_2_2|Kinh doanh & Khởi nghiệp|
+#WORD|창업|changeop|Khởi nghiệp|식당을 창업하다.~Khởi nghiệp mở quán ăn.|N2
+#WORD|기업|gieop|Doanh nghiệp|중소기업에 다니다.~Làm ở doanh nghiệp vừa và nhỏ.|N2
+#WORD|이익|iik|Lợi nhuận|이익을 창출하다.~Tạo ra lợi nhuận.|N2
+#WORD|경영|gyeongyeong|Quản trị kinh doanh|기업을 경영하다.~Quản trị doanh nghiệp.|N2
+#WORD|전략|jeonryak|Chiến lược|사업 전략을 짜다.~Lập chiến lược kinh doanh.|N2
+#WORD|시장|sijang|Thị trường|시장을 개척하다.~Mở ấu thị trường.|N2
+#WORD|경쟁|gyeongjaeng|Cạnh tranh|경쟁이 치열하다.~Cạnh tranh khốc liệt.|N2
+#WORD|파트너십|pateuneosip|Quan hệ đối tác|파트너십을 맺다.~Thiết lập quan hệ đối tác.|N2
+#WORD|수요|suyo|Nحu cầu (kinh tế)|수요가 증가하다.~Nhu cầu tăng lên.|N2
+#WORD|공급|gonggeup|Cung ứng|공급을 늘리다.~Tăng lượng cung ứng.|N2
+#TOPIC|t3_2_3|Thuật ngữ y học phổ thông|
+#WORD|진료|jinryo|Khám chữa bệnh|병원에서 진료하다.~Khám bệnh ở viện.|N2
+#WORD|처방|cheobang|Kê đơn thuốc|의사가 처방하다.~Bác sĩ kê đơn.|N2
+#WORD|수술|susul|Phẫu thuật|수술을 받다.~Nhận phẫu thuật.|N2
+#WORD|입원|ibwon|Nhập viện|환자가 입원하다.~Bệnh nhân nhập viện.|N2
+#WORD|퇴원|toewon|Xuất viện|건강히 퇴원하다.~Xuất viện khỏe mạnh.|N2
+#WORD|증상|jeungsang|Triệu chứng|코로나 증상이다.~Là triệu chứng covid.|N2
+#WORD|응급실|eunggeupsil|Phòng cấp cứu|응급실에 가다.~Đến phòng cấp cứu.|N2
+#WORD|예방접종|yebangjeopjong|Tiêm chủng phòng bệnh|예방접종을 맞다.~Tiêm chủng phòng bệnh.|N2
+#WORD|알레르기|allereugi|Dị ứng|음식 알레르기다.~Dị ứng đồ ăn.|N2
+#WORD|물리치료|mullichiryo|Vật lý trị liệu|물리치료를 받다.~Tập vật lý trị liệu.|N2
+#TIER|3|3
+#TOPIC|t3_3_1|Nghệ thuật, Âm nhạc & Điện ảnh|
+#WORD|예술|yesul|Nghệ thuật|예술을 사랑하다.~Yêu nghệ thuật.|N2
+#WORD|전시회|jeonsihoe|Triển lãm|그림 전시회다.~Là triển lãm tranh.|N2
+#WORD|작품|jakpum|Tác phẩm|예술 작품이다.~Là tác phẩm nghệ thuật.|N2
+#WORD|감독|gamdok|Đạo diễn|영화 감독이다.~Là đạo diễn điện ảnh.|N1
+#WORD|배우|baeu|Diễn viên|유명한 배우다.~Là diễn viên nổi tiếng.|N1
+#WORD|시나리오|sinario|Kịch bản|시나리오를 쓰다.~Viết kịch bản.|N2
+#WORD|콘서트|konseoteu|Buổi hòa nhạc|콘서트에 가다.~Đi xem hòa nhạc.|N2
+#WORD|음악가|eumakga|Nhạc sĩ|모차르트 음악가다.~Là nhạc sĩ Mozart.|N1
+#WORD|무대|mudae|Sân khấu|무대에 서다.~Đứng trên sân khấu.|N2
+#WORD|갤러리|g-aellori|Phòng tranh|갤러리를 방문하다.~Thăm phòng tranh.|N2
+#TOPIC|t3_3_2|Lịch sử & Sự kiện giao lưu quốc tế|
+#WORD|역사|yeoksa|Lịch sử|한국 역사를 배우다.~Học lịch sử Hàn Quốc.|N2
+#WORD|문화|munhwa|Văn hóa|문화 교류를 하다.~Giao lưu văn hóa.|N2
+#WORD|외교|oegyo|N외 giao|외교 관계를 맺다.~Thiết lập quan hệ ngoại giao.|N2
+#WORD|국제|gukje|Quốc tế|국제 회의다.~Là hội nghị quốc tế.|N2
+#WORD|전쟁|jeonjaeng|Chiến tranh|전쟁이 일어나다.~Chiến tranh bùng nổ.|N2
+#WORD|평화|pyeonghwa|Hòa bình|세계 평화를 지키다.~Bảo vệ hòa bình thế giới.|N2
+#WORD|독립|doknip|Độc lập|독립을 기념하다.~Kỷ niệm ngày độc lập.|N2
+#WORD|유적지|yujeokji|Khu di tích|역사 유적지를 가다.~Đến khu di tích lịch sử.|N2
+#WORD|협정|hyeopjeong|Hiệp định|무역 협정을 맺다.~Ký hiệp định thương mại.|N2
+#WORD|조약|joyak|Hiệp ước|평화 조약을 체결하다.~Ký kết hiệp ước hòa bình.|N2
+#TOPIC|t3_3_3|Văn hóa ẩm thực các vùng miền|
+#WORD|향토음식|hyangtoeumsik|Mức ăn địa phương|향토음식을 맛보다.~Nếm ẩm thực địa phương.|N2
+#WORD|특산물|teuksammul|Đặc sản|지역 특산물이다.~Là đặc sản địa phương.|N2
+#WORD|레시피|resipi|Công thức nấu ăn|전통 레시피다.~Là công thức truyền thống.|N2
+#WORD|조리법|joribeop|Cách chế biến|독특한 조리법이다.~Cách chế biến độc đáo.|N2
+#WORD|재료|jaeryo|Nguyên liệu nấu ăn|신선한 재료다.~Nguyên liệu tươi sống.|N2
+#WORD|발효|balhyo|Lên men|김치 발효 식품이다.~Là thực phẩm lên men.|N2
+#WORD|전통주|jeontongju|Rượu truyền thống|전통주를 마시다.~Uống rượu truyền thống.|N2
+#WORD|길거리음식|gilgeorieumsik|Đồ ăn đường phố|길거리음식을 먹다.~Ăn đồ ăn đường phố.|N2
+#WORD|맛집|matjip|Quán ăn ngon|유명한 맛집이다.~Là quán ăn ngon nổi tiếng.|N2
+#WORD|입맛|ipmat|Khẩu vị|입맛에 맞다.~Hợp khẩu vị.|N2
+#TIER|3|4
+#TOPIC|t3_4_1|Tìm kiếm việc làm & Phỏng vấn tuyển dụng|
+#WORD|이력서|iryeokseo|Sơ yếu lý lịch|이력서를 제출하다.~Nộp sơ yếu lý lịch.|N2
+#WORD|자기소개서|jagisogaseo|Thư giới thiệu bản thân|자기소개서를 쓰다.~Viết thư tự giới thiệu.|N2
+#WORD|면접|myeonjeop|Phỏng vấn|면접을 보다.~Tham gia phỏng vấn.|N2
+#WORD|채용|chaeyong|Tuyển dụng|공개 채용이다.~Là tuyển dụng công khai.|N2
+#WORD|합격|hapgyeok|Đỗ, trúng tuyển|시험에 합격하다.~Đỗ kỳ thi.|N2
+#WORD|불합격|bulhapgyeok|Trượt|면접에 불합격하다.~Trượt phỏng vấn.|N2
+#WORD|경력|gyeongryeok|Kinh nghiệm làm việc|경력직을 뽑다.~Tuyển người có kinh nghiệm.|N2
+#WORD|신입|sinip|Nhân viên mới|신입사원으로 입사하다.~Vào làm nhân viên mới.|N1
+#WORD|역량|yeokryang|Năng lực|개인의 역량을 키우다.~Nâng cao năng lực cá nhân.|N2
+#WORD|지원서|jiwonseo|Đơn ứng tuyển|지원서를 작성하다.~Điền đơn ứng tuyển.|N2
+#TOPIC|t3_4_2|Đời sống đô thị & Nông thôn|
+#WORD|도시|dosi|Thành phố|대도시에서 살다.~Sống ở thành phố lớn.|N2
+#WORD|농촌|nonchon|Nông thôn|농촌에서 살다.~Sống ở vùng nông thôn.|N2
+#WORD|인프라|inpeura|Hạ tầng cơ sở|도시 인프라가 좋다.~Hạ tầng đô thị tốt.|N2
+#WORD|복잡하다|bokjaphada|Phức tạp, đông đúc|도시가 복잡하다.~Thành phố đông đúc.|ADJ
+#WORD|한적하다|hanjeokhada|Yên bình, vắng vẻ|농촌이 한적하다.~Nông thôn yên bình.|ADJ
+#WORD|교통체증|gyotongchejeung|Tắc nghẽn giao thông|교통체증이 심하다.~Tắc đường trầm trọng.|N2
+#WORD|공해|gonghae|Ô nhiễm môi trường|도시 공해가 심하다.~Ô nhiễm đô thị nặng.|N2
+#WORD|귀농|gwinong|Bỏ phố về quê làm nông|귀농을 결심하다.~Quyết định về quê làm nông.|N2
+#WORD|주거|jugeo|Nhà ở, chỗ ở|주거 환경이 좋다.~Môi trường nhà ở tốt.|N2
+#WORD|편의시설|pyeonisiseol|Tiện ích công cộng|편의시설이 가깝다.~Tiện ích công cộng gần.|N2
+#TOPIC|t3_4_3|Khoa học tự nhiên thường thức|
+#WORD|과학|gwahak|Khoa học|과학을 연구하다.~Nghiên cứu khoa học.|N2
+#WORD|우주|uju|Vũ trụ|우주를 탐사하다.~Khám phá vũ trụ.|N2
+#WORD|지구|jigu|Trái đất|지구는 둥글다.~Trái đất hình tròn.|N2
+#WORD|중력|jungryeok|Lực hấp dẫn|지구의 중력이다.~Là lực hút trái đất.|N2
+#WORD|생태계|saengtaegye|Hệ sinh thái|생태계를 보호하다.~Bảo vệ hệ sinh thái.|N2
+#WORD|진화|jinhwa|Tiến hóa|인류가 진화하다.~Loài người tiến hóa.|N2
+#WORD|에너지|eneoji|Nلăng lượng|에너지를 절약하다.~Tiết kiệm năng lượng.|N2
+#WORD|화산|hwasan|Núi lửa|화산이 폭발하다.~Núi lửa phun trào.|N2
+#WORD|지진|jijin|Động đất|지진이 발생하다.~Động đất xảy ra.|N2
+#WORD|기후|gihu|Khí hậu|기후가 변화하다.~Khí hậu biến đổi.|N2
+#TIER|3|5
+#TOPIC|t3_5_1|Hệ thống giáo dục & Trường học|
+#WORD|교육|gyoyuk|Giáo dục|교육 제도를 바꾸다.~Thay đổi chế độ giáo dục.|N2
+#WORD|학교|hakgyo|Trường học|대학교에 입학하다.~Nhập học đại học.|N2
+#WORD|전공|jeongong|Chuyên ngành|전공을 선택하다.~Chọn chuyên ngành.|N2
+#WORD|학점|hakjeom|Điểm tín chỉ|학점이 높다.~Điểm tín chỉ cao.|N2
+#WORD|장학금|janghakgeum|Học bổng|장학금을 받다.~Nhận học bổng.|N2
+#WORD|졸업|joreop|Tốt nghiệp|대학교를 졸업하다.~Tốt nghiệp đại học.|N2
+#WORD|강의|gangui|Bài giảng|강의를 듣다.~Nghe bài giảng.|N2
+#WORD|연구|yeongu|Nghiên cứu|논문을 연구하다.~Nghiên cứu luận văn.|N2
+#WORD|동아리|dongari|Câu lạc bộ|동아리에 가입하다.~Gia nhập câu lạc bộ.|N2
+#WORD|교수|gyosu|Giáo sư|대학교 교수이다.~Là giáo sư đại học.|N1
+#TOPIC|t3_5_2|Vấn đề môi trường & Bảo vệ thiên nhiên|
+#WORD|환경|hwangyeong|Môi trường|환경을 보호하다.~Bảo vệ môi trường.|N2
+#WORD|오염|oyeom|Ô nhiễm|공기가 오염되다.~Không khí bị ô nhiễm.|N2
+#WORD|쓰레기|sseuregi|Rác thải|쓰레기를 버리다.~Vứt rác thải.|N2
+#WORD|재활용|jaehwaryong|Tái chế|쓰레기를 재활용하다.~Tái chế rác thải.|N2
+#WORD|일회용품|ilhoeyongpum|Đồ dùng dùng một lần|일회용품을 줄이다.~Giảm đồ dùng 1 lần.|N2
+#WORD|지구온난화|jiguon-nanhwa|Nóng lên toàn cầu|지구온난화가 심하다.~Trái đất nóng lên nặng.|N2
+#WORD|탄소|tanso|Cac-bon|탄소를 배출하다.~Thải khí cac-bon.|N2
+#WORD|보호|boho|Bảo vệ|자연을 보호하다.~Bảo vệ thiên nhiên.|N2
+#WORD|생물|saengmul|Sinh vật|멸종 위기 생물이다.~Sinh vật có nguy cơ tuyệt chủng.|N1
+#WORD|에코|eko|Eco, sinh thái|에코 백을 쓰다.~Dùng túi sinh thái.|N2
+#TOPIC|t3_5_3|Công nghệ thông tin & Thiết bị số|
+#WORD|컴퓨터|keompyuteo|Máy tính|컴퓨터를 켜다.~Bật máy tính.|N2
+#WORD|노트북|noteubuk|Laptop|노트북을 사다.~Mua laptop.|N2
+#WORD|스마트폰|seumateupon|Điện thoại thông minh|스마트폰을 쓰다.~Dùng điện thoại thông minh.|N2
+#WORD|인터넷|inteonet|Internet|인터넷에 접속하다.~Kết nối internet.|N2
+#WORD|파일|pail|Tệp tin, file|파일을 다운로드하다.~Tải xuống tệp tin.|N2
+#WORD|데이터|deiteo|Dữ liệu|데이터를 백업하다.~Sao lưu dữ liệu.|N2
+#WORD|보안|boan|Bảo mật|정보 보안을 유지하다.~Duy trì bảo mật thông tin.|N2
+#WORD|프로그램|purogeuraem|Chương trình|프로그램을 설치하다.~Cài đặt chương trình.|N2
+#WORD|화면|hwamyeon|Màn hình|화면이 깨끗하다.~Màn hình sáng rõ.|N2
+#WORD|키보드|kibodeu|Bàn phím|키보드를 치다.~Gõ bàn phím.|N2
+#TIER|4|1
+#TOPIC|t4_1_1|Ngữ pháp kính ngữ chuyên sâu (높임말)|
+#WORD|높임말|nophimmal|Lời nói kính ngữ|높임말을 사용하다.~Sử dụng lời kính ngữ.|N2
+#WORD|연세|yeonse|Tuổi (kính ngữ)|연세가 어떻게 되세요?~Ông/bà bao nhiêu tuổi?|N2
+#WORD|진지|jinji|Cơm (kính ngữ)|진지를 잡수시다.~Dùng bữa (kính ngữ).|N2
+#WORD|주무시다|jumusida|Ngủ (kính ngữ)|할아버지께서 주무시다.~Ông đang ngủ.|V
+#WORD|돌아가다|doragada|Qua đời (kính ngữ)|할머니께서 돌아가시다.~Bà đã qua đời.|V
+#WORD|뵙다|boepda|Gặp gỡ (kính ngữ)|선생님을 뵙다.~Đi gặp thầy giáo.|V
+#WORD|말씀|malsseum|Lời nói (kính ngữ)|말씀을 놓으세요.~Hãy nói chuyện thoải mái.|N2
+#WORD|댁|daek|Nhà (kính ngữ)|선생님의 댁이다.~Là nhà của thầy giáo.|N2
+#WORD|잡수시다|japsusida|Ăn uống (kính ngữ)|맛있게 잡수시다.~Ăn ngon miệng nhé.|V
+#WORD|계시다|gyesida|Ở, có (kính ngữ)|어머니께서 집에 계시다.~Mẹ đang ở nhà.|V
+#TOPIC|t4_1_2|Thành ngữ & Tục ngữ Hàn Quốc (속담)|
+#WORD|속담|sokdam|Tục ngữ|한국 속담을 배우다.~Học tục ngữ Hàn Quốc.|N2
+#WORD|누워서떡먹기|nuwoseotteokmeokgi|Dễ như ăn bánh|그 일은 누워서 떡먹기다.~Việc đó dễ như ăn bánh.|N2
+#WORD|금강산도식후경|geumgangsandosikhugyeong|Trời đánh tránh bữa ăn|금강산도 식후경이다.~Ăn xong rồi tính tiếp.|N2
+#WORD|원숭이도나무에서떨어진다|wonsungidonamueseotteoreojinda|Cao thủ cũng có lúc ngã ngựa|원숭이도 나무에서 떨어진다.~Ai cũng có lúc sai lầm.|N2
+#WORD|티끌모아태산|tikgeulmoataesan|Góp gió thành bão|티끌 모아 태산이다.~Góp gió thành bão lớn.|N2
+#WORD|시작이반|sijagiban|Đầu xuôi đuôi lọt|시작이 반이다.~Khởi đầu là một nửa thành công.|N2
+#WORD|배보다배꼽이더크다|baebodabaekgobideokeuda|Lợi bất cập hại|배보다 배꼽이 더 크다.~Lợi bất cập hại rồi.|N2
+#WORD|고생끝에낙이온다|gosaengkkeutenagionda|Sau cơn mưa trời lại sáng|고생 끝에 낙이 온다.~Gian nan rồi sẽ thành công.|N2
+#WORD|말 한마디로천냥빚을갚는다|malhanmadirocheonnyangbijeulgapneunda|Lời nói gói vàng|말 한마디로 천냥 빚을 갚는다.~Lời nói khéo léo giải quyết tất cả.|N2
+#WORD|소잃고외양간고친다|soilhgowaeyanggangochinda|Mất bò mới lo làm chuồng|소 잃고 외양간 고친다.~Mất bò mới lo làm chuồng.|N2
+#TOPIC|t4_1_3|Cấu trúc câu gián tiếp & Biến đổi|
+#WORD|간접화법|ganjeophwabeop|Câu gián tiếp|간접화법으로 바꾸다.~Đổi sang câu gián tiếp.|N2
+#WORD|전달|jeondal|Truyền đạt|메시지를 전달하다.~Truyền đạt thông điệp.|N2
+#WORD|인용|inyong|Trích dẫn|문장을 인용하다.~Trích dẫn câu văn.|N2
+#WORD|주장|jujang|Chủ trương, khẳng định|자신의 주장을 펴다.~Nêu lên chủ trương bản thân.|N2
+#WORD|질문|jilmun|Câu hỏi|질문 내용을 전하다.~Truyền đạt nội dung câu hỏi.|N2
+#WORD|명령|myeongryeong|Mệnh lệnh|명령문을 전달하다.~Truyền đạt câu mệnh lệnh.|N2
+#WORD|청유|cheongyu|Câu rủ rê|청유형으로 말하다.~Nói dạng câu rủ rê.|N2
+#WORD|소문|somun|Lời đồn|소문에 의하면.~Theo lời đồn đại thì.|N2
+#WORD|의견|uigyeon|Ý kiến|다른 의견을 전하다.~Truyền đạt ý kiến khác.|N2
+#WORD|뜻|tteut|Ý nghĩa|원래의 뜻을 밝히다.~Làm rõ ý nghĩa ban đầu.|N2
+#TIER|4|2
+#TOPIC|t4_2_1|Tài chính doanh nghiệp & Ngân hàng|
+#WORD|여신|yeosin|Tín dụng|여신을 관리하다.~Quản lý tín dụng ngân hàng.|N2
+#WORD|수신|susin|Nhận tiền gửi|수신 업무를 보다.~Làm nghiệp vụ nhận tiền gửi.|N2
+#WORD|환율|hwaryul|Tỷ giá hối đoái|환율이 변동하다.~Tỷ giá hối đoái biến động.|N2
+#WORD|금리|geumri|L suất|금리를 인상하다.~Tăng lãi suất ngân hàng.|N2
+#WORD|채권|chaegwon|Trái phiếu|국채를 발행하다.~Phát hành trái phiếu chính phủ.|N2
+#WORD|자본|jabon|Vốn kinh doanh|자본을 확충하다.~Tăng cường vốn đầu tư.|N2
+#WORD|재무|jaemu|Tài chính|재무 상태를 분석하다.~Phân tích trạng thái tài chính.|N2
+#WORD|회계|hoegye|Kế toán|회계 장부를 정리하다.~Sắp xếp sổ sách kế toán.|N2
+#WORD|파산|pasan|Phá sản|회사가 파산하다.~Công ty tuyên bố phá sản.|N2
+#WORD|어음|eoeum|Hối phiếu, thương phiếu|어음을 발행하다.~Phát hành thương phiếu.|N2
+#TOPIC|t4_2_2|Năng lượng & Tài nguyên khoáng sản|
+#WORD|자원|jawon|Tài nguyên|천연자원을 개발하다.~Khai thác tài nguyên thiên nhiên.|N2
+#WORD|석유|seogyu|Dầu mỏ|석유를 수입하다.~Nhập khẩu dầu mỏ.|N2
+#WORD|가스|gaseu|Khí ga|가스를 공급하다.~Cung cấp khí ga.|N2
+#WORD|신재생에너지|sinjaesaengeneoji|Năng lượng tái tạo|신재생에너지를 확대하다.~Mở rộng năng lượng tái tạo.|N2
+#WORD|원자력|wonjaryeok|Năng lượng nguyên tử|원자력 발전소이다.~Là nhà máy điện nguyên tử.|N2
+#WORD|전력|jeollyek|Điện năng|전력을 소비하다.~Tiêu thụ điện năng.|N2
+#WORD|광물|gwangmul|Khoáng sản|광물을 채굴하다.~Khai thác khoáng sản.|N2
+#WORD|연료|yeollyo|Nhiên liệu|연료를 주입하다.~Nạp nhiên liệu.|N2
+#WORD|태양광|taeyanggwang|Năng lượng mặt trời|태양광 발전이다.~Là phát điện mặt trời.|N2
+#WORD|풍력|pungryeok|Năng lượng gió|풍력 발전을 하다.~Sản xuất điện gió.|N2
+#TOPIC|t4_2_3|Thuật ngữ y tế & Bệnh viện|
+#WORD|임상|imsang|Lâm sàng|임상 시험을 하다.~Thử nghiệm lâm sàng y học.|N2
+#WORD|진단|jindan|Chẩn đoán|정밀 진단을 받다.~Nhận chẩn đoán chính xác.|N2
+#WORD|처방전|cheobangjeon|Đơn thuốc|처방전을 조제하다.~Pha chế theo đơn thuốc.|N2
+#WORD|마취|machwi|Gây mê, tê|전신 마취를 하다.~Gây mê toàn thân.|N2
+#WORD|외과|oegwa|Khoa ngoại|외과 수술을 하다.~Phẫu thuật khoa ngoại.|N2
+#WORD|내과|naegwa|Khoa nội|내과 진료를 받다.~Khám bệnh khoa nội.|N2
+#WORD|응급|eunggeup|Cấp cứu|응급 환자를 받다.~Tiếp nhận bệnh nhân cấp cứu.|N2
+#WORD|항생제|hangsaengje|Thuốc kháng sinh|항생제를 처방하다.~Kê thuốc kháng sinh.|N2
+#WORD|면역|myeonyeok|Miễn dịch|면역력을 높이다.~Tăng cường sức miễn dịch.|N2
+#WORD|퇴원|toewon|Xuất viện|환자가 퇴원하다.~Bệnh nhân xuất viện.|N2
+#TIER|4|3
+#TOPIC|t4_3_1|Tâm lý học hành vi con người|
+#WORD|심리|simni|Tâm lý|인간 심리를 연구하다.~Nghiên cứu tâm lý con người.|N2
+#WORD|무의식|muuisik|Vô thức|무의식의 세계이다.~Là thế giới vô thức.|N2
+#WORD|본능|bonneung|Bản năng|인간의 본능이다.~Là bản năng của con người.|N2
+#WORD|스트레스|seuteureseu|Căng thẳng|스트레스를 해소하다.~Giải tỏa căng thẳng tâm lý.|N2
+#WORD|우울증|uuljeung|Trầm cảm|우울증을 치료하다.~Chữa trị bệnh trầm cảm.|N2
+#WORD|방어기제|bangeogije|Cơ chế phòng vệ|심리적 방어기제이다.~Là cơ chế phòng vệ tâm lý.|N2
+#WORD|자아|jaa|Cái tôi, bản ngã|자아를 형성하다.~Hình thành cái tôi cá nhân.|N2
+#WORD|동기|donggi|Động lực|행동 동기를 부여하다.~Tạo động lực hành vi.|N2
+#WORD|인지|inji|Nhận thức|인지 능력을 키우다.~Phát triển năng lực nhận thức.|N2
+#WORD|성향|seonghyang|Xu hướng tính cách|행동 성향을 분석하다.~Phân tích xu hướng hành vi.|N2
+#TOPIC|t4_3_2|Luật pháp & Hành chính công|
+#WORD|행정|haengjeong|Hành chính|행정 업무를 처리하다.~Xử lý nghiệp vụ hành chính.|N2
+#WORD|헌법|heonbeop|Hiến법|헌법을 개정하다.~Sửa đổi hiến pháp.|N2
+#WORD|법안|beopan|Dự luật|새 법안을 발의하다.~Đề xuất dự luật mới.|N2
+#WORD|입법|ipbeop|Lập pháp|입법 활동을 하다.~Thực hiện hoạt động lập pháp.|N2
+#WORD|사법|sabop|Tư pháp|사법부를 개혁하다.~Cải cách cơ quan tư pháp.|N2
+#WORD|행정부|haengjeongbu|Cơ quan hành pháp|행정부의 정책이다.~Là chính sách của hành pháp.|N2
+#WORD|조례|jorye|Nghị quyết, quy chế|지방 자치 조례이다.~Là quy chế tự trị địa phương.|N2
+#WORD|권한|gwonhan|Quyền hạn|법적 권한을 행사하다.~Thực thi quyền hạn pháp lý.|N2
+#WORD|소송|sosong|Kiện tụng|행정 소송을 제기하다.~Khởi kiện hành chính.|N2
+#WORD|공무원|gongmuwon|Công chức|지방 공무원에 합격하다.~Đỗ công chức địa phương.|N1
+#TOPIC|t4_3_3|Thuật ngữ nghiên cứu khoa học|
+#WORD|연구|yeongu|Nghiên cứu|학술 연구를 하다.~Thực hiện nghiên cứu học thuật.|N2
+#WORD|가설|gaseol|Giả thuyết|가설을 세우다.~Lập giả thuyết nghiên cứu.|N2
+#WORD|실험|silheom|Thí nghiệm|과학 실험을 하다.~Tiến hành thí nghiệm khoa học.|N2
+#WORD|분석|bunseok|Phân tích|데이터를 분석하다.~Phân tích dữ liệu khoa học.|N2
+#WORD|통계|tonggye|Thống kê|통계 자료를 내다.~Đưa ra tài liệu thống kê.|N2
+#WORD|논문|nonmun|Luận văn|석사 논문을 쓰다.~Viết luận văn thạc sĩ.|N2
+#WORD|결론|gyollon|Kết luận|연구 결론을 내다.~Đưa ra kết luận nghiên cứu.|N2
+#WORD|증명|jeungmyeong|Chứng minh|이론을 증명하다.~Chứng minh lý thuyết.|N2
+#WORD|학회|hakhoe|Hội thảo khoa học|학회에 참석하다.~Tham dự hội thảo khoa học.|N2
+#WORD|방법론|bangbeobnon|Phương pháp luận|연구 방법론이다.~Là phương pháp luận nghiên cứu.|N2
+#TIER|4|4
+#TOPIC|t4_4_1|Kinh tế vĩ mô & Thị trường chứng khoán|
+#WORD|거시경제|geosigyeongje|Kinh tế vĩ mô|거시경제 지표이다.~Là chỉ số kinh tế vĩ mô.|N2
+#WORD|인플레이션|inpeulle-isyeon|Lạm phát|인플레이션이 발생하다.~Lạm phát xảy ra.|N2
+#WORD|금리|geumri|Lãi suất|기준 금리를 올리다.~Tăng lãi suất cơ bản.|N2
+#WORD|주식|jusik|Cổ phiếu|주식을 매수하다.~Mua vào cổ phiếu.|N2
+#WORD|증권|jeunggwon|Chứng khoán|증권 시장에 투자하다.~Đầu tư thị trường chứng khoán.|N2
+#WORD|환율|hwaryul|Tỷ giá|환율이 안정되다.~Tỷ giá ổn định.|N2
+#WORD|성장률|seongjangnyul|Tốc độ tăng trưởng|경제 성장률이 높다.~Tốc độ tăng trưởng kinh tế cao.|N2
+#WORD|투자자|tujaja|Nhà đầu tư|기관 투자자이다.~Là nhà đầu tư tổ chức.|N1
+#WORD|배당금|baedanggeum|Cổ tức|배당금을 받다.~Nhận tiền cổ tức.|N2
+#WORD|불황|bulhwang|Suy thoái kinh tế|경제 불황이 오다.~Suy thoái kinh tế đến.|N2
+#TOPIC|t4_4_2|Văn học & Triết học Hàn Quốc|
+#WORD|문학|munhak|Văn học|한국 문학을 읽다.~Đọc văn học Hàn Quốc.|N2
+#WORD|철학|cheolhak|Triết học|인생 철학을 세우다.~Lập triết lý nhân sinh.|N2
+#WORD|사상|sasang|Tư tưởng|실존주의 사상이다.~Là tư tưởng hiện sinh.|N2
+#WORD|소설|소설|Tiểu thuyết|역사 소설을 쓰다.~Viết tiểu thuyết lịch sử.|N2
+#WORD|시|si|Thơ ca|한국 시를 짓다.~Sáng tác thơ ca Hàn Quốc.|N2
+#WORD|작가|jakga|Nhà văn, tác giả|유명한 작가이다.~Là nhà văn nổi tiếng.|N1
+#WORD|인간성|inganseong|Bản chất con người|인간성을 탐구하다.~Khám phá bản chất con người.|N2
+#WORD|존재|jonjae|Sự tồn tại|인간의 존재를 묻다.~Hỏi về sự tồn tại con người.|N2
+#WORD|진리|jinri|Chân lý|삶의 진리를 찾다.~Tìm kiếm chân lý cuộc sống.|N2
+#WORD|서사|seosa|Tự sự|소설의 서사 구조다.~Là cấu trúc tự sự tiểu thuyết.|N2
+#TOPIC|t4_4_3|Biến đổi khí hậu & Phát triển bền vững|
+#WORD|기후변화|gihubyeonhwa|Biến đổi khí hậu|기후변화에 대응하다.~Ứng phó biến đổi khí hậu.|N2
+#WORD|탄소중립|tansojungnip|Trung hòa các-bon|탄소중립을 선언하다.~Tuyên bố trung hòa các-bon.|N2
+#WORD|지속가능성|jisokganeungsang|Tính bền vững|지속가능성을 높이다.~Nâng cao tính bền vững.|N2
+#WORD|재생에너지|jaesaengeneoji|N너지 tái tạo|재생에너지를 쓰다.~Dùng năng lượng tái tạo.|N2
+#WORD|생태계|saengtaegye|Hệ sinh thái|파괴된 생태계이다.~Là hệ sinh thái bị phá hủy.|N2
+#WORD|친환경|chinhwangyeong|Thân thiện môi trường|친환경 제품을 쓰다.~Dùng sản phẩm thân thiện môi trường.|N2
+#WORD|온실가스|onsilgaseu|Kh khí nhà kính|온실가스를 줄이다.~Giảm khí nhà kính.|N2
+#WORD|에너지절약|eneojijeolyak|Tiết kiệm năng lượng|에너지절약을 실천하다.~Thực hành tiết kiệm năng lượng.|N2
+#WORD|자연보호|jayeonboho|Bảo vệ tự nhiên|자연보호 캠페인이다.~Là chiến dịch bảo vệ thiên nhiên.|N2
+#WORD|위기|wigi|Khủng hoảng|기후 위기를 막다.~Ngăn chặn khủng hoảng khí hậu.|N2
+#TIER|4|5
+#TOPIC|t4_5_1|Chính trị & Quan hệ ngoại giao|
+#WORD|정치|jeongchi|Chính trị|정치 뉴스를 보다.~Xem tin tức chính trị.|N2
+#WORD|외교|oegyo|N외 giao|정상 외교를 하다.~Thực hiện ngoại giao nguyên thủ.|N2
+#WORD|동맹|dongmaeng|Liên minh|한미 동맹을 강화하다.~Cường hóa liên minh Hàn - Mỹ.|N2
+#WORD|정부|jeongbu|Chính phủ|현 정부의 정책이다.~Là chính sách chính phủ hiện tại.|N2
+#WORD|정당|jeongdang|Đảng phái chính trị|여당과 야당이다.~Là đảng cầm quyền và đối lập.|N2
+#WORD|선거|seongeo|Bầu cử|대통령 선거를 하다.~Tổ chức bầu cử tổng thống.|N2
+#WORD|정상회담|jeongsanghoedam|Hội nghị thượng đỉnh|남북 정상회담이다.~Là hội nghị thượng đỉnh Nam-Bắc.|N2
+#WORD|조약|joyak|Hiệp ước|국제 조약을 맺다.~Ký kết hiệp ước quốc tế.|N2
+#WORD|주권|jukwon|Chủ quyền|국가 주권을 지키다.~Bảo vệ chủ quyền quốc gia.|N2
+#WORD|갈등|galdeung|Xung đột|국가 간 갈등이다.~Là xung đột giữa các quốc gia.|N2
+#TOPIC|t4_5_2|Toàn cầu hóa & Hợp tác quốc tế|
+#WORD|세계화|segyehwa|Toàn cầu hóa|세계화가 진행되다.~Toàn cầu hóa đang diễn ra.|N2
+#WORD|다국적기업|dagukjeokgieop|Công ty đa quốc gia|다국적기업에 다니다.~Làm ở công ty đa quốc gia.|N1
+#WORD|국제기구|gukjegigu|Tổ chức quốc tế|국제기구에 가입하다.~Gia nhập tổ chức quốc tế.|N2
+#WORD|협력|hyeomryeok|Hợp tác|국제 협력을 강화하다.~Cường hóa hợp tác quốc tế.|N2
+#WORD|자유무역|jayumuyeok|Thương mại tự do|자유무역 협정이다.~Là hiệp định thương mại tự do.|N2
+#WORD|원조|wonjo|Viện trợ quốc tế|개발 도상국 원조이다.~Là viện trợ nước đang phát triển.|N2
+#WORD|이민|imin|Nhập cư|국제 이민이 늘다.~Dân di cư quốc tế tăng.|N2
+#WORD|다문화|damunhwa|Đa văn hóa|다문화 사회가 되다.~Trở thành xã hội đa văn hóa.|N2
+#WORD|개방|gaebang|Mở cửa|시장 개방을 하다.~Thực hiện mở cửa thị trường.|N2
+#WORD|네트워크|neteuwo-keu|Mạng lưới|글로벌 네트워크이다.~Là mạng lưới toàn cầu.|N2
+#TOPIC|t4_5_3|Công nghệ cao (AI, Big Data, Blockchain)|
+#WORD|인공지능|ingongjineung|Trí tuệ nhân tạo (AI)|인공지능 기술이다.~Là công nghệ AI.|N2
+#WORD|빅데이터|bigdeiteo|Dữ liệu lớn (Big Data)|빅데이터를 분석하다.~Phân tích dữ liệu lớn.|N2
+#WORD|블록체인|beullokchein|Chuỗi khối (Blockchain)|블록체인 기술이다.~Là công nghệ blockchain.|N2
+#WORD|사물인터넷|samulinteonet|Internet vạn vật (IoT)|사물인터넷을 연결하다.~Kết nối vạn vật internet.|N2
+#WORD|자율주행|jayuljuhang|Xe tự lái|자율주행 차를 타다.~Đi xe ô tô tự lái.|N2
+#WORD|가상현실|gasanghyeonseil|Thực tế ảo (VR)|가상현실을 체험하다.~Trải nghiệm thực tế ảo.|N2
+#WORD|클라우드|keullaudeu|Điện toán đám mây|클라우드에 저장하다.~Lưu trữ đám mây.|N2
+#WORD|알고리즘|algorijeum|Thuật toán|알고리즘을 개발하다.~Phát triển thuật toán.|N2
+#WORD|보안|boan|Bảo mật mạng|사이버 보안이다.~Là bảo mật an ninh mạng.|N2
+#WORD|혁신|hyeoksin|Đổi mới sáng tạo|기술 혁신을 이루다.~Đạt đổi mới sáng tạo công nghệ.|N2
+#TIER|5|1
+#TOPIC|t5_1_1|Từ vựng học thuật cao cấp (TOPIK II chuyên sâu)|
+#WORD|함축|hamchuk|Hàm súc|시의 의미를 함축하다.~Hàm súc ý nghĩa bài thơ.|N2
+#WORD|귀결|gwigyol|Quy kết, kết cục|결론에 귀결되다.~Quy kết về kết luận.|N2
+#WORD|상반|sangban|Trái ngược, tương phản|두 입장이 상반되다.~Hai lập trường tương phản.|N2
+#WORD|배경|baegeong|Bối cảnh|역사적 배경을 고찰하다.~Xem xét bối cảnh lịch sử.|N2
+#WORD|통찰|tongchal|Sự thấu triệt, thấu suốt|깊은 통찰을 얻다.~Thu được sự thấu triệt sâu sắc.|N2
+#WORD|귀인|gwiin|Quy nguyên, quy cho|성공의 원인을 귀인하다.~Quy nguyên nguyên nhân thành công.|N2
+#WORD|추상|chusang|Trừu tượng|추상적 개념을 이해하다.~Hiểu khái niệm trừu tượng.|N2
+#WORD|파급|pageup|Sức lan tỏa, tác động|경제적 파급 효과이다.~Là hiệu ứng lan tỏa kinh tế.|N2
+#WORD|고찰|gochal|Sự khảo sát, nghiên cứu|문헌을 고찰하다.~Khảo sát tài liệu văn hiến.|N2
+#WORD|당위|dangwi|Tính đương nhiên, nghĩa vụ|도덕적 당위이다.~Là tính đương nhiên đạo đức.|N2
+#TOPIC|t5_1_2|Tiếng lóng phức tạp & Văn hóa mạng (Slang)|
+#WORD|갓생|gatseng|Sống nỗ lực, sống hoàn hảo|갓생을 살기로 하다.~Quyết định sống nỗ lực hết mình.|N2
+#WORD|오지라퍼|ojirapeo|Người hay lo chuyện bao đồng|오지라퍼처럼 행동하다.~Hành xử như kẻ nhiều chuyện.|N1
+#WORD|꿀잼|kkuljem|Cực kỳ vui, thú vị|그 영화는 꿀잼이다.~Bộ phim đó cực kỳ thú vị.|N2
+#WORD|노잼|nojem|Nhạt nhẽo, không vui|그 개그는 노잼이다.~Trò đùa đó nhạt nhẽo quá.|N2
+#WORD|내돈내산|naedonnaesan|Tự bỏ tiền túi mua|이것은 내돈내산이다.~Cái này tự bỏ tiền túi mua.|N2
+#WORD|별다코|byeoldako|Viết tắt của Starbuck|별다코에 가다.~Đi đến quán Starbucks.|N2
+#WORD|오놀이|onoir|Ồ ngạc nhiên thật|오 놀이네!~Ồ ngạc nhiên thật đấy!|N2
+#WORD|핑공|pinggong|Công chúa màu hồng (tiếng lóng)|핑공처럼 굴다.~Cư xử như công chúa bánh bèo.|N1
+#WORD|스불재|subuljae|Tự làm tự chịu|이건 완벽한 스불재다.~Việc này hoàn toàn tự làm tự chịu.|N2
+#WORD|영포티|yeongpoti|Người trung niên tâm hồn trẻ|영포티 세대이다.~Là thế hệ trung niên tâm hồn trẻ.|N1
+#TOPIC|t5_1_3|Từ Hán-Hàn phân biệt sắc thái nghĩa (Sino-Korean)|
+#WORD|심심|simsim|Chán ngắt / Thâm tâm|심심한 사과를 하다.~Gửi lời xin lỗi từ thâm tâm.|N2
+#WORD|수도|sudo|Thủ đô / Số độ (nhiệt độ)|수도권에 살다.~Sống ở vùng thủ đô.|N2
+#WORD|안심|ansim|An tâm / Thịt thăn bò|안심을 하고 먹다.~An tâm và ăn uống.|N2
+#WORD|인기|ingi|Nhân khí, sự nổi tiếng|인기가 많다.~Có sự nổi tiếng nhiều.|N2
+#WORD|정말|jeongmal|Chân thật, quả thật|정말 그렇습니다.~Quả thật là vậy.|N2
+#WORD|지방|jibang|Địa phương / Mỡ cơ thể|지방에 출장 가다.~Đi công tác địa phương.|N2
+#WORD|학번|hakbeon|Số hiệu sinh viên theo khóa|학번이 어떻게 되세요?~Bạn khóa sinh viên năm mấy?|N2
+#WORD|해수|haesu|Nước biển / Giải quyết|해수욕을 하다.~Tắm nước biển.|N2
+#WORD|화장|hwajang|Hóa trang / Hỏa táng|화장을 하다.~Trang điểm / Hỏa táng.|N2
+#WORD|휴일|hyuil|Ngày nghỉ / Ngày lễ|휴일에 쉬다.~Nghỉ ngơi ngày lễ.|N2
+#TOPIC|t5_1_4|Thuật ngữ chuyên ngành nâng cao|
+#WORD|상법|sangbeop|Luật thương mại|상법을 위반하다.~Vi phạm luật thương mại.|N2
+#WORD|생명공학|saengmyeonggonghak|Kỹ thuật y sinh|생명공학을 연구하다.~Nghiên cứu kỹ thuật y sinh.|N2
+#WORD|국제법|gukjebop|Luật pháp quốc tế|국제법을 준수하다.~Tuân thủ luật pháp quốc tế.|N2
+#WORD|특허권|teukheogwon|Quyền sở hữu trí tuệ|특허권을 침해하다.~Xâm phạm quyền sở hữu trí tuệ.|N2
+#WORD|임상병리|imsangbyeongri|Bệnh lý lâm sàng|임상병리를 검사하다.~Kiểm tra bệnh lý lâm sàng.|N2
+#WORD|거시경제학|geosigyeongjehak|Kinh tế vĩ mô học|거시경제학을 전공하다.~Chuyên ngành kinh tế vĩ mô.|N2
+#WORD|지적재산권|jijeokjaesankwon|Quyền sở hữu trí tuệ|지적재산권을 보호하다.~Bảo vệ quyền sở hữu trí tuệ.|N2
+#WORD|양자역학|yangjayeokhak|Cơ học lượng tử|양자역학을 공부하다.~Học môn cơ học lượng tử.|N2
+#WORD|나노기술|nanogisul|Công nghệ nano|나노기술을 적용하다.~Ứng dụng công nghệ nano.|N2
+#WORD|외교정책|oegyopchaek|Chính sách ngoại giao|외교정책을 수립하다.~Thiết lập chính sách ngoại giao.|N2

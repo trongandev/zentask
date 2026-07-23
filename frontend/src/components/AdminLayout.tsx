@@ -1,11 +1,18 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, Navigate, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Shield, Users, ListTodo, LogOut, ArrowLeft, BookOpen, Type, HelpCircle, History, Bot, Activity, LayoutDashboard, MessageSquare, Clock } from "lucide-react";
+import { Shield, Users, ListTodo, LogOut, ArrowLeft, BookOpen, Type, HelpCircle, History, Bot, Activity, LayoutDashboard, MessageSquare, Clock, Menu, ChevronLeft } from "lucide-react";
 
 export function AdminLayout() {
   const { user } = useAuth();
   const location = useLocation();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+    localStorage.getItem('admin_main_sidebar_collapsed') === 'true'
+  );
+
+  useEffect(() => {
+    localStorage.setItem('admin_main_sidebar_collapsed', isSidebarCollapsed.toString());
+  }, [isSidebarCollapsed]);
 
   if (user?.role !== "admin") {
     return (
@@ -45,12 +52,18 @@ export function AdminLayout() {
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center gap-3 text-red-600">
-            <Shield className="w-8 h-8" />
-            <span className="font-extrabold text-xl tracking-tight">Admin Portal</span>
-          </div>
+      <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} transition-[width] duration-300 bg-white border-r border-gray-200 flex flex-col relative`}>
+        {/* Toggle Button */}
+        <button 
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 shadow-sm z-50"
+        >
+          {isSidebarCollapsed ? <Menu className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
+        </button>
+
+        <div className={`p-6 border-b border-gray-100 flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3'} text-red-600 overflow-hidden`}>
+          <Shield className="w-8 h-8 shrink-0" />
+          {!isSidebarCollapsed && <span className="font-extrabold text-xl tracking-tight whitespace-nowrap">Admin Portal</span>}
         </div>
 
         <nav className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
@@ -58,22 +71,23 @@ export function AdminLayout() {
             <NavLink
               key={link.path}
               to={link.path}
-              className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${isActive ? "bg-red-50 text-red-600" : "text-gray-600 hover:bg-gray-50"}`}
+              title={isSidebarCollapsed ? link.label : undefined}
+              className={({ isActive }) => `flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'} rounded-xl font-bold transition-all ${isActive ? "bg-red-50 text-red-600" : "text-gray-600 hover:bg-gray-50"}`}
             >
-              <link.icon className="w-5 h-5" />
-              {link.label}
+              <link.icon className={`w-5 h-5 shrink-0 ${isSidebarCollapsed ? 'm-0' : ''}`} />
+              {!isSidebarCollapsed && <span className="whitespace-nowrap">{link.label}</span>}
             </NavLink>
           ))}
         </nav>
 
         <div className="p-4 border-t border-gray-100 space-y-2">
-          <NavLink to="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all w-full">
-            <ArrowLeft className="w-5 h-5" />
-            Về ứng dụng
+          <NavLink to="/dashboard" title={isSidebarCollapsed ? "Về ứng dụng" : undefined} className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'} rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all w-full`}>
+            <ArrowLeft className="w-5 h-5 shrink-0" />
+            {!isSidebarCollapsed && <span className="whitespace-nowrap">Về ứng dụng</span>}
           </NavLink>
-          <button className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-600 hover:bg-red-50 transition-all w-full">
-            <LogOut className="w-5 h-5" />
-            Đăng xuất
+          <button title={isSidebarCollapsed ? "Đăng xuất" : undefined} className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'} rounded-xl font-bold text-red-600 hover:bg-red-50 transition-all w-full`}>
+            <LogOut className="w-5 h-5 shrink-0" />
+            {!isSidebarCollapsed && <span className="whitespace-nowrap">Đăng xuất</span>}
           </button>
         </div>
       </aside>

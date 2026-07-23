@@ -9,19 +9,39 @@ import {
   getAdminLesson,
   createAdminLesson,
   updateAdminLesson,
-  deleteAdminLesson
+  deleteAdminLesson,
+  reorderAdminLessons,
+  aiGenerateAdminLesson,
+  aiEvaluateAdminCourse,
+  getUnassignedLessons,
+  createUnassignedLesson,
+  aiGenerateAdminTopics,
+  getQuestionBank,
+  createQuestion,
+  updateQuestion,
+  deleteQuestion,
+  getWordBank,
+  createCourse,
+  deleteCourse,
+  updateCourseOrder,
+  updateCourseTiersTopics,
+  aiGenerateCourseTopics,
+  aiGenerateCourseTextData,
+  exportCourseToText,
+  createWord,
+  updateWord,
+  deleteWord,
+  seedAdminCourse,
+  handlePasteAdminCourses,
+  getSampleCoursePrompt
 } from "../controllers/adminCourseController.js";
 
 const router = Router();
-
-
 
 const authenticateAdmin = asyncHandler(async (req, res, next) => {
   const token = req.cookies.session;
   if (!token) return res.status(401).json({ error: "Unauthenticated" });
 
-  // verifyToken will run first, so we assume req.user is set if we use it,
-  // but let's just implement the logic using req.user since we'll put verifyToken before this middleware.
   const user = await User.findById(req.user.uid).lean();
   if (!user || user.role !== "admin") {
     return res.status(403).json({ error: "Forbidden: Admin access required" });
@@ -33,11 +53,44 @@ router.use(verifyToken);
 router.use(authenticateAdmin);
 
 // COURSE RESOURCES CRUD
+router.post("/courses/seed", seedAdminCourse);
 router.get("/courses/tree", getAdminCourseTree);
 router.get("/courses/lesson/:id", getAdminLesson);
 router.post("/courses/tier/:tierId/lesson", createAdminLesson);
+router.post("/courses/:courseId/lesson", createUnassignedLesson);
+router.post("/courses/:courseId/generate-topics", aiGenerateAdminTopics);
 router.put("/courses/lesson/:id", updateAdminLesson);
 router.delete("/courses/lesson/:id", deleteAdminLesson);
+router.put("/courses/reorder-lessons", reorderAdminLessons);
+router.post("/courses/ai-generate", aiGenerateAdminLesson);
+router.post("/courses/ai-evaluate", aiEvaluateAdminCourse);
+
+// UNASSIGNED TOPICS
+router.get("/courses/:courseId/unassigned-lessons", getUnassignedLessons);
+router.post("/courses/:courseId/lesson", createUnassignedLesson);
+
+// QUESTION BANK
+router.get("/courses/:courseId/questions", getQuestionBank);
+router.post("/courses/:courseId/questions", createQuestion);
+router.put("/courses/questions/:id", updateQuestion);
+router.delete("/courses/questions/:id", deleteQuestion);
+
+// COURSE MANAGEMENT
+router.post("/courses", createCourse);
+router.delete("/courses/:id", deleteCourse);
+router.put("/courses/reorder", updateCourseOrder);
+router.put("/courses/tiers/topics", updateCourseTiersTopics);
+router.get("/courses/:id/export", exportCourseToText);
+router.get("/courses/ai-generate-sample-prompt", getSampleCoursePrompt);
+router.post("/courses/ai-generate-course-text-data", aiGenerateCourseTextData);
+router.post("/courses/ai-generate-course-topics", aiGenerateCourseTopics);
+router.post("/courses/paste", handlePasteAdminCourses);
+
+// Word Bank routes
+router.get("/courses/:courseId/words", getWordBank);
+router.post("/courses/:courseId/words", createWord);
+router.put("/courses/words/:id", updateWord);
+router.delete("/courses/words/:id", deleteWord);
 
 // BOT JOBS CRUD
 router.get("/bot-jobs", asyncHandler(async (req, res) => {

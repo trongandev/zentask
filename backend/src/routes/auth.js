@@ -167,22 +167,8 @@ router.get("/me", verifyToken, async (req, res) => {
     }
     const userProfile = userProfileDoc.toJSON();
 
-    if (userProfile.targetLanguage) {
-      const prog = await UserLanguageProgress.findOne({ uid: uid, language: userProfile.targetLanguage }).lean();
-      if (prog) {
-        userProfile.rankId = prog.rankId;
-        userProfile.tier = prog.tier;
-        userProfile.stars = prog.stars;
-      } else {
-        userProfile.rankId = 1;
-        userProfile.tier = 3;
-        userProfile.stars = 0;
-      }
-    } else {
-      userProfile.rankId = 1;
-      userProfile.tier = 3;
-      userProfile.stars = 0;
-    }
+    // Rank info is now globally retrieved directly from the User model (userProfile)
+    // No need to query UserLanguageProgress for rankId, tier, stars anymore.
 
     // Fetch custom grammar tests
     try {

@@ -1,0 +1,812 @@
+##ja
+#TIER|1|1
+#TOPIC|jp_n5_chaohoi|Chào hỏi & Giới thiệu|
+#WORD|おはよう|ohayou|Chào buổi sáng|おはようございます。~Chào buổi sáng ạ。|ADJ
+#WORD|こんにちは|konnichiwa|Xin chào|こんにちは、田中さん。~Xin chào, anh Tanaka。|ADJ
+#WORD|こんばんは|konbanwa|Chào buổi tối|こんばんは。~Chào buổi tối。|ADJ
+#WORD|さようなら|sayounara|Tạm biệt|さようなら、また明日。~Tạm biệt, hẹn mai gặp。|ADJ
+#WORD|ありがとう|arigatou|Cảm ơn|ありがとうございます。~Cảm ơn bạn rất nhiều。|ADJ
+#WORD|すみません|sumimasen|Xin lỗi, cảm ơn|すみません、水ください。~Xin lỗi, cho nước。|ADJ
+#WORD|はじめまして|hajimemashite|Rất vui được gặp|はじめまして、私です。~Rất vui được gặp。|ADJ
+#WORD|よろしく|yoroshiku|Mong giúp đỡ|どうぞよろしく。~Rất mong giúp đỡ。|ADJ
+#WORD|はい|hai|Vâng, đúng|はい、分かりました。~Vâng, tôi hiểu rồi。|ADJ
+#WORD|いいえ|iie|Không|いいえ、違います。~Không, không phải vậy。|ADJ
+#TOPIC|jp_n5_sodem|Số đếm & Thời gian|
+#WORD|いち|ichi|Số một|これは一つです。~Đây là một cái。|NUM
+#WORD|に|ni|Số hai|二人が来ました。~Hai người đã đến。|NUM
+#WORD|さん|san|Số ba|三本の本です。~Ba quyển sách。|NUM
+#WORD|じかん|jikan|Thời gian|時間があまりない。~Không có nhiều thời gian。|N2
+#WORD|きょう|kyou|Hôm nay|今日は暑いです。~Hôm nay trời nóng。|N2
+#WORD|あした|ashita|Ngày mai|明日は雨です。~Ngày mai trời mưa。|N2
+#WORD|きのう|kinou|Hôm qua|昨日は休みでした。~Hôm qua là ngày nghỉ。|N2
+#WORD|いま|ima|Bây giờ|今何時ですか。~Bây giờ là mấy giờ?|N2
+#WORD|まいにち|mainichi|Hằng ngày|毎日日本語を勉強する。~Hằng ngày học tiếng Nhật。|ADJ
+#WORD|しゅうかん|shuukan|Tuần|一週間休みます。~Nghỉ một tuần。|N2
+#TOPIC|jp_n5_dodung|Đồ dùng học tập|
+#WORD|えんぴつ|enpitsu|Bút chì|鉛筆で書きます。~Viết bằng bút chì。|N2
+#WORD|ぺン|pen|Bút mực|ペンを貸してください。~Cho tôi mượn bút。|N2
+#WORD|ノート|nooto|Vở ghi|ノートに書く。~Viết vào vở。|N2
+#WORD|ほん|hon|Sách|本を読みます。~Đọc sách。|N2
+#WORD|じてしょ|jisho|Từ điển|辞書を引く。~Tra từ điển。|N2
+#WORD|つくえ|tsukue|Bàn học|机の上に本。~Sách ở trên bàn。|N2
+#WORD|いす|isu|Ghế|椅子に座る。~Ngồi lên ghế。|N2
+#WORD|かばん|kaban|Cặp sách|鞄が重い。~Cặp sách nặng。|N2
+#WORD|けしゴム|keshigomu|Cục tẩy|消しゴムを忘れた。~Quên tẩy rồi。|N2
+#WORD|ノートパソコン|nootopasokon|Máy tính xách tay|パソコンを買う。~Mua máy tính xách tay。|N2
+#TOPIC|jp_n5_bophan|Các bộ phận cơ thể|
+#WORD|あたま|atama|Đầu|頭が痛い。~Đau đầu quá。|N2
+#WORD|かお|kao|Mặt|顔を洗う。~Rửa mặt。|N2
+#WORD|め|me|Mắt|目がきれいです。~Mắt đẹp quá。|N2
+#WORD|みみ|mimi|Tai|耳が遠い。~Tai nghe kém。|N2
+#WORD|はな|hana|Mũi|鼻が高い。~Mũi cao。|N2
+#WORD|くち|kuchi|Miệng|口を開けて。~Hãy há miệng ra。|N2
+#WORD|て|te|Tay|手を洗う。~Rửa tay。|N2
+#WORD|あし|ashi|Chân|足が痛い。~Đau chân。|N2
+#WORD|からだ|karada|Cơ thể|体を動かす。~Vận động cơ thể。|N2
+#WORD|おなか|onaka|Bụng|おなかが空いた。~Tôi đói bụng rồi。|N2
+#TIER|1|2
+#TOPIC|jp_n5_giadinh|Gia đình & Người thân|
+#WORD|かぞく|kazoku|Gia đình|家族は四人です。~Gia đình có 4 người。|N1
+#WORD|ちち|chichi|Bố (tôi)|父は会社員です。~Bố tôi là nhân viên。|N1
+#WORD|はは|haha|Mẹ (tôi)|母は料理上手。~Mẹ tôi nấu ăn giỏi。|N1
+#WORD|あに|ani|Anh trai (tôi)|兄は大学生です。~Anh trai là sinh viên。|N1
+#WORD|あね|ane|Chị gái (tôi)|姉は銀行員です。~Chị gái làm ngân hàng。|N1
+#WORD|おとうと|otouto|Em trai|弟は中学生です。~Em trai học cấp hai。|N1
+#WORD|いもうと|imouto|Em gái|妹は小学生です。~Em gái học tiểu học。|N1
+#WORD|そふ|sofu|Ông (tôi)|祖父は元気です。~Ông tôi vẫn khỏe。|N1
+#WORD|そぼ|sobo|Bà (tôi)|祖母は優しいです。~Bà tôi rất hiền。|N1
+#WORD|こども|kodomo|Con cái, trẻ em|子どもが遊ぶ。~Trẻ con đang chơi。|N1
+#TOPIC|jp_n5_doan|Đồ ăn & Thức uống|
+#WORD|ごはん|gohan|Cơm, bữa ăn|ご飯を食べる。~Ăn cơm。|N2
+#WORD|みそしる|misoshiru|Súp miso|味噌汁を作る。~Nấu súp miso。|N2
+#WORD|さかな|sakana|Cá|魚を焼く。~Nướng cá。|N2
+#WORD|にく|niku|Thịt|肉が好きです。~Tôi thích ăn thịt。|N2
+#WORD|やさい|yasai|Rau|野菜を食べる。~Ăn rau xanh。|N2
+#WORD|くだもの|kudamono|Trái cây|果物が美味しい。~Trái cây ngon。|N2
+#WORD|みず|mizu|Nước lọc|水を飲む。~Uống nước lọc。|N2
+#WORD|おちゃ|ocha|Trà xanh|お茶を飲む。~Uống trà xanh。|N2
+#WORD|コーヒー|koohii|Cà phê|コーヒーが好き。~Thích cà phê。|N2
+#WORD|ぎゅうにゅう|gyuunyuu|Sữa bò|牛乳を買う。~Mua sữa bò。|N2
+#TOPIC|jp_n5_mausac|Màu sắc & Quần áo|
+#WORD|あか|aka|Màu đỏ|赤い車です。~Chiếc xe màu đỏ。|ADJ
+#WORD|あお|ao|Màu xanh dương|青い空です.~Bầu trời xanh。|ADJ
+#WORD|しろ|shiro|Màu trắng|白いシャツ。~Áo sơ mi trắng。|ADJ
+#WORD|くろ|kuro|Màu đen|黒い靴。~Giày màu đen。|ADJ
+#WORD|きいろ|kiiro|Màu vàng|黄色い花。~Bông hoa màu vàng。|ADJ
+#WORD|シャツ|shatsu|Áo sơ mi|シャツを着る。~Mặc áo sơ mi。|N2
+#WORD|ズボン|zubon|Quần dài|ズボンを穿く。~Mặc quần dài。|N2
+#WORD|くつ|kutsu|Giày|靴を脱ぐ.~Cởi giày ra。|N2
+#WORD|ぼうし|boushi|Mũ, nón|帽子を被る。~Đội mũ。|N2
+#WORD|コート|kooto|Áo khoác|コートを脱ぐ。~Cởi áo khoác。|N2
+#TOPIC|jp_n5_nhacua|Nhà cửa & Phòng ốc|
+#WORD|いえ|ie|Nhà|家へ帰る。~Về nhà。|N2
+#WORD|へや|heya|Phòng|部屋を掃除する。~Dọn dẹp phòng。|N2
+#WORD|リビング|ribingu|Phòng khách|リビングで寛ぐ.~Thư giãn phòng khách。|N2
+#WORD|だいどころ|daidokoro|Phòng bếp|台所で料理。~Nấu ăn ở bếp。|N2
+#WORD|ふろ|furo|Phòng tắm|風呂に入る.~Tắm bồn。|N2
+#WORD|トイレ|toire|Nhà vệ sinh|トイレはどこ？~Nhà vệ sinh ở đâu?|N2
+#WORD|ベッド|beddo|Giường ngủ|ベッドで寝る。~Ngủ trên giường。|N2
+#WORD|まど|mado|Cửa sổ|窓を開ける。~Mở cửa sổ。|N2
+#WORD|ドア|doa|Cửa ra vào|ドアを閉める.~Đóng cửa lại。|N2
+#WORD|にわ|niwa|Sân vườn|庭に花がある.~Có hoa ở sân。|N2
+#TIER|1|3
+#TOPIC|jp_n5_hoatdong|Hoạt động hàng ngày|
+#WORD|起きる|okiru|Thức dậy|朝七時に起きる。~Dậy lúc 7 giờ。|V
+#WORD|寝る|neru|Đi ngủ|夜十一時に寝る。~Ngủ lúc 11 giờ。|V
+#WORD|食べる|taberu|Ăn|朝ご飯を食べる。~Ăn sáng。|V
+#WORD|飲む|nomu|Uống|水を一杯飲む。~Uống một ly nước。|V
+#WORD|行く|iku|Đi|学校へ行く。~Đi đến trường。|V
+#WORD|来る|kuru|Đến|友人が来る。~Bạn bè đến。|V
+#WORD|見る|miru|Xem, nhìn|テレビを見る。~Xem ti vi。|V
+#WORD|聞く|kiku|Nghe|音楽を聞く。~Nghe nhạc。|V
+#WORD|書く|kaku|Viết|手紙を書く.~Viết thư。|V
+#WORD|読む|yomu|Đọc|本を読む。~Đọc sách。|V
+#TOPIC|jp_n5_thoitiet|Thời tiết & Mùa|
+#WORD|はれ|hare|Trời nắng|今日は晴れです。~Hôm nay trời nắng。|N2
+#WORD|雨|ame|Mưa|雨が降っている。~Trời đang mưa.|N2
+#WORD|雪|yuki|Tuyết|雪が積もる。~Tuyết tích tụ。|N2
+#WORD|曇り|kumori|Trời nhiều mây|明日は曇りです。~Ngày mai nhiều mây。|N2
+#WORD|春|haru|Mùa xuân|春がやってきた。~Mùa xuân đến rồi。|N2
+#WORD|夏|natsu|Mùa hè|夏は暑いです。~Mùa hè rất nóng。|N2
+#WORD|秋|aki|Mùa thu|秋は涼しいです.~Mùa thu mát mẻ。|N2
+#WORD|冬|fuyu|Mùa đông|冬は寒いです。~Mùa đông rất lạnh。|N2
+#WORD|風|kaze|Gió|風が強いです。~Gió thổi mạnh。|N2
+#WORD|気温|kion|Nhiệt độ|気温が下がる。~Nhiệt độ giảm xuống。|N2
+#TOPIC|jp_n5_dongvat|Động vật nuôi|
+#WORD|いぬ|inu|Con chó|犬を飼う。~Nuôi chó。|N2
+#WORD|ねこ|neko|Con mèo|猫が寝ている。~Mèo đang ngủ。|N2
+#WORD|とり|tori|Con chim|鳥が歌う。~Chim hót.|N2
+#WORD|さかな|sakana|Con cá|金魚を飼う。~Nuôi cá vàng.|N2
+#WORD|うさぎ|usagi|Con thỏ|ウサギが跳ねる.~Thỏ nhảy nhót。|N2
+#WORD|ハムスター|hamusutaa|Con chuột hamster|ハムスター可愛い。~Hamster đáng yêu.|N2
+#WORD|かめ|kame|Con rùa|亀が歩く。~Rùa đang bò.|N2
+#WORD|いけす|ikesu|Hồ cá|池に鯉がいる.~Có cá chép ở hồ。|N2
+#WORD|えさ|esa|Thức ăn gia súc|餌をやる。~Cho ăn.|N2
+#WORD|ペット|petto|Thú cưng|ペットを飼う。~Nuôi thú cưng。|N2
+#TOPIC|jp_n5_sothich|Sở thích cá nhân|
+#WORD|しゅみ|shumi|Sở thích|趣味は何ですか。~Sở thích là gì?|N2
+#WORD|スポーツ|supootsu|Thể thao|スポーツをする.~Chơi thể thao。|N2
+#WORD|音楽|ongaku|Âm nhạc|音楽鑑賞する。~Thưởng thức âm nhạc。|N2
+#WORD|読書|dokusho|Đọc sách|読書が好きです。~Thích đọc sách。|N2
+#WORD|映画|eiga|Phim ảnh|映画館に行く。~Đi xem rạp phim。|N2
+#WORD|旅行|ryokou|Du lịch|旅行に行く。~Đi du lịch.|N2
+#WORD|料理|ryouri|Nấu ăn|料理を作る。~Nấu ăn.|N2
+#WORD|写真|shashin|Chụp ảnh|写真を撮る。~Chụp ảnh.|N2
+#WORD|絵|e|Tranh ảnh|絵を描く。~Vẽ tranh.|N2
+#WORD|ゲーム|geemu|Trò chơi điện tử|ゲームをする。~Chơi game.|N2
+#TIER|2|1
+#TOPIC|jp_n4_muasam|Mua sắm & Giá cả|
+#WORD|かいもの|kaimono|Mua sắm|買い物に行く。~Đi mua sắm。|N2
+#WORD|ねだん|nedan|Giá cả|値段が高い。~Giá đắt quá.|N2
+#WORD|えん|en|Yên (tiền Nhật)|一万円です。~Là 1 vạn yên.|N2
+#WORD|やすい|yasui|Rẻ|この服は安い。~Bộ đồ này rẻ.|ADJ
+#WORD|たかい|takai|Đắt, cao|時計が高い。~Đồng hồ đắt.|ADJ
+#WORD|おかね|okane|Tiền|お金がない。~Không có tiền.|N2
+#WORD|カード|kaado|Thẻ tín dụng|カードで払う。~Trả bằng thẻ.|N2
+#WORD|げんきん|genkin|Tiền mặt|現金で払う。~Trả tiền mặt.|N2
+#WORD|サイズ|saizu|Kích cỡ|サイズが合う。~Vừa kích cỡ.|N2
+#WORD|まぐち|maguchi|Giảm giá|セール中安い。~Đang giảm giá rẻ。|N2
+#TOPIC|jp_n4_giaothong|Phương tiện giao thông|
+#WORD|くるま|kuruma|Xe ô tô|車を運転する。~Lái ô tô.|N2
+#WORD|でんしゃ|densha|Tàu điện|電車に乗る.~Đi tàu điện.|N2
+#WORD|バス|basu|Xe buýt|バスを待つ.~Đợi xe buýt.|N2
+#WORD|じてんしゃ|jitensha|Xe đạp|自転車で行く。~Đi bằng xe đạp.|N2
+#WORD|ひこうき|hikouki|Máy bay|飛行機に乗る.~Đi máy bay.|N2
+#WORD|しんかんせん|shinkansen|Tàu cao tốc|新幹線は速い。~Tàu siêu tốc nhanh。|N2
+#WORD|タクシー|takushii|Xe taxi|タクシーを呼ぶ.~Gọi taxi.|N2
+#WORD|ちかてつ|chikatetsu|Tàu điện ngầm|地下鉄を使う.~Dùng tàu điện ngầm。|N2
+#WORD|あるく|aruku|Đi bộ|歩いて帰る.~Đi bộ về nhà.|V
+#WORD|きっぷ|kippu|Vé tàu xe|切符を買う.~Mua vé xe.|N2
+#TOPIC|jp_n4_diadiem|Địa điểm trong thành phố|
+#WORD|えき|eki|Ga tàu|駅で待ち合わせ。~Hẹn ở ga tàu.|N2
+#WORD|ぎんこう|ginkou|Ngân hàng|銀行でお金下ろす。~Rút tiền ngân hàng。|N2
+#WORD|ゆうびんきょく|yuubinkyoku|Bưu điện|手紙を出す。~Gửi thư ở bưu điện。|N2
+#WORD|び病院|byouin|Bệnh viện|病院へ行く。~Đi bệnh viện.|N2
+#WORD|としょかん|toshokan|Thư viện|図書館で勉強。~Học ở thư viện.|N2
+#WORD|スーパー|suupaa|Siêu thị|スーパーで買う。~Mua ở siêu thị.|N2
+#WORD|コンビニ|konbini|Cửa hàng tiện lợi|コンビニ弁当。~Cơm hộp cửa hàng。|N2
+#WORD|こうえん|kouen|Công viên|公園を散歩。~Dạo công viên.|N2
+#WORD|ホテル|hoteru|Khách sạn|ホテルに泊まる.~Trọ khách sạn.|N2
+#WORD|レストラン|resutoran|Nhà hàng|レストランで食事.~Ăn ở nhà hàng.|N2
+#WORD|chidorui|chidorui|chidorui||chidorui
+#TOPIC|jp_n4_chiduong|Chỉ đường|
+#WORD|みぎ|migi|Bên phải|右に曲がる。~Rẽ phải。|N2
+#WORD|ひだり|hidari|Bên trái|左を見る。~Nhìn sang trái.|N2
+#WORD|まっすぐ|massugu|Thẳng|まっすぐ行く。~Đi thẳng。|ADJ
+#WORD|かど|kado|Góc đường|角を曲がる.~Rẽ ở góc đường。|N2
+#WORD|しんごう|shingou|Đèn giao thông|信号を渡る。~Qua đèn đỏ.|N2
+#WORD|きた|kita|Phía bắc|北へ向かう.~Hướng về phía bắc。|N2
+#WORD|みなみ|minami|Phía nam|南の島。~Hòn đảo phía nam.|N2
+#WORD|ひがし|higashi|Phía đông|東の空。~Bầu trời phía đông.|N2
+#WORD|にし|nishi|Phía tây|西に沈む.~Lặn ở phía tây.|N2
+#WORD|ちかく|chikaku|Gần đây|近くにコンビニ。~Có cửa hàng gần đây。|N2
+#TIER|2|2
+#TOPIC|jp_n4_dulich|Du lịch & Khách sạn|
+#WORD|よやく|yoyaku|Đặt chỗ|部屋を予約する。~Đặt phòng trước.|V
+#WORD|チェックイン|chekkuin|Nhận phòng|チェックインする。~Làm thủ tục nhận phòng。|V
+#WORD|チェックアウト|chekkuauto|Trả phòng|チェックアウトする。~Làm thủ tục trả phòng。|V
+#WORD|パスポート|pasupooto|Hộ chiếu|パスポート見せる。~Xuất trình hộ chiếu.|N2
+#WORD|がいかん|gaikan|Ngoại tệ|外貨を両替する.~Đổi ngoại tệ.|N2
+#WORD|あんない|annai|Hướng dẫn|観光案内所。~Trung tâm hướng dẫn。|N2
+#WORD|しゃしん|shashin|Bản đồ|地図を見る。~Xem bản đồ.|N2
+#WORD|にもつ|nimotsu|Hành lý|荷物を預ける.~Gửi hành lý.|N2
+#WORD|おみやげ|omiyage|Quà lưu niệm|お土産を買う.~Mua quà lưu niệm.|N2
+#WORD|りょかん|ryokan|Nhà trọ truyền thống|旅館に泊まる.~Trọ nhà truyền thống。|N2
+#TOPIC|jp_n4_nhahang|Nhả hàng & Gọi món|
+#WORD|メニュー|menyuu|Thực đơn|メニューをください。~Cho tôi xem menu.|N2
+#WORD|ちゅうもん|chuumon|Gọi món|注文をお願いします。~Tôi muốn gọi món.|V
+#WORD|おすすめ|osusume|Món đặc sản/gợi ý|おすすめは何ですか。~Món gì ngon vậy?|N2
+#WORD|おかいけ|okaike|Tính tiền|お会計お願いします。~Tính tiền giùm tôi.|N2
+#WORD|みず|mizui|Nước đá|氷なしの水。~Nước không đá.|N2
+#WORD|からい|karai|Cay|このカレー辛い。~Cà ri này cay.|ADJ
+#WORD|あまい|amai|Ngọt|ケーキは甘い。~Bánh ngọt.|ADJ
+#WORD|しょっぱい|shoppai|Mặn|スープがしょっぱい.~Súp hơi mặn.|ADJ
+#WORD|おいしい|oishii|Ngon|寿司が美味しい。~Sushi rất ngon.|ADJ
+#WORD|まずい|mazui|Dở|この料理まずい.~Món này dở.|ADJ
+#TOPIC|jp_n4_suckhoe|Sức khỏe & Bệnh viện|
+#WORD|びょうき|byouki|Bệnh|病気になる.~Bị mắc bệnh.|N2
+#WORD|いたい|itai|Đau|頭が痛い。~Bị đau đầu.|ADJ
+#WORD|ねつ|netsu|Sốt|熱がある。~Bị sốt.|N2
+#WORD|かぜ|kaze|Cảm lạnh|風邪を引いた。~Bị cảm lạnh.|N2
+#WORD|くすり|kusuri|Thuốc|薬を飲む。~Uống thuốc.|N2
+#WORD|いしゃ|isha|Bác sĩ|医者に診てもらう。~Khám bác sĩ.|N1
+#WORD|かんごし|kangoshi|Y tá|看護師が世話する。~Y tá chăm sóc.|N1
+#WORD|けんこう|kenkou|Sức khỏe|健康に気をつける。~Giữ gìn sức khỏe。|N2
+#WORD|ちゅうしゃ|chuusha|Tiêm thuốc|注射を打つ。~Tiêm thuốc.|N2
+#WORD|けが|kega|Vết thương|怪我をした。~Bị thương.|N2
+#TOPIC|jp_n4_camxuc|Cảm xúc & Tâm trạng|
+#WORD|うれしい|ureshii|Vui mừng|とても嬉しいです。~Rất vui mừng.|ADJ
+#WORD|かなしい|kanashii|Buồn bã|悲しいニュース。~Tin tức buồn.|ADJ
+#WORD|楽しい|tanoshii|Vui vẻ|楽しい旅行。~Chuyến đi vui vẻ.|ADJ
+#WORD|さびしい|sabishii|Cô đơn|一人で寂しい。~Cô đơn một mình.|ADJ
+#WORD|おこる|okoru|Tức giận|怒らないで。~Đừng tức giận.|V
+#WORD|こわい|kowai|Sợ hãi|お化けが怖い。~Sợ ma.|ADJ
+#WORD|あんしん|anshin|Yên tâm|安心しました。~Tôi yên tâm rồi.|N2
+#WORD|しんぱい|shinpai|Lo lắng|心配しないで。~Đừng lo lắng.|N2
+#WORD|びっくり|bikkuri|Ngạc nhiên|びっくりした。~Tôi ngạc nhiên.|ADJ
+#WORD|たいくつ|taikutsu|Nhàm chán|退屈な時間。~Thời gian nhàm chán。|ADJ
+#TIER|2|3
+#TOPIC|jp_n4_ngoaihinh|Mô tả ngoại hình & Tính cách|
+#WORD|せがたかい|segatakai|Cao lớn|背が高い人。~Người cao lớn.|ADJ
+#WORD|せがひくい|segahikui|Thấp lùn|背が低い。~Thấp.|ADJ
+#WORD|やさしい|yasuhui|Hiền lành|優しい先生。~Giáo viên hiền.|ADJ
+#WORD|きびしい|kibishii|Nghiêm khắc|厳しい上司。~Sếp nghiêm khắc.|ADJ
+#WORD|まじめ|majime|Chăm chỉ, nghiêm túc|まじめな学生。~Học sinh chăm chỉ。|ADJ
+#WORD|げんき|genki|Khỏe mạnh, năng nổ|元気な子供。~Trẻ em năng nổ.|ADJ
+#WORD|しずか|shizuka|Yên tĩnh|静かな人。~Người ít nói.|ADJ
+#WORD|うるさい|urusai|Ồn ào|声がうるさい。~Tiếng ồn ào.|ADJ
+#WORD|あかるい|akarui|Vui tươi, cởi mở|明るい性格。~Tính cách cởi mở。|ADJ
+#WORD|くらい|kurai|U ám, khép kín|暗い人。~Người khép kín.|ADJ
+#TOPIC|jp_n4_congtiec|Công việc bán thời gian|
+#WORD|アルバイト|arubaito|Việc làm thêm|アルバイトを探す。~Tìm việc làm thêm。|N2
+#WORD|きゅうりょう|kyuuryou|Lương|給料日が出る。~Nhận ngày lương.|N2
+#WORD|シフト|shifuto|Ca làm việc|シフトに入る。~Vào ca làm việc.|N2
+#WORD|じきゅう|jikyuu|Lương theo giờ|時給が高い。~Lương giờ cao.|N2
+#WORD|めんせつ|mensetsu|Phỏng vấn|面接を受ける。~Đi phỏng vấn.|N2
+#WORD|りれきしょ|rirekisho|Sơ yếu lý lịch|履歴書を書く。~Viết hồ sơ.|N2
+#WORD|てんちょう|tenchou|Cửa hàng trưởng|店長に相談する。~Thảo luận với sếp.|N1
+#WORD|せっきゃく|sekkyaku|Phục vụ khách|接客が好き。~Thích phục vụ khách.|N2
+#WORD|いそがしい|isogashii|Bận rộn|週末は忙しい。~Cuối tuần bận rộn.|ADJ
+#WORD|やすみ|yasumi|Nghỉ ngơi|明日休みます。~Ngày mai xin nghỉ.|N2
+#TOPIC|jp_n4_thethao|Thể thao & Giải trí|
+#WORD|サッカー|sakkaa|Bóng đá|サッカーをする。~Chơi bóng đá.|N2
+#WORD|やきゅう|yakyuu|Bóng chày|野球を見る。~Xem bóng chày.|N2
+#WORD|すいえい|suiei|Bơi lội|水泳が得意。~Giỏi bơi lội.|N2
+#WORD|テニス|tenisu|Quần vợt|テニスを習う。~Học đánh tennis.|N2
+#WORD|ジョギング|jogingu|Chạy bộ|ジョギングする。~Chạy bộ.|N2
+#WORD|カラオケ|karaoke|Karaoke|カラオケに行く。~Đi hát karaoke.|N2
+#WORD|キャンプ|kyanpu|Cắm trại|キャンプ場。~Khu cắm trại.|N2
+#WORD|つり|tsuri|Câu cá|釣りが好き。~Thích câu cá.|N2
+#WORD|きょく|kyoku|Bài hát|新しい曲。~Bài hát mới.|N2
+#WORD|ダンス|dansu|Nhảy múa|ダンスを踊る。~Nhảy múa.|N2
+#TOPIC|jp_n4_lehoi|Lễ hội & Văn hóa Nhật Bản|
+#WORD|まつり|matsuri|Lễ hội|夏祭りに行く。~Đi lễ hội mùa hè.|N2
+#WORD|はなび|hanabi|Pháo hoa|花火を見る。~Xem pháo hoa.|N2
+#WORD|神社|jinja|Đền thờ Thần đạo|神社にお参り。~Cầu nguyện ở đền.|N2
+#WORD|おてら|otera|Chùa Phật giáo|お寺を見学。~Tham quan chùa.|N2
+#WORD|きもの|kimono|Trang phục truyền thống|着物を着る。~Mặc kimono.|N2
+#WORD|ゆかた|yukata|Áo yukata mùa hè|浴衣を着て歩く。~Mặc yukata đi dạo.|N2
+#WORD|おまつり|omatsuri|Hội hè|祭りを楽しむ。~Tận hưởng lễ hội.|N2
+#WORD|とうろう|tourou|Đèn lồng|灯籠を流す.~Thả đèn lồng.|N2
+#WORD|はなみ|hanami|Ngắm hoa anh đào|花見をする。~Ngắm hoa anh đào.|N2
+#WORD|お盆|obon|Lễ Vu lan/Obon|お盆に帰省する。~Về quê dịp Obon.|N2
+#TIER|2|4
+#TOPIC|jp_n4_buudien|Bưu điện & Ngân hàng|
+#WORD|ゆうパック|yuupakukku|Bưu phẩm nhanh|荷物を送る。~Gửi bưu phẩm.|N2
+#WORD|きって|kitte|Tem thư|切手を貼る。~Dán tem lên thư.|N2
+#WORD|こうざ|kouza|Tài khoản ngân hàng|口座を開く。~Mở tài khoản.|N2
+#WORD|ちょきん|chokin|Tiền tiết kiệm|貯金をする。~Gửi tiết kiệm.|N2
+#WORD|ふりこみ|furikomi|Chuyển khoản|振込用紙。~Giấy chuyển khoản.|N2
+#WORD|めいぎ|meigi|Chủ tài khoản|名義を確認。~Xác nhận chủ tài khoản.|N2
+#WORD|つうちょう|tsuuchou|Sổ tiết kiệm|通帳を記帳。~Cập nhật sổ tiết kiệm。|N2
+#WORD|てすう料|tesuuryou|Phí dịch vụ|手数料がかかる。~Mất phí dịch vụ.|N2
+#WORD|サイン|sain|Chữ ký|サインをする。~Ký tên vào.|N2
+#WORD|はんこ|hanko|Con dấu cá nhân|ハンコを押す。~Đóng dấu cá nhân.|N2
+#TOPIC|jp_n4_moiquanhe|Các mối quan hệ xã hội|
+#WORD|ともだち|tomodachi|Bạn bè|友達と遊ぶ。~Đi chơi với bạn.|N1
+#WORD|せんぱい|senpai|Tiền bối|先輩に教わる。~Học hỏi từ senpai.|N1
+#WORD|こうはい|kouhai|Hậu bối|後輩を指導する。~Hướng dẫn kouhai.|N1
+#WORD|じょうし|joushi|Cấp trên|上司に報告。~Báo cáo với sếp.|N1
+#WORD|ぶか|buka|Cấp dưới|部下を褒める。~Khen ngợi cấp dưới.|N1
+#WORD|同僚|douryou|Đồng nghiệp|同僚とランチ。~Ăn trưa đồng nghiệp.|N1
+#WORD|きんじょ|kinjo|Hàng xóm|近所の人。~Người hàng xóm.|N1
+#WORD|しじん|shijin|Người quen|知り合いに出会う。~Gặp người quen.|N1
+#WORD|きゃく|kyaku|Khách hàng|お客様が来る。~Khách hàng đến.|N1
+#WORD|はもん|hamon|Đối tác|取引先と交渉。~Đàm phán đối tác.|N1
+#TOPIC|jp_n4_suco|Sự cố & Tai nạn nhỏ|
+#WORD|こわれる|kowareru|Bị hỏng|時計が壊れた。~Đồng hồ bị hỏng.|V
+#WORD|おとす|otosu|Đánh rơi|財布を落とした。~Làm rơi ví tiền.|V
+#WORD|なくす|nakusu|Làm mất|鍵をなくした。~Làm mất chìa khóa.|V
+#WORD|遅れる|okureru|Bị muộn|電車が遅れる。~Tàu điện bị muộn.|V
+#WORD|まちがえる|machigaeru|Nhầm lẫn|番号を間違えた。~Nhầm số điện thoại.|V
+#WORD|とまる|tomaru|Bị dừng lại|エレベーター止まる。~Thang máy dừng.|V
+#WORD|きえる|kieru|Bị tắt|明かりが消えた。~Đèn bị tắt.|V
+#WORD|われる|wareru|Bị vỡ|コップが割れた.~Cốc bị vỡ.|V
+#WORD|やぶれる|yabureru|Bị rách|服が破れた。~Quần áo bị rách.|V
+#WORD|こまる|komaru|Gặp rắc rối|困ったことになった。~Gặp rắc rối lớn.|V
+#TOPIC|jp_n4_dodiend|Đồ điện tử & Thiết bị gia dụng|
+#WORD|れいぞうこ|reizouko|Tủ lạnh|冷蔵庫に入れる.~Bỏ vào tủ lạnh.|N2
+#WORD|せんたくき|sentakuki|Máy giặt|洗濯機を回す。~Bật máy giặt.|N2
+#WORD|でんき|denki|Đèn điện|電気をつける。~Bật đèn lên.|N2
+#WORD|テレビ|terebi|Ti vi|テレビを消す。~Tắt ti vi.|N2
+#WORD|エアコン|eakon|Điều hòa nhiệt độ|エアコンをかける。~Bật điều hòa.|N2
+#WORD|そうじき|soujiki|Máy hút bụi|掃除機をかける。~Hút bụi nhà cửa.|N2
+#WORD|レンジ|renji|Lò vi sóng|レンジで温める.~Hâm nóng lò vi sóng。|N2
+#WORD|アイロン|airon|Bàn là quần áo|アイロンをかける。~Là quần áo.|N2
+#WORD|ドライヤー|doraiyaa|Máy sấy tóc|髪をドライヤーで乾かす。~Sấy tóc.|N2
+#WORD|コンセント|konsento|Ổ cắm điện|コンセントに挿す。~Cắm vào ổ điện.|N2
+#TIER|3|1
+#TOPIC|jp_n3_congso|Giao tiếp công sở cơ bản|
+#WORD|ほうこく|houkoku|Báo cáo|結果を報告する。~Báo cáo kết quả.|N2
+#WORD|れんらく|renraku|Liên lạc|後で連絡する。~Liên lạc sau.|N2
+#WORD|そうだん|soudan|Thảo luận|上司に相談する。~Thảo luận với sếp.|N2
+#WORD|よてい|yotei|Dự định|今日の予定。~Dự định hôm nay.|N2
+#WORD|かいぎ|kaigi|Cuộc họp|会議に出席する。~Tham dự cuộc họp.|N2
+#WORD|しごと|shigoto|Công việc|仕事が終わる。~Hoàn thành việc.|N2
+#WORD|ざんぎょう|zangyou|Làm thêm giờ|残業をする。~Làm thêm giờ.|N2
+#WORD|しゅっちょう|shucchou|Đi công tác|東京へ出張する。~Đi công tác Tokyo.|N2
+#WORD|けいかく|keikaku|Kế hoạch|計画を立てる。~Lập kế hoạch.|N2
+#WORD|せきはん|sekihan|Trách nhiệm|責任を持つ。~Chịu trách nhiệm.|N2
+#TOPIC|jp_n3_dienthoai|Điện thoại & Tin nhắn công việc|
+#WORD|でんわ|denwa|Điện thoại|電話に出る。~Nghe điện thoại.|N2
+#WORD|でんごん|dengon|Lời nhắn|伝言を残す。~Để lại lời nhắn.|N2
+#WORD|へんしん|henshin|Phản hồi tin nhắn|メールに返信する。~Phản hồi email.|N2
+#WORD|るす|rusu|Vắng nhà|留守番電話。~Hộp thư thoại.|N2
+#WORD|つうわ|tsuuwa|Cuộc gọi|通話中です。~Đang trong cuộc gọi.|N2
+#WORD|でんぱ|denpa|Sóng điện thoại|電波が悪い。~Sóng điện thoại kém.|N2
+#WORD|ちゃくしん|chakushin|Cuộc gọi đến|着信履歴を見る。~Xem cuộc gọi đến.|N2
+#WORD|そうしん|soushin|Gửi đi|送信エラー。~Lỗi gửi tin nhắn.|N2
+#WORD|じゅしん|jushin|Nhận tin|受信ボックス。~Hộp thư đến.|N2
+#WORD|きろく|kiroku|Ghi chép|通話記録。~Ghi chép cuộc gọi.|N2
+#TOPIC|jp_n3_thutin|Thư tín & Email thương mại|
+#WORD|メール|meeru|Thư điện tử|メールを送る。~Gửi email.|N2
+#WORD|けんめい|kenmei|Tiêu đề email|件名を入力する。~Nhập tiêu đề email.|N2
+#WORD|あてさき|atesaki|Người nhận|宛先を確認する。~Xác nhận người nhận.|N2
+#WORD|てんぷ|tenpu|Đính kèm tệp|ファイルを添付する。~Đính kèm tệp tin.|N2
+#WORD|そうふ|soufu|Gửi văn bản|書類を送付する。~Gửi tài liệu.|N2
+#WORD|いんさつ|insatsu|In ấn|資料を印刷する。~In tài liệu ra.|N2
+#WORD|さくせい|sakusei|Soạn thảo|企画書を作成する。~Soạn thảo đề xuất.|N2
+#WORD|かくにん|kakunin|Xác nhận|内容を確認する。~Xác nhận nội dung.|N2
+#WORD|けいやく|keiyaku|Hợp đồng|契約を結ぶ。~Ký kết hợp đồng.|N2
+#WORD|しょるい|shorui|Tài liệu|書類を提出する。~Nộp tài liệu.|N2
+#TOPIC|jp_n3_taichinh|Tài chính cá nhân|
+#WORD|よさん|yosan|Ngân sách|予算を立てる.~Lập ngân sách.|N2
+#WORD|ししゅつ|shishutsu|Khoản chi|支出を抑える。~Kiểm soát chi tiêu.|N2
+#WORD|しゅうにゅう|shuunyuu|Thu nhập|収入が増える.~Tăng thu nhập.|N2
+#WORD|りし|rishi|Lãi suất|利息がつく。~Tính tiền lãi suất.|N2
+#WORD|けいひ|keihi|Chi phí|経費を清算する。~Thanh toán chi phí.|N2
+#WORD|むだづかい|mudazukai|Tiêu xung bừa bãi|無駄遣いをやめる。~Ngừng tiêu xài phí phạm。|N2
+#WORD|せいさん|seisan|Thanh toán|交通費を精算する。~Thanh toán phí đi lại。|N2
+#WORD|ほけん|hoken|Bảo hiểm|保険に入る。~Mua bảo hiểm.|N2
+#WORD|ぜいきん|zeikin|Tiền thuế|税金を払う。~Đóng tiền thuế.|N2
+#WORD|とうし|toushi|Đầu tư|株に投資する。~Đầu tư chứng khoán.|N2
+#TIER|3|2
+#TOPIC|jp_n3_yhoc|Y học phổ thông|
+#WORD|しょうじょう|shoujou|Triệu chứng|症状を説明する。~Giải thích triệu chứng.|N2
+#WORD|しんさつ|shinsatsu|Khám bệnh|医師が診察する。~Bác sĩ khám bệnh.|N2
+#WORD|ちりょう|chiryou|Điều trị|治療を受ける。~Nhận điều trị.|N2
+#WORD|たい温|taion|Nhiệt độ cơ thể|体温を測る。~Đo nhiệt độ cơ thể.|N2
+#WORD|けつあつ|ketsuatsu|Huyết áp|血圧が高い。~Huyết áp cao.|N2
+#WORD|しょうほう|shouhou|Kê đơn thuốc|薬を処方する。~Kê đơn thuốc.|N2
+#WORD|とんぷく|tonpuku|Thuốc uống khi đau|頓服薬を飲む。~Uống thuốc khi đau.|N2
+#WORD|げねつざ|genetsuzai|Thuốc hạ sốt|解熱剤を飲む。~Uống thuốc hạ sốt.|N2
+#WORD|アレルギー|arerugii|Dị ứng|花粉アレルギー。~Dị ứng phấn hoa.|N2
+#WORD|しょうか|shouka|Tiêu hóa|消化が良い。~Dễ tiêu hóa.|N2
+#TOPIC|jp_n3_giaothongnangcao|Giao thông công cộng nâng cao|
+#WORD|じこ|jiko|Tai nạn giao thông|交通事故にあう。~Gặp tai nạn giao thông。|N2
+#WORD|うんこう|unkou|Vận hành tàu xe|運行状況を確認。~Kiểm tra tình hình.|N2
+#WORD|よやく|yoyaku|Đặt chỗ trước|指定席を予約する。~Đặt chỗ ngồi chỉ định。|V
+#WORD|のりかえ|norikae|Chuyển tuyến|電車を乗り換える。~Đổi tuyến tàu điện.|N2
+#WORD|かいしゅう|kaishuu|Sửa chữa đường sá|道路を改修する。~Sửa chữa đường.|N2
+#WORD|じかんひょう|jikanhyou|Bảng giờ tàu|時刻表を見る。~Xem lịch trình tàu.|N2
+#WORD|はんえい|hanei|Tuyến đường|迂回路を通る。~Đi đường vòng.|N2
+#WORD|うんちん|unchin|Giá vé, cước phí|運賃を支払う。~Thanh toán tiền vé.|N2
+#WORD|みちじゅん|michijun|Lộ trình|順路に従う。~Đi theo lộ trình.|N2
+#WORD|こうつうひ|koutsuuhi|Phí đi lại|交通費支給。~Cấp tiền đi lại.|N2
+#TOPIC|jp_n3_thuenha|Thuê nhà & Thủ tục hành chính|
+#WORD|ちんたい|chintai|Cho thuê nhà|賃貸物件を探す。~Tìm nhà cho thuê.|N2
+#WORD|やちん|yachin|Tiền thuê nhà|家賃を払う。~Trả tiền nhà.|N2
+#WORD|しききん|shikikin|Tiền đặt cọc|敷金を納める。~Nộp tiền đặt cọc.|N2
+#WORD|れいきん|reikin|Tiền lễ nhà chủ|礼金を支払う。~Trả tiền lễ.|N2
+#WORD|ふどうさん|fudousan|Bất động sản|不動産屋に行く。~Đến tiệm bất động sản。|N2
+#WORD|けいやくしょ|keiyakusho|Hợp đồng thuê|契約書に署名。~Ký vào hợp đồng.|N2
+#WORD|ほしょうにん|hoshounin|Người bảo lãnh|保証人を立てる。~Tìm người bảo lãnh.|N1
+#WORD|ひっこし|hikkoshi|Chuyển nhà|引っ越しをする。~Chuyển nhà.|N2
+#WORD|きんりょく|kinryoku|Khu vực lân cận|近隣に挨拶する。~Chào hỏi hàng xóm.|N2
+#WORD|こうしゅう|koushuu|Quy định chung|共益費を払う。~Đóng phí quản lý chung。|N2
+#TOPIC|jp_n3_moitruong|Môi trường & Thiên nhiên|
+#WORD|しぜん|shizen|Thiên nhiên|自然を守る。~Bảo vệ thiên nhiên.|N2
+#WORD|かんきょう|kankyou|Môi trường|環境問題。~Vấn đề môi trường.|N2
+#WORD|おせん|osen|Ô nhiễm|空気汚染。~Ô nhiễm không khí.|N2
+#WORD|ゴミ|gomi|Rác thải|ゴミを分別する。~Phân loại rác thải.|N2
+#WORD|リサイクル|risaikuru|Tái chế|ペットボトルを回収。~Thu hồi chai nhựa.|N2
+#WORD|たいりょう|tairyou|Thảm họa|自然災害。~Thảm họa thiên nhiên.|N2
+#WORD|じしん|jishin|Động đất|地震が起きた。~Động đất xảy ra.|N2
+#WORD|たいふう|taifuu|Bão lớn|台風が接近する.~Bão đang đến gần.|N2
+#WORD|おんだんか|ondanka|Hiệu ứng nhà kính|地球温暖化。~Nóng lên toàn cầu.|N2
+#WORD|しげん|shigen|Tài nguyên|資源を大切に。~Trân trọng tài nguyên.|N2
+#TIER|3|3
+#TOPIC|jp_n3_truyenthong|Truyền thông & Mạng xã hội|
+#WORD|ネット|netto|Mạng internet|ネットで調べる。~Tra cứu mạng.|N2
+#WORD|SNS|esuennesu|Mạng xã hội|SNSに投稿する。~Đăng bài lên mạng.|N2
+#WORD|ニュース|nyuusu|Tin tức|ニュースを見る。~Xem tin tức.|N2
+#WORD|じょうほう|jouhou|Thông tin|情報を発信する。~Phát tán thông tin.|N2
+#WORD|メディア|medhia|Truyền thông|メディアの取材。~Phỏng vấn truyền thông。|N2
+#WORD|ブログ|burogu|Blog cá nhân|ブログを書く。~Viết blog cá nhân.|N2
+#WORD|アド|ado|Địa chỉ email|アドレスを交換。~Đổi địa chỉ email.|N2
+#WORD|けんさく|kensaku|Tìm kiếm|ネットで検索する。~Tìm kiếm trên mạng.|N2
+#WORD|アカウント|akaunto|Tài khoản|アカウントを作る。~Tạo tài khoản.|N2
+#WORD|バズる|bazuru|Gây sốt mạng|動画がバズる。~Video gây sốt mạng.|V
+#TOPIC|jp_n3_khoahoc|Khoa học thường thức|
+#WORD|かがく|kagaku|Khoa học|科学の発展。~Sự phát triển khoa học。|N2
+#WORD|じっけん|jikken|Thí nghiệm|実験を行う。~Tiến hành thí nghiệm.|N2
+#WORD|はつめい|hatsumei|Sáng chế|新しい発明。~Phát minh mới.|N2
+#WORD|でんし|denshi|Điện tử|電子レンジ。~Lò vi sóng điện tử.|N2
+#WORD|うちゅう|uchuu|Vũ trụ|宇宙飛行士。~Phi hành gia vũ trụ.|N2
+#WORD|ほし|hoshi|Ngôi sao|星がきれいです。~Các vì sao đẹp.|N2
+#WORD|きかい|kikai|Máy móc|機械を操作する。~Vận hành máy móc.|N2
+#WORD|エネルギー|enerugii|Năng lượng|エネルギー節約。~Tiết kiệm năng lượng。|N2
+#WORD|じけん|jinken|Phát kiến|新発見をする。~Có phát kiến mới.|N2
+#WORD|けんきゅう|kenkyuu|Nghiên cứu|研究を進める。~Tiến hành nghiên cứu.|N2
+#TOPIC|jp_n3_giaoduc|Giáo dục & Trường học|
+#WORD|だいがく|daigaku|Trường đại học|大学に進学する。~Học lên đại học.|N2
+#WORD|がくせい|gakusei|Học sinh, sinh viên|大学生になる。~Trở thành sinh viên.|N1
+#WORD|じゅぎょう|jugyou|Giờ học|授業を受ける。~Tham gia giờ học.|N2
+#WORD|しけん|shiken|Kỳ thi|試験に合格する。~Đỗ kỳ thi.|N2
+#WORD|きょうかしょ|kyoukasho|Sách giáo khoa|教科書を開く。~Mở sách giáo khoa.|N2
+#WORD|そつぎょう|sotsugyou|Tốt nghiệp|大学を卒業する。~Tốt nghiệp đại học.|N2
+#WORD|りゅうがく|ryuugaku|Du học|日本へ留学する。~Du học Nhật Bản.|N2
+#WORD|こうぎ|kougi|Bài giảng|講義を聞く.~Nghe bài giảng.|N2
+#WORD|ぜみなーる|seminaru|Seminar, hội thảo|ゼミに参加する。~Tham gia seminar.|N2
+#WORD|さくぶん|sakubun|Bài văn|作文を書く。~Viết bài văn.|N2
+#TOPIC|jp_n3_doisong|Đời sống đô thị & Nông thôn|
+#WORD|とかい|tokai|Thành phố lớn|都会の生活。~Cuộc sống đô thị.|N2
+#WORD|いなか|inaka|Vùng quê|田舎に暮らす。~Sống ở vùng quê.|N2
+#WORD|じゅうたく|juutaku|Khu dân cư|住宅街を歩く。~Đi qua khu dân cư.|N2
+#WORD|こうきょう|koukyou|Công cộng|公共の施設。~Cơ sở công cộng.|N2
+#WORD|のうぎょう|nougyou|Nông nghiệp|農業に従事する。~Làm nông nghiệp.|N2
+#WORD|ぎょぎょう|gyogyou|Ngư nghiệp|漁業が盛ん。~Ngư nghiệp phát triển。|N2
+#WORD|へき地|hekichi|Vùng sâu vùng xa|過疎化が進む。~Tình trạng giảm dân số.|N2
+#WORD|ちいき|chiiki|Khu vực|地域社会。~Cộng đồng địa phương.|N2
+#WORD|しぜん|shizenkan|Cảnh quan thiên nhiên|自然豊かな村。~Làng quê giàu thiên nhiên。|N2
+#WORD|しゃかい|shakai|Xã hội|社会構造の変化。~Biến đổi cấu trúc xã hội。|N2
+#TIER|3|4
+#TOPIC|jp_n3_nghethuat|Nghệ thuật & Âm nhạc|
+#WORD|びじゅつ|bijutsu|Mỹ thuật|美術館に行く。~Đi bảo tàng mỹ thuật。|N2
+#WORD|しょうこく|shoukoku|Hội họa|油絵を描く。~Vẽ tranh sơn dầu.|N2
+#WORD|えんげき|engeki|Kịch nghệ|演劇を鑑賞する。~Thưởng thức kịch.|N2
+#WORD|おんがく|ongaku|Âm nhạc|楽器を演奏する。~Biểu diễn nhạc cụ.|N2
+#WORD|しょうせつ|shousetsu|Tiểu thuyết|小説を読む。~Đọc tiểu thuyết.|N2
+#WORD|ぶんがく|bungaku|Văn học|日本文学。~Văn học Nhật Bản.|N2
+#WORD|しじん|shijin|Thi sĩ|詩を詠む。~Ngâm thơ.|N1
+#WORD|はいゆう|haiyuu|Diễn viên|俳優になる。~Trở thành diễn viên.|N1
+#WORD|きゃくほん|kyakuhon|Kịch bản|脚本を書く。~Viết kịch bản.|N2
+#WORD|とうげい|tougei|Nghệ thuật gốm|陶芸を体験する。~Trải nghiệm làm gốm.|N2
+#TOPIC|jp_n3_amthuc|Ẩm thực truyền thống|
+#WORD|すし|sushi|Sushi|寿司を食べる。~Ăn sushi.|N2
+#WORD|てんぷら|tempura|Tempura|天ぷらを揚がる。~Chiên tempura.|N2
+#WORD|さしみ|sashimi|Sashimi|新鮮な刺身。~Sashimi tươi sống.|N2
+#WORD|うどん|udon|Mì udon|温かいうどん。~Mì udon nóng.|N2
+#WORD|そば|soba|Mì soba|ざる蕎麦を食べる。~Ăn mì soba lạnh.|N2
+#WORD|にほんしゅ|nihonshu|Rượu sake|日本酒を飲む。~Uống rượu sake.|N2
+#WORD|わしょく|washoku|Mật ẩm thực Nhật|和食文化。~Văn hóa ẩm thực Nhật.|N2
+#WORD|とうふ|toufu|Đậu hũ|豆腐料理。~Món ăn từ đậu hũ.|N2
+#WORD|みそ|miso|Tương miso|味噌を作る。~Làm tương miso.|N2
+#WORD|ちゃどう|chadou|Trà đạo|茶道を習う。~Học trà đạo.|N2
+#TOPIC|jp_n3_lichsu|Lịch sử & Địa danh Nhật Bản|
+#WORD|れきし|rekishi|Lịch sử|歴史を学ぶ。~Học lịch sử.|N2
+#WORD|じだい|jidai|Thời đại|江戸時代。~Thời đại Edo.|N2
+#WORD|じょうかく|joukaku|Thành cổ|お城を見学。~Tham quan thành cổ.|N2
+#WORD|いせき|iseki|Di tích lịch sử|歴史的遺跡。~Di tích lịch sử.|N2
+#WORD|ぶし|bushi|Võ sĩ samurai|武士の精神。~Tinh thần samurai.|N1
+#WORD|しょうぐん|shougun|Tướng quân|徳川将軍。~Tướng quân Tokugawa.|N1
+#WORD|とち|tochi|Địa danh|有名な土地。~Địa danh nổi tiếng.|N2
+#WORD|ぶんかざい|bunkazai|Di sản văn hóa|文化財を指定する。~Chỉ định di sản văn hóa.|N2
+#WORD|おんな|onna|Đền miếu truyền thống|伝統的な社。~Đền thờ truyền thống.|N2
+#WORD|きねんぶつ|kinenbutsu|Tượng đài kỷ niệm|記念碑を建てる。~Dựng đài tưởng niệm.|N2
+#TOPIC|jp_n3_xahoi|Các vấn đề xã hội cơ bản|
+#WORD|こうれいか|koureika|Già hóa dân số|高齢化社会。~Xã hội già hóa.|N2
+#WORD|しょうしこ|shoushika|Giảm tỷ lệ sinh|少子化が進む。~Tỷ lệ sinh giảm.|N2
+#WORD|しぎょう|shigyou|Thất nghiệp|失業者が増える.~Tăng người thất nghiệp.|N2
+#WORD|ひんぷ|hinpu|Phân hóa giàu nghèo|貧富の差。~Khoảng cách giàu nghèo.|N2
+#WORD|はんだん|handan|Phán đoán xã hội|問題を判断する。~Phán đoán vấn đề.|N2
+#WORD|はんざい|hanzai|Tội phạm|犯罪を防ぐ。~Phòng chống tội phạm.|N2
+#WORD|いじめ|ijime|Bắt nạt học đường|いじめをなくす。~Chấm dứt nạn bắt nạt.|N2
+#WORD|ふくし|fukushi|Phúc lợi xã hội|社会福祉。~Phúc lợi xã hội.|N2
+#WORD|きぎょう|kigyou|Doanh nghiệp lớn|企業の責任。~Trách nhiệm doanh nghiệp.|N2
+#WORD|ぼらんてぃあ|borantia|Tình nguyện|ボランティア活動。~Hoạt động tình nguyện.|N2
+#TIER|3|5
+#TOPIC|jp_n3_kinhdoanh|Kinh doanh & Khởi nghiệp|
+#WORD|きぎょう|kigyou|Khởi nghiệp|新しく起業する。~Khởi nghiệp kinh doanh.|N2
+#WORD|けいえい|keiei|Quản trị kinh doanh|会社を経営する。~Quản lý công ty.|N2
+#WORD|しほん|shihon|Vốn đầu tư|資本金を集める.~Huy động vốn.|N2
+#WORD|りえき|rieki|Lợi nhuận|利益を上げる。~Tăng lợi nhuận.|N2
+#WORD|きかく|kikaku|Đề án kinh doanh|企画を通す.~Thông qua đề án.|N2
+#WORD|しょうひん|shouhin|Sản phẩm hàng hóa|新商品を開発。~Phát triển sản phẩm.|N2
+#WORD|きょうそう|kyousou|Cạnh tranh thị trường|市場で競争する。~Cạnh tranh thị trường.|N2
+#WORD|せんでん|senden|Quảng bá thương hiệu|宣伝広告。~Quảng cáo tuyên truyền.|N2
+#WORD|こきゃく|kokyaku|Khách hàng mục tiêu|顧客を満足させる。~Làm hài lòng khách.|N1
+#WORD|はんばい|hanbai|Bán hàng|商品を販売する。~Bán sản phẩm.|N2
+#TOPIC|jp_n3_luatphap|Luật pháp cơ bản|
+#WORD|ほうりつ|houritsu|Pháp luật|法律を守る。~Tuân thủ pháp luật.|N2
+#WORD|はんそく|hansoku|Vi phạm quy định|規則に違反する。~Vi phạm quy tắc.|N2
+#WORD|さいばん|saiban|Phiên tòa xét xử|裁判を受ける。~Hầu tòa xét xử.|N2
+#WORD|はんざい|hanzai|Tội phạm|罪を犯す。~Phạm tội.|N2
+#WORD|べんごし|bengoshi|Luật sư|弁護士に相談する。~Hỏi ý kiến luật sư.|N1
+#WORD|けいじ|keiji|Hình sự|刑事事件。~Vụ án hình sự.|N2
+#WORD|みんじ|minji|Dân sự|民事訴訟。~Kiện tụng dân sự.|N2
+#WORD|しょうこ|shouko|Chứng cứ|証拠を集める。~Thu thập chứng cứ.|N2
+#WORD|けいばつ|keibatsu|Hình phạt|重い刑罰。~Hình phạt nặng.|N2
+#WORD|ほご|hogo|Bảo vệ quyền lợi|権利を保護する。~Bảo vệ quyền lợi.|N2
+#TOPIC|jp_n3_dichvuchang|Dịch vụ khách hàng|
+#WORD|おうたい|outai|Tiếp đón khách|丁寧に応対する。~Tiếp đón lịch sự.|N2
+#WORD|クレーム|kuremu|Khiếu nại khách hàng|クレームに対応する。~Giải quyết khiếu nại.|N2
+#WORD|まんぞく|manzoku|Sự hài lòng|顧客満足度。~Mức độ hài lòng khách.|N2
+#WORD|たいおう|taiou|Phản hồi ứng xử|迅速に対応する。~Phản hồi nhanh chóng.|N2
+#WORD|ようきゅう|youkyuu|Yêu cầu dịch vụ|顧客の要求を聞く。~Nghe yêu cầu khách.|N2
+#WORD|しんし|shinshi|Thái độ chân thành|真摯に謝罪する。~Xin lỗi chân thành.|ADJ
+#WORD|ほしょう|hoshou|Bảo hành sản phẩm|製品を保証する。~Bảo hành sản phẩm.|N2
+#WORD|へんぴん|henpin|Trả lại hàng|商品を返品する。~Trả lại hàng hóa.|N2
+#WORD|こうかん|koukan|Đổi hàng|サイズを交換する.~Đổi kích cỡ khác.|N2
+#WORD|あんしん|anshinshisaku|Biện pháp an tâm|安心のサービス。~Dịch vụ đáng tin cậy.|N2
+#TOPIC|jp_n3_anninh|An ninh & An toàn|
+#WORD|あんぜん|anzen|An toàn|安全を確認する。~Xác nhận an toàn.|ADJ
+#WORD|ぼうはん|bouhan|Phòng chống tội phạm|防犯カメラ設置。~Lắp camera an ninh.|N2
+#WORD|さいがい|saigai|Thiên tai thảm họa|災害に備える.~Chuẩn bị phòng tai.|N2
+#WORD|ひなん|hinan|Sơ tán khẩn cấp|避難訓練をする。~Tập huấn sơ tán.|N2
+#WORD|きゅうきゅう|kyuukyuu|Cấp cứu y tế|救急車を呼ぶ.~Gọi xe cấp cứu.|N2
+#WORD|しょうぼう|shoubou|Phòng cháy chữa cháy|消防署に通報。~Báo cháy cơ quan.|N2
+#WORD|じこ|jiko|Sự cố tai nạn|事故を防ぐ。~Phòng ngừa tai nạn.|N2
+#WORD|けいこく|keikoku|Cảnh báo nguy hiểm|危険を警告する。~Cảnh báo nguy hiểm.|N2
+#WORD|じょうほう|jouhoukanri|Quản lý thông tin an toàn|情報を守る。~Bảo vệ thông tin.|N2
+#WORD|しじ|shiji|Chỉ thị khẩn|指示に従う。~Tuân theo chỉ thị.|N2
+#TIER|4|1
+#TOPIC|jp_n2_kinhte|Kinh tế & Thị trường lao động|
+#WORD|けいいき|keiki|Tình hình kinh tế|景気が回復する。~Kinh tế phục hồi.|N2
+#WORD|こ雇用|koyou|Việc làm, tuyển dụng|雇用の安定。~Ổn định việc làm.|N2
+#WORD|きゅうよ|kyuuyo|Tiền lương, đãi ngộ|給与が引き上げられる。~Lương được tăng.|N2
+#WORD|いんフレ|infure|Lạm phát kinh tế|インフレが進む。~Lạm phát tăng cao.|N2
+#WORD|こうぎょう|kougyou|Công nghiệp chế tạo|工業生産が伸びる。~Sản xuất tăng.|N2
+#WORD|ぶっか|bukka|Vật giá thị trường|物価が上昇する。~Vật giá leo thang.|N2
+#WORD|もうかる|moukaru|Sinh lợi, kiếm lời|商売が儲かる。~Việc buôn lời lãi.|V
+#WORD|とうさん|tousan|Phá sản doanh nghiệp|企業が倒産する。~Doanh nghiệp phá sản.|N2
+#WORD|しじょう|shijou|Thị trường lao động|労働市場の拡大。~Mở rộng thị trường.|N2
+#WORD|ざいせい|zaisei|Tài chính công|財政赤字を抱える.~Gánh thâm hụt.|N2
+#TOPIC|jp_n2_chinhtri|Chính trị & Tin tức thời sự|
+#WORD|せいじ|seiji|Chính trị quốc gia|政治に関心を持つ。~Quan tâm chính trị.|N2
+#WORD|とうせん|tousen|Trúng cử nghị sĩ|選挙で当選する。~Trúng cử bầu cử.|N2
+#WORD|ほうあん|houan|Dự luật chính trị|法案を成立させる。~Thông qua dự luật.|N2
+#WORD|はいし|haishi|Bãi bỏ chính sách|制度を廃止する。~Bãi bỏ chế độ.|N2
+#WORD|がいこう|gaikou|Ngoại giao quốc tế|外交交渉を行う。~Đàm phán ngoại giao.|N2
+#WORD|せろん|seron|Dư luận xã hội|世論調査を実施。~Tiến hành trưng cầu.|N2
+#WORD|とうとう|toutou|Đảng phái chính trị|与党と野党。~Đảng cầm quyền đối lập.|N2
+#WORD|さいかく|saikaku|Cải cách chính trị|政治を改革する。~Cải cách chính trị.|N2
+#WORD|しょうひょう|shouhyou|Bỏ phiếu tín nhiệm|信任投票を行う.~Bỏ phiếu tín nhiệm.|N2
+#WORD|じたい|jitai|Tình hình khủng hoảng|重大な事態。~Tình hình nghiêm trọng.|N2
+#TOPIC|jp_n2_khoahoccongnghe|Khoa học & Công nghệ thông tin|
+#WORD|じんこうちのう|jinkouchinou|Trí tuệ nhân tạo AI|人工知能の開発。~Phát triển trí tuệ nhân tạo.|N2
+#WORD|でーた|deeta|Dữ liệu lớn Big Data|データを分析する。~Phân tích dữ liệu.|N2
+#WORD|ろぼっと|robotto|Robot tự động hóa|ロボットを導入する。~Đưa robot vào dùng.|N2
+#WORD|てっく|tekku|Công nghệ tiên tiến|先端技術を学ぶ。~Học công nghệ cao.|N2
+#WORD|じどうか|jidouka|Tự động hóa sản xuất|工場を自動化する。~Tự động hóa nhà máy.|N2
+#WORD|しんぽ|shinpo|Tiến bộ khoa học|科学が急速に進歩する。~Khoa học tiến bộ.|N2
+#WORD|はつめい|hatsumei|Phát minh công nghệ|新技術を発明する。~Phát minh công nghệ.|N2
+#WORD|あんぜんせい|anzensei|Tính bảo mật an toàn|安全性を確保する。~Đảm bảo an toàn.|N2
+#WORD|ネットワーク|nettowaaku|Mạng lưới thông tin|ネットワーク構築。~Xây dựng hệ thống mạng.|N2
+#WORD|かくしん|kakushin|Đổi mới công nghệ|技術革新が進む。~Đổi mới công nghệ.|N2
+#TOPIC|jp_n2_moitruongkhihau|Môi trường & Biến đổi khí hậu|
+#WORD|きこう|kikou|Khí hậu trái đất|気候変動に対応する.~Ứng phó biến đổi khí hậu。|N2
+#WORD|はかい|hakai|Tàn phá sinh thái|自然環境を破壊する。~Phá hủy môi trường.|N2
+#WORD|さいせい|saisei|Năng lượng tái tạo|再生可能エネルギー。~Năng lượng tái sinh.|N2
+#WORD|ほご|hogo|Bảo tồn thiên nhiên|絶灭危惧種を保護する。~Bảo tồn loài nguy cấp.|N2
+#WORD|はいしゅつ|haishutsu|Phát thải khí nhà kính|CO2を排出する。~Phát thải khí CO2.|N2
+#WORD|りさいくる|risaikuruu|Tái chế rác thải|ゴミをリサイクル。~Tái chế rác thải.|N2
+#WORD|げんしょう|genshou|Sự nóng lên toàn cầu|地球温暖化現象。~Hiện tượng nóng lên.|N2
+#WORD|ほろん|horon|Tuyệt chủng sinh vật|動物が絶滅する。~Động vật tuyệt chủng.|N2
+#WORD|かんきょう|kankyohogo|Bảo vệ sinh thái|環境保護活動。~Hoạt động bảo vệ.|N2
+#WORD|たいさく|taisaku|Biện pháp ứng phó|環境対策を強化。~Tăng cường biện pháp.|N2
+#TIER|4|2
+#TOPIC|jp_n2_luatphapxh|Luật pháp & Quy định xã hội|
+#WORD|きてい|kitei|Quy định pháp lý|社内規定に従う。~Tuân thủ quy định.|N2
+#WORD|きょうせい|kyousei|Cưỡng chế pháp luật|法律を強制する。~Cưỡng chế thi hành luật.|N2
+#WORD|そしょう|soshou|Kiện tụng pháp lý|損害賠償を請求する。~Yêu cầu bồi thường.|N2
+#WORD|つみ|tsumi|Tội lỗi, hình phạt|罪を償う。~Đền tội lỗi.|N2
+#WORD|けんり|kenri|Quyền lợi hợp pháp|基本的人権。~Quyền con người cơ bản.|N1
+#WORD|ぎむ|gimu|Nghĩa vụ công dân|国民の義務を果たす。~Làm tròn nghĩa vụ.|N2
+#WORD|てってい|tettei|Triệt để thực hiện|規則を徹底する。~Thực hiện triệt để.|ADJ
+#WORD|てきよう|tekiyou|Áp dụng điều luật|新しい法律を適用。~Áp dụng luật mới.|N2
+#WORD|いはん|ihan|Phạm pháp vi luật|交通法規に違反する。~Vi phạm luật giao thông.|N2
+#WORD|けいじつ|keibatsu|Chế tài hình phạt|厳しい刑罰を科す.~Áp đặt hình phạt.|N2
+#TOPIC|jp_n2_ytedoisong|Y tế & Phúc lợi xã hội|
+#WORD|ふくし|fukushi|An sinh xã hội|福祉政策を充実。~Hoàn thiện chính sách an sinh.|N2
+#WORD|いりょう|iryou|Y tế công cộng|医療制度改革。~Cải cách hệ thống y tế.|N2
+#WORD|ほけん|shakaihoken|Bảo hiểm xã hội|社会保険に加入する。~Tham gia bảo hiểm.|N2
+#WORD|ろうじん|roujin|Chăm sóc người cao tuổi|老人ホームに入る。~Vào viện dưỡng lão.|N1
+#WORD|ほご|seikatsuhogo|Trợ cấp xã hội|生活保護を受ける。~Nhận trợ cấp xã hội.|N2
+#WORD|かご|kaigo|Chăm sóc người bệnh|介護士の仕事。~Công việc điều dưỡng.|N2
+#WORD|けんこう|kenkoushindan|Khám sức khỏe định kỳ|健康診断を受ける。~Khám sức khỏe định kỳ.|N2
+#WORD|たいりょく|tairyoku|Thể lực con người|体力維持に努める。~Duy trì thể lực.|N2
+#WORD|えいよう|eiyou|Dinh dưỡng hợp lý|栄養バランス。~Cân bằng dinh dưỡng.|N2
+#WORD|ぼうえき|yobou|Phòng bệnh y khoa|病気を予防する。~Phòng ngừa bệnh tật.|N2
+#TOPIC|jp_n2_vanhoadoanhnghiep|Văn hóa doanh nghiệp nâng cao|
+#WORD|きこう|kikou|Cơ cấu tổ chức công ty|組織の機構改革。~Cải cách cơ cấu tổ chức.|N2
+#WORD|しゃふう|shafuu|Văn hóa công ty|社風に馴染む。~Hòa nhập văn hóa công ty.|N2
+#WORD|きょうりょく|kyouryoku|Hợp tác liên minh|他社と協力する。~Hợp tác với công ty khác.|N2
+#WORD|せいか|seika|Thành quả công việc|成果主義を取り入れる。~Áp dụng lương theo năng lực.|N2
+#WORD|じんざい|jinzai|Nhân sự tài năng|優秀な人材を確保する。~Chiêu mộ nhân tài.|N1
+#WORD|しんせい|shinsei|Cải tiến quy trình|業務を改善する。~Cải tiến nghiệp vụ.|N2
+#WORD|きょういく|shainkyouiku|Đào tạo nhân viên|社員教育に力を入れる。~Đầu tư đào tạo nhân viên.|N2
+#WORD|きんむ|kinmu|Chế độ làm việc|柔軟な勤務形態。~Hình thức làm việc linh hoạt.|N2
+#WORD|こうりょ|kouryo|Xem xét thấu đáo|様々な事情を考慮する。~Cân nhắc mọi tình huống.|N2
+#WORD|えいぎょう|eigyouseiseki|Kết quả kinh doanh|営業成績が伸びる。~Doanh số kinh doanh tăng.|N2
+#TOPIC|jp_n2_taichinhdoanhnghiep|Tài chính doanh nghiệp|
+#WORD|ざいむ|zaimu|Tài chính doanh nghiệp|財務状況を分析する。~Phân tích tình hình tài chính.|N2
+#WORD|しさん|shisan|Tài sản công ty|会社の一切の資産。~Toàn bộ tài sản công ty.|N2
+#WORD|ふさい|fusai|Khoản nợ công ty|負債を抱える.~Gánh chịu khoản nợ.|N2
+#WORD|けっさん|kessan|Quyết toán tài chính|決算報告を行う。~Báo cáo quyết toán tài chính.|N2
+#WORD|とうし|toushi|Đầu tư vốn tài chính|事業に投資する。~Đầu tư vào dự án.|N2
+#WORD|はいとう|haitou|Chia cổ tức|株主へ配当を支払う。~Trả cổ tức cho cổ đông.|N2
+#WORD|よさん|yosan|Ngân sách tài chính|年間予算を編成する。~Lập ngân sách hàng năm.|N2
+#WORD|ししゅつ|keihishishutsu|Chi phí vận hành|経費の支出を抑える。~Kiểm soát chi phí hoạt động.|N2
+#WORD|えき|eki|Lợi nhuận ròng|純利益を計算する。~Tính toán lợi nhuận ròng.|N2
+#WORD|しさん|shihyou|Chỉ số tài chính|経済指標を発表する。~Công bố chỉ số kinh tế.|N2
+#TIER|4|3
+#TOPIC|jp_n2_tamlyhoc|Tâm lý học hành vi|
+#WORD|しんり|shinri|Tâm lý con người|人間の心理を研究する。~Nghiên cứu tâm lý con người.|N2
+#WORD|いしき|ishiki|Ý thức hành vi|問題意識を持つ。~Có ý thức về vấn đề.|N2
+#WORD|すとれす|sutoresu|Căng thẳng tâm lý|ストレスを解消する。~Giảm bớt căng thẳng.|N2
+#WORD|きょうかん|kyoukan|Sự đồng cảm|他人に共感する。~Đồng cảm với người khác.|N2
+#WORD|せんたく|sentaku|Sự lựa chọn tâm lý|慎重に選択する。~Lựa chọn một cách thận trọng.|N2
+#WORD|きおく|kioku|Trí nhớ, ký ức|過去の記憶を呼び起こす。~Gợi lại ký ức quá khứ.|N2
+#WORD|かんじょう|kanjou|Cảm xúc cá nhân|感情をコントロール。~Kiểm soát cảm xúc bản thân.|N2
+#WORD|はんこう|hankou|Phản kháng tâm lý|親に反抗する。~Phản kháng lại bố mẹ.|N2
+#WORD|しょうがい|shougai|Rào cản tâm lý|心理的障害を乗り越える。~Vượt qua rào cản.|N2
+#WORD|いよく|iyoku|Năng lượng tinh thần|学習意欲を高める.~Nâng cao động lực học.|N2
+#TOPIC|jp_n2_giaoducdaihoc|Giáo dục đại học & Nghiên cứu|
+#WORD|がくじゅつ|gakujutsu|Học thuật nghiên cứu|学術論文を発表する。~Công bố bài báo học thuật.|N2
+#WORD|ろんぶん|ronbun|Luận văn khoa học|卒業論文を書く。~Viết luận văn tốt nghiệp.|N2
+#WORD|けんきゅう|kenkyuusha|Nhà nghiên cứu|研究者の意見を聞く。~Nghe ý kiến nhà nghiên cứu.|N1
+#WORD|しんさ|shinsa|Thẩm định luận văn|論文を審査する。~Thẩm định luận văn khoa học.|N2
+#WORD|せんもん|senmon|Chuyên môn nghiên cứu|専門分野を極める.~Theo đuổi chuyên môn.|N2
+#WORD|はっぴょう|happyou|Trình bày nghiên cứu|成果を発表する。~Trình bày thành quả nghiên cứu.|N2
+#WORD|いんさ|insha|Trích dẫn tài liệu|文献を引用する。~Trích dẫn tài liệu tham khảo.|N2
+#WORD|しゅとく|shutoku|Lấy học vị học thuật|博士号を取得する。~Lấy học vị tiến sĩ.|N2
+#WORD|かいせき|kaiseki|Phân tích dữ liệu học thuật|データを解析する。~Phân tích dữ liệu học thuật.|N2
+#WORD|しょうれい|shourei|Khuyến khích học tập|研究を奨励する。~Khuyến khích nghiên cứu khoa học.|N2
+#TOPIC|jp_n2_quanhequoc-te|Quan hệ quốc tế|
+#WORD|こくさい|kokusai|Quan hệ quốc tế|国際社会に貢献する。~Đóng góp cho quốc tế.|N2
+#WORD|じょうやく|jouyaku|Hiệp ước quốc tế|平和条約を結ぶ。~Ký kết hiệp ước hòa bình.|N2
+#WORD|ていあん|teian|Đề xuất ngoại giao|新しい提案をする.~Đưa ra đề xuất mới.|N2
+#WORD|きょうてい|kyoutei|Thỏa thuận quốc tế|貿易協定に調印する。~Ký thỏa thuận thương mại.|N2
+#WORD|かくざい|kakuzai|Sự đối đầu ngoại giao|外交上の摩擦が生じる。~Phát sinh cọ xát.|N2
+#WORD|えんじょ|enjo|Viện trợ phát triển|途上国を援助する。~Viện trợ quốc gia đang phát.|N2
+#WORD|せいきゅう|seikyuu|Yêu cầu quốc tế|権利を請求する。~Yêu cầu quyền lợi quốc gia.|N2
+#WORD|みんぞく|minzoku|Dân tộc, sắc tộc|民族間の対立。~Xung đột giữa các dân tộc.|N1
+#WORD|へいわ|heiwa|Hòa bình thế giới|世界平和を維持する。~Duy trì hòa bình thế giới.|N2
+#WORD|そうご|sougo|Tương hỗ lẫn nhau|相互理解を深める.~Thắt chặt hiểu biết lẫn nhau.|N2
+#TOPIC|jp_n2_daoducnghiep|Đạo đức nghề nghiệp|
+#WORD|りんり|rinri|Đạo đức nghề nghiệp|職業倫理を守る。~Tuân thủ đạo đức nghề nghiệp.|N2
+#WORD|めい誉|meiyo|Danh dự cá nhân, nghề nghiệp|名誉を重んじる。~Coi trọng danh dự nghề nghiệp.|N2
+#WORD|こくはく|kokuhaku|Thú nhận sai phạm|不正を告発する。~Tố giác hành vi sai trái.|N2
+#WORD|かくす|kakusu|Che giấu sai phạm|不祥事を隠蔽する。~Che giấu vụ bê bối.|V
+#WORD|せきにん|sekinin|Trách nhiệm công việc|責任を全うする。~Hoàn thành trọn vẹn trách nhiệm.|N2
+#WORD|こうせい|kousei|Sự công bằng công minh|公正な判断を下す。~Đưa ra phán quyết công minh.|ADJ
+#WORD|しんよう|shinyou|Uy tín nghề nghiệp|信用を失う。~Đánh mất uy tín cá nhân.|N2
+#WORD|ぎまん|giman|Sự lừa dối gian lận|欺瞞的な行為。~Hành vi mang tính lừa dối.|N2
+#WORD|こうし|koushi|Rạch ròi công tư|公私を混同しない。~Không lẫn lộn công tư.|N2
+#WORD|しょうじょ|shoujiki|Sự trung thực nghề nghiệp|正直に行동する.~Hành động một cách trung thực.|ADJ
+#TIER|4|4
+#TOPIC|jp_n2_vanhocduongdai|Vanthọc & Nghệ thuật đương đại|
+#WORD|げんだい|gendai|Văn học đương đại|現代美術の展覧会。~Triển lãm mỹ thuật đương đại.|N2
+#WORD|さくひん|sakuhin|Tác phẩm nghệ thuật|優れた作品を鑑賞。~Thưởng thức tác phẩm đẹp.|N2
+#WORD|きょしょう|kyoshou|Đại văn hào, bậc thầy|巨匠の絵画を見る。~Xem tranh bậc thầy nghệ thuật.|N1
+#WORD|しょうせつか|shousetsuka|Nhà văn đương đại|小説家の講演会。~Buổi nói chuyện nhà văn.|N1
+#WORD|ひょうろん|hyouron|Bình luận nghệ thuật|文学の評論を書く。~Viết phê bình văn học.|N2
+#WORD|そうさく|sousaku|Sáng tác nghệ thuật|新しい作品を創作。~Sáng tác tác phẩm nghệ thuật.|V
+#WORD|げきじょう|gekijou|Nhà hát kịch nghệ|劇場で劇を見る。~Xem kịch tại nhà hát.|N2
+#WORD|はくぶつかん|hakubutsukan|Bảo tàng mỹ thuật|美術館を訪れる。~Ghé thăm bảo tàng nghệ thuật.|N2
+#WORD|えんしゅつ|enshutsu|Đạo diễn nghệ thuật|舞台の演出を手掛ける。~Đảm nhận đạo diễn sân khấu.|N2
+#WORD|しゅえい|shueiyaku|Diễn viên chính|主役を演じる。~Đóng vai trò diễn viên chính.|N2
+#TOPIC|jp_n2_triethoc|Triết học cuộc sống|
+#WORD|じんせい|jinsei|Triết lý cuộc đời|人生の意味を考える。~Suy ngẫm ý nghĩa cuộc đời.|N2
+#WORD|しそう|shisou|Tư tưởng triết học|独自の思想を持つ。~Có tư tưởng triết lý riêng.|N2
+#WORD|そんざい|sonzai|Sự tồn tại con người|人間の存在意義。~Ý nghĩa tồn tại con người.|N2
+#WORD|しんり|shinri|Chân lý cuộc sống|真理を追求する。~Theo đuổi chân lý cuộc sống.|N2
+#WORD|てつがく|tetsugaku|Triết học nhận thức|哲学の本を読む。~Đọc sách triết học.|N2
+#WORD|きょうくん|kyoukun|Bài học cuộc sống|人生の教訓を得る。~Nhận bài học cuộc sống.|N2
+#WORD|価値|kachi|Giá trị tinh thần|価値観が変わる。~Thay đổi quan điểm giá trị.|N2
+#WORD|うんめい|unmei|Số mệnh cuộc đời|運命を受け入れる。~Chấp nhận số mệnh cuộc đời.|N2
+#WORD|せいしん|seishin|Tinh thần nội tại|精神世界を探求。~Khám phá thế giới nội tâm.|N2
+#WORD|きわめる|kiwameru|Tột cùng tri thức|真理を極める。~Đạt tới chân lý tột cùng.|V
+#TOPIC|jp_n2_phanlichdulieu|Phân tích dữ liệu & Báo cáo|
+#WORD|ぶんせき|bunseki|Phân tích dữ liệu|データを分析する。~Phân tích dữ liệu thống kê.|N2
+#WORD|とうけい|toukei|Thống kê dữ liệu|統計をとる。~Làm số liệu thống kê.|N2
+#WORD|ちゅうしゅつ|chuushutsu|Trích xuất thông tin|重要な情報を抽出。~Trích xuất thông tin chính.|N2
+#WORD|ほうこくしょ|houkokusyo|Báo cáo phân tích|報告書を作成する。~Lập báo cáo phân tích.|N2
+#WORD|けっか|kekka|Kết quả báo cáo|分析結果をまとめる.~Tổng hợp kết quả phân tích.|N2
+#WORD|すいしん|suishin|Dự báo xu hướng|今後の動向を推測する。~Dự đoán xu hướng tương lai.|N2
+#WORD|ずひょう|zuhyou|Biểu đồ thống kê|図表を用いて説明。~Giải thích bằng biểu đồ.|N2
+#WORD|せいど|seido|Độ chính xác dữ liệu|データの精度を高める。~Nâng cao độ chính xác.|N2
+#WORD|ひかく|hikaku|So sánh dữ liệu|前年と比較する。~So sánh với năm trước đó.|N2
+#WORD|けいこう|keikou|Xu hướng dữ liệu|市場の傾向を読む。~Nắm bắt xu hướng thị trường.|N2
+#TOPIC|jp_n2_dulichsinhtai|Du lịch sinh thái & Bền vững|
+#WORD|エコツーリズム|ekotsuurizumu|Du lịch sinh thái|エコツーリズムを推進。~Thúc đẩy du lịch sinh thái.|N2
+#WORD|しぜん|shizentaiken|Trải nghiệm thiên nhiên|自然体験ツアーに参加。~Tham gia tour thiên nhiên.|N2
+#WORD|ほご|kankyohogo|Bảo tồn hệ sinh thái|生態系を保護する。~Bảo tồn hệ sinh thái tự nhiên.|N2
+#WORD|じそく|jizokukan|Phát triển bền vững|持続可能な観光。~Du lịch phát triển bền vững.|N2
+#WORD|ちいき|chiikishakai|Cộng đồng địa phương|地域社会に貢献する。~Đóng góp cộng đồng địa phương.|N2
+#WORD|はかい|kankyohakai|Phản đối hủy hoại|環境破壊を防ぐ。~Ngăn chặn hủy hoại sinh thái.|N2
+#WORD|さいせい|saiseikano|Năng lượng tái tạo du lịch|再生資源を利用する。~Sử dụng tài nguyên tái sinh.|N2
+#WORD|みどり|ryokuka|Phủ xanh môi trường|街を緑化する。~Phủ xanh đô thị du lịch.|N2
+#WORD|いさん|shizenisan|Di sản thiên nhiên thế giới|自然遺産を見学する。~Tham quan di sản thiên nhiên.|N2
+#WORD|こうりょ|kankyouryouryo|Tác động môi trường|環境への負荷を減らす。~Giảm tác động môi trường.|N2
+#TIER|4|5
+#TOPIC|jp_n2_kietruc|Kiến trúc & Đô thị thông minh|
+#WORD|とし|toshikeikaku|Quy hoạch đô thị|都市計画を立案する。~Lập bản quy hoạch đô thị.|N2
+#WORD|ちてき|chitekikensetsu|Xây dựng thông minh|スマートシティを建設。~Xây dựng thành phố thông minh.|N2
+#WORD|けんちく|kenchikuka|Kiến trúc sư hiện đại|有名な建築家が設計。~Kiến trúc sư nổi tiếng thiết kế.|N1
+#WORD|こうぞう|kouzobutsu|Kết cấu công trình|頑丈な構造物。~Công trình kết cấu vững chắc.|N2
+#WORD|きんだい|kindaikentiku|Kiến trúc hiện đại|近代建築を保存する。~Bảo tồn kiến trúc hiện đại.|N2
+#WORD|さいかいはつ|saikaihatsu|Tái phát triển đô thị|駅前を再開発する。~Tái phát triển khu vực ga.|N2
+#WORD|しょうえね|shouene|Tiết kiệm năng lượng đô thị|省エネビルを建てる。~Xây dựng tòa nhà tiết kiệm.|N2
+#WORD|きゅうきょ|kyuukyoujyuutaku|Nhà ở công cộng|公営住宅に住む。~Sống tại nhà ở công cộng.|N2
+#WORD|きかん|kikanisetsu|Hệ thống hạ tầng đô thị|インフラを整備する。~Hoàn thiện cơ sở hạ tầng.|N2
+#WORD|きょうかん|kukan|Không gian đô thị|都市の公共空間。~Không gian công cộng đô thị.|N2
+#TOPIC|jp_n2_nangluong|Năng lượng & Tài nguyên thiên nhiên|
+#WORD|でんりょく|denryoku|Năng lượng điện|電力を供給する。~Cung cấp năng lượng điện.|N2
+#WORD|げんしりょく|genshiryoku|Năng lượng nguyên tử|原子力発電所。~Nhà máy điện hạt nhân.|N2
+#WORD|さいせい|saiseikanoenerugii|Năng lượng tái tạo xanh|再生可能エネルギー開発。~Phát triển năng lượng tái tạo.|N2
+#WORD|せきゆ|sekiyu|Dầu mỏ tài nguyên|石油資源が枯渇する。~Cạn kiệt tài nguyên dầu mỏ.|N2
+#WORD|ねんりょう|nenryou|Nhiên liệu sạch|代替燃料を使用する。~Sử dụng nhiên liệu thay thế.|N2
+#WORD|しょうひ|shouhi|Tiêu thụ năng lượng|エネルギー消費を抑える。~Giảm tiêu thụ năng lượng.|N2
+#WORD|ちきゅう|chikyuu|Tài nguyên trái đất|地球の資源を守る。~Bảo vệ tài nguyên trái đất.|N2
+#WORD|はつでん|hatsuden|Phát điện công nghiệp|風力発電を行う。~Tiến hành phát điện gió.|N2
+#WORD|ちょぞう|chozouzairyou|Dự trữ năng lượng|エネルギーを貯蔵する。~Lưu trữ năng lượng dự phòng.|N2
+#WORD|きき|energykiki|Khủng hoảng năng lượng|エネルギー危機に直面。~Đối mặt khủng hoảng năng lượng.|N2
+#TOPIC|jp_n2_quangcao|Quảng cáo & Truyền thông đại chúng|
+#WORD|こうこく|koukoku|Quảng cáo thương mại|新製品の広告を出す。~Đăng quảng cáo sản phẩm.|N2
+#WORD|せんでき|senden|Chiến dịch tuyên truyền|大規模な宣伝活動。~Hoạt động tuyên truyền lớn.|N2
+#WORD|メディア|masumedia|Truyền thông đại chúng|マスメディアの影響力。~Sức ảnh hưởng truyền thông.|N2
+#WORD|しょうひしゃ|shouhisha|Người tiêu dùng đại chúng|消費者の欲求を満たす。~Thỏa mãn người tiêu dùng.|N1
+#WORD|うりあげ|uriagekoujou|Gia tăng doanh số|売上を向上させる。~Nâng cao doanh số bán hàng.|N2
+#WORD|いめーじ|imeejikarakuta|Đại sứ thương hiệu|ブランドのイメージキャラクター。~Đại sứ thương hiệu.|N2
+#WORD|きゃっちこぴー|kyatchikopii|Khẩu hiệu quảng cáo|キャッチコピーを考える。~Nghĩ khẩu hiệu quảng cáo.|N2
+#WORD|はっしん|jouhouhasshin|Phát sóng thông tin|情報を広く発信する。~Phát tán thông tin rộng rãi.|N2
+#WORD|ちょうしゅう|choushuusha|Khán thính giả|視聴者の意見を聞く.~Lắng nghe ý kiến khán giả.|N1
+#WORD|はんばい|hanbaisenryaku|Chiến lược tiếp thị|販売戦略を練る。~Hoạch định chiến lược tiếp thị.|N2
+#TOPIC|jp_n2_anhinhmang|An ninh mạng & Công nghệ số|
+#WORD|せキュリティ|sekyuriti|Bảo mật an ninh mạng|セキュリティを強化する。~Tăng cường bảo mật mạng.|N2
+#WORD|ふせつ|fusei|Truy cập trái phép|不正アクセスを防ぐ.~Chống truy cập trái phép.|N2
+#WORD|ウイルス|konpyuuruirusu|Virus máy tính|コンピュータウイルスに感染。~Nhiễm virus máy tính.|N2
+#WORD|あんごう|angou|Mã hóa thông tin số|データを暗号化する。~Mã hóa dữ liệu số.|N2
+#WORD|じょうほう|jouhoumuroi|Rò rỉ thông tin cá nhân|個人情報の漏洩を防ぐ。~Chống rò rỉ thông tin.|N2
+#WORD|はっかー|hakkaa|Tin tặc mạng|ハッカーの攻撃を受ける。~Bị tin tặc tấn công mạng.|N1
+#WORD|ばっくあっぷ|bakuappu|Sao lưu dữ liệu số|定期的にバックアップする。~Sao lưu dữ liệu định kỳ.|N2
+#WORD|ぎぞう|gizou|Giả mạo dữ liệu điện tử|電子データの偽造。~Giả mạo dữ liệu điện tử.|N2
+#WORD|たいさく|sekyurititaisaku|Biện pháp bảo mật mạng|セキュリティ対策を講じる。~Thiết lập giải pháp an ninh.|N2
+#WORD|ぎゃくしゅう|koushuu|Tấn công mạng phản kích|サイバー攻撃に対処する。~Ứng phó tấn công mạng.|N2
+#TIER|5|1
+#TOPIC|jp_n1_thanhngu|Thành ngữ & Tục ngữ (Kanyouku/Kotowaza)|
+#WORD|いしの上にも三年|ishinouenimosanen|Kiên trì 3 năm trên đá|石の上にも三年耐える。~Kiên trì 3 năm ắt thành công.|ADJ
+#WORD|猿も木から落ちる|sarumokikaraochiru|Thậm chí khỉ cũng ngã cây|猿も木から落ちることもある。~Nhân vô thập toàn, ai cũng lầm.|ADJ
+#WORD|花より団子|hanayoridango|Thực tế hơn hình thức|花より団子、実を取る。~Thực tế hơn là hình thức.|ADJ
+#WORD|郷に入っては郷に従え|gounihaittehawagounishitagae|Nhập gia tùy tục|郷に入っては郷に従えという。~Nhập gia tùy tục địa phương.|ADJ
+#WORD|知らぬが仏|shiranugabotoke|Không biết là phật, vô tư|知らぬが仏、気楽だ。~Không biết thì không lo nghĩ.|ADJ
+#WORD|塵も積もれば山となる|chirimotsumorebayamataninaru|Góp gió thành bão|塵も積もれば山となる。~Góp gió thành bão lớn.|ADJ
+#WORD|弘法にも筆の誤り|koubounimohitsunogamari|Bậc thầy cũng nhầm lẫn|弘法にも筆の誤りと言う。~Bậc vĩ nhân cũng có lúc sai.|ADJ
+#WORD|雨降って地固まる|amefuttetjigatamaru|Sau cơn mưa trời lại sáng|雨降って地固まるものだ。~Sau gian truân sẽ ổn định.|ADJ
+#WORD|悪因悪果|akuinakka|Gieo gió gặt bão|悪因悪果、報いを受ける。~Gieo nhân nào gặt quả nấy.|ADJ
+#WORD|七転び八起き|nanakorobiyaoki|Ngã bảy đứng tám lần|七転び八起きで頑張る。~Kiên cường không bao giờ bỏ cuộc.|ADJ
+#TOPIC|jp_n1_kinhngu|Kính ngữ nâng cao (Keigo chuyên sâu trong kinh doanh)|
+#WORD|おっしゃる|ossharu|Nói (Kính ngữ)|社長がおっしゃる。~Giám đốc đã nói (kính ngữ).|V
+#WORD|いらっしゃる|irassharu|Đến/Đi/Ở (Kính ngữ)|お客様がいらっしゃる。~Khách hàng đang đến (kính ngữ).|V
+#WORD|なさる|nasaru|Làm (Kính ngữ)|お仕事なさる。~Ngài đang làm việc (kính ngữ).|V
+#WORD|ご覧になる|goranninaru|Xem (Kính ngữ)|書類をご覧になる。~Ngài xem tài liệu (kính ngữ).|V
+#WORD|召し上がる|meshiagaru|Ăn/Uống (Kính ngữ)|お茶を召し上がる。~Mời ngài dùng trà (kính ngữ).|V
+#WORD|存じる|sonjiru|Nghĩ/Biết (Khiêm nhường ngữ)|存じ上げております。~Tôi xin phép được biết.|V
+#WORD|申す|mousu|Nói (Khiêm nhường ngữ)|私から申す。~Chính tôi xin phép trình bày.|V
+#WORD|伺う|ukagau|Đến thăm/Hỏi (Khiêm nhường)|会社に伺う。~Tôi xin phép đến công ty.|V
+#WORD|致す|itasu|Làm (Khiêm nhường ngữ)|私の方で致す。~Tôi xin phép được thực hiện.|V
+#WORD|お目にかかる|omenikakaru|Gặp gỡ (Khiêm nhường ngữ)|明日お目にかかる。~Ngày mai tôi xin phép gặp.|V
+#TOPIC|jp_n1_chuyennganh|Thuật ngữ chuyên ngành học thuật (Y khoa, Luật pháp, Kinh tế vĩ mô)|
+#WORD|まくろ|makurokeizai|Kinh tế vĩ mô|マクロ経済政策を立案。~Lập chính sách vĩ mô.|N2
+#WORD|けんり|mimpoukenri|Quyền dân sự pháp lý|民法上の権利を主張。~Đòi quyền lợi theo dân luật.|N1
+#WORD|りんしょう|rinshouiken|Thử nghiệm lâm sàng y khoa|臨床試験を実施する。~Tiến hành thử nghiệm lâm sàng.|N2
+#WORD|さいせい|zaiseikin'yuu|Tài chính tiền tệ vĩ mô|財政金融政策の転換。~Chuyển hướng chính sách tiền tệ.|N2
+#WORD|けんぽう|kenpoukaisei|Sửa đổi hiến pháp|憲法改正を議論する。~Thảo luận sửa đổi hiến pháp.|N2
+#WORD|とくきょ|tokkyoken|Quyền sở hữu trí tuệ|特許権を取得する。~Đăng ký quyền sáng chế độc quyền.|N2
+#WORD|しじょう|shijougenri|Quy luật thị trường tự do|市場原理に委ねる。~Phó mặc cho quy luật thị trường.|N2
+#WORD|でんた|dentakabu|Luật hình sự tố tụng|刑事訴訟法を適用する。~Áp dụng luật tố tụng hình sự.|N2
+#WORD|きょけい|byourikensa|Xét nghiệm bệnh lý y khoa|病理検査の結果を見る。~Xem kết quả xét nghiệm bệnh lý.|N2
+#WORD|こくさい|kokusaiboueki|Thương mại quốc tế vĩ mô|国際貿易協定を締結。~Ký kết hiệp định thương mại.|N2
+#TOPIC|jp_n1_vanphong|Văn phong trang trọng trong văn bản pháp lý & ngoại giao|
+#WORD|つきましては|tsukimashiteha|Do đó, vì vậy (Trang trọng)|つきましては御相談。~Do vậy chúng tôi xin trao đổi.|ADJ
+#WORD|めいじ|meijisuru|Chỉ rõ trong văn bản|契約書に明示する。~Chỉ rõ điều khoản trong hợp đồng.|V
+#WORD|かんがみる|kangamiru|Xét đến, dựa trên tình hình|諸般の事情に鑑みる。~Xét đến các yếu tố tình hình.|V
+#WORD|きさく|kisa|Ký kết văn bản pháp lý|条約に署名する。~Ký kết hiệp ước ngoại giao.|V
+#WORD|おって|otte|Sau đây, thông báo sau|追ってご連絡する。~Chúng tôi sẽ thông báo sau đây.|ADJ
+#WORD|ごとう|gotou|Kính thưa/Kính gửi đầu thư|謹んでご通知する。~Trân trọng kính báo thông tin.|ADJ
+#WORD|けいぐ|keigu|Kính thư (Cuối thư)|敬具、〇〇株式会社。~Kính thư, Công ty Cổ phần.|ADJ
+#WORD|しょくん|shokun|Toàn thể các bên liên quan|関係諸君に周知する。~Thông báo toàn thể các bên.|N1
+#WORD|しょめん|shomen|Bằng văn bản trang trọng|書面にてご回答する。~Xin phản hồi bằng văn bản chính thức.|N2
+#WORD|ちんじゅつ|chinjutsusuru|Trình bày ý kiến pháp lý|意見を陳述する。~Trình bày ý kiến chính thức.|V

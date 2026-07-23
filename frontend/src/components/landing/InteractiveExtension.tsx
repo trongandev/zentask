@@ -67,7 +67,7 @@ export function InteractiveExtension() {
                       <p className="text-blue-600 font-mono text-sm">/ˈkɜːrɪdʒ/</p>
                     </div>
                     <button
-                      onClick={() => playAudio("courage", "en-US-RogerNeural")}
+                      onClick={() => playAudio("courage", "en")}
                       className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isPlaying ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
                     >
                       <Volume2 className="w-4 h-4" />

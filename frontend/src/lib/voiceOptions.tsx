@@ -217,7 +217,7 @@ export const voiceOptions = [
     sample: "Hello, I'm Michelle. I'll guide you through perfect English pronunciation.",
   },
   {
-    id: "en-US-RogerNeural",
+    id: "en",
     name: "Roger",
     gender: "male",
     language: "English",

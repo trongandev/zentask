@@ -64,7 +64,7 @@ export function InteractiveFlashcard() {
                 <p className="text-blue-600 font-medium font-mono text-lg mt-1">/ˈdɪlɪdʒənt/</p>
               </div>
               <button
-                onClick={() => playAudio("diligent", "en-US-RogerNeural")}
+                onClick={() => playAudio("diligent", "en")}
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isPlaying ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "bg-blue-50 text-blue-600 hover:bg-blue-100"}`}
               >
                 <Volume2 className="w-5 h-5" />

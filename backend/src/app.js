@@ -163,7 +163,7 @@ const limiter = rateLimit({
     } catch (e) {
       console.error("Lỗi khi gửi cảnh báo spam/DDOS qua Zalo:", e);
     }
-    return res.status(options.statusCode).send(options.message);
+    return res.status(options.statusCode).json({ error: options.message });
   },
 });
 app.use(limiter);
@@ -175,7 +175,7 @@ app.use((req, res, next) => {
     if (bodyClone.password) delete bodyClone.password;
     if (bodyClone.oldPassword) delete bodyClone.oldPassword;
     if (bodyClone.newPassword) delete bodyClone.newPassword;
-    
+
     const requestUrl = req.originalUrl || req.url;
     if (requestUrl && requestUrl.includes("/api/pronunciation/assess") && bodyClone.base64Audio) {
       bodyClone.base64Audio = "Hệ thống đã tự động xóa trường này";

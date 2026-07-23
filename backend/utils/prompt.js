@@ -25,3 +25,75 @@ TUYỆT ĐỐI KHÔNG DÙNG:
 - Dòng kẻ ngang (---) → KHÔNG hỗ trợ, thay bằng tiêu đề ## để phân mục
 - Khối mã (code blocks) dùng \`\`\` hoặc \` → KHÔNG hỗ trợ, hãy trình bày bằng văn bản thường hoặc danh sách (-)
 - HTML tags`;
+
+export const getSystemPromptCreateCourse = (
+  language,
+  level,
+  topicCount,
+  topicList,
+  wordCount,
+  exampleCount,
+) => `Bạn là một API xuất dữ liệu cấu trúc thô. Hãy tạo danh sách từ vựng ${language} giao tiếp cho ${topicCount} chủ đề cấp độ ${level}: [${topicList}].
+
+Mỗi chủ đề PHẢI CÓ ĐỦ ${wordCount} từ vựng đặc trưng nhất (Tổng cộng là ${wordCount * topicCount} từ vựng). Với mỗi từ vựng, CHỈ cung cấp đúng ${exampleCount} câu ví dụ duy nhất.
+
+QUY TẮC ĐỊNH DẠNG TỐI CAO (BẮT BUỘC ĐỂ HỆ THỐNG PARSE KHÔNG BỊ LỖI):
+1. KHÔNG giải thích, KHÔNG viết lời chào/lời kết, KHÔNG bọc dữ liệu bằng khối mã Markdown. Chỉ xuất văn bản thuần (plain text).
+2. QUY TẮC DÒNG ĐƠN (SINGLE LINE): Mỗi thẻ #TOPIC hoặc #WORD phải nằm trên MỘT HÀNG DUY NHẤT. Tuyệt đối không sử dụng ký tự xuống dòng (\n hoặc \r) ở giữa nội dung của một thẻ. Dù hàng đó dài bao nhiêu cũng phải viết liền mạch trên một hàng.
+3. QUY TẮC NGẮT DÒNG (NEWLINE): Chỉ xuống dòng (\n) khi đã kết thúc hoàn toàn một thẻ để sang thẻ tiếp theo. Không gộp chung nhiều thẻ trên cùng một hàng.
+
+QUY TẮC NÉN NỘI DUNG ĐỂ TIẾT KIỆM TOKEN:
+- Câu ví dụ tiếng ${language}: BẮT BUỘC cực ngắn, KHÔNG ĐƯỢC VƯỢT QUÁ 6 từ.
+- Mục Ghi chú (Trường cuối cùng): Sử dụng các MÃ KÝ HIỆU VIẾT TẮT sau đây:
+  + PR (Đại từ)
+  + N1 (Danh từ chỉ người/mối quan hệ)
+  + N2 (Danh từ chỉ vật/địa điểm/thời gian)
+  + V (Động từ)
+  + ADJ (Tính từ)
+  + NUM (Số từ / Lượng từ)
+
+CẤU TRÚC PHÂN TÁCH DỮ LIỆU:
+#TOPIC|ID_Chủ_Đề|Tiêu_đề|Category|Mô_tả_ngắn_không_xuống_dòng|Mã_màu_css
+#WORD|ID_Từ|Từ_vựng|Phiên_âm|Nghĩa_tiếng_Việt|Ví_dụ_1~Dịch_1|Mã_ghi_chú
+
+*Quy ước phần Ví dụ: Ngoại ngữ và Tiếng Việt nối bằng dấu "~". Không chèn dấu cách bừa bãi xung quanh dấu "~".
+
+HÃY COPIED CHÍNH XÁC KHUÔN MẪU XUẤT DỮ LIỆU SIÊU NÉN DƯỚI ĐÂY (Dưới đây chỉ là ví dụ định dạng):
+#TOPIC|hsk1_family|Bản thân & Gia đình|personal|Giới thiệu bản thân và gia đình.|bg-blue-900
+#WORD|f1|我|wǒ|Tôi, tớ|我是越南人。~Tôi là người VN。|PR
+#WORD|f2|爸爸|bàba|Bố|我爸爸是医生。~Bố tôi là bác sĩ。|N1`;
+
+export const getSystemPromptCreateCourseLessonFull = (courseName, tierContext, wordCount, exampleCount) => `Bạn là một hệ thống AI xuất dữ liệu cấu trúc thô. Hãy tạo lộ trình học (bao gồm Chủ đề và Từ vựng) cho khóa học: ${courseName}.
+
+Dưới đây là danh sách các Tier (Cấp độ) hiện có của khóa học. Bạn cần sinh các Chủ đề và Từ vựng tương ứng cho từng Tier. BẮT BUỘC trả về đúng định dạng cấu trúc nén dưới đây (đảm bảo giữ nguyên id của TIER):
+
+Mỗi chủ đề PHẢI CÓ ĐỦ ${wordCount} từ vựng đặc trưng nhất. Với mỗi từ vựng, CHỈ cung cấp đúng ${exampleCount} câu ví dụ duy nhất.
+
+#TIER|<rank_id>|<tier_num>
+#TOPIC|<topic_id>|<tên_chủ_đề>|<mô_tả_ngắn>
+#WORD|<từ_vựng>|<phiên_âm>|<nghĩa_tiếng_việt>|<ví_dụ_ngoại_ngữ>~<dịch_nghĩa_ví_dụ>|<mã_từ_loại>
+#WORD|...
+#TOPIC|...
+
+Danh sách Tier:
+${tierContext}
+
+QUY TẮC ĐỊNH DẠNG TỐI CAO (BẮT BUỘC ĐỂ HỆ THỐNG PARSE KHÔNG BỊ LỖI):
+1. KHÔNG giải thích, KHÔNG viết lời chào/lời kết, KHÔNG bọc dữ liệu bằng khối mã Markdown (\`\`\`json hay \`\`\`). Chỉ xuất văn bản thuần (plain text).
+2. QUY TẮC DÒNG ĐƠN (SINGLE LINE): Mỗi thẻ #TIER, #TOPIC hoặc #WORD phải nằm trên MỘT HÀNG DUY NHẤT. Tuyệt đối không sử dụng ký tự xuống dòng (\\n hoặc \\r) ở giữa nội dung của một thẻ. Dù hàng đó dài bao nhiêu cũng phải viết liền mạch trên một hàng.
+3. QUY TẮC NGẮT DÒNG (NEWLINE): Chỉ xuống dòng (\\n) khi đã kết thúc hoàn toàn một thẻ để sang thẻ tiếp theo. Không gộp chung nhiều thẻ trên cùng một hàng.
+
+QUY TẮC NÉN NỘI DUNG ĐỂ TIẾT KIỆM TOKEN:
+- Câu ví dụ: BẮT BUỘC cực ngắn, KHÔNG ĐƯỢC VƯỢT QUÁ 6 từ.
+- Mã từ loại: PR (Đại từ), N1 (Danh từ chỉ người/mối quan hệ), N2 (Danh từ chỉ vật/địa điểm/thời gian), V (Động từ), ADJ (Tính từ), NUM (Số từ).
+
+*Quy ước phần Ví dụ: Ngoại ngữ và Tiếng Việt nối bằng dấu "~". Không chèn dấu cách bừa bãi xung quanh dấu "~".
+
+HÃY COPIED CHÍNH XÁC KHUÔN MẪU XUẤT DỮ LIỆU SIÊU NÉN DƯỚI ĐÂY:
+#TIER|1|1
+#TOPIC|hsk1_family|Bản thân & Gia đình|Giới thiệu bản thân và gia đình
+#WORD|我|wǒ|Tôi, tớ|我是越南人。~Tôi là người VN。|PR
+#WORD|爸爸|bàba|Bố|我爸爸是医生。~Bố tôi là bác sĩ。|N1
+#TIER|1|2
+#TOPIC|hsk1_food|Đồ ăn & Đồ uống|Gọi món và tên các món ăn
+#WORD|水|shuǐ|Nước|请给我一杯水。~Cho tôi 1 ly nước。|N2`;

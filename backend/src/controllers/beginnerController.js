@@ -23,7 +23,6 @@ export const getBeginnerProgress = async (req, res) => {
 
 export const completeGrammarTopic = async (req, res) => {
   try {
-    console.log(req.user);
     const uid = req.user.uid;
     const { topicId } = req.body;
 

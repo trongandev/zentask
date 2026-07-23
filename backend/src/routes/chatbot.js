@@ -357,7 +357,9 @@ async function startZaloBot() {
   }
 }
 
-startZaloBot();
+if (process.env.NODE_ENV === "production") {
+  startZaloBot();
+}
 
 export const getApi = () => api;
 

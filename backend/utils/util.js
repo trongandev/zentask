@@ -130,3 +130,65 @@ export function parseMarkdownToZalo(rawText) {
     styles: finalStyles.length > 0 ? finalStyles : undefined,
   };
 }
+
+export function parseMessyAIData(rawText) {
+  if (!rawText) return [];
+
+  // Bước 1: Sửa lỗi AI tự ý xuống dòng bậy (Nối các dòng mồ côi lại)
+  const rawLines = rawText.split(/[\r\n]+/);
+  const cleanLines = [];
+
+  for (let line of rawLines) {
+    line = line.trim();
+    if (!line) continue;
+
+    if (line.startsWith("#TOPIC|") || line.startsWith("#WORD|") || line.includes("#WORD|") || line.includes("#TOPIC|")) {
+      // Nếu dòng chứa thẻ mới, đẩy vào mảng
+      cleanLines.push(line);
+    } else {
+      // Nếu dòng mồ côi (bị AI ngắt xuống), nối nó vào đuôi của dòng trước đó
+      if (cleanLines.length > 0) {
+        cleanLines[cleanLines.length - 1] += " " + line;
+      }
+    }
+  }
+
+  // Bước 2: Tách các thẻ bị AI gộp ngang trên cùng một hàng
+  const finalizedText = cleanLines
+    .join("\n")
+    .replace(/#TOPIC\|/g, "\n#TOPIC|")
+    .replace(/#WORD\|/g, "\n#WORD|");
+
+  const lines = finalizedText
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  // Bước 3: Parse dữ liệu chuẩn như logic ban đầu của bạn
+  const result = [];
+  let currentTopic = null;
+
+  for (const line of lines) {
+    if (line.startsWith("#TOPIC|")) {
+      const parts = line.substring(7).split("|");
+      if (parts.length < 5) continue;
+      currentTopic = { id: parts[0].trim(), title: parts[1].trim(), category: parts[2].trim(), description: parts[3].trim(), color: parts[4].trim(), words: [] };
+      result.push(currentTopic);
+    } else if (line.startsWith("#WORD|") && currentTopic) {
+      const parts = line.substring(6).split("|");
+      if (parts.length < 6) continue;
+
+      const exampleList = [];
+      if (parts[4].trim()) {
+        parts[4].split(";").forEach((pair) => {
+          if (pair.includes("~")) {
+            const [en, vi] = pair.split("~");
+            exampleList.push({ en: en.trim(), vi: vi.trim() });
+          }
+        });
+      }
+      currentTopic.words.push({ id: parts[0].trim(), term: parts[1].trim(), phonetic: parts[2].trim(), translation: parts[3].trim(), examples: exampleList, notes: parts[5].trim() });
+    }
+  }
+  return result;
+}

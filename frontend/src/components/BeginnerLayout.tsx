@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Map, BookOpen, Headphones, Trophy } from "lucide-react";
+import { ArrowLeft, Map, BookOpen, Headphones, Trophy, Swords } from "lucide-react";
 import { cn } from "../lib/utils";
 
 export function BeginnerLayout() {
@@ -10,14 +10,16 @@ export function BeginnerLayout() {
   const navItems = [
     { path: "/beginner", label: "Lộ trình", icon: <Map className="w-6 h-6" /> },
     { path: "/beginner/grammar", label: "Ngữ pháp", icon: <BookOpen className="w-6 h-6" /> },
+    { path: "/beginner/arena", label: "Đấu hạng", icon: <Swords className="w-6 h-6" /> },
     { path: "/beginner/skills", label: "Kỹ năng", icon: <Headphones className="w-6 h-6" /> },
-    { path: "/beginner/rank", label: "Bảng xếp hạng", icon: <Trophy className="w-6 h-6" /> },
+    { path: "/beginner/rank", label: "BXH", icon: <Trophy className="w-6 h-6" /> },
   ];
 
   const isLessonPage =
     location.pathname.includes("/lesson/") ||
     (location.pathname.includes("/grammar/") && location.pathname !== "/beginner/grammar") ||
     (location.pathname.includes("/skills/") && location.pathname !== "/beginner/skills") ||
+    (location.pathname.includes("/arena") && location.pathname !== "/beginner/arena") ||
     (location.pathname.includes("/rank/") && location.pathname !== "/beginner/rank");
 
   return (

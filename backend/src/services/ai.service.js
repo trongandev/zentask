@@ -18,7 +18,7 @@ const getAvailableKeys = () => {
   return keys;
 };
 
-export const generateAIContent = async ({ prompt, systemInstruction, responseSchema, feature = "general", uid = null, model = "gemini-3.1-flash-lite" }) => {
+export const generateAIContent = async ({ prompt, systemInstruction, responseSchema, feature = "general", uid = null, model = "gemini-3.5-flash-lite" }) => {
   const keys = getAvailableKeys();
   if (keys.length === 0) {
     throw new Error("No AI keys configured");

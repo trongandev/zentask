@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useEtcStore } from "@/src/services/etcService";
 import { getVoiceForLanguage } from "@/src/lib/ttsVoiceStorage";
+import { useAuth } from "../contexts/AuthContext";
 let globalAudio: HTMLAudioElement | null = null;
 const audioCache = new Map<string, string>();
 const preloadingSet = new Set<string>();
@@ -11,7 +12,7 @@ export const useTTSAudio = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingText, setLoadingText] = useState<string | null>(null);
   const [playingText, setPlayingText] = useState<string | null>(null);
-
+  const { user } = useAuth();
   useEffect(() => {
     // Ensure default voice is set (migration handled by getVoiceForLanguage)
     getVoiceForLanguage();
@@ -72,7 +73,7 @@ export const useTTSAudio = () => {
     });
   };
 
-  const playAudio = async (text: string, overrideVoice?: string, playEffect?: "correct" | "wrong") => {
+  const playAudio = async (text: string, language?: string, playEffect?: "correct" | "wrong") => {
     let playId = currentPlayId;
     if (playEffect) {
       const notInterrupted = await playSoundEffect(playEffect);
@@ -87,9 +88,8 @@ export const useTTSAudio = () => {
 
     setIsLoading(true);
     setLoadingText(text);
-
     try {
-      const voice = overrideVoice || getVoiceForLanguage();
+      const voice = language || getVoiceForLanguage(user?.targetLanguage);
       const cacheKey = `${text}_${voice}`;
 
       let audioUrl = audioCache.get(cacheKey);

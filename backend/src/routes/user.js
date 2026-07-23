@@ -334,34 +334,30 @@ router.put(
       }
     }
 
+    // Update global rank if jumping to higher level (e.g., from placement test)
+    if (targetRankId > user.rankId || (targetRankId === user.rankId && targetTier < user.tier)) {
+      user.rankId = targetRankId;
+      user.tier = targetTier;
+      user.stars = 0;
+    }
     await user.save();
 
-    // Upsert UserLanguageProgress
+    // Upsert UserLanguageProgress (only language tracking now, rank is global)
     let progress = await UserLanguageProgress.findOne({ uid: user._id, language: languageCode });
     if (!progress) {
       progress = await UserLanguageProgress.create({
         uid: user._id,
         language: languageCode,
-        rankId: targetRankId,
-        tier: targetTier,
-        stars: 0,
-        arenaMatchesPlayed: 0,
+        // rankId, tier, stars kept for schema compatibility, but unused
       });
-    } else {
-      // Update progress if jumping to higher level
-      if (targetRankId > progress.rankId || (targetRankId === progress.rankId && targetTier < progress.tier)) {
-        progress.rankId = targetRankId;
-        progress.tier = targetTier;
-        await progress.save();
-      }
     }
 
     res.json({
       status: "success",
       targetLanguage: languageCode,
       learningLanguages: user.learningLanguages,
-      rankId: progress.rankId,
-      tier: progress.tier,
+      rankId: user.rankId,
+      tier: user.tier,
       level: user.languageLevels?.get(languageCode),
     });
   }),

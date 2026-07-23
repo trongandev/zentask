@@ -1,0 +1,558 @@
+##es
+#TIER|1|1
+#TOPIC|t1_trang_phuc|Trang phục & Phụ kiện|
+#WORD|camisa|kamisa|Áo sơ mi|Llevo una camisa blanca.~Tôi mặc áo trắng.|N2
+#WORD|pantalón|pantalón|Quần dài|El pantalón es azul.~Cái quần màu xanh.|N2
+#WORD|zapatos|sapato|Giày|Compré nuevos zapatos.~Tôi mua giày mới.|N2
+#WORD|vestido|bestido|Váy liền|El vestido es hermoso.~Chiếc váy rất đẹp.|N2
+#WORD|sombrero|sombɾeɾo|Mũ nón|Usa un sombrero negro.~Anh ấy đội mũ đen.|N2
+#WORD|chaqueta|tʃaketa|Áo khoác|La chaqueta abrigadora.~Chiếc áo khoác ấm.|N2
+#WORD|bufanda|bufanda|Khăn choàng|Lleva bufanda roja.~Cô ấy quàng khăn đỏ.|N2
+#WORD|reloj|relox|Đồng hồ|El reloj funciona bien.~Đồng hồ chạy tốt.|N2
+#WORD|gafas|gafas|Kính mắt|Mis gafas nuevas.~Kính mới của tôi.|N2
+#WORD|bolso|bolso|Túi xách|Un bolso de cuero.~Một chiếc túi da.|N2
+#TOPIC|t1_nha_cua|Nhà cửa & Phòng ốc|
+#WORD|casa|kasa|Ngôi nhà|Mi casa es grande.~Nhà của tôi lớn.|N2
+#WORD|puerta|pueɾta|Cửa ra vào|Cierra la puerta.~Hãy đóng cửa lại.|N2
+#WORD|ventana|bentana|Cửa sổ|Abro la ventana.~Tôi mở cửa sổ.|N2
+#WORD|cocina|kosina|Phòng bếp|Cocino en la cocina.~Tôi nấu ăn bếp.|N2
+#WORD|baño|baño|Phòng tắm|El baño está limpio.~Phòng tắm rất sạch.|N2
+#WORD|cama|kama|Giường ngủ|Mi cama es cómoda.~Giường của tôi êm.|N2
+#WORD|mesa|mesa|Cái bàn|El libro sobre la mesa.~Sách trên bàn.|N2
+#WORD|silla|siʎa|Cái ghế|Sienta en la silla.~Ngồi lên ghế đi.|N2
+#WORD|sala|sala|Phòng khách|Esperar en la sala.~Đợi ở phòng khách.|N2
+#WORD|jardín|xaɾdin|Khu vườn|Flores en el jardín.~Hoa trong vườn.|N2
+#TOPIC|t1_hoat_dong|Hoạt động hàng ngày|
+#WORD|despertar|despeɾtaɾ|Thức dậy|Me despierto temprano.~Tôi dậy sớm.|V
+#WORD|desayunar|desayunaɾ|Ăn sáng|Desayuno pan tostado.~Tôi ăn bánh mỳ.|V
+#WORD|duchar|dutʃaɾ|Tắm gội|Me ducho por la mañana.~Tôi tắm buổi sáng.|V
+#WORD|trabajar|tɾabaxaɾ|Làm việc|Trabajo en la oficina.~Tôi làm văn phòng.|V
+#WORD|estudiar|estudiaɾ|Học tập|Estudio español hoy.~Hôm nay học TBN.|V
+#WORD|comer|komeɾ|Ăn trưa|Comemos a mediodía.~Chúng tôi ăn trưa.|V
+#WORD|correr|koɾeɾ|Chạy bộ|Corro en el parque.~Tôi chạy công viên.|V
+#WORD|dormir|doɾmiɾ|Ngủ|Duermo ocho horas.~Tôi ngủ 8 tiếng.|V
+#WORD|cocinar|kosinaɾ|Nấu ăn|Cocino la cena.~Tôi nấu bữa tối.|V
+#WORD|leer|leeɾ|Đọc sách|Leo un libro.~Tôi đọc một sách.|V
+#TOPIC|t1_dong_vat_hd|Động vật hoang dã|
+#WORD|león|leon|Con sư tử|El león ruge fuerte.~Sư tử gầm lớn.|N2
+#WORD|tigre|tiɣɾe|Con hổ|Un tigre en selva.~Con hổ trong rừng.|N2
+#WORD|elefante|elefante|Con voi|El elefante es grande.~Con voi rất lớn.|N2
+#WORD|mono|mono|Con khỉ|El mono come banana.~Khỉ ăn chuối.|N2
+#WORD|lobo|lobo|Con sói|El lobo aúlla noche.~Sói hú ban đêm.|N2
+#WORD|oso|oso|Con gấu|El oso duerme mucho.~Gấu ngủ rất nhiều.|N2
+#WORD|serpiente|seɾpiente|Con rắn|Cuidado con serpiente.~Cẩn thận con rắn.|N2
+#WORD|jirafa|xiɾafa|Con hươu cao cổ|La jirafa es alta.~Hươu rất cao.|N2
+#WORD|cebra|sebɾa|Con ngựa vằn|La cebra tiene rayas.~Ngựa vằn có sọc.|N2
+#WORD|zorro|soro|Con cáo|El zorro es astuto.~Con cáo rất ranh.|N2
+#TIER|1|2
+#TOPIC|t1_gia_dinh|Gia đình & Người thân|
+#WORD|madre|maðɾe|Mẹ|Mi madre cocina bien.~Mẹ tôi nấu ngon.|N1
+#WORD|padre|paðɾe|Bố|Mi padre es amable.~Bố tôi rất tốt.|N1
+#WORD|hermano|eɾmano|Anh/Em trai|Tengo un hermano.~Tôi có một em trai.|N1
+#WORD|hermana|eɾmana|Chị/Em gái|Mi hermana canta.~Em gái tôi hát.|N1
+#WORD|hijo|ixo|Con trai|Mi hijo estudia.~Con trai tôi học.|N1
+#WORD|hija|ixa|Con gái|Mi hija juega.~Con gái tôi chơi.|N1
+#WORD|abuelo|abuelo|Ông|Mi abuelo tiene barba.~Ông có râu quai nón.|N1
+#WORD|abuela|abuela|Bà|Mi abuela es dulce.~Bà rất dịu dàng.|N1
+#WORD|tio|tio|Bác/Chú|Mi tío vive lejos.~Chú tôi ở xa.|N1
+#WORD|tia|tia|Cô/Dì|Mi tia es doctora.~Dì tôi là bác sĩ.|N1
+#TOPIC|t1_dong_vat_nuoi|Động vật nuôi|
+#WORD|perro|peɾo|Con chó|El perro ladra mucho.~Chó sủa rất nhiều.|N2
+#WORD|gato|gato|Con mèo|El gato duerme sofá.~Mèo ngủ trên ghế.|N2
+#WORD|pájaro|paxaɾo|Con chim|El pájaro vanta alto.~Chim bay cao.|N2
+#WORD|pez|pes|Con cá|El pez nada agua.~Cá bơi trong nước.|N2
+#WORD|conejo|konexo|Con thỏ|El conejo come zanahoria.~Thỏ ăn cà rốt.|N2
+#WORD|caballo|kabaʎo|Con ngựa|El caballo corre rápido.~Ngựa chạy nhanh.|N2
+#WORD|vaca|baka|Con bò sữa|La vaca da leche.~Bò cho sữa uống.|N2
+#WORD|cerveza|seɾbesa|Con lợn|El cerdo es rosado.~Con lợn màu hồng.|N2
+#WORD|oveja|obexa|Con cừu|La oveja tiene lana.~Cừu có lông len.|N2
+#WORD|pato|pato|Con vịt|El pato nada lago.~Vịt bơi hồ nước.|N2
+#TOPIC|t1_do_an_uong|Đồ ăn & Thức uống|
+#WORD|pan|pan|Bánh mì|Como pan fresco.~Tôi ăn bánh mì tươi.|N2
+#WORD|agua|aɣwa|Nước lọc|Bebo agua fría.~Tôi uống nước lạnh.|N2
+#WORD|manzana|mansana|Quả táo|Quiero una manzana.~Tôi muốn một quả táo.|N2
+#WORD|arroz|aɾos|Cơm/Gạo|El arroz con pollo.~Cơm thịt gà.|N2
+#WORD|carne|kaɾne|Thịt|Me gusta la carne.~Tôi thích ăn thịt.|N2
+#WORD|leche|letʃe|Sữa tươi|Bebo leche tibia.~Tôi uống sữa ấm.|N2
+#WORD|cafe|kafe|Cà phê|Tomo café amargo.~Tôi uống cà phê đắng.|N2
+#WORD|jugo|xuɣo|Nước ép|Jugo de naranja.~Nước ép cam.|N2
+#WORD|queso|keso|Phô mai|Queso muy sabroso.~Phô mai rất ngon.|N2
+#WORD|huevo|uebo|Trứng|Huevo frito rico.~Trứng ốp la ngon.|N2
+#TOPIC|t1_thoi_tiet|Thời tiết & Khí hậu|
+#WORD|sol|sol|Mặt trời|El sol brilla hoy.~Trời hôm nay nắng.|N2
+#WORD|lluvia|ʎubia|Mưa|La lluvia cae fuerte.~Mưa rơi rất nặng.|N2
+#WORD|nieve|nieve|Tuyết|La nieve es blanca.~Tuyết màu trắng.|N2
+#WORD|viento|biento|Gió|Hay mucho viento.~Trời rất nhiều gió.|N2
+#WORD|nube|nube|Đám mây|El cielo tiene nubes.~Trời có mây.|N2
+#WORD|calor|kaloɾ|Nóng|Hace mucho calor.~Trời rất nóng bức.|N2
+#WORD|frio|fɾio|Lạnh|Tengo mucho frío.~Tôi thấy rất lạnh.|N2
+#WORD|tormenta|toɾmenta|Bão|Se acerca tormenta.~Bão đang đến gần.|N2
+#WORD|niebla|niebla|Sương mù|Mucha niebla fuera.~Ngoài sương mù dày.|N2
+#WORD|clima|klima|Khí hậu|El clima es agradable.~Khí hậu rất dễ chịu.|N2
+#TIER|1|3
+#TOPIC|t1_chao_hoi|Chào hỏi & Giới thiệu bản thân|
+#WORD|hola|ola|Xin chào|Hola, ¿cómo estás?~Xin chào, bạn khỏe không?|V
+#WORD|adios|adios|Tạm biệt|Adiós, hasta luego.~Tạm biệt, hẹn gặp lại.|V
+#WORD|gracias|gɾasias|Cảm ơn|Muchas gracias por todo.~Cảm ơn bạn rất nhiều.|V
+#WORD|nombre|nombɾe|Tên|Mi nombre es Juan.~Tên tôi là Juan.|N2
+#WORD|gusto|ɣusto|Hân hạnh|Mucho gusto en conocerte.~Rất vui được gặp bạn.|N2
+#WORD|porfavor|poɾfavor|Làm ơn|Ayúdame, por favor.~Làm ơn giúp tôi với.|V
+#WORD|perdon|peɾdon|Xin lỗi|Perdón por llegar tarde.~Xin lỗi vì đến muộn.|V
+#WORD|bien|bien|Tốt/Khỏe|Estoy muy bien hoy.~Hôm nay tôi rất khỏe.|ADJ
+#WORD|si|si|Vâng/Có|Sí, entiendo bien.~Vâng, tôi hiểu rõ.|V
+#WORD|no|no|Không|No quiero eso.~Tôi không muốn thế.|V
+#TOPIC|t1_so_mau|Số đếm & Màu sắc|
+#WORD|uno|uno|Số một|Tengo uno hermano.~Tôi có một anh em.|NUM
+#WORD|dos|dos|Số hai|Dos tazas de café.~Hai tách cà phê.|NUM
+#WORD|tres|tres|Số ba|Tres libros nuevos.~Ba quyển sách mới.|NUM
+#WORD|rojo|roxo|Màu đỏ|La rosa es roja.~Hoa hồng màu đỏ.|ADJ
+#WORD|azul|asul|Màu xanh dương|El mar es azul.~Biển màu xanh dương.|ADJ
+#WORD|verde|beɾde|Màu xanh lá|La hierba es verde.~Cỏ màu xanh lá.|ADJ
+#WORD|blanco|blanko|Màu trắng|Nieve blanca pura.~Tuyết trắng tinh khiết.|ADJ
+#WORD|negro|neɣɾo|Màu đen|Gato negro misterioso.~Mèo đen bí ẩn.|ADJ
+#WORD|amarillo|amaɾiʎo|Màu vàng|Sol amarillo brillante.~Mặt trời vàng óng.|ADJ
+#WORD|diez|dies|Số mười|Diez dedos tengo.~Tôi có mười ngón tay.|NUM
+#TOPIC|t1_co_the|Các bộ phận cơ thể|
+#WORD|cabeza|kabesa|Cái đầu|Me duele la cabeza.~Tôi bị đau đầu.|N2
+#WORD|mano|mano|Bàn tay|Lava tus manos.~Hãy rửa tay đi.|N2
+#WORD|pie|pie|Bàn chân|Me duele el pie.~Tôi bị đau chân.|N2
+#WORD|ojo|oxo|Mắt|Tiene ojos negros.~Anh ấy mắt đen.|N2
+#WORD|boca|boka|Miệng|Abre la boca.~Há miệng ra xem.|N2
+#WORD|nariz|naɾis|Mũi|Tiene nariz pequeña.~Cô ấy mũi nhỏ.|N2
+#WORD|oreja|orexa|Tai|Escucha con oreja.~Lắng nghe bằng tai.|N2
+#WORD|pelo|pelo|Tóc|Tiene pelo largo.~Cô ấy tóc dài.|N2
+#WORD|brazo|braso|Tay|Levanta tu brazo.~Hãy giơ tay lên.|N2
+#WORD|corazón|koɾason|Trái tim|Corazón late fuerte.~Tim đập rất mạnh.|N2
+#TOPIC|t1_dung_cu_ht|Đồ dùng học tập|
+#WORD|lapiz|lapis|Bút chì|Escribe con lápiz.~Viết bằng bút chì.|N2
+#WORD|boligrafo|boliɣɾafo|Bút bi|Usa bolígrafo azul.~Dùng bút bi xanh.|N2
+#WORD|libro|libɾo|Cuốn sách|Leo un libro.~Tôi đọc một sách.|N2
+#WORD|cuaderno|kwadeɾno|Vở ghi chép|Escribe en cuaderno.~Viết vào vở ghi.|N2
+#WORD|papel|papel|Giấy|Una hoja de papel.~Một tờ giấy trắng.|N2
+#WORD|mochila|motʃila|Cặp sách|Mi mochila es nueva.~Cặp sách tôi mới.|N2
+#WORD|goma|goma|Cục tẩy|Borra con goma.~Tẩy bằng cục tẩy.|N2
+#WORD|regera|reɣla|Thước kẻ|Mide con regla.~Đo bằng thước kẻ.|N2
+#WORD|tijeras|tixeɾas|Cái kéo|Corta con tijeras.~Cắt bằng cái kéo.|N2
+#WORD|mesa|mesa|Bàn học|Sienta en la mesa.~Ngồi vào bàn học.|N2
+#TIER|2|1
+#TOPIC|t2_le_hoi|Lễ hội & Văn hóa Tây Ban Nha|
+#WORD|navidad|nabidad|Giáng sinh|Feliz Navidad a todos.~Giáng sinh vui vẻ nhé.|N2
+#WORD|pascua|paskwa|Lễ Phục sinh|Huevos de Pascua.~Trứng lễ Phục sinh.|N2
+#WORD|feria|feɾia|Hội chợ|Feria de abril.~Hội chợ tháng Tư.|N2
+#WORD|danza|dansa|Điệu múa|Danza flamenca famosa.~Múa Flamenco nổi tiếng.|N2
+#WORD|musica|musika|Âm nhạc|Música española bonita.~Âm nhạc Tây Ban Nha hay.|N2
+#WORD|fiesta|fiesta|Lễ hội|Fiesta tradicional.~Lễ hội truyền thống.|N2
+#WORD|tradicion|tɾadision|Truyền thống|Mantener tradición.~Duy trì truyền thống.|N2
+#WORD|cultura|kultuɾa|Văn hóa|Cultura rica.~Văn hóa phong phú.|N2
+#WORD|costumbre|kostumbɾe|Phong tục|Costumbres locales.~Phong tục địa phương.|N2
+#WORD|arte|aɾte|Nghệ thuật|Museo de arte.~Bảo tàng nghệ thuật.|N2
+#TOPIC|t2_cong_viec|Công việc cơ bản|
+#WORD|oficina|ofisina|Văn phòng|Trabajo en oficina.~Tôi làm văn phòng.|N2
+#WORD|jefe|xefe|Sếp/Quản lý|Mi jefe es estricto.~Sếp tôi rất nghiêm.|N1
+#WORD|empleado|empleado|Nhân viên|Somos diez empleados.~Chúng tôi mười nhân viên.|N1
+#WORD|reunion|reunion|Cuộc họp|Reunión a las tres.~Họp lúc ba giờ.|N2
+#WORD|salario|salaɾio|Tiền lương|Salario mensual bueno.~Lương hàng tháng tốt.|N2
+#WORD|proyecto|pɾoyekto|Dự án|Proyecto importante.~Dự án quan trọng.|N2
+#WORD|contrato|kontɾato|Hợp đồng|Firmar el contrato.~Ký kết hợp đồng.|N2
+#WORD|correo|koɾeo|Thư điện tử|Envía un correo.~Hãy gửi email đi.|N2
+#WORD|telefono|telefono|Điện thoại|Contesta el teléfono.~Nghe điện thoại đi.|N2
+#WORD|empresa|empɾesa|Công ty|Empresa internacional.~Công ty quốc tế.|N2
+#TOPIC|t2_mang_xa_hoi|Phương tiện truyền thông xã hội|
+#WORD|redes|redes|Mạng xã hội|Uso redes sociales.~Tôi dùng MXH.|N2
+#WORD|mensaje|mensaje|Tin nhắn|Envía un mensaje.~Gửi một tin nhắn.|N2
+#WORD|perfil|peɾfil|Hồ sơ cá nhân|Actualiza tu perfil.~Cập nhật hồ sơ đi.|N2
+#WORD|video|video|Video|Sube un video.~Đăng tải một video.|N2
+#WORD|foto|foto|Bức ảnh|Saca una foto.~Chụp một bức ảnh.|N2
+#WORD|enlace|enlake|Đường link|Haz clic en enlace.~Nhấn vào đường link.|N2
+#WORD|pantalla|pantalla|Màn hình|Pantalla muy grande.~Màn hình rất lớn.|N2
+#WORD|clave|klave|Mật khẩu|Introduce tu clave.~Nhập mật khẩu vào.|N2
+#WORD|usuario|usuario|Tên người dùng|Nombre de usuario.~Tên người dùng mới.|N2
+#WORD|conexion|koneksion|Kết nối|Conexión a internet.~Kết nối internet nhanh.|N2
+#TIER|2|2
+#TOPIC|t2_du_lich|Du lịch & Đặt phòng khách sạn|
+#WORD|hotel|otel|Khách sạn|Reservar un hotel.~Đặt một phòng khách sạn.|N2
+#WORD|viaje|viaxe|Chuyến du lịch|Buen viaje.~Chúc chuyến đi tốt.|N2
+#WORD|maleta|maleta|Va li du lịch|Empacar la maleta.~Đóng gói vali đi.|N2
+#WORD|pasaporte|pasapoɾte|Hộ chiếu|Muestra tu pasaporte.~Xuất trình hộ chiếu.|N2
+#WORD|boleto|boleto|Vé xe/máy bay|Comprar un boleto.~Mua một vé xe.|N2
+#WORD|turista|tuɾista|Khách du lịch|Muchos turistas aquí.~Nhiều khách du lịch.|N1
+#WORD|mapa|mapa|Bản đồ|Busca en el mapa.~Tìm trên bản đồ đi.|N2
+#WORD|playa|plaʎa|Bãi biển|Nadar en la playa.~Bơi ở bãi biển.|N2
+#WORD|habitacion|abitasion|Phòng nghỉ|Habitación doble.~Phòng đôi khách sạn.|N2
+#WORD|guia|gija|Hướng dẫn viên|Guía turístico amable.~HDV rất thân thiện.|N1
+#TOPIC|t2_suc_khoe|Sức khỏe & Lối sống lành mạnh|
+#WORD|salud|salud|Sức khỏe|La salud es oro.~Sức khỏe là vàng.|N2
+#WORD|medicina|medisina|Thuốc men|Toma tu medicina.~Uống thuốc của bạn.|N2
+#WORD|hospital|ospital|Bệnh viện|Ir al hospital.~Đi đến bệnh viện.|N2
+#WORD|doctor|doktoɾ|Bác sĩ|El doctor ayuda.~Bác sĩ giúp đỡ.|N1
+#WORD|farmacia|faɾmasia|Nhà thuốc|Comprar en farmacia.~Mua ở tiệm thuốc.|N2
+#WORD|fiebre|fieβɾe|Sốt|Tengo fiebre alta.~Tôi bị sốt cao.|N2
+#WORD|dolor|doloɾ|Cơn đau|Dolor de garganta.~Đau họng quá đi.|N2
+#WORD|ejercicio|exerxisio|Tập thể dục|Hacer ejercicio.~Tập thể dục hàng ngày.|V
+#WORD|descanso|deskanso|Nغhỉ ngơi|Necesito descanso.~Tôi cần nghỉ ngơi.|N2
+#WORD|dieta|dieta|Chế độ ăn|Dieta equilibrada.~Chế độ ăn cân đối.|N2
+#TOPIC|t2_cam_xuc|Cảm xúc & Tâm trạng|
+#WORD|feliz|felis|Vui vẻ|Estoy muy feliz.~Tôi đang rất vui.|ADJ
+#WORD|triste|triste|Buồn bã|Me siento triste.~Tôi cảm thấy buồn.|ADJ
+#WORD|enojado|enoxado|Tức giận|No estés enojado.~Đừng có giận dữ.|ADJ
+#WORD|miedo|miedo|Sợ hãi|Tengo miedo.~Tôi đang sợ hãi.|N2
+#WORD|sorpresa|soɾpesa|Ngạc nhiên|Qué gran sorpresa.~Thật bất ngờ lớn.|N2
+#WORD|ansioso|ansioso|Lo lắng|Estudio ansioso.~Tôi học lo lắng.|ADJ
+#WORD|cansado|kansado|Mệt mỏi|Estoy muy cansado.~Tôi rất mệt mỏi.|ADJ
+#WORD|calmo|kalmo|Bình tĩnh|Mantente calmo.~Hãy giữ bình tĩnh.|ADJ
+#WORD|emocionado|emosionado|Hứng khởi|Estoy emocionado.~Tôi rất hào hứng.|ADJ
+#WORD|aburrido|abuɾido|Chán nản|Estoy aburrido.~Tôi cảm thấy chán.|ADJ
+#TIER|2|3
+#TOPIC|t2_mua_sam|Mua sắm & Đàm phán giá cả|
+#WORD|tienda|tienda|Cửa hàng|Comprar en tienda.~Mua ở cửa hàng.|N2
+#WORD|precio|pɾesio|Giá cả|¿Qué precio tiene?~Giá của cái này là gì?|N2
+#WORD|caro|kaɾo|Đắt đỏ|Es muy caro.~Cái này rất đắt.|ADJ
+#WORD|barato|baɾato|Rẻ|Es bastante barato.~Khá là rẻ tiền.|ADJ
+#WORD|descuento|deskuento|Giảm giá|Hay descuento.~Có giảm giá đấy.|N2
+#WORD|dinero|dineɾo|Tiền bạc|No tengo dinero.~Tôi không có tiền.|N2
+#WORD|tarjeta|taɾxeta|Thẻ ngân hàng|Pago con tarjeta.~Tôi trả bằng thẻ.|N2
+#WORD|efectivo|efektivo|Tiền mặt|Pago en efectivo.~Tôi trả tiền mặt.|N2
+#WORD|bolsa|bolsa|Túi đựng|¿Una bolsa, por favor?~Cho cái túi nhé?|N2
+#WORD|cambio|kambio|Tiền thừa|Aquí tiene su cambio.~Tiền thừa của bạn đây.|N2
+#TOPIC|t2_ngoai_hinh|Mô tả ngoại hình & Tính cách|
+#WORD|alto|alto|Cao lớn|Mi hermano es alto.~Em trai tôi cao.|ADJ
+#WORD|bajo|baxo|Thấp bé|Soy un poco bajo.~Tôi hơi thấp bé.|ADJ
+#WORD|guapo|gwapo|Đẹp trai|Él es muy guapo.~Anh ấy rất đẹp trai.|ADJ
+#WORD|bonito|bonito|Định dạng đẹp|Ella es bonita.~Cô ấy rất xinh đẹp.|ADJ
+#WORD|amable|amable|Tốt bụng|Eres muy amable.~Bạn rất tốt bụng.|ADJ
+#WORD|inteligente|inteligente|Thông minh|Ella es inteligente.~Cô ấy thông minh.|ADJ
+#WORD|serio|seɾio|Nghiêm túc|Él es muy serio.~Anh ấy rất nghiêm túc.|ADJ
+#WORD|timido|timido|Rụt rè|El niño es tímido.~Đứa bé rất rụt rè.|ADJ
+#WORD|alegre|aleɣɾe|Vui tươi|Una chica alegre.~Một cô gái vui tươi.|ADJ
+#WORD|fuerte|fueɾte|Khỏe mạnh|Un hombre fuerte.~Một người đàn ông khỏe.|ADJ
+#TOPIC|t2_the_thao|Thể thao & Vận động|
+#WORD|futbol|futbol|Bóng đá|Jugar al fútbol.~Chơi đá bóng.|N2
+#WORD|baloncesto|baloncesto|Bóng rổ|Juego baloncesto.~Tôi chơi bóng rổ.|N2
+#WORD|tenis|tenis|Quần vợt|Partido de tenis.~Trận đấu quần vợt.|N2
+#WORD|natacion|natasion|Bơi lội|Practico natación.~Tôi tập bơi lội.|N2
+#WORD|carrera|kaɾera|Cuộc đua|Carrera de 100m.~Cuộc đua 100 mét.|N2
+#WORD|equipo|ekipo|Đội thể thao|Mi equipo ganó.~Đội tôi đã thắng.|N2
+#WORD|partido|paɾtido|Trận đấu|Partidos del domingo.~Trận đấu chủ nhật.|N2
+#WORD|pelota|pelota|Quả bóng|Patea la pelota.~Hãy sút quả bóng.|N2
+#WORD|medalla|medaʎa|Huy chương|Ganar una medalla.~Giành huy chương vàng.|N2
+#WORD|gimnasio|ximnasio|Phòng gym|Voy al gimnasio.~Tôi đi phòng gym.|N2
+#TIER|2|4
+#TOPIC|t2_giao_thong|Phương tiện giao thông công cộng|
+#WORD|autobus|autobus|Xe buýt|Tomar el autobús.~Đi xe buýt công cộng.|N2
+#WORD|tren|tɾen|Tàu hỏa|El tren llega.~Tàu hỏa đang đến.|N2
+#WORD|metro|metɾo|Tàu điện ngầm|Viajar en metro.~Đi tàu điện ngầm.|N2
+#WORD|taxi|taksi|Xe taxi|Llamar un taxi.~Gọi một chiếc taxi.|N2
+#WORD|avion|avion|Máy bay|El avión vuela.~Máy bay đang bay.|N2
+#WORD|estacion|estasion|Ga/Bến xe|Estación central.~Ga trung tâm thành phố.|N2
+#WORD|parada|paɾada|Trạm dừng|Próxima parada.~Trạm dừng tiếp theo.|N2
+#WORD|viaje|viaxe|Chuyến đi|Buen viaje en tren.~Chuyến tàu tốt lành.|N2
+#WORD|boleto|boleto|Vé xe|Comprar un boleto.~Mua vé xe buýt.|N2
+#WORD|trafico|tɾafiko|Giao thông|Mucho tráfico hoy.~Đông xe cộ hôm nay.|N2
+#TOPIC|t2_thanh_pho|Địa điểm trong thành phố|
+#WORD|calle|kaʎe|Đường phố|Calle muy larga.~Phố rất dài.|N2
+#WORD|plaza|plasa|Quảng trường|Plaza mayor.~Quảng trường lớn.|N2
+#WORD|parque|paɾke|Công viên|Pasear por parque.~Dạo chơi công viên.|N2
+#WORD|museo|museo|Bảo tàng|Visitar el museo.~Thăm quan bảo tàng.|N2
+#WORD|iglesia|iɣlesia|Nhà thờ|Iglesia antigua.~Nhà thờ cổ kính.|N2
+#WORD|banco|banko|Ngân hàng|Ir al banco.~Đi đến ngân hàng.|N2
+#WORD|correo|koɾeo|Bưu điện|Oficina de correo.~Văn phòng bưu điện.|N2
+#WORD|hospital|ospital|Bệnh viện|Hospital central.~Bệnh viện trung tâm.|N2
+#WORD|tienda|tienda|Cửa hàng|Tienda de ropa.~Cửa hàng quần áo.|N2
+#WORD|puente|puente|Cây cầu|Cruzando el puente.~Đi qua cây cầu.|N2
+#TOPIC|t2_so_thich|Sở thích & Giải trí|
+#WORD|musica|musika|Âm nhạc|Escuchar música.~Nghe nhạc thư giãn.|N2
+#WORD|pintura|pintuɾa|Hội họa|Clase de pintura.~Lớp học hội họa.|N2
+#WORD|fotografia|fotoɣɾafia|Nhiếp ảnh|Afición a foto.~Thích nhiếp ảnh.|N2
+#WORD|lectura|lektuɾa|Đọc sách|Aficionado a lectura.~Thích đọc sách.|N2
+#WORD|jardin|xaɾdin|Làm vườn|Flores en jardín.~Trồng hoa vườn nhà.|N2
+#WORD|cine|sine|Điện ảnh|Ir al cine hoy.~Hôm nay đi xem phim.|N2
+#WORD|baile|bailes|Khiêu vũ|Clase de baile.~Lớp học khiêu vũ.|N2
+#WORD|cocina|kosina|Nấu nướng|Arte de cocina.~Nghệ thuật nấu ăn.|N2
+#WORD|viaje|viaxe|Du lịch|Disfrutar viaje.~Tận hưởng chuyến đi.|N2
+#WORD|juego|xueɣo|Trò chơi|Jugar un juego.~Chơi một trò chơi.|N2
+#TIER|3|1
+#TOPIC|t3_tai_chinh|Tài chính cá nhân & Ngân hàng|
+#WORD|cuenta|kwenta|Tài khoản|Abrir una cuenta.~Mở một tài khoản.|N2
+#WORD|ahorro|ahoɾo|Tiền tiết kiệm|Cuenta de ahorro.~Tài khoản tiết kiệm.|N2
+#WORD|prestamo|pɾestamo|Khoản vay|Solicitar préstamo.~Yêu cầu khoản vay.|N2
+#WORD|interes|inteɾes|Lãi suất|Tipo de interés.~Mức lãi suất ngân hàng.|N2
+#WORD|deuda|deuda|Khoản nợ|Pagar la deuda.~Thanh toán khoản nợ.|N2
+#WORD|inversion|inveɾsion|Đầu tư|Inversión segura.~Đầu tư an toàn.|N2
+#WORD|cajero|kaxeɾo|Máy ATM|Buscar un cajero.~Tìm một cây ATM.|N2
+#WORD|tarjeta|taɾxeta|Thẻ tín dụng|Tarjeta de crédito.~Thẻ tín dụng ngân hàng.|N2
+#WORD|firma|fiɾma|Chữ ký|Firma aquí por favor.~Ký tên ở đây nhé.|N2
+#WORD|cheque|tʃeke|Séc ngân hàng|Cobrar un cheque.~Rút tiền bằng séc.|N2
+#TOPIC|t3_giao_tiep_cs|Giao tiếp công sở|
+#WORD|reunion|reunion|Cuộc họp|Reunión importante.~Cuộc họp quan trọng.|N2
+#WORD|informe|infoɾme|Báo cáo|Presentar informe.~Trình bày báo cáo.|N2
+#WORD|colega|koleɣa|Đồng nghiệp|Mi colega trabaja.~Đồng nghiệp làm việc.|N1
+#WORD|proyecto|pɾoyekto|Dự án|Liderar proyecto.~Dẫn dắt dự án mới.|N2
+#WORD|agenda|axenda|Lịch trình|Revisar agenda.~Kiểm tra lịch trình.|N2
+#WORD|gerente|xeɾente|Giám đốc|Hablar con gerente.~Nói chuyện với GĐ.|N1
+#WORD|oficina|ofisina|Văn phòng|Oficina principal.~Văn phòng chính.|N2
+#WORD|asunto|asunto|Vấn đề/Tiêu đề|Asunto urgente.~Vấn đề khẩn cấp.|N2
+#WORD|plazo|plaso|Thời hạn|Plazo de entrega.~Thời hạn giao hàng.|N2
+#WORD|exito|eksito|Thành công|¡Mucho éxito!~Chúc thành công lớn!|N2
+#TOPIC|t3_truyen_thong|Truyền thông & Quảng cáo|
+#WORD|anuncio|anunsio|Quảng cáo|Ver un anuncio.~Xem một quảng cáo.|N2
+#WORD|marca|maɾka|Thương hiệu|Marca famosa.~Thương hiệu nổi tiếng.|N2
+#WORD|medios|medios|Phương tiện TT|Medios masivos.~Phương tiện đại chúng.|N2
+#WORD|prensa|pɾensa|Báo chí|Libertad de prensa.~Tự do báo chí.|N2
+#WORD|noticia|notisia|Tin tức|Última noticia.~Tin tức mới nhất.|N2
+#WORD|campana|kampaña|Chiến dịch|Campaña publicitaria.~Chiến dịch quảng cáo.|N2
+#WORD|publico|publiko|Khán giả|Público atento.~Khán giả chăm chú.|N1
+#WORD|difusion|difusion|Sự phát sóng|Difusión en vivo.~Phát sóng trực tiếp.|N2
+#WORD|estrategia|estɾatexia|Chiến lược|Estrategia de marketing.~Chiến lược marketing.|N2
+#WORD|imagen|imaxen|Hình ảnh|Imagen corporativa.~Hình ảnh doanh nghiệp.|N2
+#TIER|3|2
+#TOPIC|t3_luat_phap|Luật pháp cơ bản & Quyền lợi|
+#WORD|ley|lei|Luật pháp|Cumplir la ley.~Tuân thủ luật pháp.|N2
+#WORD|derecho|deɾetʃo|Quyền lợi|Derechos humanos.~Quyền con người.|N2
+#WORD|justicia|xustisia|Công lý|Buscar justicia.~Tìm kiếm công lý.|N2
+#WORD|abogado|aboɣado|Luật sư|Contratar abogado.~Thuê luật sư riêng.|N1
+#WORD|juicio|xuisio|Phiên tòa|Juicio pendiente.~Phiên tòa đang chờ.|N2
+#WORD|delito|delito|Tội phạm|Cometer delito.~Phạm tội pháp luật.|N2
+#WORD|multa|multa|Tiền phạt|Pagar la multa.~Đóng tiền phạt vi phạm.|N2
+#WORD|firma|fiɾma|Ký kết|Firma de acuerdo.~Ký kết thỏa thuận.|N2
+#WORD|norma|noɾma|Quy tắc|Normas de conducta.~Quy tắc ứng xử.|N2
+#WORD|testigo|testiɣo|Nhân chứng|Testigo clave.~Nhân chứng quan trọng.|N1
+#TOPIC|t3_kinh_doanh|Kinh doanh & Khởi nghiệp|
+#WORD|empresa|empɾesa|Doanh nghiệp|Crear empresa.~Thành lập doanh nghiệp.|N2
+#WORD|socio|sosio|Đối tác|Socio comercial.~Đối tác thương mại.|N1
+#WORD|mercado|meɾkado|Thị trường|Nuevo mercado.~Thị trường mới mẻ.|N2
+#WORD|capital|kapital|Vốn đầu tư|Capital inicial.~Số vốn ban đầu.|N2
+#WORD|beneficio|benefisio|Lợi nhuận|Obtener beneficio.~Thu được lợi nhuận.|N2
+#WORD|riesgo|riesɣo|Rủi ro|Asumir riesgo.~Chịu đựng rủi ro.|N2
+#WORD|estrategia|estɾatexia|Chiến lược|Estrategia comercial.~Chiến lược thương mại.|N2
+#WORD|innovacion|inobasion|Đổi mới|Innovación tecnológica.~Đổi mới công nghệ.|N2
+#WORD|startup|startupr|Công ty khởi nghiệp|Invertir en startup.~Đầu tư vào startup.|N2
+#WORD|cliente|kliente|Khách hàng|Cliente fiel.~Khách hàng trung thành.|N1
+#TOPIC|t3_y_hoc|Y học phổ thông & Hiệu thuốc|
+#WORD|medico|mediko|Bác sĩ|Consulta médica.~Buổi khám bác sĩ.|N1
+#WORD|receta|reseta|Đơn thuốc|Receta médica.~Đơn thuốc của bác sĩ.|N2
+#WORD|pastilla|pasta|Viên thuốc|Tomar pastilla.~Uống viên thuốc này.|N2
+#WORD|jarabe|xaɾabe|Thuốc ho nước|Jarabe para tos.~Thuốc ho dạng nước.|N2
+#WORD|farmacia|faɾmasia|Hiệu thuốc|Ir a farmacia.~Đi đến hiệu thuốc.|N2
+#WORD|sintoma|sintoma|Triệu chứng|Síntomas de gripe.~Triệu chứng cúm mùa.|N2
+#WORD|alergia|aleɾxia|Dị ứng|Alergia al polvo.~Dị ứng với bụi bẩn.|N2
+#WORD|infeccion|infeksion|Nhiễm trùng|Infección leve.~Nhiễm trùng nhẹ nhàng.|N2
+#WORD|vitamina|vitamina|Vitamin|Tomar vitaminas.~Uống bổ sung vitamin.|N2
+#WORD|hospital|ospital|Bệnh viện|Cama de hospital.~Giường bệnh viện lớn.|N2
+#TIER|3|3
+#TOPIC|t3_nghe_thuat|Nghệ thuật & Điện ảnh|
+#WORD|pintura|pintuɾa|Tranh vẽ|Pintura al óleo.~Tranh vẽ sơn dầu.|N2
+#WORD|escultura|eskultuɾa|Điêu khắc|Estatua de máscara.~Tượng điêu khắc đá.|N2
+#WORD|pelicula|pelikula|Phिम ảnh|Película de acción.~Phim hành động hay.|N2
+#WORD|director|direktoɾ|Đạo diễn|Director de cine.~Đạo diễn điện ảnh.|N1
+#WORD|actor|aktoɾ|Nam diễn viên|Actor famoso.~Nam diễn viên nổi tiếng.|N1
+#WORD|actriz|aktɾis|Nữ diễn viên|Actriz principal.~Nữ diễn viên chính.|N1
+#WORD|teatro|teatɾo|Nhà hát|Ir al teatro.~Đi xem nhà hát.|N2
+#WORD|exposicion|exposision|Triển lãm|Exposición de arte.~Triển lãm nghệ thuật.|N2
+#WORD|camara|kamara|Máy quay phim|Cámara de cine.~Máy quay điện ảnh.|N2
+#WORD|escena|esena|Cảnh quay|Escena dramática.~Cảnh quay kịch tính.|N2
+#TOPIC|t3_lich_su|Lịch sử & Sự kiện quốc tế|
+#WORD|historia|istoria|Lịch sử|Clase de historia.~Lớp học lịch sử.|N2
+#WORD|siglo|siɣlo|Thế kỷ|Siglo XXI.~Thế kỷ 21 hiện đại.|N2
+#WORD|imperio|impeɾio|Đế chế|Imperio romano.~Đế chế La Mã cổ.|N2
+#WORD|batalla|bataʎa|Trận chiến|Batalla histórica.~Trận chiến lịch sử.|N2
+#WORD|revolucion|revolusion|Cách mạng|Revolución industrial.~Cách mạng công nghiệp.|N2
+#WORD|tratado|tɾatado|Hiệp ước|Tratado de paz.~Hiệp ước hòa bình.|N2
+#WORD|museo|museo|Bảo tàng|Museo histórico.~Bảo tàng lịch sử.|N2
+#WORD|evento|evento|Sự kiện|Evento mundial.~Sự kiện toàn cầu.|N2
+#WORD|monumento|monumento|Di tích|Monumento antiguo.~Di tích cổ xưa.|N2
+#WORD|pasado|pasado|Quá khứ|En el pasado.~Trong quá khứ xa.|N2
+#TOPIC|t3_am_thuc_tg|Ẩm thực thế giới & Nhà hàng|
+#WORD|restaurante|restauɾante|Nhà hàng|Restaurante italiano.~Nhà hàng món Ý.|N2
+#WORD|camarero|kamaɾeɾo|Phục vụ bàn|Llamar camarero.~Gọi nhân viên phục vụ.|N1
+#WORD|menu|menu|Thực đơn|Ver el menú.~Xem qua thực đơn.|N2
+#WORD|propina|pɾopina|Tiền típ|Dejar propina.~Để lại tiền típ.|N2
+#WORD|plato|plato|Món ăn|Plato principal.~Món ăn chính của bạn.|N2
+#WORD|bebida|bebida|Thức uống|Bebidas frías.~Các thức uống lạnh.|N2
+#WORD|postre|postɾe|Món tráng miệng|Postre dulce.~Món tráng miệng ngọt.|N2
+#WORD|cocina|kosina|Ẩm thực|Cocina japonesa.~Nghệ thuật ẩm thực Nhật.|N2
+#WORD|sabor|saboɾ|Hương vị|Sabor delicioso.~Hương vị rất ngon.|N2
+#WORD|receta|reseta|Công thức nấu ăn|Receta secreta.~Công thức nấu ăn bí mật.|N2
+#TIER|3|4
+#TOPIC|t3_viec_lam|Việc làm & Phỏng vấn tuyển dụng|
+#WORD|curriculum|kurrikulum|Hồ sơ xin việc|Enviar currículum.~Gửi hồ sơ xin việc.|N2
+#WORD|entrevista|entɾevista|Phỏng vấn|Entrevista de trabajo.~Buổi phỏng vấn việc làm.|N2
+#WORD|puesto|puesto|Vị trí tuyển dụng|Puesto vacante.~Vị trí đang tuyển dụng.|N2
+#WORD|candidato|kandidato|Ứng viên|Candidato ideal.~Ứng viên vô cùng lý tưởng.|N1
+#WORD|experiencia|eksperiencia|Kinh nghiệm|Experiencia previa.~Kinh nghiệm làm việc trước.|N2
+#WORD|habilidad|abilidad|Kỹ năng|Habilidades blandas.~Các kỹ năng mềm.|N2
+#WORD|requisito|rekisito|Yêu cầu|Requisitos mínimos.~Các yêu cầu tối thiểu.|N2
+#WORD|contrato|kontɾato|Hợp đồng làm việc|Firmar contrato.~Ký hợp đồng việc làm.|N2
+#WORD|salario|salaɾio|Mức lương|Salario negociable.~Mức lương có thể thỏa thuận.|N2
+#WORD|aspiracion|aspɾasion|Nguyện vọng|Aspiraciones salariales.~Nguyện vọng về tiền lương.|N2
+#TOPIC|t3_do_thi_nong_thon|Đời sống đô thị & Nông thôn|
+#WORD|ciudad|siudad|Thành phố|Ciudad moderna.~Thành phố hiện đại lớn.|N2
+#WORD|pueblo|pueblo|Làng quê|Pueblo tranquilo.~Làng quê yên bình nhỏ.|N2
+#WORD|campo|kampo|Nông thôn|Vida en el campo.~Cuộc sống ở nông thôn.|N2
+#WORD|trafico|tɾafiko|Giao thông đông đúc|Tráfico pesado.~Giao thông đông đúc nặng.|N2
+#WORD|ruido|ruido|Tiếng ồn|Ruido de ciudad.~Tiếng ồn thành phố lớn.|N2
+#WORD|naturaleza|natuɾaleza|Thiên nhiên|Amante de naturaleza.~Người yêu thiên nhiên.|N2
+#WORD|aire|aiɾe|Không khí|Aire puro rural.~Không khí trong lành sạch.|N2
+#WORD|vecino|besino|Láng giềng|Vecino amable.~Người hàng giềng tốt bụng.|N1
+#WORD|poblacion|poblasion|Dân số|Población urbana.~Dân số khu vực đô thị.|N2
+#WORD|tranquilidad|trankilidad|Sự yên tĩnh|Busca tranquilidad.~Tìm kiếm sự yên tĩnh.|N2
+#TOPIC|t3_khoa_hoc|Khoa học thường thức|
+#WORD|ciencia|siensia|Khoa học|Feria de ciencia.~Hội chợ khoa học vui.|N2
+#WORD|experimento|ekspeɾimento|Thí nghiệm|Hacer experimento.~Làm thí nghiệm khoa học.|N2
+#WORD|investigacion|investiɣasion|Nghiên cứu|Investigación científica.~Nghiên cứu tính khoa học.|N2
+#WORD|laboratorio|laboɾatoɾio|Phòng thí nghiệm|En el laboratorio.~Trong phòng thí nghiệm.|N2
+#WORD|teDoria|teoɾia|Lý thuyết|Teoría física.~Lý thuyết vật lý mới.|N2
+#WORD|formula|foɾmula|Công thức hóa học|Fórmula química.~Công thức hóa học chuẩn.|N2
+#WORD|energia|eneɾxia|Năng lượng|Energía solar.~Năng lượng mặt trời sạch.|N2
+#WORD|atomo|atomo|Nguyên tử|Estructura de átomo.~Cấu trúc của nguyên tử.|N2
+#WORD|biologia|bioloɣia|Sinh học|Estudio de biología.~Nghiên cứu về sinh học.|N2
+#WORD|universo|unibeɾso|Vũ trụ|Misterio del universo.~Bí ẩn lớn của vũ trụ.|N2
+#TIER|3|5
+#TOPIC|t3_giao_duc|Giáo dục & Trường học|
+#WORD|escuela|eskuela|Trường học|Escuela primaria.~Trường học tiểu học nhỏ.|N2
+#WORD|universidad|unibeɾsidad|Đại học|Estudiar universidad.~Học đại học lớn ở đây.|N2
+#WORD|profesor|pɾofesoɾ|Giáo viên|Profesor amable.~Thầy giáo rất thân thiện.|N1
+#WORD|alumno|alumno|Học sinh|Alumno aplicado.~Học sinh chăm chỉ học.|N1
+#WORD|examen|eksamen|Kỳ thi|Preparar examen.~Chuẩn bị cho kỳ thi.|N2
+#WORD|calificacion|kalifikasion|Điểm số|Buena calificación.~Điểm số học tập tốt.|N2
+#WORD|clase|klase|Lớp học|Clase de español.~Lớp học tiếng Tây Ban Nha.|N2
+#WORD|tarea|taɾea|Bài tập về nhà|Hacer la tarea.~Làm bài tập về nhà.|N2
+#WORD|diploma|diploma|Bằng cấp|Recibir diploma.~Nhận bằng tốt nghiệp đại học.|N2
+#WORD|beca|beka|Học bổng|Ganar una beca.~Giành được suất học bổng.|N2
+#TOPIC|t3_moi_truong|Môi trường & Thiên nhiên|
+#WORD|medioambiente|medioambiente|Môi trường|Cuidar medioambiente.~Bảo vệ môi trường sống.|N2
+#WORD|reciclaje|resiklaxe|Tái chế|Planta de reciclaje.~Nhà máy tái chế rác.|N2
+#WORD|contaminacion|kontaminasion|Ô nhiễm|Evitar contaminación.~Tránh ô nhiễm không khí.|N2
+#WORD|bosque|boske|Rừng cây|Bosque tropical.~Rừng cây nhiệt đới xanh.|N2
+#WORD|oceano|oseano|Đại dương|Océano Pacífico.~Đại dương Thái Bình Dương.|N2
+#WORD|recargar|rekarkaɾ|Tái tạo|Energía renovable.~Năng lượng tái tạo sạch.|N2
+#WORD|especie|espesie|Loài sinh vật|Especie en peligro.~Loài vật nguy cấp đỏ.|N2
+#WORD|sequia|sekia|Hạn hán|Sufrir sequía.~Gánh chịu hạn hán lớn.|N2
+#WORD|basura|basuɾa|Rác thải|Recoger basura.~Thu gom rác thải sạch.|N2
+#WORD|ecologia|ekoloɣia|Sinh thái học|Estudio de ecología.~Nghiên cứu về sinh thái.|N2
+#TOPIC|t3_cntt|Công nghệ thông tin|
+#WORD|ordenador|ordeṇadoɾ|Máy tính bàn|Comprar ordenador.~Mua máy tính để bàn.|N2
+#WORD|software|softwaɾe|Phần mềm|Instalar software.~Cài đặt phần mềm mới.|N2
+#WORD|hardware|haɾdwaɾe|Phần cứng|Actualizar hardware.~Nâng cấp phần cứng máy.|N2
+#WORD|programa|pɾogɾama|Chương trình|Programa informático.~Chương trình máy tính hay.|N2
+#WORD|archivo|aɾtʃivo|Tệp tin|Guardar archivo.~Lưu tệp tin quan trọng.|N2
+#WORD|servidor|seɾvidoɾ|Máy chủ|Servidor web.~Máy chủ trang web chính.|N2
+#WORD|red|red|Mạng lưới|Red de computadoras.~Mạng lưới máy tính lớn.|N2
+#WORD|pantalla|pantalla|Màn hình máy tính|Pantalla táctil.~Màn hình cảm ứng hiện đại.|N2
+#WORD|teclado|teklaðo|Bàn phím|Teclado inalambrico.~Bàn phím máy tính không dây.|N2
+#WORD|raton|raton|Chuột máy tính|Usar el ratón.~Sử dụng chuột máy tính.|N2
+#TIER|4|1
+#TOPIC|t4_cum_dong_tu|Cụm động từ phản thân (Reflexive Verbs)|
+#WORD|levantarse|lebantaɾse|Thức dậy|Me levanto tarde.~Tôi thức dậy muộn màng.|V
+#WORD|acostarse|akostaɾse|Đi ngủ|Me acuesto pronto.~Tôi đi ngủ sớm nay.|V
+#WORD|ducharse|dutʃaɾse|Tắm rửa|Me ducho ahora.~Tôi tắm rửa ngay bây giờ.|V
+#WORD|vestirse|bestiɾse|Mặc quần áo|Me visto bien.~Tôi mặc quần áo đẹp.|V
+#WORD|cepillarse|sepillaɾse|Đánh răng|Me cepillo dientes.~Tôi đánh răng sạch sẽ.|V
+#WORD|peinarse|peinaɾse|Chải tóc|Me peino el pelo.~Tôi chải tóc gọn gàng.|V
+#WORD|divertirse|dibeɾtiɾse|Vui chơi|Nos divertimos mucho.~Chúng tôi rất vui chơi.|V
+#WORD|preocuparse|pɾeokupaɾse|Lo lắng|No te preocupes.~Đừng có lo lắng nhé.|V
+#WORD|enfermarse|enfeɾmaɾse|Bị ốm|Ella se enfermó.~Cô ấy đã bị ốm rồi.|V
+#WORD|relajarse|relaxaɾse|Thư giãn|Quiero relajarme.~Tôi muốn được thư giãn.|V
+#TOPIC|t4_thanh_ngu|Thành ngữ thông dụng (Idioms)|
+#WORD|pancomido|pankomido|Dễ như ăn kẹo|Es pan comido.~Chuyện đó dễ như kẹo.|ADJ
+#WORD|patas|patas|Chạy biến đi|Poner pies en polvorosa.~Ba chân bốn cẳng chạy.|N2
+#WORD|nubes|nubes|Trên chín tầng mây|Estar en las nubes.~Lơ lửng trên chín mây.|N2
+#WORD|hielo|ielo|Phá băng|Romper el hielo.~Phá vỡ sự ngại ngùng.|N2
+#WORD|manos|manos|Bắt tay hợp tác|Echar una mano.~Giúp đỡ một tay nhé.|N2
+#WORD|memoria|memoɾia|Học thuộc lòng|Saber de memoria.~Thuộc lòng như cháo chảy.|N2
+#WORD|costar|kostaɾ|Đắt cắt cổ|Costar un ojo.~Đắt cắt cổ người mua.|V
+#WORD|sueno|suenyo|Giấc mơ ngọt ngào|Dulces sueños.~Giấc mơ đẹp ban đêm.|N2
+#WORD|cuerno|kuerno|May mắn bất ngờ|Tocar el cuerno.~Gặp may mắn bất ngờ.|N2
+#WORD|fuego|fueɣo|Đùa với lửa|Jugar con fuego.~Đùa với lửa nguy hiểm.|N2
+#TOPIC|t4_tu_ghep|Từ ghép cố định (Collocations)|
+#WORD|tomar|tomaɾ|Đưa ra quyết định|Tomar una decisión.~Đưa ra quyết định quan trọng.|V
+#WORD|prestar|pɾestaɾ|Chú ý lắng nghe|Prestar atención.~Hãy chú ý lắng nghe nhé.|V
+#WORD|cumplir|kumpliɾ|Hoàn thành cam kết|Cumplir promesa.~Hoàn thành lời hứa hẹn.|V
+#WORD|caer|kaeɾ|Mắc bẫy|Caer en la trampa.~Mắc vào chiếc bẫy tinh vi.|V
+#WORD|ganar|ganaɾ|Kiếm sống|Ganar la vida.~Kiếm sống qua ngày tháng.|V
+#WORD|perder|peɾdeɾ|Mất kiên nhẫn|Perder la paciencia.~Mất đi sự kiên nhẫn rồi.|V
+#WORD|guardar|ɡaɾdaɾ|Giữ im lặng|Guardar silencio.~Giữ sự im lặng tuyệt đối.|V
+#WORD|dar|daɾ|Chào tạm biệt|Dar las gracias.~Gửi lời cảm ơn chân thành.|V
+#WORD|hacer|aseɾ|Gây ồn ào|Hacer ruido.~Gây ra tiếng ồn ào lớn.|V
+#WORD|poner|poneɾ|Trở nên lo lắng|Poner nervioso.~Trở nên lo lắng bồn chồn.|V
+#TIER|4|2
+#TOPIC|t4_tai_chinh_dn|Tài chính doanh nghiệp|
+#WORD|balance|balanse|Bảng cân đối kế toán|Balance general.~Bảng cân đối kế toán chung.|N2
+#WORD|activo|aktibo|Tài sản doanh nghiệp|Activo corriente.~Tài sản ngắn hạn doanh nghiệp.|N2
+#WORD|pasivo|pasibo|Nợ phải trả|Pasivo circulante.~Nợ ngắn hạn phải trả.|N2
+#WORD|patrimonio|patɾimonio|Vốn chủ sở hữu|Patrimonio neto.~Vốn chủ sở hữu ròng lớn.|N2
+#WORD|rentabilidad|rentabilidad|Khả năng sinh lời|Alta rentabilidad.~Khả năng sinh lời rất cao.|N2
+#WORD|liquidez|likidez|Tính thanh khoản|Problema de liquidez.~Vấn đề về tính thanh khoản.|N2
+#WORD|auditoria|auditoɾia|Kiểm toán doanh nghiệp|Auditoría interna.~Kiểm toán nội bộ doanh nghiệp.|N2
+#WORD|presupuesto|pɾesupuesto|Ngân sách tài chính|Presupuesto anual.~Bản ngân sách tài chính năm.|N2
+#WORD|dividendo|dibendo|Cổ tức lợi nhuận|Pago de dividendo.~Chi trả cổ tức lợi nhuận.|N2
+#WORD|insolvencia|insolbensia|Sự mất khả năng thanh toán|Declarar insolvencia.~Tuyên bố mất khả năng trả.|N2
+#TOPIC|t4_nang_luong|Năng lượng & Tài nguyên|
+#WORD|petroleo|petɾoleo|Dầu mỏ thô|Pozo de petróleo.~Mỏ khai thác dầu mỏ thô.|N2
+#WORD|carbon|kaɾbon|Than đá|Minas de carbón.~Các mỏ khai thác than đá.|N2
+#WORD|renovable|renobable|Tài nguyên tái tạo|Energía renovable.~Nguồn năng lượng tái tạo sạch.|ADJ
+#WORD|hidroelectrica|iðɾoelektɾika|Thủy điện|Presa hidroeléctrica.~Đập nhà máy sản xuất thủy điện.|N2
+#WORD|nuclear|nukleaɾ|Năng lượng nguyên tử|Energía nuclear.~Nhà máy năng lượng nguyên tử.|ADJ
+#WORD|gasoducto|gasodukto|Đường ống dẫn khí|Construir gasoducto.~Xây dựng đường ống dẫn khí.|N2
+#WORD|yacimiento|yasimiento|Mỏ khoáng sản|Yacimiento minero.~Mỏ khai thác khoáng sản lớn.|N2
+#WORD|sostenibilidad|sostenibilidad|Sự phát triển bền vững|Busca sostenibilidad.~Hướng tới sự phát triển bền vững.|N2
+#WORD|combustible|kombustible|Nhiên liệu hóa thạch|Combustible fósil.~Nhiên liệu hóa thạch gây ô nhiễm.|N2
+#WORD|fotovoltaica|fotoboltaika|Điện mặt trời quang điện|Placa fotovoltaica.~Tấm pin điện mặt trời quang điện.|ADJ
+#TOPIC|t4_y_hoc_uyen_sau|Y học chuyên sâu|
+#WORD|cardiologia|kaɾdioloɣia|Khoa tim mạch|Especialista en cardiología.~Chuyên gia khoa tim mạch giỏi.|N2
+#WORD|neurologia|neuɾoloɣia|Khoa thần kinh học|Estudio de neurología.~Nghiên cứu khoa thần kinh học.|N2
+#WORD|farmacologia|faɾmakoloɣia|Dược lý học|Tratado de farmacología.~Bộ sách nghiên cứu dược lý học.|N2
+#WORD|anestesia|anestesia|Thuốc gây mê phẫu thuật|Aplicar anestesia.~Tiêm thuốc gây mê phẫu thuật.|N2
+#WORD|diagnostico|diaɣnostiko|Chẩn đoán y khoa|Diagnóstico médico.~Bản chẩn đoán y khoa chính xác.|N2
+#WORD|quimioterapia|kimioteɾapia|Hóa trị ung thư|Sesión quimioterapia.~Buổi điều trị hóa trị ung thư.|N2
+#WORD|patologia|patoloɣia|Bệnh học lâm sàng|Laboratorio patología.~Phòng xét nghiệm bệnh học lâm sàng.|N2
+#WORD|epidemiologia|epidemioloɣia|Dịch tễ học|Estudio epidemiológico.~Nghiên cứu thuộc về dịch tễ học.|N2
+#WORD|pediatria|pediatɾia|Khoa nhi khoa|Ala de pediatría.~Khu vực điều trị khoa nhi khoa.|N2
+#WORD|traumatologia|tɾaumatoloɣia|Khoa ngoại chấn thương|Servicio traumatología.~Dịch vụ khoa ngoại chấn thương.|N2
+#TIER|4|3
+#TOPIC|t4_tam_ly_hoc|Tâm lý học hành vi|
+#WORD|conductismo|konduktismo|Thuyết hành vi tâm lý|Teoría del conductismo.~Lý thuyết của thuyết hành vi tâm lý.|N2
+#WORD|psicoanalisis|psikoanalisis|Phân tâm học học thuyết|Estudio psicoanálisis.~Nghiên cứu trường phái phân tâm học.|N2
+#WORD|cognitivo|koɣnitivo|Nhận thức tâm lý|Desarrollo cognitivo.~Quá trình phát triển nhận thức tâm lý.|ADJ
+#WORD|subconciente|subkonciente|Tiềm thức con người|En el subconsciente.~Ẩn sâu trong tiềm thức con người.|N2
+#WORD|neurosis|neuɾosis|Bệnh nhiễu tâm thần kinh|Sintomática neurosis.~Biểu hiện của bệnh nhiễu tâm thần.|N2
+#WORD|introversion|intɾobeɾsion|Tính hướng nội|Nivel de introversión.~Mức độ biểu hiện tính hướng nội.|N2
+#WORD|extroversion|extɾobeɾsion|Tính hướng ngoại|Rasgo extraversión.~Đặc điểm biểu hiện tính hướng ngoại.|N2
+#WORD|resiliencia|resilienxia|Sức bật tâm lý/Khả năng hồi phục|Gran resiliencia.~Sức bật tâm lý và kiên cường lớn.|N2
+#WORD|autoestima|autoestima|Lòng tự trọng cá nhân|Baja autoestima.~Mức độ lòng tự trọng cá nhân thấp.|N2
+#WORD|percepcion|peɾsepsion|Sự tri giác cảm giác|Percepción visual.~Sự tri giác cảm giác qua thị giác.|N2
+#TOPIC|t4_luat_quoc_te|Luật pháp quốc tế|
+#WORD|soberania|sobeɾania|Chủ quyền quốc gia|Soberanía nacional.~Bảo vệ chủ quyền quốc gia toàn vẹn.|N2
+#WORD|diplomacia|diplomasia|Ngoại giao quốc tế|Relación diplomacia.~Quan hệ ngoại giao quốc tế bền chặt.|N2
+#WORD|tratado|tɾatado|Hiệp ước quốc tế|Tratado bilateral.~Ký kết hiệp ước quốc tế song phương.|N2
+#WORD|extradicion|extradision|Sự dẫn độ tội phạm|Orden de extradición.~Lệnh dẫn độ tội phạm quốc tế đi.|N2
+#WORD|asilo|asilo|Quyền tị nạn chính trị|Pedir asilo político.~Xin cấp quyền tị nạn chính trị.|N2
+#WORD|arbitraje|aɾbitɾaxe|Trọng tài quốc tế|Tribunal arbitraje.~Tòa án trọng tài thương mại quốc tế.|N2
+#WORD|ratificacion|ratifikasion|Sự phê chuẩn văn bản|Ratificación de pacto.~Sự phê chuẩn văn bản thỏa thuận.|N2
+#WORD|jurisdiccion|xuɾisdiksion|Quyền tài phán quốc gia|Fuera jurisdicción.~Nằm ngoài thẩm quyền quyền tài phán.|N2
+#WORD|embargo|embaɾgo|Lệnh cấm vận thương mại|Levantar el embargo.~Dỡ bỏ lệnh cấm vận thương mại lớn.|N2
+#WORD|multilateral|multilateɾal|Đa phương quốc tế|Acuerdo multilateral.~Hiệp ước hợp tác đa phương quốc tế.|ADJ
+#TOPIC|t4_nghien_cuu_kh|Nghiên cứu khoa học|
+#WORD|hipotesis|ipotesis|Giả thuyết khoa học|Plantear hipótesis.~Đưa ra giả thuyết khoa học mới mẻ.|N2
+#WORD|metodologia|metodoloɣia|Phương pháp luận nghiên cứu|Metodología de tesis.~Phương pháp luận nghiên cứu luận văn.|N2
+#WORD|empirico|empiɾiko|Dựa trên thực nghiệm|Estudio empírico.~Nghiên cứu dựa trên thực nghiệm khoa học.|ADJ
+#WORD|paradigma|paɾadiɣma|Mô hình tư duy khoa học|Cambio de paradigma.~Sự thay đổi mô hình tư duy khoa học.|N2
+#WORD|correlacion|koɾelasion|Sự tương quan dữ liệu|Alta correlación.~Mức độ tương quan dữ liệu thống kê.|N2
+#WORD|variable|baɾiable|Biến số nghiên cứu|Variable dependiente.~Biến số nghiên cứu phụ thuộc quan trọng.|N2
+#WORD|cualitativo|kwalitativo|Nghiên cứu định tính|Análisis cualitativo.~Phương pháp phân tích nghiên cứu định tính.|ADJ
+#WORD|cuantitativo|kwantitativo|Nghiên cứu định lượng|Método cuantitativo.~Phương pháp nghiên cứu định lượng thống kê.|ADJ
+#WORD|publicacion|publikasion|Ấn phẩm khoa học|Revista de publicación.~Tạp chí chuyên ngành ấn phẩm khoa học.|N2
+#WORD|plagio|plaxio|Hành vi đạo văn khoa học|Evitar el plagio.~Kiểm tra để tránh hành vi đạo văn.|N2
+#TIER|4|4
+#TIER|4|5
+#TIER|5|1
+#TOPIC|t5_hoc_thuat_cao|Từ vựng học thuật chuyên sâu (DELE C1-C2)|
+#WORD|verosimilitud|beɾosimilitud|Tính chân thực đáng tin|Falta de verosimilitud.~Sự thiếu tính chân thực đáng tin cậy.|N2
+#WORD|ubicuidad|ubikuidad|Sự có mặt ở khắp nơi|Fenómeno de ubicuidad.~Hiện tượng sự có mặt ở khắp mọi nơi.|N2
+#WORD|perspicacia|peɾspikasia|Sự sắc sảo minh mẫn|Gran perspicacia mental.~Sự sắc sảo minh mẫn trong tư duy trí tuệ.|N2
+#WORD|inexorable|inexoɾable|Không thể lay chuyển/Tất yếu|Ley inexorable del tiempo.~Quy luật tất yếu không thể lay chuyển.|ADJ
+#WORD|superfluo|supeɾfluo|Phù phiếm thừa thãi|Gasto muy superfluo.~Khoản chi tiêu phù phiếm và thừa thãi.|ADJ
+#WORD|parsimonia|paɾsimonia|Sự thong thả điềm đạm|Actuar con parsimonia.~Hành động với sự thong thả và điềm đạm.|N2
+#WORD|pusilanime|pusilanime|Tính nhát gan yếu đuối|Carácter pusilánime.~Tính cách nhát gan và yếu đuối đáng trách.|ADJ
+#WORD|efimero|efimeɾo|Phù du ngắn ngủi|Belleza efímera de vida.~Vẻ đẹp phù du ngắn ngủi của cuộc đời.|ADJ
+#WORD|socarron|sokaɾon|Tính láu cá mỉa mai|Sonrisa socarrón.~Nụ cười mang tính láu cá và mỉa mai ẩn ý.|ADJ
+#WORD|vicisitud|visisitud|Sự thăng trầm biến đổi|Vicisitudes de la vida.~Những sự thăng trầm biến đổi trong cuộc đời.|N2

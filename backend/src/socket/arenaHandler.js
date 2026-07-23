@@ -1,5 +1,5 @@
 import { ArenaTournamentRoom, Flashcard, BotConfig } from "../models/Schemas.js";
-import { CourseRank, CourseTier, CourseLesson } from "../models/Course.js";
+import { Course, CourseRank, CourseTier, CourseLesson } from "../models/Course.js";
 import { BUILTIN_FLASHCARD_SETS } from "../data/builtinLearning/index.js";
 import User from "../models/User.js";
 import { arenaQueue, activeArenaRooms, tournamentLobbies, userSockets } from "./state.js";
@@ -149,25 +149,53 @@ const buildTournamentMatchData = async (playerAUid, playerBUid) => {
   };
 };
 
-const buildArenaDeck = async (rankId, tierNum) => {
+const buildArenaDeck = async (rankId, tierNum, languageCode = "en") => {
   let validWords = [];
   try {
-    const ranks = await CourseRank.find({ rankId: Number(rankId) }).lean();
-    if (ranks && ranks.length > 0) {
-      const rank = ranks[0];
-      const tier = await CourseTier.findOne({ rankId: rank._id, tierNum: Number(tierNum) }).lean();
-      if (tier) {
-        const lessons = await CourseLesson.find({ tierId: tier._id }).lean();
-        lessons.forEach((l) => {
+    console.log(`[Arena Debug Deck] languageCode: ${languageCode}, rankId: ${rankId}, tierNum: ${tierNum}`);
+    const course = await Course.findOne({ languageCode }).lean();
+    if (course) {
+      console.log(`[Arena Debug Deck] Found course: ${course._id}`);
+      const rank = await CourseRank.findOne({ rankId: Number(rankId) }).lean();
+      if (rank) {
+        const tier = await CourseTier.findOne({ rankId: rank._id, tierNum: Number(tierNum), courseId: course._id }).lean();
+        if (tier) {
+          const lessons = await CourseLesson.find({ tierId: tier._id }).lean();
+          lessons.forEach((l) => {
+            if (l.words && Array.isArray(l.words)) {
+              validWords.push(...l.words);
+            }
+          });
+          console.log(`[Arena Debug Deck] Found ${validWords.length} words in specific tier ${tier._id}`);
+        } else {
+          console.log(`[Arena Debug Deck] Tier ${tierNum} not found in rank ${rank._id} for course ${course._id}`);
+        }
+      } else {
+        console.log(`[Arena Debug Deck] Rank ${rankId} not found in DB`);
+      }
+
+      if (validWords.length < 10) {
+        console.log(`[Arena Debug Deck] Fallback to entire course lessons for ${languageCode}`);
+        const allTiers = await CourseTier.find({ courseId: course._id }).lean();
+        const allTierIds = allTiers.map(t => t._id);
+        const allLessons = await CourseLesson.find({ tierId: { $in: allTierIds } }).lean();
+        allLessons.forEach((l) => {
           if (l.words && Array.isArray(l.words)) {
             validWords.push(...l.words);
           }
         });
+        console.log(`[Arena Debug Deck] Aggregated ${validWords.length} words from entire course ${languageCode}`);
       }
+    } else {
+      console.log(`[Arena Debug Deck] Course not found for languageCode: ${languageCode}`);
     }
   } catch (error) {
     console.error("[Arena] Error building deck:", error);
   }
+
+  const uniqueWordsMap = new Map();
+  validWords.forEach(w => uniqueWordsMap.set(w.id || w.term, w));
+  validWords = Array.from(uniqueWordsMap.values());
 
   if (validWords.length < 10) {
     validWords = getBuiltinTournamentWords();
@@ -513,7 +541,7 @@ const startSoloBotMatch = (entry, io, botRankOverride = null) => {
 const tryCreateSoloRoom = (entry, io) => {
   if (!entry || !isQueueEntryAlive(entry)) return false;
   const liveSoloQueue = getLiveArenaQueue("solo");
-  const opponent = liveSoloQueue.find((item) => item.queueToken !== entry.queueToken && getUid(item.user) !== getUid(entry.user));
+  const opponent = liveSoloQueue.find((item) => item.queueToken !== entry.queueToken && getUid(item.user) !== getUid(entry.user) && item.language === entry.language);
   if (!opponent) return false;
 
   const first = dequeueArenaEntry(opponent, "solo_human");
@@ -534,24 +562,34 @@ const tryCreateSoloRoom = (entry, io) => {
 
 const tryCreateTeam2v2Room = (forceEntry = null, io) => {
   const liveTeamQueue = getLiveArenaQueue("team2v2");
-  if (liveTeamQueue.length >= 4) {
-    const picked = liveTeamQueue
-      .slice(0, 4)
-      .map((entry) => dequeueArenaEntry(entry, "team2v2_human"))
-      .filter(Boolean);
-    if (picked.length >= 4) {
-      createArenaRoom(
-        picked.map((entry, index) => ({ ...entry.user, socket: entry.socket, team: index < 2 ? "blue" : "red" })),
-        picked[0].matchData,
-        "team2v2",
-        io,
-      );
-      return true;
+  
+  const languageGroups = {};
+  for (const entry of liveTeamQueue) {
+    const lang = entry.language || "en";
+    languageGroups[lang] = languageGroups[lang] || [];
+    languageGroups[lang].push(entry);
+  }
+
+  for (const lang of Object.keys(languageGroups)) {
+    if (languageGroups[lang].length >= 4) {
+      const picked = languageGroups[lang]
+        .slice(0, 4)
+        .map((entry) => dequeueArenaEntry(entry, "team2v2_human"))
+        .filter(Boolean);
+      if (picked.length >= 4) {
+        createArenaRoom(
+          picked.map((entry, index) => ({ ...entry.user, socket: entry.socket, team: index < 2 ? "blue" : "red" })),
+          picked[0].matchData,
+          "team2v2",
+          io,
+        );
+        return true;
+      }
     }
   }
 
   if (forceEntry && isQueueEntryAlive(forceEntry) && isBotEligible(forceEntry.user)) {
-    const liveQueue = getLiveArenaQueue("team2v2");
+    const liveQueue = getLiveArenaQueue("team2v2").filter(item => item.language === forceEntry.language);
     const pickedEntries = [];
     const forceLive = liveQueue.find((entry) => entry.queueToken === forceEntry.queueToken) || forceEntry;
     if (forceLive && isQueueEntryAlive(forceLive)) pickedEntries.push(forceLive);
@@ -645,7 +683,7 @@ export function registerArenaHandlers(io, socket) {
 
     let freshProfile = null;
     try {
-      freshProfile = await User.findById(uid).select("displayName photoURL rankId tier stars arenaMatchesPlayed").lean();
+      freshProfile = await User.findById(uid).select("displayName photoURL rankId tier stars arenaMatchesPlayed targetLanguage").lean();
     } catch (err) {
       console.warn("[Arena] Cannot refresh user profile for bot difficulty:", err.message);
     }
@@ -660,9 +698,14 @@ export function registerArenaHandlers(io, socket) {
       tier: Number(freshProfile?.tier || user.tier || 3),
       stars: Number(freshProfile?.stars || user.stars || 0),
       arenaMatchesPlayed: Number(freshProfile?.arenaMatchesPlayed || user.arenaMatchesPlayed || 0),
+      targetLanguage: freshProfile?.targetLanguage || user.targetLanguage || "en",
     };
 
-    const serverDeck = await buildArenaDeck(entryUser.rankId, entryUser.tier);
+    console.log(`[Arena Debug] find_arena_match called by uid: ${uid}`);
+    console.log(`[Arena Debug] entryUser targetLanguage: ${entryUser.targetLanguage}, rank: ${entryUser.rankId}, tier: ${entryUser.tier}`);
+
+    const serverDeck = await buildArenaDeck(entryUser.rankId, entryUser.tier, entryUser.targetLanguage);
+    console.log(`[Arena Debug] serverDeck returned ${serverDeck.cards.length} cards.`);
 
     // If user explicitly chose a bot rank, create bot match immediately
     const safeBotRankOverride = botRankOverride != null ? Number(botRankOverride) : null;
@@ -678,6 +721,7 @@ export function registerArenaHandlers(io, socket) {
       matchData: serverDeck,
       mode: arenaMode,
       targetSlotIndex,
+      language: entryUser.targetLanguage,
       timer: null,
     });
 
