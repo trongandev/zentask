@@ -289,7 +289,7 @@ const connectDB = async () => {
     console.log(`MongoDB Connected: ${conn.connection.host}`);
 
     // Dùng hàm dưới đây khi bạn muốn reset toàn bộ dữ liệu khóa học
-    await seedDropTable();
+    // await seedDropTable();
 
     // Run seeders
     await seedDailyTasks();
