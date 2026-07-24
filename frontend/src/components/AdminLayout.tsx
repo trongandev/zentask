@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Outlet, Navigate, NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Shield, Users, ListTodo, LogOut, ArrowLeft, BookOpen, Type, HelpCircle, History, Bot, Activity, LayoutDashboard, MessageSquare, Clock, Menu, ChevronLeft } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
 
 export function AdminLayout() {
   const { user } = useAuth();
@@ -54,12 +55,12 @@ export function AdminLayout() {
       {/* Sidebar */}
       <aside className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} transition-[width] duration-300 bg-white border-r border-gray-200 flex flex-col relative`}>
         {/* Toggle Button */}
-        <button 
+        <Button 
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 shadow-sm z-50"
         >
           {isSidebarCollapsed ? <Menu className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
-        </button>
+        </Button>
 
         <div className={`p-6 border-b border-gray-100 flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3'} text-red-600 overflow-hidden`}>
           <Shield className="w-8 h-8 shrink-0" />
@@ -85,10 +86,10 @@ export function AdminLayout() {
             <ArrowLeft className="w-5 h-5 shrink-0" />
             {!isSidebarCollapsed && <span className="whitespace-nowrap">Về ứng dụng</span>}
           </NavLink>
-          <button title={isSidebarCollapsed ? "Đăng xuất" : undefined} className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'} rounded-xl font-bold text-red-600 hover:bg-red-50 transition-all w-full`}>
+          <Button title={isSidebarCollapsed ? "Đăng xuất" : undefined} className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'} rounded-xl font-bold text-red-600 hover:bg-red-50 transition-all w-full`}>
             <LogOut className="w-5 h-5 shrink-0" />
             {!isSidebarCollapsed && <span className="whitespace-nowrap">Đăng xuất</span>}
-          </button>
+          </Button>
         </div>
       </aside>
 

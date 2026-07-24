@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { MessageSquare, ShieldAlert, Trash2 } from "lucide-react";
 import { adminService } from "../../services/adminService";
 import { DataTable } from "../../components/Admin/DataTable";
-import { UserAvatar } from "../../components/UserAvatar";
+import { UserAvatar } from "../../components/ui/UserAvatar";
+import { Button } from "@/src/components/ui/Button";
 
 export function AdminCommunityPosts() {
   const [data, setData] = useState({ items: [], totalPages: 1 });
@@ -70,13 +71,9 @@ export function AdminCommunityPosts() {
       header: "Hành động",
       align: "right" as const,
       render: (item: any) => (
-        <button
-          onClick={() => handleDelete(item.id || item._id)}
-          className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
-          title="Xoá bài viết"
-        >
+        <Button onClick={() => handleDelete(item.id || item._id)} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors" title="Xoá bài viết">
           <Trash2 className="w-4 h-4" />
-        </button>
+        </Button>
       ),
     },
   ];

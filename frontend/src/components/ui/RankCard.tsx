@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { RANK_CONFIG } from "../../config/rankTopicConfig";
 import { cn } from "../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 interface RankCardProps {
   showButton?: boolean;
@@ -37,12 +38,12 @@ export function RankCard({ showButton = false, buttonText = "Bắt đầu đấu
           <Medal className="w-12 h-12 text-blue-300 mb-4 opacity-80" />
           <h2 className="text-xl font-bold text-white mb-2">Đấu Hạng Zentask</h2>
           <p className="text-blue-200 text-sm mb-6 max-w-[200px]">Hãy đăng nhập để tham gia đấu hạng, so tài và leo lên đỉnh vinh quang!</p>
-          <button
+          <Button
             onClick={() => (window.location.href = "/auth")}
             className="w-full max-w-[200px] bg-yellow-500 hover:bg-yellow-400 text-yellow-950 font-bold py-3 px-4 rounded-xl transition-colors shadow-lg"
           >
             Đăng nhập ngay
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -93,13 +94,13 @@ export function RankCard({ showButton = false, buttonText = "Bắt đầu đấu
           </div>
 
           {showButton && (
-            <button
+            <Button
               onClick={() => navigate("/beginner/arena")}
               className="w-full bg-yellow-500 hover:bg-yellow-400 text-yellow-950 font-bold py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg"
             >
               <Target className="w-5 h-5" />
               {buttonText}
-            </button>
+            </Button>
           )}
         </div>
       </div>

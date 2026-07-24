@@ -6,6 +6,8 @@ import { useAuth } from "../contexts/AuthContext";
 import toastService from "@/src/services/toastService";
 import { hasRecaptchaSiteKey, RecaptchaBox, type RecaptchaBoxHandle } from "../components/security/RecaptchaBox";
 import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 const MASCOT_SRC = "/mascot/Lopy%20(16).png";
 
@@ -165,7 +167,7 @@ export function Auth() {
                 <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">{authTitle}</h2>
                 <p className="mt-2.5 text-sm sm:text-base leading-relaxed text-slate-500">{authDescription}</p>
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={loginWithGoogle}
                 className="group flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 font-extrabold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98]"
@@ -177,14 +179,14 @@ export function Auth() {
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
                 Tiếp tục với Google
-              </button>
+              </Button>
               <div className="my-6 flex items-center gap-4">
                 <div className="h-px flex-1 bg-slate-100" />
                 <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400">hoặc</span>
                 <div className="h-px flex-1 bg-slate-100" />
               </div>
               <div className="mb-7 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1.5 ring-1 ring-slate-200">
-                <button
+                <Button
                   type="button"
                   onClick={() => switchMode(true)}
                   className={cn(
@@ -193,8 +195,8 @@ export function Auth() {
                   )}
                 >
                   Đăng nhập
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => switchMode(false)}
                   className={cn(
@@ -203,7 +205,7 @@ export function Auth() {
                   )}
                 >
                   Đăng ký
-                </button>
+                </Button>
               </div>
 
               <form onSubmit={handleAuth} className="space-y-4">
@@ -213,7 +215,7 @@ export function Auth() {
                   </label>
                   <div className="relative group">
                     <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600" />
-                    <input
+                    <Input
                       id="auth-email"
                       type="email"
                       required
@@ -235,7 +237,7 @@ export function Auth() {
                   </div>
                   <div className="relative group">
                     <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600" />
-                    <input
+                    <Input
                       id="auth-password"
                       type={showPassword ? "text" : "password"}
                       required
@@ -246,20 +248,20 @@ export function Auth() {
                       placeholder={isLogin ? "Nhập mật khẩu của bạn" : "Tạo mật khẩu an toàn"}
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-12 font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
                     />
-                    <button
+                    <Button
                       type="button"
                       onClick={() => setShowPassword((value) => !value)}
                       className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                       aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
                 <RecaptchaBox key={recaptchaFormKey} ref={recaptchaRef} value={recaptchaToken} resetKey={recaptchaFormKey} onChange={handleRecaptchaChange} onReady={setRecaptchaReady} />
 
-                <button
+                <Button
                   type="submit"
                   disabled={loading || (hasRecaptchaSiteKey && (!recaptchaReady || !recaptchaToken))}
                   className="group mt-2 flex w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3.5 sm:py-4 text-sm sm:text-base font-black text-white shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-600/30 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98]"
@@ -273,7 +275,7 @@ export function Auth() {
                       <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
                     </>
                   )}
-                </button>
+                </Button>
               </form>
 
               <p className="mt-7 text-center text-xs leading-6 text-slate-500">

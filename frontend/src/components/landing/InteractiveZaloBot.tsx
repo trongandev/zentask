@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Bot, Send, ArrowRight } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 interface ChatMessage {
   id: number;
@@ -93,19 +94,19 @@ export function InteractiveZaloBot() {
               {hasInteracted ? "..." : "new diligent"}
             </div>
             {!hasInteracted ? (
-              <button 
+              <Button 
                 onClick={handleSend}
                 className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors shrink-0 shadow-md"
               >
                 <Send className="w-4 h-4 ml-0.5" />
-              </button>
+              </Button>
             ) : (
-              <button 
+              <Button 
                 onClick={handleReset}
                 className="w-9 h-9 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-300 transition-colors shrink-0"
               >
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </Button>
             )}
           </div>
         </div>

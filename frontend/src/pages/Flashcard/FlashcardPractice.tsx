@@ -21,6 +21,7 @@ import { VoiceSelectorModal } from "@/src/components/practice/VoiceSelectorModal
 import { getVoiceForLanguage } from "@/src/lib/ttsVoiceStorage";
 import toastService from "@/src/services/toastService";
 import axiosInstance from "@/src/services/axiosConfig";
+import { Button } from "@/src/components/ui/Button";
 
 export type PracticeMode = "flashcard" | "quiz" | "fill_blank" | "listening" | "pronunciation" | "match" | "bubble" | "guess" | "typing" | "arrange";
 
@@ -154,18 +155,18 @@ export function FlashcardPractice() {
 
   const beginnerCompletionActions = isBeginner ? (
     <div className="mt-5 flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:justify-center">
-      <button
+      <Button
         onClick={reviewBeginnerWrong}
         disabled={beginnerWrongIds.length === 0}
         className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-orange-50 px-5 py-3 font-bold text-orange-600 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <AlertTriangle className="h-5 w-5" />
         Ôn tập lại câu sai ({beginnerWrongIds.length})
-      </button>
-      <button onClick={reviewBeginnerAll} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-50 px-5 py-3 font-bold text-blue-600 transition-colors hover:bg-blue-100">
+      </Button>
+      <Button onClick={reviewBeginnerAll} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-50 px-5 py-3 font-bold text-blue-600 transition-colors hover:bg-blue-100">
         <RotateCw className="h-5 w-5" />
         Ôn tập lại toàn bộ câu
-      </button>
+      </Button>
     </div>
   ) : null;
 
@@ -181,9 +182,9 @@ export function FlashcardPractice() {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Không tìm thấy bộ thẻ</p>
-        <button onClick={() => navigate(-1)} className="mt-4 text-blue-600 font-semibold">
+        <Button onClick={() => navigate(-1)} className="mt-4 text-blue-600 font-semibold">
           Quay lại danh sách
-        </button>
+        </Button>
       </div>
     );
   }
@@ -197,7 +198,7 @@ export function FlashcardPractice() {
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Xin chúc mừng!</h2>
         <p className="text-gray-500 mb-3 text-center max-w-md">Bạn đã học hết các từ cần ôn tập hôm nay.</p>
         <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row mt-6">
-          <button
+          <Button
             onClick={() => {
               setIsReviewAll(true);
               setPracticeSessionKey((k) => k + 1);
@@ -206,11 +207,11 @@ export function FlashcardPractice() {
           >
             <RotateCw className="w-5 h-5" />
             Ôn tập lại tất cả
-          </button>
+          </Button>
         </div>
-        <button onClick={() => navigate(-1)} className="mt-4 text-sm font-bold text-gray-500 hover:text-gray-700">
+        <Button onClick={() => navigate(-1)} className="mt-4 text-sm font-bold text-gray-500 hover:text-gray-700">
           Quay lại danh sách
-        </button>
+        </Button>
       </div>
     );
   }
@@ -228,20 +229,20 @@ export function FlashcardPractice() {
           Chủ đề đã hoàn thành
         </div>
         <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row">
-          <button
+          <Button
             onClick={reviewBeginnerWrong}
             disabled={beginnerWrongIds.length === 0}
             className="flex-1 rounded-xl bg-orange-50 px-6 py-3 font-bold text-orange-600 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Ôn tập lại câu sai ({beginnerWrongIds.length})
-          </button>
-          <button onClick={reviewBeginnerAll} className="flex-1 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition-colors hover:bg-blue-700">
+          </Button>
+          <Button onClick={reviewBeginnerAll} className="flex-1 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition-colors hover:bg-blue-700">
             Ôn tập lại toàn bộ câu
-          </button>
+          </Button>
         </div>
-        <button onClick={() => navigate(-1)} className="mt-4 text-sm font-bold text-gray-500 hover:text-gray-700">
+        <Button onClick={() => navigate(-1)} className="mt-4 text-sm font-bold text-gray-500 hover:text-gray-700">
           Quay lại
-        </button>
+        </Button>
       </div>
     );
   }
@@ -267,9 +268,9 @@ export function FlashcardPractice() {
       {/* Top Navigation */}
       <div className="bg-white px-6 py-4 flex items-center justify-between shadow-sm flex-shrink-0 z-10 border-b border-gray-100">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+          <Button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
             <ArrowLeft className="w-6 h-6 text-gray-600" />
-          </button>
+          </Button>
           <div>
             <h1 className="text-xl font-bold text-gray-900">{currentSet.title}</h1>
             <p className="text-sm text-gray-500">Đang luyện tập...</p>
@@ -280,7 +281,7 @@ export function FlashcardPractice() {
             (isReviewAll ? (
               <span className="hidden sm:inline-flex px-3 py-2 bg-purple-50 text-purple-600 font-semibold rounded-xl text-sm items-center gap-1">Đang ôn tất cả (không lưu điểm)</span>
             ) : allCards.length > dueCards.length ? (
-              <button
+              <Button
                 onClick={() => {
                   setIsReviewAll(true);
                   setPracticeSessionKey((k) => k + 1);
@@ -289,14 +290,14 @@ export function FlashcardPractice() {
               >
                 <RotateCw className="w-4 h-4" />
                 Ôn tất cả ({allCards.length})
-              </button>
+              </Button>
             ) : null)}
-          <button onClick={() => setIsVoiceModalOpen(true)} className="px-3 py-2 md:px-4 md:py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors text-sm">
+          <Button onClick={() => setIsVoiceModalOpen(true)} className="px-3 py-2 md:px-4 md:py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors text-sm">
             Thay đổi giọng nói
-          </button>
-          <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors border border-gray-200">
+          </Button>
+          <Button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors border border-gray-200">
             <Menu className="w-6 h-6 text-gray-700" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -350,9 +351,9 @@ export function FlashcardPractice() {
         >
           <div className="flex items-center justify-between p-4 lg:hidden border-b border-gray-100">
             <span className="font-bold text-gray-800">Chế độ luyện tập</span>
-            <button onClick={() => setIsSidebarOpen(false)} className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
+            <Button onClick={() => setIsSidebarOpen(false)} className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
               <X className="w-5 h-5 text-gray-600" />
-            </button>
+            </Button>
           </div>
           <PracticeSidebar
             activeMode={activeMode}

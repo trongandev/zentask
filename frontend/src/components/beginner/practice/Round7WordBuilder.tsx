@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { cn } from "../../../lib/utils";
 import { Shuffle } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
 
 interface Round7WordBuilderProps {
   currentWord: any;
@@ -10,7 +11,7 @@ interface Round7WordBuilderProps {
 
 const DraggableItem = ({ id, text, index, moveItem, isUsed, onClick }: any) => {
   return (
-    <button
+    <Button
       onClick={() => onClick(id, text)}
       disabled={isUsed}
       className={cn(
@@ -19,7 +20,7 @@ const DraggableItem = ({ id, text, index, moveItem, isUsed, onClick }: any) => {
       )}
     >
       {text}
-    </button>
+    </Button>
   );
 };
 
@@ -89,7 +90,7 @@ export function Round7WordBuilder({ currentWord, isCorrect, onCheckAnswer }: Rou
       <div className="w-full min-h-[80px] p-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 flex flex-wrap gap-2 items-center justify-center">
         {selectedParts.length === 0 && <span className="text-slate-400">Kết quả của bạn sẽ hiển thị ở đây...</span>}
         {selectedParts.map((part, index) => (
-          <button
+          <Button
             key={`${part.id}-selected-${index}`}
             onClick={() => handleRemovePart(index)}
             disabled={isCorrect !== null}
@@ -100,7 +101,7 @@ export function Round7WordBuilder({ currentWord, isCorrect, onCheckAnswer }: Rou
             )}
           >
             {part.text}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -114,9 +115,9 @@ export function Round7WordBuilder({ currentWord, isCorrect, onCheckAnswer }: Rou
 
       {/* Action buttons (optional reset) */}
       {selectedParts.length > 0 && isCorrect === null && (
-        <button onClick={() => setSelectedParts([])} className="text-sm font-semibold text-slate-400 hover:text-slate-600 flex items-center gap-1">
+        <Button onClick={() => setSelectedParts([])} className="text-sm font-semibold text-slate-400 hover:text-slate-600 flex items-center gap-1">
           <Shuffle className="w-4 h-4" /> Làm lại
-        </button>
+        </Button>
       )}
     </div>
   );

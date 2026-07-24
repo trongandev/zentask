@@ -9,6 +9,7 @@ import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
 import { getVoiceForLanguage } from "@/src/lib/ttsVoiceStorage";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/src/components/ui/Button";
 
 interface ModeArrangeProps {
   cards: Flashcard[];
@@ -161,7 +162,7 @@ export function ModeArrange({ cards, setId, onComplete, completionActions }: Mod
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Tuyệt vời!</h2>
         <p className="text-gray-500 mb-8">Bạn đã hoàn thành bài luyện tập sắp xếp.</p>
-        <button
+        <Button
           onClick={() => {
             setCompleted(false);
             setCurrentIndex(0);
@@ -172,11 +173,11 @@ export function ModeArrange({ cards, setId, onComplete, completionActions }: Mod
         >
           <RotateCw className="w-5 h-5" />
           Làm lại
-        </button>
-        <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 rounded-xl bg-gray-100 px-6 py-3 font-bold text-gray-700 transition-colors hover:bg-gray-200">
+        </Button>
+        <Button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 rounded-xl bg-gray-100 px-6 py-3 font-bold text-gray-700 transition-colors hover:bg-gray-200">
           <ArrowLeft className="w-5 h-5" />
           Quay về
-        </button>
+        </Button>
         {completionActions}
       </div>
     );
@@ -221,16 +222,16 @@ export function ModeArrange({ cards, setId, onComplete, completionActions }: Mod
 
           {/* Actions Area */}
           <div className="flex items-center justify-center gap-4 mt-12 w-full flex-wrap">
-            <button
+            <Button
               onClick={() => setShowHint(true)}
               disabled={showHint || status !== "idle"}
               className="p-4 rounded-xl bg-amber-50 text-amber-600 font-bold hover:bg-amber-100 transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               <Lightbulb className="w-5 h-5" />
               {showHint ? currentCard.term : "Gợi ý"}
-            </button>
+            </Button>
 
-            <button
+            <Button
               onClick={(e) => handlePlayAudio(e, currentCard.term)}
               disabled={isLoading && loadingText === currentCard.term}
               className="p-4 rounded-xl bg-slate-100 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-50 flex items-center justify-center"
@@ -240,9 +241,9 @@ export function ModeArrange({ cards, setId, onComplete, completionActions }: Mod
               ) : (
                 <Volume2 className="w-6 h-6" />
               )}
-            </button>
+            </Button>
 
-            <button
+            <Button
               onClick={handleCheck}
               disabled={status !== "idle"}
               className={cn(
@@ -261,7 +262,7 @@ export function ModeArrange({ cards, setId, onComplete, completionActions }: Mod
                   <Play className="w-6 h-6" /> Kiểm Tra
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

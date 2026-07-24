@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Puzzle, Volume2, Plus, Check, Youtube } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { cn } from "../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 export function InteractiveExtension() {
   const [showPopover, setShowPopover] = useState(false);
@@ -66,17 +67,17 @@ export function InteractiveExtension() {
                       <h5 className="text-lg font-black text-slate-900">courage</h5>
                       <p className="text-blue-600 font-mono text-sm">/ˈkɜːrɪdʒ/</p>
                     </div>
-                    <button
+                    <Button
                       onClick={() => playAudio("courage", "en")}
                       className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isPlaying ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
                     >
                       <Volume2 className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </div>
 
                   <p className="text-slate-700 font-medium mb-4 pb-4 border-b border-slate-100">sự can đảm, dũng khí</p>
 
-                  <button
+                  <Button
                     onClick={handleSave}
                     disabled={isSaved}
                     className={cn(
@@ -93,7 +94,7 @@ export function InteractiveExtension() {
                         <Plus className="w-4 h-4" /> Thêm vào Flashcard
                       </>
                     )}
-                  </button>
+                  </Button>
                 </div>
               )}
             </span>{" "}

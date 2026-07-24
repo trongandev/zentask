@@ -9,9 +9,11 @@ import { CourseTree } from "./Courses/CourseTree";
 import { LessonEditor } from "./Courses/LessonEditor";
 import { ResourceBankPane } from "./Courses/ResourceBankPane";
 import { FolderExplorer } from "./Courses/FolderExplorer";
-import { Modal } from "../../components/shared/Modal";
+import { Modal } from "../../components/ui/Modal";
 import { useHistory } from "../../hooks/useHistory";
 import { useSearchParams } from "react-router-dom";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 export function AdminCourses() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -665,15 +667,15 @@ export function AdminCourses() {
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-6 z-50 animate-bounce-short">
               <span className="font-medium text-sm">Có thay đổi chưa lưu</span>
               <div className="flex gap-2">
-                <button onClick={handleDiscardChanges} className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-full text-sm font-bold transition-colors">
+                <Button onClick={handleDiscardChanges} className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-full text-sm font-bold transition-colors">
                   Hủy bỏ
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleSaveAllChanges}
                   className="px-4 py-1.5 bg-blue-500 hover:bg-blue-600 rounded-full text-sm font-bold shadow-lg shadow-blue-500/30 transition-colors flex items-center gap-2"
                 >
                   <Save className="w-4 h-4" /> Lưu thay đổi
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -681,20 +683,20 @@ export function AdminCourses() {
           {/* MIDDLE PANE: Editor */}
           <div className="flex-1 flex flex-col bg-white overflow-hidden relative  shadow-[0_0_15px_rgba(0,0,0,0.05)] border-x border-slate-200">
             {/* Toggle Left Button */}
-            <button
+            <Button
               onClick={() => setIsLeftCollapsed(!isLeftCollapsed)}
               className="absolute left-0 top-1/2 -translate-y-1/2 w-5 h-16 bg-white border border-slate-200 border-l-0 rounded-r-xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 z-30 shadow-md transition-colors"
             >
               {isLeftCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-            </button>
+            </Button>
 
             {/* Toggle Right Button */}
-            <button
+            <Button
               onClick={() => setIsRightCollapsed(!isRightCollapsed)}
               className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-16 bg-white border border-slate-200 border-r-0 rounded-l-xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 z-30 shadow-md transition-colors"
             >
               {isRightCollapsed ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-            </button>
+            </Button>
             {!selectedLessonId ? (
               <FolderExplorer
                 node={selectedNode || { type: "root", data: { courses: localCourses } }}
@@ -810,7 +812,7 @@ export function AdminCourses() {
       {/* Create Lesson Modal */}
       <Modal isOpen={!!createLessonTierId} onClose={() => setCreateLessonTierId(null)} title="Tạo bài học mới" desc="Bài học sẽ được gán vào Tier bạn vừa chọn.">
         <div className="p-5">
-          <input
+          <Input
             type="text"
             className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500"
             placeholder="Nhập tên bài học..."
@@ -820,12 +822,12 @@ export function AdminCourses() {
             autoFocus
           />
           <div className="flex justify-end gap-2 mt-4">
-            <button onClick={() => setCreateLessonTierId(null)} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">
+            <Button onClick={() => setCreateLessonTierId(null)} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">
               Huỷ
-            </button>
-            <button onClick={executeCreateLesson} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow">
+            </Button>
+            <Button onClick={executeCreateLesson} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow">
               Tạo mới
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>
@@ -833,12 +835,12 @@ export function AdminCourses() {
       {/* Delete Lesson Confirm Modal */}
       <Modal isOpen={!!deleteLessonId} onClose={() => setDeleteLessonId(null)} title="Xác nhận xoá" desc="Bạn có chắc chắn muốn xoá bài học này không? Hành động này không thể hoàn tác.">
         <div className="p-5 flex justify-end gap-2 border-t border-slate-100 mt-2">
-          <button onClick={() => setDeleteLessonId(null)} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">
+          <Button onClick={() => setDeleteLessonId(null)} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">
             Huỷ
-          </button>
-          <button onClick={executeDeleteLesson} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow">
+          </Button>
+          <Button onClick={executeDeleteLesson} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow">
             Xoá
-          </button>
+          </Button>
         </div>
       </Modal>
 
@@ -847,7 +849,7 @@ export function AdminCourses() {
         <div className="p-5 space-y-4">
           <div>
             <label className="text-sm font-bold text-slate-700 block mb-1">Tên Khóa Học (Ngôn ngữ)</label>
-            <input
+            <Input
               type="text"
               className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500"
               placeholder="Vd: Tiếng Đan Mạch"
@@ -857,7 +859,7 @@ export function AdminCourses() {
           </div>
           <div>
             <label className="text-sm font-bold text-slate-700 block mb-1">Mã Ngôn Ngữ (Language Code)</label>
-            <input
+            <Input
               type="text"
               className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500"
               placeholder="Vd: da"
@@ -866,17 +868,17 @@ export function AdminCourses() {
             />
           </div>
           <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-slate-100">
-            <button onClick={() => setCreateCourseModalOpen(false)} disabled={isCreatingCourse} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">
+            <Button onClick={() => setCreateCourseModalOpen(false)} disabled={isCreatingCourse} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">
               Huỷ
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={executeCreateCourse}
               disabled={isCreatingCourse}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow flex items-center gap-2 disabled:opacity-50"
             >
               {isCreatingCourse ? <RefreshCw className="w-4 h-4 animate-spin" /> : null}
               Khởi tạo cấu trúc
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>

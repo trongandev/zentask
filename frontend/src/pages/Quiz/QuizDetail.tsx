@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Play, Users, Clock, Target, Loader2, ArrowLeft, Settings2 } from "lucide-react";
 import { useQuizStore, Quiz, QuizRoomSettings } from "../../services/quizService";
 import toastService from "@/src/services/toastService";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 export function QuizDetail() {
   const { id } = useParams<{ id: string }>();
@@ -77,10 +79,10 @@ export function QuizDetail() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4">
-      <button onClick={() => navigate("/quiz")} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors font-semibold">
+      <Button onClick={() => navigate("/quiz")} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors font-semibold">
         <ArrowLeft className="w-5 h-5" />
         Quay lại danh sách
-      </button>
+      </Button>
 
       <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50 to-purple-50 rounded-full blur-3xl opacity-50 -z-10 translate-x-1/3 -translate-y-1/3" />
@@ -102,16 +104,16 @@ export function QuizDetail() {
         <p className="text-lg text-gray-500 mb-8 max-w-2xl">{quiz.description || "Bài thi trắc nghiệm giúp bạn ôn tập và kiểm tra kiến thức nhanh chóng."}</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button
+          <Button
             onClick={() => navigate(`/quiz/play/${quiz.id}`)}
             className="flex items-center justify-center gap-3 px-8 py-4 bg-gray-900 hover:bg-black text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]"
           >
             <Play className="w-6 h-6" />
             Làm bài ngay (Cá nhân)
-          </button>
+          </Button>
 
           {!isBuiltInQuiz && (
-            <button
+            <Button
               onClick={() => setShowSettings(!showSettings)}
               className={`flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold text-lg border-2 transition-all hover:scale-[1.02] ${
                 showSettings ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
@@ -119,7 +121,7 @@ export function QuizDetail() {
             >
               <Users className="w-6 h-6" />
               Mở phòng thi (Nhiều người)
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -138,7 +140,7 @@ export function QuizDetail() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <label className="flex items-start gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-blue-100 hover:bg-blue-50/30 cursor-pointer transition-colors group">
-              <input
+              <Input
                 type="checkbox"
                 className="w-5 h-5 mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 checked={settings.showAnswers}
@@ -151,7 +153,7 @@ export function QuizDetail() {
             </label>
 
             <label className="flex items-start gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-orange-100 hover:bg-orange-50/30 cursor-pointer transition-colors group">
-              <input
+              <Input
                 type="checkbox"
                 className="w-5 h-5 mt-1 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
                 checked={settings.phoenixRebirth}
@@ -164,7 +166,7 @@ export function QuizDetail() {
             </label>
 
             <label className="flex items-start gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-purple-100 hover:bg-purple-50/30 cursor-pointer transition-colors group">
-              <input
+              <Input
                 type="checkbox"
                 className="w-5 h-5 mt-1 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                 checked={settings.shuffleQuestions}
@@ -177,7 +179,7 @@ export function QuizDetail() {
             </label>
 
             <label className="flex items-start gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-green-100 hover:bg-green-50/30 cursor-pointer transition-colors group">
-              <input
+              <Input
                 type="checkbox"
                 className="w-5 h-5 mt-1 rounded border-gray-300 text-green-600 focus:ring-green-500"
                 checked={settings.allowRetry}
@@ -191,13 +193,13 @@ export function QuizDetail() {
           </div>
 
           <div className="flex justify-end">
-            <button
+            <Button
               onClick={handleCreateRoom}
               disabled={creatingRoom}
               className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 disabled:opacity-50 transition-all flex items-center gap-2 text-lg"
             >
               {creatingRoom ? <Loader2 className="w-6 h-6 animate-spin" /> : "Tạo phòng chờ ngay"}
-            </button>
+            </Button>
           </div>
         </div>
       )}

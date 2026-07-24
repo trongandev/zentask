@@ -1,6 +1,7 @@
 import { Play } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
+import { Button } from "@/src/components/ui/Button";
 
 export function Hero() {
     const { user } = useAuth();
@@ -33,10 +34,10 @@ export function Hero() {
                 </h2>
                 <p className="text-gray-600 mb-8 text-lg">Mỗi ngày một chút tiến bộ, tương lai rộng mở.</p>
                 <Link to="/beginner">
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl font-semibold flex items-center gap-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95">
+                    <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl font-semibold flex items-center gap-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95">
                         <Play className="w-5 h-5 fill-current" />
                         Tiếp tục học ngay
-                    </button>
+                    </Button>
                 </Link>
             </div>
         </div>

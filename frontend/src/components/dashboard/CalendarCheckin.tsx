@@ -4,6 +4,7 @@ import { cn } from "../../lib/utils";
 import { useUserStore } from "../../services/userService";
 import { useAuth } from "../../contexts/AuthContext";
 import axiosInstance from "@/src/services/axiosConfig";
+import { Button } from "@/src/components/ui/Button";
 
 export function CalendarCheckin() {
     const { user, updateUser } = useAuth();
@@ -92,9 +93,9 @@ export function CalendarCheckin() {
                 <CalendarIcon className="w-12 h-12 text-gray-300 mb-4" />
                 <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Lịch Điểm Danh</h3>
                 <p className="text-gray-500 mb-6 text-center text-sm">Vui lòng đăng nhập để theo dõi tiến độ và nhận điểm danh mỗi ngày!</p>
-                <button onClick={() => (window.location.href = "/auth")} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
+                <Button onClick={() => (window.location.href = "/auth")} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
                     Đăng nhập ngay
-                </button>
+                </Button>
             </div>
         );
     }
@@ -107,15 +108,15 @@ export function CalendarCheckin() {
                     Lịch Điểm Danh
                 </h3>
                 <div className="flex items-center gap-4">
-                    <button onClick={() => changeMonth(-1)} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 font-bold">
+                    <Button onClick={() => changeMonth(-1)} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 font-bold">
                         &lt;
-                    </button>
+                    </Button>
                     <span className="font-bold text-gray-800 w-24 text-center">
                         Tháng {month}/{year}
                     </span>
-                    <button onClick={() => changeMonth(1)} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 font-bold">
+                    <Button onClick={() => changeMonth(1)} className="p-1 hover:bg-gray-100 rounded-lg text-gray-500 font-bold">
                         &gt;
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -156,7 +157,7 @@ export function CalendarCheckin() {
             </div>
 
             <div className="mt-6 pt-6 border-t border-gray-100">
-                <button
+                <Button
                     onClick={handleCheckIn}
                     disabled={isCheckedInToday || checkingIn}
                     className={cn(
@@ -164,7 +165,7 @@ export function CalendarCheckin() {
                         isCheckedInToday ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600 text-white shadow-sm active:scale-95",
                     )}>
                     {checkingIn ? "Đang điểm danh..." : isCheckedInToday ? "Đã điểm danh hôm nay" : "Điểm danh ngay"}
-                </button>
+                </Button>
             </div>
         </div>
     );

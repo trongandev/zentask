@@ -1,6 +1,7 @@
 import React from "react";
 import { Volume2 } from "lucide-react";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
+import { Button } from "@/src/components/ui/Button";
 
 interface GrammarRound1DiscoveryProps {
   topicId: string;
@@ -31,12 +32,12 @@ export function GrammarRound1Discovery({ topicId, data }: GrammarRound1Discovery
               </p>
               <p className="text-slate-500 italic text-lg">{ex.vi}</p>
             </div>
-            <button 
+            <Button 
               onClick={() => playAudio(ex.en)}
               className="w-12 h-12 rounded-full bg-slate-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-100 transition-colors"
             >
               <Volume2 className="w-6 h-6" />
-            </button>
+            </Button>
           </div>
         ))}
       </div>

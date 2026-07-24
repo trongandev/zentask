@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Power, Settings2, Clock, AlertCircle } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
 
 type ConditionalInfo = {
   type: number;
@@ -136,7 +137,7 @@ export function Conditionals() {
           </h4>
 
           {conditionalData.map((item) => (
-            <button
+            <Button
               key={item.type}
               onClick={() => {
                 setConditionalType(item.type);
@@ -146,7 +147,7 @@ export function Conditionals() {
             >
               <div className="mb-1 text-xs font-bold opacity-80">{item.smallLabel}</div>
               <div className="text-sm font-medium">{item.tabLabel}</div>
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -175,7 +176,7 @@ export function Conditionals() {
                 <div className="mb-6 flex items-center justify-between gap-3">
                   <span className={`text-sm font-bold ${!isHypothetical ? "text-white" : "text-slate-500"}`}>{current.factTitle}</span>
 
-                  <button
+                  <Button
                     onClick={() => setIsHypothetical(!isHypothetical)}
                     className="relative h-7 w-14 rounded-full border border-slate-600 bg-slate-900 transition-colors focus:outline-none"
                     aria-label="Chuyển giữa thực tế và câu If"
@@ -184,7 +185,7 @@ export function Conditionals() {
                       animate={{ x: isHypothetical ? 28 : 2 }}
                       className={`absolute top-[1.5px] h-6 w-6 rounded-full shadow-md ${isHypothetical ? current.knobClass : "bg-slate-400"}`}
                     />
-                  </button>
+                  </Button>
 
                   <span className={`text-sm font-bold ${isHypothetical ? current.accentText : "text-slate-500"}`}>{current.ifTitle}</span>
                 </div>

@@ -162,3 +162,90 @@ export const getBeginnerLesson = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getBeginnerStats = async (req, res) => {
+  try {
+    const uid = req.user.uid || req.user.id || req.user._id;
+    const languageCode = req.user?.targetLanguage || req.query.lang || "en";
+    const course = await Course.findOne({ languageCode });
+    let totalWords = 0;
+    let totalTopics = 0;
+
+    if (course) {
+      const tiers = await CourseTier.find({ courseId: course._id }).lean();
+      const tierIds = tiers.map((t) => t._id);
+
+      const stats = await CourseLesson.aggregate([
+        { $match: { tierId: { $in: tierIds } } },
+        {
+          $group: {
+            _id: null,
+            totalWords: { $sum: "$wordCount" },
+            totalTopics: { $sum: 1 },
+          },
+        },
+      ]);
+      if (stats.length > 0) {
+        totalWords = stats[0].totalWords || 0;
+        totalTopics = stats[0].totalTopics || 0;
+      }
+    }
+
+    const records = await BeginnerProgress.find({ $or: [{ uid: uid }, { userId: uid }] }).lean();
+    const completedLessonIds = records.map((r) => r.lessonId); // e.g. "t1_do_an_uong_0"
+    const rewardClaimedCount = records.filter((r) => r.rewardClaimed).length;
+
+    // Extract base topicIds (e.g. "t1_do_an_uong")
+    const baseTopicIds = completedLessonIds.map(id => {
+      const lastUnderscore = id.lastIndexOf("_");
+      return lastUnderscore > 0 ? id.substring(0, lastUnderscore) : id;
+    });
+    const uniqueBaseTopicIds = [...new Set(baseTopicIds)];
+
+    // Fetch word count for completed base topics
+    const completedLessonsDocs = await CourseLesson.find({ lessonId: { $in: uniqueBaseTopicIds } })
+      .select("lessonId wordCount")
+      .lean();
+
+    const wordCountMap = {};
+    completedLessonsDocs.forEach(doc => {
+      wordCountMap[doc.lessonId] = doc.wordCount || 0;
+    });
+
+    let learnedWords = 0;
+    completedLessonIds.forEach(id => {
+      const lastUnderscore = id.lastIndexOf("_");
+      const baseId = lastUnderscore > 0 ? id.substring(0, lastUnderscore) : id;
+      const index = lastUnderscore > 0 ? parseInt(id.substring(lastUnderscore + 1), 10) : 0;
+      
+      const totalWordsInTopic = wordCountMap[baseId] || 0;
+      if (totalWordsInTopic > 0) {
+        const WORDS_PER_LESSON = 5;
+        const totalLessonsInTopic = Math.ceil(totalWordsInTopic / WORDS_PER_LESSON) || 1;
+        
+        if (index === totalLessonsInTopic - 1) {
+          // Last chunk
+          const remainder = totalWordsInTopic - (index * WORDS_PER_LESSON);
+          learnedWords += remainder > 0 ? remainder : WORDS_PER_LESSON;
+        } else {
+          // Normal chunk
+          learnedWords += WORDS_PER_LESSON;
+        }
+      }
+    });
+
+    const completedTopics = records.length;
+    const totalXP = completedTopics * 10 + rewardClaimedCount * 20;
+
+    res.json({
+      totalWords,
+      totalTopics,
+      completedTopics,
+      learnedWords,
+      totalXP,
+    });
+  } catch (error) {
+    console.error("Error in getBeginnerStats:", error);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};

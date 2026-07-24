@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { cn } from "../../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 interface GrammarRound5FixErrorProps {
   topicId: string;
@@ -29,7 +31,7 @@ export function GrammarRound5FixError({ topicId, isCorrect, setIsCorrect, data }
       </div>
 
       <div className="w-full max-w-lg space-y-4 mt-8">
-        <input
+        <Input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
@@ -42,9 +44,9 @@ export function GrammarRound5FixError({ topicId, isCorrect, setIsCorrect, data }
           autoFocus
         />
         {isCorrect === null && (
-          <button onClick={handleCheck} className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-bold text-lg">
+          <Button onClick={handleCheck} className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-bold text-lg">
             Kiểm tra
-          </button>
+          </Button>
         )}
       </div>
     </div>

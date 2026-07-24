@@ -6,6 +6,8 @@ import { useAuth } from "../contexts/AuthContext";
 import { pronunciationService } from "../services/pronunciationService";
 import { useTTSAudio } from "../hooks/useTTSAudio";
 import axiosInstance from "@/src/services/axiosConfig";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 type Mode = "listening" | "speaking" | "fill_blank" | "reflex";
 
@@ -166,14 +168,14 @@ export default function SkillPracticeRoom() {
     };
 
     const renderTtsButton = (text: string, label = "Nghe") => (
-        <button
+        <Button
             type="button"
             onClick={() => speak(text)}
             disabled={ttsLoading || !String(text || "").trim()}
             className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-black text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50">
             {ttsLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4" />}
             {label}
-        </button>
+        </Button>
     );
 
     const renderBody = () => {
@@ -187,21 +189,21 @@ export default function SkillPracticeRoom() {
                         <h2 className="mt-3 text-2xl font-black text-gray-900">Nghe câu và gõ lại chính xác</h2>
                         <p className="mt-2 text-sm font-semibold text-blue-700">Nội dung cần nghe đã được ẩn để bạn luyện nghe thật sự.</p>
                         <div className="mt-5 flex flex-wrap gap-3">
-                            <button onClick={() => speak(exercise.targetAnswer)} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-700">
+                            <Button onClick={() => speak(exercise.targetAnswer)} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white hover:bg-blue-700">
                                 <Volume2 className="h-5 w-5" /> Nghe câu cần gõ
-                            </button>
+                            </Button>
                             {renderTtsButton(exercise.instruction || "Listen and type the sentence.", "Nghe hướng dẫn")}
                         </div>
                     </div>
-                    <input
+                    <Input
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
                         placeholder="Gõ lại câu bạn nghe được..."
                         className="w-full rounded-2xl border border-gray-200 p-4 font-semibold outline-none focus:border-blue-500"
                     />
-                    <button onClick={checkTextAnswer} disabled={!!result} className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white disabled:opacity-50">
+                    <Button onClick={checkTextAnswer} disabled={!!result} className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white disabled:opacity-50">
                         Nộp đáp án
-                    </button>
+                    </Button>
                 </div>
             );
         }
@@ -215,13 +217,13 @@ export default function SkillPracticeRoom() {
                         <div className="mt-5 flex justify-center">{renderTtsButton(exercise.sentence, "Nghe mẫu")}</div>
                     </div>
                     {!recording ? (
-                        <button onClick={startRecording} disabled={!!result} className="w-full rounded-2xl bg-purple-600 px-6 py-4 font-black text-white hover:bg-purple-700 disabled:opacity-50">
+                        <Button onClick={startRecording} disabled={!!result} className="w-full rounded-2xl bg-purple-600 px-6 py-4 font-black text-white hover:bg-purple-700 disabled:opacity-50">
                             Bắt đầu ghi âm
-                        </button>
+                        </Button>
                     ) : (
-                        <button onClick={stopRecording} className="w-full rounded-2xl bg-red-600 px-6 py-4 font-black text-white hover:bg-red-700">
+                        <Button onClick={stopRecording} className="w-full rounded-2xl bg-red-600 px-6 py-4 font-black text-white hover:bg-red-700">
                             Dừng & chấm phát âm
-                        </button>
+                        </Button>
                     )}
                 </div>
             );
@@ -238,15 +240,15 @@ export default function SkillPracticeRoom() {
                             {renderTtsButton(exercise.instruction || "Fill in the missing word.", "Nghe hướng dẫn")}
                         </div>
                     </div>
-                    <input
+                    <Input
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
                         placeholder="Nhập từ còn thiếu..."
                         className="w-full rounded-2xl border border-gray-200 p-4 font-semibold outline-none focus:border-emerald-500"
                     />
-                    <button onClick={checkTextAnswer} disabled={!!result} className="rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white disabled:opacity-50">
+                    <Button onClick={checkTextAnswer} disabled={!!result} className="rounded-xl bg-emerald-600 px-6 py-3 font-bold text-white disabled:opacity-50">
                         Nộp đáp án
-                    </button>
+                    </Button>
                 </div>
             );
         }
@@ -270,7 +272,7 @@ export default function SkillPracticeRoom() {
                                   ? "border-red-400 bg-red-50 text-red-800"
                                   : "border-gray-200 bg-white hover:border-orange-400 hover:bg-orange-50";
                         return (
-                            <button
+                            <Button
                                 key={`${exercise._renderKey}_${idx}_${opt}`}
                                 onClick={() => {
                                     if (result) return;
@@ -281,7 +283,7 @@ export default function SkillPracticeRoom() {
                                 <span>
                                     {String.fromCharCode(65 + idx)}. {opt}
                                 </span>
-                            </button>
+                            </Button>
                         );
                     })}
                 </div>
@@ -291,9 +293,9 @@ export default function SkillPracticeRoom() {
 
     return (
         <div className="mx-auto max-w-5xl space-y-6">
-            <button onClick={() => navigate("/beginner")} className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900">
+            <Button onClick={() => navigate("/beginner")} className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-900">
                 <ArrowLeft className="h-4 w-4" /> Quay lại
-            </button>
+            </Button>
             <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-4">
@@ -305,12 +307,12 @@ export default function SkillPracticeRoom() {
                             <p className="text-sm font-medium text-gray-500">Bài được AI tổng hợp ngẫu nhiên từ phong cách VOA English và British Council Learning English.</p>
                         </div>
                     </div>
-                    <button
+                    <Button
                         onClick={loadExercise}
                         disabled={loading}
                         className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-5 py-3 font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50">
                         <RefreshCw className="h-5 w-5" /> Đổi bài
-                    </button>
+                    </Button>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold">
                     {(["listening", "speaking", "fill_blank", "reflex"] as Mode[]).map((m) => (

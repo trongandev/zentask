@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { PenTool, Loader2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
+import { Textarea } from "@/src/components/ui/Textarea";
 
 interface GrammarRound6FreeOutputProps {
   topicId: string;
@@ -47,7 +49,7 @@ export function GrammarRound6FreeOutput({ topicId, isCorrect, setIsCorrect, data
       </div>
 
       <div className="w-full max-w-lg space-y-4">
-        <textarea
+        <Textarea
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           disabled={isCorrect !== null || isChecking}
@@ -66,13 +68,13 @@ export function GrammarRound6FreeOutput({ topicId, isCorrect, setIsCorrect, data
         )}
 
         {isCorrect === null && (
-          <button 
+          <Button 
             onClick={handleCheck} 
             disabled={isChecking || !inputText.trim()}
             className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-300 text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2"
           >
             {isChecking ? <Loader2 className="w-6 h-6 animate-spin" /> : "Nhờ AI chấm điểm"}
-          </button>
+          </Button>
         )}
       </div>
     </div>

@@ -1,7 +1,9 @@
 import { CheckCircle, XCircle } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { ArenaGameRenderer } from "../../ArenaGameRenderer";
-import { UserAvatar } from "../../../components/UserAvatar";
+import { UserAvatar } from "../../../components/ui/UserAvatar";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 interface ArenaPlayingHUDProps {
   user: any;
@@ -141,15 +143,15 @@ export function ArenaPlayingHUD({
           <div>
             <p className="mb-2 text-xs font-black uppercase tracking-widest text-purple-300">Gợi ý cho đồng đội</p>
             <div className="flex gap-2">
-              <input
+              <Input
                 value={teamHint}
                 onChange={(e) => onTeamHintChange(e.target.value)}
                 placeholder="Gửi gợi ý ngắn..."
                 className="min-w-0 flex-1 rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold outline-none placeholder:text-white/30"
               />
-              <button onClick={onSendTeamHint} className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold">
+              <Button onClick={onSendTeamHint} className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold">
                 Gửi
-              </button>
+              </Button>
             </div>
             {teamHints.length > 0 && (
               <div className="mt-2 space-y-1 text-xs text-purple-100">

@@ -3,7 +3,8 @@ import { X, Play, Volume2, CheckCircle2 } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { voiceOptions } from "../../lib/voiceOptions";
 import { setVoiceForLanguage } from "../../lib/ttsVoiceStorage";
-import { Modal } from "../shared/Modal";
+import { Modal } from "../ui/Modal";
+import { Button } from "@/src/components/ui/Button";
 
 const LANG_CODE_TO_VOICE_LANGUAGE: Record<string, string> = {
   en: "English",
@@ -36,9 +37,7 @@ export function VoiceSelectorModal({ isOpen, onClose, currentVoiceId, onSelectVo
     }
   }, [isOpen]);
 
-  const filteredVoices = language && LANG_CODE_TO_VOICE_LANGUAGE[language]
-    ? voiceOptions.filter((v) => v.language === LANG_CODE_TO_VOICE_LANGUAGE[language])
-    : voiceOptions;
+  const filteredVoices = language && LANG_CODE_TO_VOICE_LANGUAGE[language] ? voiceOptions.filter((v) => v.language === LANG_CODE_TO_VOICE_LANGUAGE[language]) : voiceOptions;
 
   if (!isOpen) return null;
 
@@ -95,7 +94,7 @@ export function VoiceSelectorModal({ isOpen, onClose, currentVoiceId, onSelectVo
                     <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-lg font-medium">{voice.gender === "female" ? "Nữ" : "Nam"}</span>
                     {voice.premium && <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-lg font-medium">Premium</span>}
                   </div>
-                  <button
+                  <Button
                     onClick={(e) => {
                       e.stopPropagation();
                       handlePlaySample(voice.id, voice.sample);
@@ -112,7 +111,7 @@ export function VoiceSelectorModal({ isOpen, onClose, currentVoiceId, onSelectVo
                     ) : (
                       <Play className="w-5 h-5 ml-0.5" />
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}

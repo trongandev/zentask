@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Swords, Trophy, ArrowRight, CheckCircle2 } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 export function InteractiveArena() {
   const [step, setStep] = useState<"intro" | "quiz" | "win">("intro");
@@ -54,12 +55,12 @@ export function InteractiveArena() {
             </div>
             <h4 className="text-2xl font-black mb-2">Sẵn sàng thi đấu?</h4>
             <p className="text-slate-400 mb-8 text-sm">Cố gắng trả lời thật nhanh và chính xác để nhận thêm điểm XP và thăng hạng nhé!</p>
-            <button 
+            <Button 
               onClick={handleStart}
               className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-lg py-3.5 rounded-xl shadow-lg shadow-orange-500/30 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
             >
               <Swords className="w-5 h-5" /> Bắt Đầu Ngay
-            </button>
+            </Button>
           </div>
         )}
 
@@ -85,7 +86,7 @@ export function InteractiveArena() {
                 }
 
                 return (
-                  <button 
+                  <Button 
                     key={idx}
                     onClick={() => handleAnswer(idx)}
                     disabled={selectedAnswer !== null}
@@ -96,7 +97,7 @@ export function InteractiveArena() {
                   >
                     {ans}
                     {isSelected && isCorrect && <CheckCircle2 className="w-5 h-5" />}
-                  </button>
+                  </Button>
                 )
               })}
             </div>
@@ -118,9 +119,9 @@ export function InteractiveArena() {
 
             <p className="text-emerald-400 font-bold mb-8">Bạn đã thăng hạng lên Lục Bảo!</p>
 
-            <button onClick={handleReset} className="text-sm font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-1 mx-auto">
+            <Button onClick={handleReset} className="text-sm font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-1 mx-auto">
               Chơi lại <ArrowRight className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         )}
       </div>

@@ -6,6 +6,7 @@ import { pronunciationService } from "../../services/pronunciationService";
 import { cn } from "../../lib/utils";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
+import { Button } from "@/src/components/ui/Button";
 
 interface ModePronunciationProps {
   cards: Flashcard[];
@@ -402,7 +403,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Phát âm rất tốt!</h2>
         <p className="text-gray-500 mb-8">Bạn đã hoàn thành bài luyện phát âm.</p>
-        <button
+        <Button
           onClick={() => {
             setCompleted(false);
             setCurrentIndex(0);
@@ -416,7 +417,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
         >
           <RotateCw className="w-5 h-5" />
           Luyện phát âm lại
-        </button>
+        </Button>
         {completionActions}
       </div>
     );
@@ -446,32 +447,32 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
           <p className="mt-3 text-lg font-bold text-gray-500">{currentCard.translation}</p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <button
+            <Button
               onClick={() => playAudio(currentCard.term)}
               disabled={ttsLoading || status === "recording" || status === "checking"}
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-50 px-5 py-3 font-bold text-blue-600 transition hover:bg-blue-100 disabled:opacity-50"
             >
               <Volume2 className="h-5 w-5" />
               Nghe mẫu
-            </button>
+            </Button>
 
             {status === "recording" ? (
-              <button
+              <Button
                 onClick={stopRecording}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-6 py-3 font-bold text-white shadow-lg shadow-red-500/20 transition hover:bg-red-700"
               >
                 <MicOff className="h-5 w-5" />
                 Dừng & chấm điểm {recordingSeconds}s
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 onClick={startRecording}
                 disabled={status === "checking"}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700 disabled:opacity-50"
               >
                 {status === "checking" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Mic className="h-5 w-5" />}
                 {status === "checking" ? "Đang chấm điểm..." : result ? "Ghi âm lại" : "Bắt đầu ghi âm"}
-              </button>
+              </Button>
             )}
           </div>
 
@@ -529,12 +530,12 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
       <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:justify-center">
         {(status === "correct" || status === "wrong") && (
           <>
-            <button onClick={retryCurrent} className="flex-1 rounded-2xl bg-gray-100 px-6 py-4 font-bold text-gray-700 transition hover:bg-gray-200">
+            <Button onClick={retryCurrent} className="flex-1 rounded-2xl bg-gray-100 px-6 py-4 font-bold text-gray-700 transition hover:bg-gray-200">
               Ghi âm lại
-            </button>
-            <button onClick={goNext} className="flex-1 rounded-2xl bg-blue-600 px-6 py-4 font-bold text-white transition hover:bg-blue-700">
+            </Button>
+            <Button onClick={goNext} className="flex-1 rounded-2xl bg-blue-600 px-6 py-4 font-bold text-white transition hover:bg-blue-700">
               {currentIndex < cards.length - 1 ? "Câu tiếp theo" : "Hoàn thành"}
-            </button>
+            </Button>
           </>
         )}
       </div>

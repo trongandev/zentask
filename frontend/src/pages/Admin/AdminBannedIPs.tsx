@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { ShieldAlert, Trash2, Plus, MessageSquareWarning } from "lucide-react";
 import { adminService } from "../../services/adminService";
 import { DataTable } from "../../components/Admin/DataTable";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 export function AdminBannedIPs() {
   const [ips, setIps] = useState([]);
@@ -67,9 +69,9 @@ export function AdminBannedIPs() {
       header: "Hành động",
       align: "right" as const,
       render: (item: any) => (
-        <button onClick={() => handleDeleteIp(item._id)} className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100" title="Gỡ cấm">
+        <Button onClick={() => handleDeleteIp(item._id)} className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100" title="Gỡ cấm">
           <Trash2 className="w-4 h-4" />
-        </button>
+        </Button>
       ),
     },
   ];
@@ -83,9 +85,9 @@ export function AdminBannedIPs() {
       header: "Hành động",
       align: "right" as const,
       render: (item: any) => (
-        <button onClick={() => handleDeleteFeedback(item._id)} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100" title="Xoá">
+        <Button onClick={() => handleDeleteFeedback(item._id)} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100" title="Xoá">
           <Trash2 className="w-4 h-4" />
-        </button>
+        </Button>
       ),
     },
   ];
@@ -105,18 +107,18 @@ export function AdminBannedIPs() {
       </div>
 
       <div className="flex gap-4 mb-6 border-b border-gray-200 pb-2">
-        <button
+        <Button
           onClick={() => setActiveTab("ips")}
           className={`flex items-center gap-2 px-4 py-2 font-bold rounded-lg transition-colors ${activeTab === "ips" ? "bg-red-50 text-red-700" : "text-gray-500 hover:bg-gray-50"}`}
         >
           <ShieldAlert className="w-4 h-4" /> IP Bị Cấm
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setActiveTab("feedbacks")}
           className={`flex items-center gap-2 px-4 py-2 font-bold rounded-lg transition-colors ${activeTab === "feedbacks" ? "bg-purple-50 text-purple-700" : "text-gray-500 hover:bg-gray-50"}`}
         >
           <MessageSquareWarning className="w-4 h-4" /> Lời nhắn từ Hacker
-        </button>
+        </Button>
       </div>
 
       {activeTab === "ips" && (
@@ -128,15 +130,15 @@ export function AdminBannedIPs() {
             <form onSubmit={handleAddIp} className="flex gap-4 items-end">
               <div className="flex-1">
                 <label className="block text-sm font-bold text-gray-700 mb-1">Địa chỉ IP</label>
-                <input type="text" value={newIp} onChange={(e) => setNewIp(e.target.value)} placeholder="VD: 192.168.1.1" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all" required />
+                <Input type="text" value={newIp} onChange={(e) => setNewIp(e.target.value)} placeholder="VD: 192.168.1.1" className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all" required />
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-bold text-gray-700 mb-1">Lý do</label>
-                <input type="text" value={newReason} onChange={(e) => setNewReason(e.target.value)} placeholder="VD: Scan cổng, DDOS, spam..." className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all" />
+                <Input type="text" value={newReason} onChange={(e) => setNewReason(e.target.value)} placeholder="VD: Scan cổng, DDOS, spam..." className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all" />
               </div>
-              <button type="submit" className="px-6 py-2 h-[42px] bg-gray-900 hover:bg-black text-white font-bold rounded-xl transition-colors whitespace-nowrap">
+              <Button type="submit" className="px-6 py-2 h-[42px] bg-gray-900 hover:bg-black text-white font-bold rounded-xl transition-colors whitespace-nowrap">
                 Chặn IP
-              </button>
+              </Button>
             </form>
           </div>
 

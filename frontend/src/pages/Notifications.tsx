@@ -4,6 +4,7 @@ import { cn, timeAgo } from "../lib/utils";
 import { useSocket } from "../contexts/SocketContext";
 import { useNavigate } from "react-router-dom";
 import { getNotificationStyles, getNotificationLink } from "../config/notificationConfig";
+import { Button } from "@/src/components/ui/Button";
 
 export function Notifications() {
   const [filter, setFilter] = useState<"all" | "unread">("all");
@@ -29,28 +30,28 @@ export function Notifications() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          <Button
             onClick={() => setFilter("all")}
             className={cn("px-4 py-2 rounded-xl font-bold text-sm transition-colors", filter === "all" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200")}
           >
             Tất cả
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setFilter("unread")}
             className={cn("px-4 py-2 rounded-xl font-bold text-sm transition-colors relative", filter === "unread" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200")}
           >
             Chưa đọc
             {notifications.filter((n) => !n.isRead).length > 0 && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Notifications List */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-end">
-          <button onClick={() => markAsRead()} className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">
+          <Button onClick={() => markAsRead()} className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">
             Đánh dấu tất cả đã đọc
-          </button>
+          </Button>
         </div>
         {filteredNotifications.length > 0 ? (
           <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto no-scrollbar">
@@ -73,14 +74,14 @@ export function Notifications() {
                         <h3 className={cn("text-base mb-1", !notification.isRead ? "font-extrabold text-gray-900" : "font-bold text-gray-700")}>{notification.title}</h3>
                         <p className={cn("text-sm mb-2", !notification.isRead ? "text-gray-700 font-medium" : "text-gray-500")}>{notification.message}</p>
                       </div>
-                      <button
+                      <Button
                         className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-all flex-shrink-0"
                         onClick={(e) => {
                           e.stopPropagation();
                         }}
                       >
                         <MoreHorizontal className="w-5 h-5" />
-                      </button>
+                      </Button>
                     </div>
                     <span className="text-xs font-bold text-gray-400">{timeAgo(notification.createdAt)}</span>
                   </div>

@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middleware/auth.js";
-import { getBeginnerProgress, completeGrammarTopic, seedBeginnerData, getBeginnerRanks, getBeginnerLesson } from "../controllers/beginnerController.js";
+import { getBeginnerProgress, completeGrammarTopic, seedBeginnerData, getBeginnerRanks, getBeginnerLesson, getBeginnerStats } from "../controllers/beginnerController.js";
 
 const router = express.Router();
 
@@ -15,6 +15,7 @@ router.get("/lesson/:lessonId", verifyToken, getBeginnerLesson);
 router.use(verifyToken);
 
 router.get("/progress", verifyToken, getBeginnerProgress);
+router.get("/stats", verifyToken, getBeginnerStats);
 router.post("/grammar/complete", verifyToken, completeGrammarTopic);
 
 export default router;

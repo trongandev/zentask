@@ -4,7 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useQuizStore } from "../../services/quizService";
 import { useAuth } from "../../contexts/AuthContext";
 import toastService from "@/src/services/toastService";
-import { Modal } from "../../components/shared/Modal";
+import { Modal } from "../../components/ui/Modal";
+import { Button } from "@/src/components/ui/Button";
+import { Select } from "@/src/components/ui/Select";
+import { Input } from "@/src/components/ui/Input";
 
 export function Quiz() {
   const {
@@ -133,7 +136,7 @@ export function Quiz() {
       setJoinError("Mã phòng phải có 6 ký tự");
       return;
     }
-    
+
     setJoinError("");
     const room = await getRoomByCode(codeToJoin);
     if (room) {
@@ -237,46 +240,46 @@ export function Quiz() {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3">
-          <button
+          <Button
             onClick={openJoinModal}
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white border-2 border-blue-100 text-blue-600 px-5 py-2.5 rounded-xl font-bold hover:bg-blue-50 transition-all"
           >
             <LogIn className="w-5 h-5" /> Nhập mã phòng
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={openCreateQuizModal}
             className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold hover:shadow-lg hover:scale-105 transition-all"
           >
             <Plus className="w-5 h-5" />
             Tạo Quiz
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 flex  gap-2 w-full sm:w-max">
-          <button
+          <Button
             onClick={() => setActiveTab("mine")}
             className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "mine" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Của tôi
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setActiveTab("builtin")}
             className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "builtin" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Có sẵn
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setActiveTab("public")}
             className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "public" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
           >
             Công khai
-          </button>
+          </Button>
         </div>
         <div className="relative w-full lg:max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
+          <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={activeTab === "public" ? "Tìm quiz công khai..." : activeTab === "builtin" ? "Tìm quiz có sẵn IELTS/TOEIC..." : "Tìm trong bài thi nổi bật và quiz của tôi..."}
@@ -297,33 +300,33 @@ export function Quiz() {
           </div>
           {activeTab === "mine" && (
             <div className="flex flex-col gap-2 sm:flex-row">
-              <input
+              <Input
                 value={newQuizCategoryName}
                 onChange={(e) => setNewQuizCategoryName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreateQuizCategory()}
                 placeholder="Tạo đề mục quiz..."
                 className="w-full rounded-2xl border border-gray-200 px-4 py-2.5 text-sm font-bold outline-none focus:border-blue-500 sm:w-56"
               />
-              <button onClick={handleCreateQuizCategory} className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-slate-800">
+              <Button onClick={handleCreateQuizCategory} className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-slate-800">
                 Thêm
-              </button>
+              </Button>
             </div>
           )}
         </div>
         <div className="flex flex-wrap gap-2 overflow-x-auto pb-1">
           {quizCategoryOptions.map((category: any) => (
             <div key={category.key} className="group inline-flex shrink-0 items-center overflow-hidden rounded-2xl bg-gray-100">
-              <button
+              <Button
                 onClick={() => setActiveCategoryKey(category.key)}
                 className={`flex items-center gap-2 px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryKey === category.key ? `${category.color || "bg-blue-600"} text-white shadow-sm` : "text-gray-600 hover:bg-gray-200"}`}
               >
                 <span>{category.name}</span>
                 <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryKey === category.key ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{category.count}</span>
-              </button>
+              </Button>
               {activeTab === "mine" && category.id && (
-                <button onClick={() => deleteQuizCategory(category.id)} title="Xóa đề mục" className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">
+                <Button onClick={() => deleteQuizCategory(category.id)} title="Xóa đề mục" className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100">
                   ×
-                </button>
+                </Button>
               )}
             </div>
           ))}
@@ -369,9 +372,9 @@ export function Quiz() {
                     : "Chưa có bài thi nào được tạo."}
             </p>
             {activeTab === "mine" && (
-              <button onClick={openCreateQuizModal} className="text-blue-600 font-bold hover:underline">
+              <Button onClick={openCreateQuizModal} className="text-blue-600 font-bold hover:underline">
                 Tạo bài thi đầu tiên
-              </button>
+              </Button>
             )}
           </div>
         ) : (
@@ -515,7 +518,7 @@ export function Quiz() {
         <div className="p-6">
           <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6">
             {roomCodeDigits.map((digit, idx) => (
-              <input
+              <Input
                 key={idx}
                 id={`room-code-${idx}`}
                 type="text"
@@ -529,17 +532,13 @@ export function Quiz() {
               />
             ))}
           </div>
-          {joinError && (
-            <div className="text-center text-red-500 text-sm font-bold mb-6 bg-red-50 py-2 rounded-lg">
-              {joinError}
-            </div>
-          )}
-          <button
+          {joinError && <div className="text-center text-red-500 text-sm font-bold mb-6 bg-red-50 py-2 rounded-lg">{joinError}</div>}
+          <Button
             onClick={handleJoinRoom}
             className="w-full bg-blue-600 text-white font-bold text-lg py-3.5 rounded-xl hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
           >
             <LogIn className="w-5 h-5" /> Tìm phòng
-          </button>
+          </Button>
         </div>
       </Modal>
 
@@ -551,12 +550,12 @@ export function Quiz() {
                 <h2 className="text-xl font-extrabold text-gray-900">Tạo Quiz mới</h2>
                 <p className="mt-1 text-sm font-medium text-gray-500">Chọn quyền hiển thị trước khi tạo quiz.</p>
               </div>
-              <button onClick={() => setIsCreateModalOpen(false)} className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700">
+              <Button onClick={() => setIsCreateModalOpen(false)} className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700">
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
             <div className="space-y-3 p-6">
-              <button
+              <Button
                 type="button"
                 onClick={() => setCreateIsPublic(true)}
                 className={`w-full rounded-2xl border p-4 text-left transition-all ${createIsPublic ? "border-emerald-400 bg-emerald-50 ring-4 ring-emerald-100" : "border-gray-200 bg-gray-50 hover:bg-white"}`}
@@ -565,8 +564,8 @@ export function Quiz() {
                   <Globe2 className="w-5 h-5 text-emerald-600" /> Công khai
                 </div>
                 <p className="mt-1 text-sm font-medium text-gray-500">Mặc định. Quiz sẽ xuất hiện ở tab Công khai.</p>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => {
                   if (!isVip) {
@@ -581,11 +580,11 @@ export function Quiz() {
                   <Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}
                 </div>
                 <p className="mt-1 text-sm font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo quiz riêng tư.</p>
-              </button>
+              </Button>
             </div>
             <div className="border-t border-gray-100 px-6 py-5">
               <label className="mb-2 block text-sm font-bold text-gray-700">Đề mục</label>
-              <select
+              <Select
                 value={selectedCreateCategoryId}
                 onChange={(e) => setSelectedCreateCategoryId(e.target.value)}
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-bold text-gray-800 outline-none focus:border-blue-500"
@@ -596,15 +595,15 @@ export function Quiz() {
                     {category.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div className="flex gap-3 border-t border-gray-100 p-6">
-              <button onClick={() => setIsCreateModalOpen(false)} className="flex-1 rounded-xl bg-gray-100 py-3 font-bold text-gray-700 hover:bg-gray-200">
+              <Button onClick={() => setIsCreateModalOpen(false)} className="flex-1 rounded-xl bg-gray-100 py-3 font-bold text-gray-700 hover:bg-gray-200">
                 Hủy
-              </button>
-              <button onClick={continueCreateQuiz} className="flex-1 rounded-xl bg-blue-600 py-3 font-bold text-white hover:bg-blue-700">
+              </Button>
+              <Button onClick={continueCreateQuiz} className="flex-1 rounded-xl bg-blue-600 py-3 font-bold text-white hover:bg-blue-700">
                 Tiếp tục
-              </button>
+              </Button>
             </div>
           </div>
         </div>

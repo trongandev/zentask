@@ -134,13 +134,27 @@ class FlashcardService {
     const progressDocs = await FlashcardProgress.find({ userId, dueDate: { $lte: now } })
       .limit(5)
       .lean();
-    if (progressDocs.length === 0) return [];
-
     const cards = [];
     for (const data of progressDocs) {
       const cardDoc = await Flashcard.findById(data.cardId).lean();
       if (cardDoc) cards.push({ id: cardDoc._id, ...cardDoc, progress: data });
     }
+
+    if (cards.length < 5) {
+      const limit = 5 - cards.length;
+      const newCards = await Flashcard.find({ userId, isLearned: false })
+        .limit(limit)
+        .lean();
+      
+      for (const cardDoc of newCards) {
+        cards.push({
+          id: cardDoc._id,
+          ...cardDoc,
+          progress: { setId: cardDoc.setId } // giả lập progress để giao diện có thể chuyển hướng đúng setId
+        });
+      }
+    }
+
     return cards;
   }
 
@@ -267,6 +281,21 @@ class FlashcardService {
       clonedFrom: null,
       builtinId: set.id,
     });
+
+    if (set.words && set.words.length > 0) {
+      const cardsToInsert = set.words.map((word) => ({
+        setId: newSet._id,
+        userId: userId,
+        term: word.term,
+        language: set.language || "en",
+        phonetic: word.phonetic || "",
+        translation: word.translation || "",
+        examples: word.examples || [],
+        notes: word.notes || "",
+        isLearned: false,
+      }));
+      await Flashcard.insertMany(cardsToInsert);
+    }
 
     const setObj = newSet.toObject();
     return { id: setObj._id, ...setObj };
@@ -404,26 +433,7 @@ class FlashcardService {
       await set.save();
     }
 
-    let cards = [];
-    if (set.builtinId) {
-      const builtinData = getBuiltinFlashcardSetById(set.builtinId);
-      if (builtinData && builtinData.words) {
-        cards = builtinData.words.map((word) => ({
-          _id: word.id || word.term,
-          setId: set._id,
-          userId: set.userId,
-          term: word.term,
-          phonetic: word.phonetic || "",
-          translation: word.translation || "",
-          examples: word.examples || [],
-          notes: word.notes || "",
-          isLearned: false,
-          isBuiltIn: true,
-        }));
-      }
-    } else {
-      cards = await Flashcard.find({ setId }).sort({ createdAt: -1 }).lean();
-    }
+    let cards = await Flashcard.find({ setId }).sort({ createdAt: -1 }).lean();
 
     const setObj = set.toObject();
     return {
@@ -436,7 +446,6 @@ class FlashcardService {
     const { term, phonetic, translation, examples, notes } = data;
     const set = await FlashcardSet.findById(setId);
     if (!set || set.userId.toString() !== userId) throw { statusCode: 404, message: "Flashcard set not found" };
-    if (set.builtinId) throw { statusCode: 403, message: "Cannot add cards to a built-in set" };
 
     await validatePublicObject({ term, translation, examples, notes }, "Nội dung flashcard");
     await consumeDailyLimit({

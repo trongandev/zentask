@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Volume2, CheckCircle } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
+import { Button } from "@/src/components/ui/Button";
 
 interface Round2ChooseMeaningProps {
   topicId: string | undefined;
@@ -35,9 +36,9 @@ export function Round2ChooseMeaning({ topicId, currentWord, allLessonWords, isCo
       <h2 className="text-2xl font-bold text-slate-800">Nghĩa của từ này là gì?</h2>
       <div className="text-center mb-8">
         <p className="font-bold text-4xl text-blue-600 mb-4">{currentWord?.term}</p>
-        <button onClick={() => playAudio(currentWord?.term)} className="text-blue-500 hover:bg-blue-50 p-2 rounded-full inline-flex">
+        <Button onClick={() => playAudio(currentWord?.term)} className="text-blue-500 hover:bg-blue-50 p-2 rounded-full inline-flex">
           <Volume2 className="w-6 h-6" />
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 gap-3">
@@ -54,7 +55,7 @@ export function Round2ChooseMeaning({ topicId, currentWord, allLessonWords, isCo
           }
           
           return (
-            <button
+            <Button
               key={opt.id}
               onClick={() => handleSelect(opt.translation)}
               disabled={isCorrect !== null}
@@ -69,7 +70,7 @@ export function Round2ChooseMeaning({ topicId, currentWord, allLessonWords, isCo
                   <CheckCircle className="w-6 h-6 opacity-80" />
                 </div>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>

@@ -4,6 +4,8 @@ import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw, AlertTriangle, Send } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 interface ModeFillBlankProps {
   cards: Flashcard[];
@@ -84,13 +86,13 @@ export function ModeFillBlank({ cards, setId, onComplete, completionActions }: M
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Thật xuất sắc!</h2>
         <p className="text-gray-500 mb-8">Bạn đã hoàn thành bài Điền từ.</p>
-        <button 
+        <Button 
           onClick={() => { setCompleted(false); setCurrentIndex(0); setInputValue(""); setStatus("idle"); setWrongCardIds([]); wrongCardIdsRef.current = []; }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Luyện tập lại
-        </button>
+        </Button>
         {completionActions}
       </div>
     );
@@ -177,7 +179,7 @@ export function ModeFillBlank({ cards, setId, onComplete, completionActions }: M
       </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-xl relative group">
-        <input
+        <Input
           ref={inputRef}
           type="text"
           value={inputValue}
@@ -193,13 +195,13 @@ export function ModeFillBlank({ cards, setId, onComplete, completionActions }: M
                 : "border-red-500 text-red-700 bg-red-50"
           )}
         />
-        <button 
+        <Button 
           type="submit" 
           disabled={status !== "idle" || !inputValue.trim()}
           className="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:bg-gray-400 transition-colors shadow-sm"
         >
           <Send className="w-5 h-5" />
-        </button>
+        </Button>
       </form>
     </div>
   );

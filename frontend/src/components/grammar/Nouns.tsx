@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, Minus, GlassWater, Apple, Droplets, Banknote, Coffee, Droplet } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
 
 type WordType = {
   id: string;
@@ -43,7 +44,7 @@ export function Nouns() {
             {WORDS.map(w => {
               const Icon = w.icon;
               return (
-                <button 
+                <Button 
                   key={w.id}
                   onClick={() => handleSelectWord(w)}
                   className={`flex flex-col items-center gap-1 p-3 rounded-xl border transition-all ${
@@ -54,7 +55,7 @@ export function Nouns() {
                     <Icon className="w-5 h-5" />
                   </div>
                   <span className="text-sm font-bold text-gray-800">{w.word}</span>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -138,34 +139,34 @@ export function Nouns() {
                 <div className="flex justify-center w-full">
                   {selectedWord.isCountable ? (
                     <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-xl border border-gray-200">
-                      <button 
+                      <Button 
                         onClick={() => setCount(Math.max(1, count - 1))}
                         className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 text-gray-600"
                       >
                         <Minus className="w-5 h-5" />
-                      </button>
+                      </Button>
                       <span className="w-8 text-center font-bold text-lg">{count}</span>
-                      <button 
+                      <Button 
                         onClick={() => setCount(Math.min(5, count + 1))}
                         className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-100 text-gray-600"
                       >
                         <Plus className="w-5 h-5" />
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div className="flex gap-2">
-                      <button 
+                      <Button 
                         onClick={() => setContainer("glass")}
                         className={`px-4 py-2 rounded-xl border text-sm font-bold transition-colors ${container === "glass" ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-white border-gray-200 hover:bg-gray-50 text-gray-700"}`}
                       >
                         A glass of...
-                      </button>
-                      <button 
+                      </Button>
+                      <Button 
                         onClick={() => setContainer("bottle")}
                         className={`px-4 py-2 rounded-xl border text-sm font-bold transition-colors ${container === "bottle" ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-white border-gray-200 hover:bg-gray-50 text-gray-700"}`}
                       >
                         A bottle of...
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>

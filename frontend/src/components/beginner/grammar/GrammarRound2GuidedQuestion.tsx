@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { cn } from "../../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 interface GrammarRound2GuidedQuestionProps {
   topicId: string;
@@ -27,7 +28,7 @@ export function GrammarRound2GuidedQuestion({ topicId, isCorrect, setIsCorrect, 
       
       <div className="grid grid-cols-1 gap-4">
         {options.map((opt) => (
-          <button
+          <Button
             key={opt.id}
             onClick={() => handleSelect(opt.id)}
             disabled={isCorrect !== null}
@@ -41,7 +42,7 @@ export function GrammarRound2GuidedQuestion({ topicId, isCorrect, setIsCorrect, 
             )}
           >
             {opt.text}
-          </button>
+          </Button>
         ))}
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { Bot, X, Zap } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 const BOT_LEVELS = [
   { rankId: 1, name: "Bạc", accuracy: "40%", color: "from-gray-400 to-gray-500", borderColor: "border-gray-400/50", description: "Bot cơ bản, phù hợp người mới" },
@@ -23,15 +24,15 @@ export function ArenaBotSelector({ onSelectBot, onClose }: ArenaBotSelectorProps
             <Bot className="w-5 h-5 text-blue-400" />
             Chọn Level Bot
           </h3>
-          <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
+          <Button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         <p className="text-sm text-gray-400 mb-5">Chọn level máy bạn muốn đấu, hoặc để hệ thống tự chọn phù hợp với rank hiện tại.</p>
 
         {/* Auto option */}
-        <button
+        <Button
           onClick={() => onSelectBot(null)}
           className="w-full mb-4 p-6 rounded-3xl border-2 border-blue-500 hover:border-blue-400 bg-blue-500/10 hover:bg-blue-500/20 transition-all text-left group shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] scale-100 hover:scale-[1.02]"
         >
@@ -44,12 +45,12 @@ export function ArenaBotSelector({ onSelectBot, onClose }: ArenaBotSelectorProps
               <div className="text-sm text-blue-200/70 mt-1">Hệ thống sẽ chọn bot có trình độ phù hợp với Rank hiện tại của bạn</div>
             </div>
           </div>
-        </button>
+        </Button>
 
         {/* Bot levels */}
         <div className="grid grid-cols-2 gap-2">
           {BOT_LEVELS.map((bot) => (
-            <button
+            <Button
               key={bot.rankId}
               onClick={() => onSelectBot(bot.rankId)}
               className={cn(
@@ -67,7 +68,7 @@ export function ArenaBotSelector({ onSelectBot, onClose }: ArenaBotSelectorProps
                 </div>
                 <div className="text-[10px] text-gray-400 leading-tight line-clamp-2">{bot.description}</div>
               </div>
-            </button>
+            </Button>
           ))}
         </div>
       </div>

@@ -7,6 +7,7 @@ import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
 import { getVoiceForLanguage } from "@/src/lib/ttsVoiceStorage";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/src/components/ui/Button";
 
 interface ModeQuizProps {
   cards: Flashcard[];
@@ -96,7 +97,7 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Tuyệt vời!</h2>
         <p className="text-gray-500 mb-8">Bạn đã hoàn thành bài Trắc nghiệm.</p>
-        <button
+        <Button
           onClick={() => {
             setCompleted(false);
             setCurrentIndex(0);
@@ -107,15 +108,15 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
         >
           <RotateCw className="w-5 h-5" />
           Làm lại
-        </button>
+        </Button>
         {/* button quay về */}
-        <button 
+        <Button 
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 rounded-xl bg-gray-100 px-6 py-3 font-bold text-gray-700 transition-colors hover:bg-gray-200"
         >
           <ArrowLeft className="w-5 h-5" />
           Quay về
-        </button>
+        </Button>
         {completionActions}
       </div>
     );
@@ -136,13 +137,13 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
 
       <div className="w-full bg-white rounded-3xl p-10 shadow-lg border border-gray-100 mb-8 relative flex flex-col items-center text-center">
         <h2 className="text-5xl font-extrabold text-gray-900 mb-4">{currentCard.term}</h2>
-        <button
+        <Button
           onClick={(e) => handlePlayAudio(e, currentCard.term)}
           disabled={isLoading && loadingText === currentCard.term}
           className="p-3 rounded-full bg-gray-50 text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors disabled:opacity-50"
         >
           {isLoading && loadingText === currentCard.term ? <div className="w-6 h-6 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-6 h-6" />}
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
@@ -160,7 +161,7 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
           }
 
           return (
-            <button
+            <Button
               key={idx}
               onClick={() => handleSelect(opt.id)}
               disabled={selectedOptionId !== null}
@@ -172,7 +173,7 @@ export function ModeQuiz({ cards, setId, onComplete, completionActions }: ModeQu
                   <CheckCircle className="w-6 h-6 opacity-80" />
                 </div>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>

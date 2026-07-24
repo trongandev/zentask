@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import toastService from "../../services/toastService";
 import { useAuth } from "@/src/contexts/AuthContext";
 import axiosInstance from "@/src/services/axiosConfig";
+import { Button } from "@/src/components/ui/Button";
 
 export function ZaloGo() {
     const { id } = useParams<{ id: string }>();
@@ -42,9 +43,9 @@ export function ZaloGo() {
                     <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">!</div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">Lỗi liên kết</h2>
                     <p className="text-gray-500 mb-6">{error}</p>
-                    <button onClick={() => navigate("/")} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
+                    <Button onClick={() => navigate("/")} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors">
                         Quay lại trang chủ
-                    </button>
+                    </Button>
                 </div>
             </div>
         );

@@ -2,6 +2,7 @@ import React from "react";
 import { Layers, HelpCircle, FormInput, Headphones, Shuffle, Target, Lock, Keyboard, Mic, LayoutGrid } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { PracticeMode } from "../../pages/Flashcard/FlashcardPractice";
+import { Button } from "@/src/components/ui/Button";
 
 interface PracticeSidebarProps {
   activeMode: PracticeMode;
@@ -46,7 +47,7 @@ export function PracticeSidebar({ activeMode, onChangeMode, cardCount, language 
 
           return (
             <div key={mode.id} title={isLocked ? lockReason : undefined} className="w-full">
-              <button
+              <Button
                 disabled={isLocked}
                 onClick={() => onChangeMode(mode.id as PracticeMode)}
                 className={cn(
@@ -82,7 +83,7 @@ export function PracticeSidebar({ activeMode, onChangeMode, cardCount, language 
                     </div>
                   )}
                 </div>
-              </button>
+              </Button>
             </div>
           );
         })}

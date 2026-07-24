@@ -4,8 +4,10 @@ import { adminService } from "@/src/services/adminService";
 import { AdminStatCards } from "@/src/components/Admin/AdminStatCards";
 import { DataTable } from "@/src/components/Admin/DataTable";
 import { useAdminStore } from "@/src/store/useAdminStore";
-import { UserAvatar } from "@/src/components/UserAvatar";
-import { UserLevelBadge } from "@/src/components/UserLevelBadge";
+import { UserAvatar } from "@/src/components/ui/UserAvatar";
+import { UserLevelBadge } from "@/src/components/ui/UserLevelBadge";
+import { Button } from "@/src/components/ui/Button";
+import { Select } from "@/src/components/ui/Select";
 
 export function AdminUsers() {
   const { users, fetchUsers } = useAdminStore();
@@ -22,10 +24,8 @@ export function AdminUsers() {
   };
 
   const handleBanUser = async (uid: string, currentBanStatus: boolean) => {
-    const confirmMessage = currentBanStatus
-      ? "Bạn có chắc chắn muốn MỞ KHOÁ tài khoản này không?"
-      : "Bạn có chắc chắn muốn KHOÁ tài khoản này không?";
-    
+    const confirmMessage = currentBanStatus ? "Bạn có chắc chắn muốn MỞ KHOÁ tài khoản này không?" : "Bạn có chắc chắn muốn KHOÁ tài khoản này không?";
+
     if (window.confirm(confirmMessage)) {
       const success = await adminService.banUser(uid, !currentBanStatus);
       if (success) fetchUsers(page, true);
@@ -61,7 +61,7 @@ export function AdminUsers() {
     {
       header: "Vai trò",
       render: (u: any) => (
-        <select
+        <Select
           className={`border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold uppercase tracking-wider focus:outline-none focus:border-red-500 transition-colors cursor-pointer ${
             u.role === "admin" ? "bg-red-50 text-red-600" : "bg-gray-100 text-gray-600"
           }`}
@@ -71,7 +71,7 @@ export function AdminUsers() {
         >
           <option value="user">USER</option>
           <option value="admin">ADMIN</option>
-        </select>
+        </Select>
       ),
     },
     {
@@ -80,13 +80,12 @@ export function AdminUsers() {
     },
     {
       header: "Trạng thái",
-      render: (u: any) => (
+      render: (u: any) =>
         u.isBanned ? (
           <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-lg uppercase">Bị khoá</span>
         ) : (
           <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-lg uppercase">Hoạt động</span>
-        )
-      )
+        ),
     },
     {
       header: "Ngày tham gia",
@@ -97,21 +96,21 @@ export function AdminUsers() {
       header: "Hành động",
       align: "right" as const,
       render: (u: any) => (
-        <button
+        <Button
           onClick={() => handleBanUser(u.id, u.isBanned)}
           disabled={u.role === "admin"}
           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${
-            u.role === "admin" 
-              ? "bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed" 
-              : u.isBanned 
+            u.role === "admin"
+              ? "bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed"
+              : u.isBanned
                 ? "bg-white text-green-600 border-green-200 hover:bg-green-50"
                 : "bg-white text-red-600 border-red-200 hover:bg-red-50"
           }`}
         >
           {u.isBanned ? "MỞ KHOÁ" : "KHOÁ"}
-        </button>
-      )
-    }
+        </Button>
+      ),
+    },
   ];
 
   const totalUsers = users.totalItems || 0;

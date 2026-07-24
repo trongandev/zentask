@@ -4,6 +4,8 @@ import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw, Keyboard, Settings as SettingsIcon } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 interface ModeTypingProps {
   cards: Flashcard[];
@@ -293,7 +295,7 @@ export function ModeTyping({ cards, setId, onComplete, completionActions }: Mode
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Tuyệt vời!</h2>
         <p className="text-gray-500 mb-8">Bạn đã bảo vệ thành công căn cứ.</p>
-        <button
+        <Button
           onClick={() => {
             unlearnedRef.current = [...cards];
             learnedRef.current = [];
@@ -304,7 +306,7 @@ export function ModeTyping({ cards, setId, onComplete, completionActions }: Mode
         >
           <RotateCw className="w-5 h-5" />
           Chơi lại
-        </button>
+        </Button>
         {completionActions}
       </div>
     );
@@ -327,9 +329,9 @@ export function ModeTyping({ cards, setId, onComplete, completionActions }: Mode
 
       {/* Settings */}
       <div className="absolute top-4 right-4 z-30 flex flex-col items-end gap-2">
-        <button onClick={() => setShowSettings(!showSettings)} className="bg-white/10 hover:bg-white/20 backdrop-blur text-white p-3 rounded-xl border border-white/20 transition-colors">
+        <Button onClick={() => setShowSettings(!showSettings)} className="bg-white/10 hover:bg-white/20 backdrop-blur text-white p-3 rounded-xl border border-white/20 transition-colors">
           <SettingsIcon className="w-5 h-5" />
-        </button>
+        </Button>
 
         {showSettings && (
           <div className="bg-gray-800 border border-gray-700 p-4 rounded-2xl shadow-xl w-64 animate-in fade-in slide-in-from-top-2">
@@ -341,7 +343,7 @@ export function ModeTyping({ cards, setId, onComplete, completionActions }: Mode
                   <span>Tốc độ rơi</span>
                   <span className="text-white font-bold">{Math.round(config.speedMultiplier * 100)}%</span>
                 </label>
-                <input
+                <Input
                   type="range"
                   min="0.5"
                   max="2.0"
@@ -357,7 +359,7 @@ export function ModeTyping({ cards, setId, onComplete, completionActions }: Mode
                   <span>Khoảng cách sinh ra</span>
                   <span className="text-white font-bold">{config.spawnDelay / 1000}s</span>
                 </label>
-                <input
+                <Input
                   type="range"
                   min="1"
                   max="6"

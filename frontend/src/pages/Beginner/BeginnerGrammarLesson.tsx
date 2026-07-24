@@ -12,6 +12,7 @@ import { GrammarRound3RuleSummary } from "../../components/beginner/grammar/Gram
 import { GrammarRound4TrueFalse } from "../../components/beginner/grammar/GrammarRound4TrueFalse";
 import { GrammarRound5FixError } from "../../components/beginner/grammar/GrammarRound5FixError";
 import { GrammarRound6FreeOutput } from "../../components/beginner/grammar/GrammarRound6FreeOutput";
+import { Button } from "@/src/components/ui/Button";
 
 type GrammarRoundType = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -78,9 +79,9 @@ export function BeginnerGrammarLesson() {
     <div className="max-w-xl mx-auto w-full pt-8 px-4 flex flex-col min-h-[80vh]">
       {/* Progress Bar */}
       <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate("/beginner/grammar")} className="text-slate-400 hover:text-slate-700">
+        <Button onClick={() => navigate("/beginner/grammar")} className="text-slate-400 hover:text-slate-700">
           <X className="w-6 h-6" />
-        </button>
+        </Button>
         <div className="flex-1 bg-slate-200 h-4 rounded-full overflow-hidden">
           <div className="bg-blue-500 h-full transition-all duration-300" style={{ width: `${(currentRound / 6) * 100}%` }} />
         </div>
@@ -101,9 +102,9 @@ export function BeginnerGrammarLesson() {
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-50">
         <div className="max-w-xl mx-auto flex items-center justify-end">
           {isInformationalRound ? (
-            <button onClick={nextStep} className="font-bold text-white bg-blue-500 hover:bg-blue-600 px-8 py-3 rounded-2xl flex items-center gap-2 w-full justify-center">
+            <Button onClick={nextStep} className="font-bold text-white bg-blue-500 hover:bg-blue-600 px-8 py-3 rounded-2xl flex items-center gap-2 w-full justify-center">
               Đã hiểu, Tiếp tục <ArrowRight className="w-5 h-5" />
-            </button>
+            </Button>
           ) : (
             <div
               className={cn(
@@ -125,12 +126,12 @@ export function BeginnerGrammarLesson() {
               </div>
 
               {isCorrect !== null && (
-                <button
+                <Button
                   onClick={nextStep}
                   className={cn("font-bold px-8 py-3 rounded-2xl flex items-center gap-2 text-white", isCorrect === true ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600")}
                 >
                   Tiếp tục
-                </button>
+                </Button>
               )}
             </div>
           )}

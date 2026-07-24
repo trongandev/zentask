@@ -4,6 +4,7 @@ import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
+import { Button } from "@/src/components/ui/Button";
 
 interface ModeBubbleProps {
   cards: Flashcard[];
@@ -167,7 +168,7 @@ export function ModeBubble({ cards, setId, onComplete, completionActions }: Mode
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Chiến thắng!</h2>
         <p className="text-gray-500 mb-8">Bạn có phản xạ rất tuyệt vời.</p>
-        <button
+        <Button
           onClick={() => {
             setCompleted(false);
             setCurrentIndex(0);
@@ -178,7 +179,7 @@ export function ModeBubble({ cards, setId, onComplete, completionActions }: Mode
         >
           <RotateCw className="w-5 h-5" />
           Chơi lại
-        </button>
+        </Button>
         {completionActions}
       </div>
     );
@@ -242,7 +243,7 @@ export function ModeBubble({ cards, setId, onComplete, completionActions }: Mode
               }}
               className="will-change-transform pointer-events-none"
             >
-              <button
+              <Button
                 onClick={() => handleBubbleClick(bubble.cardId)}
                 disabled={animatingSuccess}
                 className={cn(
@@ -256,7 +257,7 @@ export function ModeBubble({ cards, setId, onComplete, completionActions }: Mode
                 {/* Glossy reflection effect */}
                 <div className="absolute top-[15%] left-[15%] w-[30%] h-[30%] bg-white rounded-full opacity-60"></div>
                 <span className="relative z-10 leading-tight break-words pointer-events-none drop-shadow-sm">{bubble.term}</span>
-              </button>
+              </Button>
             </div>
           );
         })}

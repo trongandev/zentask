@@ -1,6 +1,7 @@
 import React from "react";
 import { Mic, Check } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 interface RoundPlaceholderProps {
   roundName: string;
@@ -15,7 +16,7 @@ export function RoundPlaceholder({ roundName, isCorrect, setIsCorrect }: RoundPl
       <p className="text-slate-500">Tính năng này đang được phát triển...</p>
       
       <div className="mt-12">
-        <button
+        <Button
           onClick={() => setIsCorrect(true)}
           disabled={isCorrect !== null}
           className={cn(
@@ -24,7 +25,7 @@ export function RoundPlaceholder({ roundName, isCorrect, setIsCorrect }: RoundPl
           )}
         >
           <Check className="w-8 h-8" />
-        </button>
+        </Button>
         <p className="text-sm text-slate-400 mt-4">Bấm để hoàn thành vòng (UI Demo)</p>
       </div>
     </div>

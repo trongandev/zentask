@@ -26,6 +26,10 @@ import {
 } from "lucide-react";
 import toastService from "@/src/services/toastService";
 import { NotebookBackground, NotebookDocument, NotebookItem, NotebookPageData, NotebookStroke, NotebookTool, notebookService } from "../services/notebookService";
+import { Button } from "@/src/components/ui/Button";
+import { Select } from "@/src/components/ui/Select";
+import { Input } from "@/src/components/ui/Input";
+import { Textarea } from "@/src/components/ui/Textarea";
 
 const BOARD_WIDTH = 1200;
 const BOARD_HEIGHT = 760;
@@ -145,7 +149,7 @@ interface DragState {
 
 function ToolButton({ active, icon: Icon, label, onClick }: { active?: boolean; icon: React.ElementType; label: string; onClick: () => void }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
       title={label}
@@ -154,7 +158,7 @@ function ToolButton({ active, icon: Icon, label, onClick }: { active?: boolean; 
       }`}
     >
       <Icon className="h-5 w-5" />
-    </button>
+    </Button>
   );
 }
 
@@ -663,14 +667,14 @@ export default function Notebook() {
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-500">Zentask</p>
             <h2 className="mt-1 text-xl font-extrabold text-slate-900">Sổ tay</h2>
           </div>
-          <button onClick={createNotebook} className="rounded-2xl bg-blue-600 p-2.5 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700">
+          <Button onClick={createNotebook} className="rounded-2xl bg-blue-600 p-2.5 text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700">
             <Plus className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-2 overflow-y-auto pr-1">
           {notebooks.map((notebook) => (
-            <button
+            <Button
               key={notebook.id}
               onClick={() => void openNotebook(notebook.id)}
               className={`w-full rounded-2xl border p-3 text-left transition ${
@@ -686,7 +690,7 @@ export default function Notebook() {
                   <p className="text-xs text-slate-400">{notebook.pages.length || 1} trang</p>
                 </div>
               </div>
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -709,15 +713,15 @@ export default function Notebook() {
               <h2 className="truncate text-base font-extrabold text-slate-900">Quản lý sổ tay</h2>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <button
+              <Button
                 type="button"
                 onClick={createNotebook}
                 className="flex items-center gap-1 rounded-2xl bg-blue-600 px-3 py-2 text-xs font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
               >
                 <Plus className="h-4 w-4" />
                 Mới
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => void deleteNotebook()}
                 disabled={!activeNotebookId}
@@ -725,12 +729,12 @@ export default function Notebook() {
                 title="Xóa sổ tay"
               >
                 <Trash2 className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <select
+            <Select
               value={activeNotebookId || ""}
               onChange={(event) => {
                 if (event.target.value) void openNotebook(event.target.value);
@@ -743,17 +747,17 @@ export default function Notebook() {
                   {notebook.title} · {notebook.pages.length || 1} trang
                 </option>
               ))}
-            </select>
-            <button type="button" onClick={handleManualSave} className="flex shrink-0 items-center gap-1 rounded-2xl bg-white px-3 py-2 text-xs font-bold text-blue-600 shadow-sm hover:bg-blue-50">
+            </Select>
+            <Button type="button" onClick={handleManualSave} className="flex shrink-0 items-center gap-1 rounded-2xl bg-white px-3 py-2 text-xs font-bold text-blue-600 shadow-sm hover:bg-blue-50">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Lưu
-            </button>
+            </Button>
           </div>
         </div>
 
         <header className="flex flex-wrap items-center gap-3 border-b border-slate-100 p-3 sm:p-4">
           <div className="min-w-[240px] flex-1">
-            <input
+            <Input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               className="w-full rounded-2xl border border-transparent bg-slate-50 px-4 py-2.5 text-lg font-extrabold text-slate-900 outline-none transition focus:border-blue-200 focus:bg-white"
@@ -777,23 +781,23 @@ export default function Notebook() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button onClick={undo} className="rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-500 hover:text-blue-600" title="Hoàn tác">
+            <Button onClick={undo} className="rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-500 hover:text-blue-600" title="Hoàn tác">
               <Undo2 className="h-5 w-5" />
-            </button>
-            <button onClick={redo} className="rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-500 hover:text-blue-600" title="Làm lại">
+            </Button>
+            <Button onClick={redo} className="rounded-2xl border border-slate-200 bg-white p-2.5 text-slate-500 hover:text-blue-600" title="Làm lại">
               <Redo2 className="h-5 w-5" />
-            </button>
-            <button onClick={handleManualSave} className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700">
+            </Button>
+            <Button onClick={handleManualSave} className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700">
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Lưu
-            </button>
+            </Button>
           </div>
         </header>
 
         {showImagePanel && (
           <div className="flex flex-wrap items-center gap-3 border-b border-blue-100 bg-blue-50/60 px-4 py-3">
             <ImagePlus className="h-5 w-5 text-blue-600" />
-            <input
+            <Input
               value={imageUrl}
               onChange={(event) => setImageUrl(event.target.value)}
               onKeyDown={(event) => {
@@ -802,12 +806,12 @@ export default function Notebook() {
               className="min-w-[260px] flex-1 rounded-2xl border border-blue-100 bg-white px-4 py-2 text-sm outline-none focus:border-blue-300"
               placeholder="Dán đường dẫn hình ảnh hoặc ảnh động, ví dụ https://.../image.gif"
             />
-            <button onClick={addMediaFromUrl} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">
+            <Button onClick={addMediaFromUrl} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">
               Thêm vào trang
-            </button>
-            <button onClick={() => setShowImagePanel(false)} className="rounded-2xl p-2 text-blue-700 hover:bg-blue-100">
+            </Button>
+            <Button onClick={() => setShowImagePanel(false)} className="rounded-2xl p-2 text-blue-700 hover:bg-blue-100">
               <X className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
         )}
 
@@ -820,21 +824,21 @@ export default function Notebook() {
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <button onClick={addPage} className="rounded-xl bg-white p-2 text-blue-600 shadow-sm hover:bg-blue-50" title="Thêm trang">
+              <Button onClick={addPage} className="rounded-xl bg-white p-2 text-blue-600 shadow-sm hover:bg-blue-50" title="Thêm trang">
                 <Plus className="h-4 w-4" />
-              </button>
-              <button onClick={duplicatePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-blue-600" title="Nhân bản trang">
+              </Button>
+              <Button onClick={duplicatePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-blue-600" title="Nhân bản trang">
                 <CopyIcon className="h-4 w-4" />
-              </button>
-              <button onClick={deletePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-red-600" title="Xóa trang">
+              </Button>
+              <Button onClick={deletePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-red-600" title="Xóa trang">
                 <Trash2 className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           </div>
 
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
             {pages.map((page, index) => (
-              <button
+              <Button
                 key={page.id}
                 type="button"
                 onClick={() => {
@@ -847,7 +851,7 @@ export default function Notebook() {
               >
                 <div className="text-xs font-extrabold">Trang {index + 1}</div>
                 <div className="truncate text-[10px] text-slate-400">{page.title}</div>
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -856,13 +860,13 @@ export default function Notebook() {
           <aside className="hidden border-r border-slate-100 bg-slate-50/70 p-3 lg:block">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-extrabold text-slate-700">Trang</h3>
-              <button onClick={addPage} className="rounded-xl bg-white p-2 text-blue-600 shadow-sm hover:bg-blue-50">
+              <Button onClick={addPage} className="rounded-xl bg-white p-2 text-blue-600 shadow-sm hover:bg-blue-50">
                 <Plus className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
             <div className="space-y-2 overflow-y-auto pr-1">
               {pages.map((page, index) => (
-                <button
+                <Button
                   key={page.id}
                   onClick={() => {
                     setActivePageId(page.id);
@@ -873,7 +877,7 @@ export default function Notebook() {
                   <div className="mb-2 flex h-20 items-center justify-center rounded-xl border border-slate-100 bg-white text-xs font-bold text-slate-400" style={getBackgroundStyle(page.background)}>
                     {index + 1}
                   </div>
-                  <input
+                  <Input
                     value={page.title}
                     onChange={(event) => updatePageTitle(page.id, event.target.value)}
                     onClick={(event) => event.stopPropagation()}
@@ -882,20 +886,20 @@ export default function Notebook() {
                   <p className="px-1 text-[10px] text-slate-400">
                     {page.strokes.length} nét • {page.items.length} vật thể
                   </p>
-                </button>
+                </Button>
               ))}
             </div>
 
             <div className="mt-3 grid grid-cols-3 gap-2">
-              <button onClick={duplicatePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-blue-600" title="Nhân bản trang">
+              <Button onClick={duplicatePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-blue-600" title="Nhân bản trang">
                 <CopyIcon className="h-4 w-4" />
-              </button>
-              <button onClick={deletePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-red-600" title="Xóa trang">
+              </Button>
+              <Button onClick={deletePage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-red-600" title="Xóa trang">
                 <Trash2 className="h-4 w-4" />
-              </button>
-              <button onClick={clearPage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-red-600" title="Xóa nội dung">
+              </Button>
+              <Button onClick={clearPage} className="rounded-xl bg-white p-2 text-slate-500 shadow-sm hover:text-red-600" title="Xóa nội dung">
                 <Eraser className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           </aside>
 
@@ -903,7 +907,7 @@ export default function Notebook() {
             <div className="flex flex-wrap items-center gap-3 border-b border-slate-200/70 bg-white/70 px-4 py-3 backdrop-blur">
               <div className="flex items-center gap-2 rounded-2xl bg-white p-2 shadow-sm">
                 {DEFAULT_COLORS.map((item) => (
-                  <button
+                  <Button
                     key={item}
                     onClick={() => setColor(item)}
                     className={`h-6 w-6 rounded-full border-2 ${color === item ? "border-slate-900" : "border-white"}`}
@@ -911,40 +915,40 @@ export default function Notebook() {
                     title={item}
                   />
                 ))}
-                <input type="color" value={color} onChange={(event) => setColor(event.target.value)} className="h-7 w-8 cursor-pointer rounded-lg border-0 bg-transparent" />
+                <Input type="color" value={color} onChange={(event) => setColor(event.target.value)} className="h-7 w-8 cursor-pointer rounded-lg border-0 bg-transparent" />
               </div>
 
               <label className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2 text-xs font-bold text-slate-500 shadow-sm">
                 Nét
-                <input type="range" min={1} max={24} value={strokeWidth} onChange={(event) => setStrokeWidth(Number(event.target.value))} />
+                <Input type="range" min={1} max={24} value={strokeWidth} onChange={(event) => setStrokeWidth(Number(event.target.value))} />
                 <span className="w-7 text-right">{strokeWidth}</span>
               </label>
 
               <div className="flex items-center gap-2 rounded-2xl bg-white p-1.5 shadow-sm">
                 {(["plain", "grid", "dots", "line"] as NotebookBackground[]).map((bg) => (
-                  <button
+                  <Button
                     key={bg}
                     onClick={() => setPageBackground(bg)}
                     className={`rounded-xl px-3 py-1.5 text-xs font-bold ${activePage?.background === bg ? "bg-blue-50 text-blue-600" : "text-slate-500 hover:bg-slate-50"}`}
                   >
                     {bg === "plain" ? "Trắng" : bg === "grid" ? "Ô ly" : bg === "dots" ? "Chấm" : "Dòng"}
-                  </button>
+                  </Button>
                 ))}
               </div>
 
               <div className="ml-auto flex items-center gap-2 rounded-2xl bg-white p-1.5 shadow-sm">
-                <button onClick={() => setZoom((value) => Math.max(0.35, value - 0.08))} className="rounded-xl p-2 text-slate-500 hover:bg-slate-50">
+                <Button onClick={() => setZoom((value) => Math.max(0.35, value - 0.08))} className="rounded-xl p-2 text-slate-500 hover:bg-slate-50">
                   <ZoomOut className="h-4 w-4" />
-                </button>
+                </Button>
                 <span className="w-14 text-center text-xs font-bold text-slate-500">{Math.round(zoom * 100)}%</span>
-                <button onClick={() => setZoom((value) => Math.min(1.5, value + 0.08))} className="rounded-xl p-2 text-slate-500 hover:bg-slate-50">
+                <Button onClick={() => setZoom((value) => Math.min(1.5, value + 0.08))} className="rounded-xl p-2 text-slate-500 hover:bg-slate-50">
                   <ZoomIn className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
 
-              <button onClick={exportJson} className="rounded-2xl bg-white px-3 py-2 text-xs font-bold text-slate-500 shadow-sm hover:text-blue-600">
+              <Button onClick={exportJson} className="rounded-2xl bg-white px-3 py-2 text-xs font-bold text-slate-500 shadow-sm hover:text-blue-600">
                 <Download className="mr-1 inline h-4 w-4" /> Sao lưu
-              </button>
+              </Button>
             </div>
 
             {selectedItem && (
@@ -952,20 +956,20 @@ export default function Notebook() {
                 <span className="font-bold text-blue-700">
                   Đang chọn: {selectedItem.type === "gif" ? "Ảnh động" : selectedItem.type === "image" ? "Hình ảnh" : selectedItem.type === "sticky" ? "Ghi chú màu" : "Hộp chữ"}
                 </span>
-                <button onClick={bringSelectedToFront} className="rounded-xl bg-white px-3 py-1.5 font-bold text-slate-600 hover:text-blue-600">
+                <Button onClick={bringSelectedToFront} className="rounded-xl bg-white px-3 py-1.5 font-bold text-slate-600 hover:text-blue-600">
                   Đưa lên trước
-                </button>
-                <button onClick={duplicateSelectedItem} className="rounded-xl bg-white px-3 py-1.5 font-bold text-slate-600 hover:text-blue-600">
+                </Button>
+                <Button onClick={duplicateSelectedItem} className="rounded-xl bg-white px-3 py-1.5 font-bold text-slate-600 hover:text-blue-600">
                   Nhân bản
-                </button>
-                <button onClick={deleteSelectedItem} className="rounded-xl bg-white px-3 py-1.5 font-bold text-red-600 hover:bg-red-50">
+                </Button>
+                <Button onClick={deleteSelectedItem} className="rounded-xl bg-white px-3 py-1.5 font-bold text-red-600 hover:bg-red-50">
                   Xóa
-                </button>
+                </Button>
                 {selectedItem.type !== "image" && selectedItem.type !== "gif" && (
                   <>
                     <label className="ml-1 flex items-center gap-2 rounded-xl bg-white px-3 py-1.5 font-bold text-slate-600">
                       Cỡ chữ
-                      <input
+                      <Input
                         type="range"
                         min={14}
                         max={52}
@@ -973,7 +977,7 @@ export default function Notebook() {
                         onChange={(event) => updateItem(selectedItem.id, (item) => ({ ...item, fontSize: Number(event.target.value) }))}
                       />
                     </label>
-                    <input
+                    <Input
                       type="color"
                       value={selectedItem.textColor || "#0f172a"}
                       onChange={(event) => updateItem(selectedItem.id, (item) => ({ ...item, textColor: event.target.value }))}
@@ -1032,7 +1036,7 @@ export default function Notebook() {
                             <img src={item.url} alt="Hình trong sổ tay" className="h-full w-full select-none object-contain" draggable={false} />
                             {item.type === "gif" && <span className="absolute left-2 top-2 rounded-lg bg-black/60 px-2 py-1 text-[10px] font-bold text-white">Ảnh động</span>}
                             {selected && (
-                              <button className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-white bg-blue-600" onPointerDown={(event) => startItemDrag(event, item, "resize")} />
+                              <Button className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-white bg-blue-600" onPointerDown={(event) => startItemDrag(event, item, "resize")} />
                             )}
                           </div>
                         );
@@ -1045,7 +1049,7 @@ export default function Notebook() {
                           style={{ ...commonStyle, backgroundColor: item.type === "sticky" ? item.color || "#fff7ad" : "transparent" }}
                           onPointerDown={(event) => startItemDrag(event, item, "move")}
                         >
-                          <textarea
+                          <Textarea
                             value={item.content || ""}
                             onChange={(event) => updateItem(item.id, (prev) => ({ ...prev, content: event.target.value }))}
                             onPointerDown={(event) => {
@@ -1056,7 +1060,7 @@ export default function Notebook() {
                             style={{ color: item.textColor || "#0f172a", fontSize: item.fontSize || 22 }}
                           />
                           {selected && (
-                            <button className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-white bg-blue-600" onPointerDown={(event) => startItemDrag(event, item, "resize")} />
+                            <Button className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-2 border-white bg-blue-600" onPointerDown={(event) => startItemDrag(event, item, "resize")} />
                           )}
                         </div>
                       );

@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Bot, Image as ImageIcon, Lightbulb, Loader2, MessageCircle, Paperclip, RefreshCcw, Send, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { checkAIBackend, chatWithGemini, generateImageWithHuggingFace, type AIChatMessagePayload } from "../services/aiChatService";
+import { Button } from "@/src/components/ui/Button";
+import { Select } from "@/src/components/ui/Select";
+import { Input } from "@/src/components/ui/Input";
+import { Textarea } from "@/src/components/ui/Textarea";
 
 const quickPrompts = [
   "Giải thích ngữ pháp câu này thật dễ hiểu",
@@ -330,12 +334,12 @@ export function AIChat() {
               <p className="mt-1 text-sm text-gray-500">Nhập câu hỏi hoặc gửi ảnh để nhận hỗ trợ.</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button onClick={handleHealthCheck} className="flex items-center gap-2 rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100">
+              <Button onClick={handleHealthCheck} className="flex items-center gap-2 rounded-xl bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100">
                 <RefreshCcw className="h-4 w-4" /> Kiểm tra kết nối
-              </button>
-              <button onClick={clearChat} className="flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100">
+              </Button>
+              <Button onClick={clearChat} className="flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100">
                 <Trash2 className="h-4 w-4" /> Làm mới cuộc trò chuyện
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -344,13 +348,13 @@ export function AIChat() {
             <div className="flex flex-wrap items-center gap-2">
               <label className="flex h-9 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-xs text-gray-500">
                 Cách trả lời
-                <select value={String(temperature)} onChange={(event) => setTemperature(Number(event.target.value))} className="bg-transparent font-semibold text-gray-800 outline-none">
+                <Select value={String(temperature)} onChange={(event) => setTemperature(Number(event.target.value))} className="bg-transparent font-semibold text-gray-800 outline-none">
                   {replyStyles.map((item) => (
                     <option key={item.label} value={item.value}>
                       {item.label}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
             </div>
           </div>
@@ -370,12 +374,12 @@ export function AIChat() {
                   {message.generatedImage && (
                     <div className="mt-3">
                       <img src={message.generatedImage} alt="generated" className="max-h-[420px] rounded-2xl border border-gray-100 bg-gray-50 object-contain" />
-                      <button
+                      <Button
                         onClick={() => downloadDataUrl(message.generatedImage!, "zentask-ai-image.png")}
                         className="mt-3 rounded-xl bg-gray-900 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-gray-800"
                       >
                         Tải ảnh
-                      </button>
+                      </Button>
                     </div>
                   )}
                   {message.meta && <div className={`mt-2 text-[11px] ${message.role === "user" ? "text-blue-100" : "text-gray-400"}`}>{message.meta}</div>}
@@ -395,9 +399,9 @@ export function AIChat() {
           <div className="border-t border-gray-100 bg-white p-4 md:p-5">
             <div className="mb-3 flex flex-wrap gap-2">
               {quickPrompts.map((prompt) => (
-                <button key={prompt} onClick={() => setInput(prompt)} className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100">
+                <Button key={prompt} onClick={() => setInput(prompt)} className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100">
                   {prompt}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -406,24 +410,24 @@ export function AIChat() {
                 {selectedImages.map((image, index) => (
                   <div key={image.url} className="group relative">
                     <img src={image.url} alt={image.file.name} className="h-20 w-20 rounded-2xl border border-gray-200 object-cover" />
-                    <button onClick={() => removeImage(index)} className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-gray-900 text-white shadow-lg">
+                    <Button onClick={() => removeImage(index)} className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-gray-900 text-white shadow-lg">
                       <X className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
             )}
 
             <div className="flex items-end gap-3">
-              <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(event) => handlePickImages(event.target.files)} />
-              <button
+              <Input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={(event) => handlePickImages(event.target.files)} />
+              <Button
                 onClick={() => fileInputRef.current?.click()}
                 className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200"
                 title="Thêm hình ảnh"
               >
                 <Paperclip className="h-5 w-5" />
-              </button>
-              <textarea
+              </Button>
+              <Textarea
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={(event) => {
@@ -435,14 +439,14 @@ export function AIChat() {
                 placeholder="Nhập câu hỏi cho trợ lý... Shift + Enter để xuống dòng"
                 className="min-h-[52px] max-h-36 flex-1 resize-none rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
               />
-              <button
+              <Button
                 onClick={() => void handleSend()}
                 disabled={!canSend || isSending}
                 className="flex h-12 flex-shrink-0 items-center gap-2 rounded-2xl bg-blue-600 px-5 font-bold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                 <span className="hidden md:inline">Gửi</span>
-              </button>
+              </Button>
             </div>
           </div>
         </section>
@@ -461,7 +465,7 @@ export function AIChat() {
 
             <label className="mb-2 block text-sm font-bold text-gray-700">Mô tả ảnh</label>
             <p className="mb-2 text-xs leading-relaxed text-gray-500">Bạn có thể nhập tiếng Việt. ZenTask sẽ tự chuyển mô tả sang tiếng Anh trước khi tạo ảnh.</p>
-            <textarea
+            <Textarea
               value={imagePrompt}
               onChange={(event) => setImagePrompt(event.target.value)}
               className="h-28 w-full resize-none rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
@@ -469,7 +473,7 @@ export function AIChat() {
             />
 
             <label className="mb-2 mt-4 block text-sm font-bold text-gray-700">Điều bạn không muốn xuất hiện</label>
-            <input
+            <Input
               value={negativePrompt}
               onChange={(event) => setNegativePrompt(event.target.value)}
               className="h-11 w-full rounded-2xl border border-gray-200 px-4 text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
@@ -479,26 +483,26 @@ export function AIChat() {
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs font-bold text-gray-500">Kích thước</label>
-                <select value={imageSize} onChange={(event) => setImageSize(event.target.value)} className="h-11 w-full rounded-2xl border border-gray-200 bg-white px-3 text-sm focus:outline-none">
+                <Select value={imageSize} onChange={(event) => setImageSize(event.target.value)} className="h-11 w-full rounded-2xl border border-gray-200 bg-white px-3 text-sm focus:outline-none">
                   <option value="1024x1024">Vuông 1024</option>
                   <option value="768x1024">Dọc 3:4</option>
                   <option value="1024x768">Ngang 4:3</option>
                   <option value="720x1280">Story 9:16</option>
-                </select>
+                </Select>
               </div>
               <div className="rounded-2xl border border-dashed border-purple-200 bg-purple-50/60 px-4 py-3 text-xs leading-relaxed text-purple-700">
                 Ảnh sẽ được tạo tự động theo chế độ phù hợp nhất để bạn sử dụng nhanh và dễ dàng.
               </div>
             </div>
 
-            <button
+            <Button
               onClick={() => void handleGenerateImage()}
               disabled={isGenerating || !imagePrompt.trim()}
               className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-purple-600 font-bold text-white transition-colors hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />}
               Tạo ảnh
-            </button>
+            </Button>
 
             {generatedImage && (
               <div className="mt-5">
@@ -508,12 +512,12 @@ export function AIChat() {
                     <span className="font-bold">Mô tả tiếng Anh đã dùng:</span> {generatedEnglishPrompt}
                   </div>
                 )}
-                <button
+                <Button
                   onClick={() => downloadDataUrl(generatedImage, "zentask-ai-image.png")}
                   className="mt-3 h-10 w-full rounded-xl bg-gray-900 text-sm font-bold text-white transition-colors hover:bg-gray-800"
                 >
                   Tải ảnh PNG
-                </button>
+                </Button>
               </div>
             )}
           </section>

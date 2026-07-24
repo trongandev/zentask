@@ -19,6 +19,7 @@ interface Props {
 
 import axiosInstance from "../../../services/axiosConfig";
 import toastService from "../../../services/toastService";
+import { Button } from "@/src/components/ui/Button";
 
 export function FolderExplorer({ node, onNavigate, onClose, canBack, canForward, onBack, onForward, undo, handleCreateLesson, handleDeleteLesson, onRefresh }: Props) {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -154,21 +155,21 @@ export function FolderExplorer({ node, onNavigate, onClose, canBack, canForward,
       <div className="mb-8 border-b border-slate-100 pb-4 flex justify-between items-start">
         <div>
           <div className="flex gap-2 items-center mb-2">
-            <button onClick={onBack} disabled={!canBack} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md disabled:opacity-30">
+            <Button onClick={onBack} disabled={!canBack} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md disabled:opacity-30">
               <ArrowLeft className="w-5 h-5" />
-            </button>
-            <button onClick={onForward} disabled={!canForward} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md disabled:opacity-30">
+            </Button>
+            <Button onClick={onForward} disabled={!canForward} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md disabled:opacity-30">
               <ArrowRight className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
           {renderBreadcrumbs()}
           <p className="text-slate-500 mt-1">
             {children.length} mục con {selectedItems.length > 0 && `- Đang chọn ${selectedItems.length}`}
           </p>
         </div>
-        <button onClick={onClose} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
+        <Button onClick={onClose} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
           <X className="w-6 h-6" />
-        </button>
+        </Button>
       </div>
 
       {children.length === 0 ? (
@@ -228,7 +229,7 @@ export function FolderExplorer({ node, onNavigate, onClose, canBack, canForward,
       {contextMenu && (
         <div className="fixed bg-white border border-slate-200 shadow-xl rounded-lg py-1 w-48 z-50 overflow-hidden" style={{ top: contextMenu.y, left: contextMenu.x }}>
           {contextMenu.data.action === "background" && (
-            <button
+            <Button
               className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700"
               onClick={() => {
                 handleCreateLesson();
@@ -236,12 +237,12 @@ export function FolderExplorer({ node, onNavigate, onClose, canBack, canForward,
               }}
             >
               <Plus className="w-4 h-4" /> Thêm chủ đề mới
-            </button>
+            </Button>
           )}
 
           {contextMenu.data.action === "item" && (
             <>
-              <button
+              <Button
                 className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700"
                 onClick={() => {
                   onNavigate("lesson", contextMenu.data.data);
@@ -249,8 +250,8 @@ export function FolderExplorer({ node, onNavigate, onClose, canBack, canForward,
                 }}
               >
                 <Edit className="w-4 h-4" /> Chỉnh sửa
-              </button>
-              <button
+              </Button>
+              <Button
                 className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 flex items-center gap-2 text-red-600"
                 onClick={() => {
                   handleDeleteLesson(contextMenu.data.data.id);
@@ -258,7 +259,7 @@ export function FolderExplorer({ node, onNavigate, onClose, canBack, canForward,
                 }}
               >
                 <Trash2 className="w-4 h-4" /> Xóa
-              </button>
+              </Button>
             </>
           )}
         </div>

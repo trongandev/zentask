@@ -5,6 +5,7 @@ import { useSocket } from "../../contexts/SocketContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useQuizStore, Quiz, QuizRoom } from "../../services/quizService";
 import toastService from "@/src/services/toastService";
+import { Button } from "@/src/components/ui/Button";
 
 export function QuizPlay() {
   const { id } = useParams<{ id: string }>();
@@ -224,7 +225,7 @@ export function QuizPlay() {
             <h3 className="font-bold text-lg mb-4">Chọn 1 câu sai để sửa:</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {wrongQuestions.map((q, idx) => (
-                <button
+                <Button
                   key={q.id}
                   onClick={() => {
                     setRebirthTarget(q.id);
@@ -236,7 +237,7 @@ export function QuizPlay() {
                 >
                   <div className="font-bold mb-1 line-clamp-1">Câu hỏi: {q.text}</div>
                   <div className="text-sm opacity-80">Đã chọn sai: {answers[q.id]}</div>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -248,7 +249,7 @@ export function QuizPlay() {
                 {quiz.questions
                   .find((q) => q.id === rebirthTarget)
                   ?.options.map((opt, idx) => (
-                    <button
+                    <Button
                       key={idx}
                       onClick={() => setRebirthAnswer(opt)}
                       className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left font-semibold ${
@@ -259,27 +260,27 @@ export function QuizPlay() {
                         {String.fromCharCode(65 + idx)}
                       </div>
                       {opt}
-                    </button>
+                    </Button>
                   ))}
               </div>
               <div className="mt-6 flex justify-end">
-                <button
+                <Button
                   onClick={executePhoenix}
                   disabled={!rebirthAnswer}
                   className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 transition-all flex items-center gap-2"
                 >
                   <Sparkles className="w-5 h-5" />
                   Chốt đáp án & Nộp bài
-                </button>
+                </Button>
               </div>
             </div>
           )}
 
           {!rebirthTarget && (
             <div className="text-center">
-              <button onClick={skipPhoenix} className="text-white/70 hover:text-white font-semibold underline underline-offset-4">
+              <Button onClick={skipPhoenix} className="text-white/70 hover:text-white font-semibold underline underline-offset-4">
                 Bỏ qua đặc quyền và nộp bài
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -331,7 +332,7 @@ export function QuizPlay() {
             .map((opt, idx) => {
               const isSelected = answers[currentQ.id] === opt;
               return (
-                <button
+                <Button
                   key={idx}
                   onClick={() => handleSelect(currentQ.id, opt)}
                   className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left group ${
@@ -346,7 +347,7 @@ export function QuizPlay() {
                     {String.fromCharCode(65 + idx)}
                   </div>
                   <span className={`font-semibold text-lg ${isSelected ? "text-blue-900" : "text-gray-700"}`}>{opt}</span>
-                </button>
+                </Button>
               );
             })}
         </div>
@@ -354,29 +355,29 @@ export function QuizPlay() {
 
       {/* Navigation */}
       <div className="flex items-center justify-between">
-        <button
+        <Button
           onClick={() => setCurrentQuestionIndex((p) => Math.max(0, p - 1))}
           disabled={currentQuestionIndex === 0}
           className="px-6 py-3 font-bold text-gray-500 hover:text-gray-900 disabled:opacity-30 transition-colors"
         >
           Quay lại
-        </button>
+        </Button>
 
         {currentQuestionIndex === quiz.questions.length - 1 ? (
-          <button
+          <Button
             onClick={handlePreSubmit}
             disabled={submitting}
             className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg flex items-center gap-2 disabled:opacity-50 transition-colors"
           >
             {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Nộp bài ngay"}
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             onClick={() => setCurrentQuestionIndex((p) => p + 1)}
             className="px-8 py-3 bg-gray-900 hover:bg-black text-white font-bold rounded-2xl shadow-lg flex items-center gap-2 transition-colors"
           >
             Tiếp theo <ArrowRight className="w-5 h-5" />
-          </button>
+          </Button>
         )}
       </div>
 
@@ -388,7 +389,7 @@ export function QuizPlay() {
             const hasAnswered = !!answers[q.id];
             const isCurrent = idx === currentQuestionIndex;
             return (
-              <button
+              <Button
                 key={q.id}
                 onClick={() => setCurrentQuestionIndex(idx)}
                 className={`w-10 h-10 rounded-xl font-bold text-sm transition-all flex items-center justify-center border-2 ${
@@ -400,7 +401,7 @@ export function QuizPlay() {
                 }`}
               >
                 {idx + 1}
-              </button>
+              </Button>
             );
           })}
         </div>

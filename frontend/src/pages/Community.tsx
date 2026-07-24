@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { UserAvatar } from "../components/UserAvatar";
-import { UserLevelBadge } from "../components/UserLevelBadge";
+import { UserAvatar } from "../components/ui/UserAvatar";
+import { UserLevelBadge } from "@/src/components/ui/UserLevelBadge";
 import { Heart, MessageSquare, Share2, MoreHorizontal, Send, Image as ImageIcon, Smile, Hash, Edit2, Trash2, X, CornerDownRight } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
@@ -9,6 +9,9 @@ import DOMPurify from "dompurify";
 import { RichTextEditor } from "../components/RichTextEditor";
 import toastService from "@/src/services/toastService";
 import { SEO } from "../components/SEO";
+import { Button } from "@/src/components/ui/Button";
+import { Textarea } from "@/src/components/ui/Textarea";
+import { Input } from "@/src/components/ui/Input";
 
 // Cấu hình DOMPurify để chặn các thẻ và style độc hại
 DOMPurify.addHook("uponSanitizeAttribute", (node, data) => {
@@ -224,9 +227,9 @@ export function Community() {
               <Hash className="w-5 h-5" />
               Đang lọc theo: <span className="text-blue-600">{filterTag}</span>
             </div>
-            <button onClick={() => setFilterTag(null)} className="p-1 hover:bg-blue-100 rounded-full transition">
+            <Button onClick={() => setFilterTag(null)} className="p-1 hover:bg-blue-100 rounded-full transition">
               <X className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
         )}
 
@@ -241,7 +244,7 @@ export function Community() {
             />
             <div className="flex-1 space-y-4">
               {!showEditor && !newPostContent.trim() ? (
-                <textarea
+                <Textarea
                   placeholder="Bạn đang nghĩ gì? Cần giúp đỡ về ngữ pháp hay từ vựng? Thêm hashtag với ký tự # (VD: #grammar)"
                   className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none transition-all min-h-[50px] cursor-text"
                   onFocus={() => setShowEditor(true)}
@@ -268,21 +271,21 @@ export function Community() {
               )}
               <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                 <div className="flex items-center gap-2">
-                  <button className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-colors cursor-not-allowed opacity-50" title="Chưa hỗ trợ ảnh">
+                  <Button className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-colors cursor-not-allowed opacity-50" title="Chưa hỗ trợ ảnh">
                     <ImageIcon className="w-5 h-5" />
-                  </button>
-                  <button className="p-2 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-xl transition-colors">
+                  </Button>
+                  <Button className="p-2 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-xl transition-colors">
                     <Smile className="w-5 h-5" />
-                  </button>
+                  </Button>
                 </div>
-                <button
+                <Button
                   onClick={handlePostSubmit}
                   disabled={!newPostContent.trim()}
                   className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 text-white font-bold rounded-xl transition-all flex items-center gap-2"
                 >
                   <Send className="w-4 h-4" />
                   Đăng bài
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -319,7 +322,7 @@ export function Community() {
                     </div>
                     {isOwnPost && (
                       <div className="relative">
-                        <button
+                        <Button
                           onClick={(e) => {
                             e.stopPropagation();
                             setActiveMenuId(activeMenuId === post.id ? null : post.id);
@@ -327,15 +330,15 @@ export function Community() {
                           className="p-2 text-gray-400 hover:bg-gray-50 rounded-full transition-colors"
                         >
                           <MoreHorizontal className="w-5 h-5" />
-                        </button>
+                        </Button>
                         {activeMenuId === post.id && (
                           <div className="absolute right-0 top-10 bg-white border border-gray-100 shadow-xl rounded-xl w-40 py-2 z-50">
-                            <button onClick={() => startEditPost(post)} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-gray-700 font-medium">
+                            <Button onClick={() => startEditPost(post)} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-gray-700 font-medium">
                               <Edit2 className="w-4 h-4" /> Sửa
-                            </button>
-                            <button onClick={() => handleDeletePost(post.id)} className="w-full text-left px-4 py-2 hover:bg-red-50 flex items-center gap-2 text-red-600 font-medium">
+                            </Button>
+                            <Button onClick={() => handleDeletePost(post.id)} className="w-full text-left px-4 py-2 hover:bg-red-50 flex items-center gap-2 text-red-600 font-medium">
                               <Trash2 className="w-4 h-4" /> Xóa
-                            </button>
+                            </Button>
                           </div>
                         )}
                       </div>
@@ -347,12 +350,12 @@ export function Community() {
                     <div className="mb-4 space-y-3">
                       <RichTextEditor content={editContent} onChange={setEditContent} minHeight="100px" />
                       <div className="flex gap-2 justify-end">
-                        <button onClick={() => setEditingPostId(null)} className="px-4 py-2 text-gray-500 font-medium hover:bg-gray-50 rounded-lg">
+                        <Button onClick={() => setEditingPostId(null)} className="px-4 py-2 text-gray-500 font-medium hover:bg-gray-50 rounded-lg">
                           Hủy
-                        </button>
-                        <button onClick={submitEditPost} className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg">
+                        </Button>
+                        <Button onClick={submitEditPost} className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg">
                           Lưu
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -378,22 +381,22 @@ export function Community() {
                   {user ? (
                     <div className="flex items-center justify-between py-3 border-y border-gray-100 mb-4">
                       <div className="flex items-center gap-6">
-                        <button
+                        <Button
                           onClick={() => handleLike(post.id)}
                           className={cn("flex items-center gap-2 font-bold text-sm transition-colors", isLiked ? "text-red-500" : "text-gray-500 hover:text-red-500")}
                         >
                           <Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
                           {post.likes.length} <span className="hidden sm:inline">Thích</span>
-                        </button>
-                        <button onClick={() => toggleCommentSection(post.id)} className="flex items-center gap-2 text-gray-500 hover:text-blue-500 font-bold text-sm transition-colors">
+                        </Button>
+                        <Button onClick={() => toggleCommentSection(post.id)} className="flex items-center gap-2 text-gray-500 hover:text-blue-500 font-bold text-sm transition-colors">
                           <MessageSquare className="w-5 h-5" />
                           {post.commentsCount} <span className="hidden sm:inline">Bình luận</span>
-                        </button>
+                        </Button>
                       </div>
-                      <button className="flex items-center gap-2 text-gray-500 hover:text-green-500 font-bold text-sm transition-colors">
+                      <Button className="flex items-center gap-2 text-gray-500 hover:text-green-500 font-bold text-sm transition-colors">
                         <Share2 className="w-5 h-5" />
                         <span className="hidden sm:inline">Chia sẻ</span>
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center py-3 border-y border-gray-100 mb-4 text-gray-500 text-sm">Vui lòng đăng nhập để tương tác</div>
@@ -425,19 +428,19 @@ export function Community() {
 
                                   {editingCommentId === comment.id ? (
                                     <div className="mt-2 space-y-2">
-                                      <input
+                                      <Input
                                         type="text"
                                         value={editCommentContent}
                                         onChange={(e) => setEditCommentContent(e.target.value)}
                                         className="w-full bg-white border border-gray-200 rounded-lg py-1.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                                       />
                                       <div className="flex gap-2 justify-end">
-                                        <button onClick={() => setEditingCommentId(null)} className="text-xs font-bold text-gray-500 hover:text-gray-700">
+                                        <Button onClick={() => setEditingCommentId(null)} className="text-xs font-bold text-gray-500 hover:text-gray-700">
                                           Hủy
-                                        </button>
-                                        <button onClick={() => handleCommentEditSubmit(post.id)} className="text-xs font-bold text-blue-600 hover:text-blue-700">
+                                        </Button>
+                                        <Button onClick={() => handleCommentEditSubmit(post.id)} className="text-xs font-bold text-blue-600 hover:text-blue-700">
                                           Lưu
-                                        </button>
+                                        </Button>
                                       </div>
                                     </div>
                                   ) : (
@@ -448,17 +451,17 @@ export function Community() {
                                 {/* Comment Actions */}
                                 {!editingCommentId && (
                                   <div className="flex items-center gap-4 mt-1 ml-2">
-                                    <button
+                                    <Button
                                       onClick={() => handleCommentLike(post.id, comment.id)}
                                       className={cn("text-[11px] font-bold transition-colors flex items-center gap-1", isCommentLiked ? "text-red-500" : "text-gray-500 hover:text-gray-700")}
                                     >
                                       Thích {comment.likes.length > 0 && `(${comment.likes.length})`}
-                                    </button>
-                                    <button onClick={() => setReplyingToCommentId(comment.id)} className="text-[11px] font-bold text-gray-500 hover:text-gray-700 transition-colors">
+                                    </Button>
+                                    <Button onClick={() => setReplyingToCommentId(comment.id)} className="text-[11px] font-bold text-gray-500 hover:text-gray-700 transition-colors">
                                       Trả lời
-                                    </button>
+                                    </Button>
                                     {isOwnComment && (
-                                      <button
+                                      <Button
                                         onClick={() => {
                                           setEditingCommentId(comment.id);
                                           setEditCommentContent(comment.content);
@@ -466,7 +469,7 @@ export function Community() {
                                         className="text-[11px] font-bold text-gray-500 hover:text-blue-500 transition-colors"
                                       >
                                         Sửa
-                                      </button>
+                                      </Button>
                                     )}
                                   </div>
                                 )}
@@ -491,13 +494,13 @@ export function Community() {
                               <span className="flex items-center gap-1">
                                 <CornerDownRight className="w-3 h-3" /> Đang trả lời bình luận
                               </span>
-                              <button onClick={() => setReplyingToCommentId(null)} className="ml-2 hover:text-blue-900">
+                              <Button onClick={() => setReplyingToCommentId(null)} className="ml-2 hover:text-blue-900">
                                 <X className="w-3 h-3" />
-                              </button>
+                              </Button>
                             </div>
                           )}
                           <div className="relative">
-                            <input
+                            <Input
                               type="text"
                               placeholder="Viết bình luận..."
                               className="w-full bg-gray-50 border border-gray-100 rounded-full py-2 pl-4 pr-10 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
@@ -507,13 +510,13 @@ export function Community() {
                                 if (e.key === "Enter") handleCommentSubmit(post.id);
                               }}
                             />
-                            <button
+                            <Button
                               onClick={() => handleCommentSubmit(post.id)}
                               disabled={!commentText.trim()}
                               className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-blue-600 disabled:text-gray-300 transition-colors"
                             >
                               <Send className="w-4 h-4" />
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -535,13 +538,13 @@ export function Community() {
           </h3>
           <div className="flex flex-wrap gap-2">
             {["#grammar", "#english", "#help", "#achievement", "#motivation"].map((tag) => (
-              <button
+              <Button
                 key={tag}
                 onClick={() => setFilterTag(tag)}
                 className={cn("px-3 py-1.5 rounded-lg text-sm font-bold transition-all", filterTag === tag ? "bg-blue-600 text-white shadow-md" : "bg-gray-50 text-gray-600 hover:bg-gray-100")}
               >
                 {tag}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

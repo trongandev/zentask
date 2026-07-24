@@ -4,6 +4,7 @@ import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
+import { Button } from "@/src/components/ui/Button";
 
 interface ModeMatchProps {
   cards: Flashcard[];
@@ -122,13 +123,13 @@ export function ModeMatch({ cards, setId, onComplete, completionActions }: ModeM
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Quá đỉnh!</h2>
         <p className="text-gray-500 mb-2">Bạn đã nối xong các từ.</p>
         <p className="text-xl font-bold text-blue-600 mb-8">Thời gian: {timeElapsed} giây</p>
-        <button 
+        <Button 
           onClick={initGame}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Chơi lại
-        </button>
+        </Button>
         {completionActions}
       </div>
     );
@@ -149,7 +150,7 @@ export function ModeMatch({ cards, setId, onComplete, completionActions }: ModeM
           const isMatched = matchedPairs.includes(item.id);
 
           return (
-            <button
+            <Button
               key={item.id}
               onClick={() => handleSelect(item.id)}
               disabled={isMatched || (selectedIds.length === 2 && !isSelected && !isWrong)}
@@ -167,7 +168,7 @@ export function ModeMatch({ cards, setId, onComplete, completionActions }: ModeM
               <span className={cn("text-lg", item.type === 'en' ? "font-extrabold text-xl" : "font-medium")}>
                 {item.text}
               </span>
-            </button>
+            </Button>
           );
         })}
       </div>

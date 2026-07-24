@@ -1,20 +1,33 @@
+import React, { useEffect, useState } from "react";
 import { TrendingUp, BookOpen, Star, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { RANK_NAMES } from "../config/rankTopicConfig";
+import { Button } from "@/src/components/ui/Button";
+import axiosInstance from "../services/axiosConfig";
 
 export function ProgressCard() {
   const { user } = useAuth();
-  const learnedWords = (user as any)?.learnedBeginnerWords || [];
 
-  // Since we migrated to the backend, these numbers are approx.
-  // In a real scenario, we'd fetch stats from the backend.
-  const totalWords = 2500;
-  let totalTopics = 350;
-  let completedTopics = Math.floor(learnedWords.length / 5);
+  const [stats, setStats] = useState({
+    totalWords: 0,
+    totalTopics: 0,
+    completedTopics: 0,
+    learnedWords: 0,
+    totalXP: 0,
+  });
 
-  const learnedCount = learnedWords.length;
-  const percentage = totalWords > 0 ? Math.round((learnedCount / totalWords) * 100) : 0;
+  useEffect(() => {
+    if (user) {
+      axiosInstance
+        .get("/api/beginner/stats")
+        .then((res) => {
+          if (res.data) setStats(res.data);
+        })
+        .catch((err) => console.error("Error fetching beginner stats:", err));
+    }
+  }, [user]);
+  console.log(stats);
+  const percentage = stats.totalWords > 0 ? Math.round((stats.learnedWords / stats.totalWords) * 100) : 0;
 
   if (!user) {
     return (
@@ -22,9 +35,9 @@ export function ProgressCard() {
         <TrendingUp className="w-12 h-12 text-gray-300 mb-4" />
         <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Tiến độ học tập</h3>
         <p className="text-gray-500 mb-6 text-center text-sm">Vui lòng đăng nhập để lưu trữ tiến độ học tập và theo dõi số từ vựng đã thuộc!</p>
-        <button onClick={() => (window.location.href = "/auth")} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
+        <Button onClick={() => (window.location.href = "/auth")} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
           Đăng nhập ngay
-        </button>
+        </Button>
       </div>
     );
   }
@@ -43,8 +56,8 @@ export function ProgressCard() {
           <div>
             <p className="text-gray-500 font-medium mb-1">Bạn đã hoàn thành</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-gray-900 tracking-tight">{learnedCount}</span>
-              <span className="text-gray-500 font-medium">/ {totalWords} từ vựng</span>
+              <span className="text-4xl font-extrabold text-gray-900 tracking-tight">{stats.learnedWords}</span>
+              <span className="text-gray-500 font-medium">/ {stats.totalWords} từ vựng</span>
             </div>
           </div>
           <span className="text-sm font-bold text-gray-700">{percentage}%</span>
@@ -57,7 +70,9 @@ export function ProgressCard() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center text-center border border-gray-100">
           <BookOpen className="w-5 h-5 text-blue-500 mb-2" />
-          <span className="text-lg font-bold text-gray-900 mb-1">{completedTopics}</span>
+          <span className="text-lg font-bold text-gray-900 mb-1">
+            {stats.completedTopics} / {stats.totalTopics}
+          </span>
           <span className="text-[11px] font-medium text-gray-500">
             Chủ đề đã hoàn
             <br />
@@ -66,12 +81,12 @@ export function ProgressCard() {
         </div>
         <div className="bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center text-center border border-gray-100">
           <CheckCircle2 className="w-5 h-5 text-green-500 mb-2" />
-          <span className="text-lg font-bold text-gray-900 mb-1">{learnedCount}</span>
+          <span className="text-lg font-bold text-gray-900 mb-1">{stats.learnedWords}</span>
           <span className="text-[11px] font-medium text-gray-500">Từ vựng đã thuộc</span>
         </div>
         <div className="bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center text-center border border-gray-100">
           <Star className="w-5 h-5 text-yellow-500 mb-2" />
-          <span className="text-lg font-bold text-gray-900 mb-1">{user?.xp || 0}</span>
+          <span className="text-lg font-bold text-gray-900 mb-1">{stats.totalXP}</span>
           <span className="text-[11px] font-medium text-gray-500">Điểm XP tích lũy</span>
         </div>
       </div>

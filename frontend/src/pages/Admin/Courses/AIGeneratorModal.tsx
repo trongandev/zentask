@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Sparkles, X, RefreshCw } from "lucide-react";
 import axiosInstance from "../../../services/axiosConfig";
 import toastService from "../../../services/toastService";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 interface Props {
   onClose: () => void;
@@ -36,15 +38,15 @@ export function AIGeneratorModal({ onClose, onSuccess }: Props) {
           <h2 className="font-bold text-lg flex items-center gap-2">
             <Sparkles className="w-5 h-5" /> Tạo Từ Vựng Bằng AI
           </h2>
-          <button onClick={onClose} className="p-1 hover:bg-white/20 rounded">
+          <Button onClick={onClose} className="p-1 hover:bg-white/20 rounded">
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
         
         <div className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-1">Ngôn ngữ</label>
-            <input 
+            <Input 
               type="text" 
               value={languageCode} 
               onChange={e => setLanguageCode(e.target.value)} 
@@ -54,7 +56,7 @@ export function AIGeneratorModal({ onClose, onSuccess }: Props) {
           </div>
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-1">Chủ đề (Topic)</label>
-            <input 
+            <Input 
               type="text" 
               value={topic} 
               onChange={e => setTopic(e.target.value)} 
@@ -64,7 +66,7 @@ export function AIGeneratorModal({ onClose, onSuccess }: Props) {
           </div>
           <div>
             <label className="block text-sm font-bold text-slate-700 mb-1">Số lượng từ vựng</label>
-            <input 
+            <Input 
               type="number" 
               value={count} 
               onChange={e => setCount(Number(e.target.value))} 
@@ -75,17 +77,17 @@ export function AIGeneratorModal({ onClose, onSuccess }: Props) {
         </div>
 
         <div className="p-4 border-t bg-slate-50 flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-200 rounded-lg">
+          <Button onClick={onClose} className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-200 rounded-lg">
             Hủy
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={handleGenerate} 
             disabled={loading}
             className="px-4 py-2 font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 disabled:opacity-50"
           >
             {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             Tạo Bằng AI
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
 
 interface ArenaSurrenderModalProps {
   onCancel: () => void;
@@ -14,18 +15,18 @@ export function ArenaSurrenderModal({ onCancel, onSurrender }: ArenaSurrenderMod
           Nếu bạn bỏ cuộc ngay bây giờ, bạn sẽ bị xử thua và trừ sao ngay lập tức. Bạn có chắc chắn muốn thoát?
         </p>
         <div className="flex gap-4">
-          <button
+          <Button
             onClick={onCancel}
             className="flex-1 py-3 px-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors"
           >
             Tiếp tục chơi
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onSurrender}
             className="flex-1 py-3 px-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-colors"
           >
             Chấp nhận thua
-          </button>
+          </Button>
         </div>
       </div>
     </div>

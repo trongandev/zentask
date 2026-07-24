@@ -105,6 +105,7 @@ export const FlashcardSetSchema = new Schema({
   isPublic: { type: Boolean, default: false },
   order: { type: Number },
   clonedFrom: { type: Schema.Types.ObjectId, ref: 'FlashcardSet' },
+  builtinId: { type: String, default: null },
 }, { timestamps: true, suppressReservedKeysWarning: true });
 
 export const VocabularySchema = new Schema({

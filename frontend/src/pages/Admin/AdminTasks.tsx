@@ -5,6 +5,9 @@ import { DataTable } from "@/src/components/Admin/DataTable";
 import { Modal } from "@/src/components/Admin/Modal";
 import { AdminStatCards } from "@/src/components/Admin/AdminStatCards";
 import { useAdminStore } from "@/src/store/useAdminStore";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
+import { Textarea } from "@/src/components/ui/Textarea";
 
 export function AdminTasks() {
   const { tasks, fetchTasks } = useAdminStore();
@@ -87,12 +90,12 @@ export function AdminTasks() {
       align: "right" as const,
       render: (task: any) => (
         <div className="space-x-2">
-          <button onClick={() => startEditTask(task)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors inline-block">
+          <Button onClick={() => startEditTask(task)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors inline-block">
             <Edit2 className="w-5 h-5" />
-          </button>
-          <button onClick={() => handleDeleteTask(task.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors inline-block">
+          </Button>
+          <Button onClick={() => handleDeleteTask(task.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors inline-block">
             <Trash2 className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
       ),
     },
@@ -123,10 +126,10 @@ export function AdminTasks() {
           </div>
         </div>
 
-        <button onClick={startCreateTask} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-md flex items-center gap-2">
+        <Button onClick={startCreateTask} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-md flex items-center gap-2">
           <Plus className="w-5 h-5" />
           Thêm mới
-        </button>
+        </Button>
       </div>
 
       <AdminStatCards stats={stats} />
@@ -139,7 +142,7 @@ export function AdminTasks() {
         <form onSubmit={handleSaveTask} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5 md:col-span-2">
             <label className="text-sm font-bold text-gray-700">Mã nhiệm vụ (ID)</label>
-            <input
+            <Input
               type="text"
               required
               value={taskForm.id}
@@ -151,7 +154,7 @@ export function AdminTasks() {
           </div>
           <div className="space-y-1.5 md:col-span-2">
             <label className="text-sm font-bold text-gray-700">Tiêu đề</label>
-            <input
+            <Input
               type="text"
               required
               value={taskForm.title}
@@ -162,7 +165,7 @@ export function AdminTasks() {
           </div>
           <div className="space-y-1.5 md:col-span-2">
             <label className="text-sm font-bold text-gray-700">Mô tả</label>
-            <textarea
+            <Textarea
               required
               value={taskForm.desc}
               onChange={(e) => setTaskForm({ ...taskForm, desc: e.target.value })}
@@ -172,7 +175,7 @@ export function AdminTasks() {
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-bold text-gray-700">Phần thưởng (XP mỗi lần)</label>
-            <input
+            <Input
               type="number"
               required
               min="1"
@@ -183,7 +186,7 @@ export function AdminTasks() {
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-bold text-gray-700">Mục tiêu (Total)</label>
-            <input
+            <Input
               type="number"
               required
               min="1"
@@ -194,7 +197,7 @@ export function AdminTasks() {
           </div>
           <div className="space-y-1.5 md:col-span-2">
             <label className="text-sm font-bold text-gray-700">Icon URL</label>
-            <input
+            <Input
               type="text"
               required
               value={taskForm.icon}
@@ -203,13 +206,13 @@ export function AdminTasks() {
             />
           </div>
           <div className="md:col-span-2 flex justify-end gap-3 mt-4">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors">
+            <Button type="button" onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors">
               Hủy
-            </button>
-            <button type="submit" className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-md hover:shadow-lg flex items-center gap-2">
+            </Button>
+            <Button type="submit" className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors shadow-md hover:shadow-lg flex items-center gap-2">
               {isEditingTask ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
               {isEditingTask ? "Lưu thay đổi" : "Thêm nhiệm vụ"}
-            </button>
+            </Button>
           </div>
         </form>
       </Modal>

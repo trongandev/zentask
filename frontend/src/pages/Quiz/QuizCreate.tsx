@@ -6,6 +6,10 @@ import { useConfigStore } from "../../services/configService";
 import { useUserStore } from "../../services/userService";
 import toastService from "@/src/services/toastService";
 import { useAuth } from "../../contexts/AuthContext";
+import { Button } from "@/src/components/ui/Button";
+import { Select } from "@/src/components/ui/Select";
+import { Textarea } from "@/src/components/ui/Textarea";
+import { Input } from "@/src/components/ui/Input";
 
 export function QuizCreate() {
   const navigate = useNavigate();
@@ -143,9 +147,9 @@ export function QuizCreate() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
       <div className="flex items-center gap-4">
-        <button onClick={() => navigate("/quiz")} className="p-2 hover:bg-white rounded-full transition-colors border border-transparent hover:border-gray-200">
+        <Button onClick={() => navigate("/quiz")} className="p-2 hover:bg-white rounded-full transition-colors border border-transparent hover:border-gray-200">
           <ArrowLeft className="w-6 h-6 text-gray-600" />
-        </button>
+        </Button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tạo bài thi mới</h1>
           <p className="text-sm text-gray-500">Tạo thủ công hoặc nhờ trợ lý AI tạo tự động</p>
@@ -153,26 +157,26 @@ export function QuizCreate() {
       </div>
 
       <div className="bg-white rounded-3xl p-2 flex gap-2 border border-gray-100 shadow-sm w-full md:w-max">
-        <button
+        <Button
           onClick={() => setMode("ai")}
           className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl font-bold transition-all ${mode === "ai" ? "bg-blue-600 text-white shadow-md" : "text-gray-500 hover:bg-gray-50"}`}
         >
           <Bot className="w-5 h-5" />
           AI
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setMode("manual")}
           className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-2xl font-bold transition-all ${mode === "manual" ? "bg-gray-900 text-white shadow-md" : "text-gray-500 hover:bg-gray-50"}`}
         >
           <FileText className="w-5 h-5" />
           Thủ công
-        </button>
+        </Button>
       </div>
 
       <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
         <label className="mb-3 block text-sm font-bold text-gray-700">Quyền hiển thị quiz</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button
+          <Button
             type="button"
             onClick={() => setIsPublic(true)}
             className={`rounded-2xl border p-4 text-left transition-all ${isPublic ? "border-emerald-400 bg-emerald-50 ring-4 ring-emerald-100" : "border-gray-200 bg-gray-50 hover:bg-white"}`}
@@ -181,8 +185,8 @@ export function QuizCreate() {
               <Globe2 className="w-5 h-5 text-emerald-600" /> Công khai
             </div>
             <p className="mt-1 text-xs font-medium text-gray-500">Mặc định. Quiz sẽ xuất hiện ở tab Công khai.</p>
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={selectPrivate}
             className={`rounded-2xl border p-4 text-left transition-all ${!isPublic ? "border-slate-400 bg-slate-100 ring-4 ring-slate-100" : "border-gray-200 bg-gray-50 hover:bg-white"} ${!isVip ? "opacity-75" : ""}`}
@@ -191,13 +195,13 @@ export function QuizCreate() {
               <Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}
             </div>
             <p className="mt-1 text-xs font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo quiz riêng tư.</p>
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className="rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
         <label className="mb-3 block text-sm font-bold text-gray-700">Đề mục quiz</label>
-        <select
+        <Select
           value={selectedCategoryId}
           onChange={(e) => setSelectedCategoryId(e.target.value)}
           className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 font-bold text-gray-800 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
@@ -208,7 +212,7 @@ export function QuizCreate() {
               {category.name}
             </option>
           ))}
-        </select>
+        </Select>
         <p className="mt-2 text-xs font-medium text-gray-500">Đề mục giúp bài quiz xuất hiện đúng nhóm trong tab Của tôi và Công khai.</p>
       </div>
 
@@ -228,7 +232,7 @@ export function QuizCreate() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Chủ đề bài thi</label>
-              <textarea
+              <Textarea
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
                 placeholder="VD: Tạo 10 câu hỏi ngữ pháp tiếng Anh B1 tập trung vào các thì quá khứ..."
@@ -238,7 +242,7 @@ export function QuizCreate() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Số lượng câu hỏi</label>
-                <select
+                <Select
                   value={aiNumQuestions}
                   onChange={(e) => setAiNumQuestions(Number(e.target.value))}
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium text-gray-900 outline-none focus:border-blue-500"
@@ -247,11 +251,11 @@ export function QuizCreate() {
                   <option value={10}>10 câu</option>
                   <option value={15}>15 câu</option>
                   <option value={20}>20 câu</option>
-                </select>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Độ khó</label>
-                <select
+                <Select
                   value={aiDifficulty}
                   onChange={(e) => setAiDifficulty(e.target.value)}
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium text-gray-900 outline-none focus:border-blue-500"
@@ -259,12 +263,12 @@ export function QuizCreate() {
                   <option value="Dễ">Dễ (A1-A2)</option>
                   <option value="Trung bình">Trung bình (B1)</option>
                   <option value="Khó">Khó (B2-C1)</option>
-                </select>
+                </Select>
               </div>
             </div>
 
             <div className="pt-4 flex justify-end">
-              <button
+              <Button
                 onClick={handleGenerateAI}
                 disabled={loading || !aiPrompt.trim()}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 disabled:opacity-50 transition-colors"
@@ -278,7 +282,7 @@ export function QuizCreate() {
                     <Bot className="w-5 h-5" /> Bắt đầu tạo (AI)
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -288,7 +292,7 @@ export function QuizCreate() {
             <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-2">Thông tin chung</h2>
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Tiêu đề bài thi</label>
-              <input
+              <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 type="text"
@@ -298,7 +302,7 @@ export function QuizCreate() {
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Mô tả ngắn</label>
-              <textarea
+              <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
@@ -309,7 +313,7 @@ export function QuizCreate() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Thời gian (phút)</label>
-                <input
+                <Input
                   value={duration}
                   onChange={(e) => setDuration(Number(e.target.value))}
                   type="number"
@@ -318,11 +322,11 @@ export function QuizCreate() {
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Độ khó</label>
-                <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-gray-900">
+                <Select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-gray-900">
                   <option value="Dễ">Dễ</option>
                   <option value="Trung bình">Trung bình</option>
                   <option value="Khó">Khó</option>
-                </select>
+                </Select>
               </div>
             </div>
           </div>
@@ -330,14 +334,14 @@ export function QuizCreate() {
           <div className="space-y-4">
             {questions.map((q, qIndex) => (
               <div key={q.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm relative group">
-                <button
+                <Button
                   onClick={() => removeQuestion(q.id)}
                   className="absolute top-4 right-4 p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors hidden group-hover:block"
                 >
                   <Trash2 className="w-5 h-5" />
-                </button>
+                </Button>
                 <h3 className="font-bold text-gray-900 mb-4">Câu hỏi {qIndex + 1}</h3>
-                <input
+                <Input
                   value={q.text}
                   onChange={(e) => updateQuestion(q.id, "text", e.target.value)}
                   type="text"
@@ -349,7 +353,7 @@ export function QuizCreate() {
                   {q.options.map((opt, oIndex) => (
                     <div key={oIndex} className="flex items-center gap-2">
                       <span className="w-8 h-8 rounded-lg bg-gray-100 font-bold text-gray-500 flex items-center justify-center flex-shrink-0">{String.fromCharCode(65 + oIndex)}</span>
-                      <input
+                      <Input
                         value={opt}
                         onChange={(e) => updateQuestion(q.id, "option", e.target.value, oIndex)}
                         type="text"
@@ -362,7 +366,7 @@ export function QuizCreate() {
 
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Đáp án đúng</label>
-                  <select
+                  <Select
                     value={q.correctAnswer}
                     onChange={(e) => updateQuestion(q.id, "correctAnswer", e.target.value)}
                     className="w-full bg-green-50 border border-green-200 text-green-700 rounded-xl p-3 outline-none focus:border-green-500 font-bold"
@@ -375,29 +379,29 @@ export function QuizCreate() {
                           {String.fromCharCode(65 + idx)}: {opt}
                         </option>
                       ))}
-                  </select>
+                  </Select>
                 </div>
               </div>
             ))}
           </div>
 
           <div className="flex gap-4">
-            <button
+            <Button
               onClick={addQuestion}
               className="flex-1 border-2 border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-600 font-bold py-4 rounded-3xl flex items-center justify-center gap-2 transition-colors"
             >
               <Plus className="w-5 h-5" /> Thêm câu hỏi
-            </button>
+            </Button>
           </div>
 
           <div className="pt-4 flex justify-end">
-            <button
+            <Button
               onClick={handleSaveManual}
               disabled={loading}
               className="bg-gray-900 hover:bg-black text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 disabled:opacity-50 transition-colors"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Lưu và Xuất bản"}
-            </button>
+            </Button>
           </div>
         </div>
       )}

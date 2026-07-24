@@ -24,6 +24,7 @@ import {
   UserRoundPlus,
 } from "lucide-react";
 import CTAZaloZentaskCommunity from "./dashboard/CTAZaloZentaskCommunity";
+import { Button } from "@/src/components/ui/Button";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -184,9 +185,9 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             <CTAZaloZentaskCommunity className="mt-5" />
           </>
         ) : (
-          <button onClick={onToggle} className="hidden lg:block p-4 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
+          <Button onClick={onToggle} className="hidden lg:block p-4 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
             {isOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeftOpen className="w-5 h-5" />}
-          </button>
+          </Button>
         )}
       </div>
 

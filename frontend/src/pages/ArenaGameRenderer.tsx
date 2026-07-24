@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useTTSAudio } from "../hooks/useTTSAudio";
 import { cn } from "../lib/utils";
 import { Volume2, Send, Lightbulb, Target, Languages } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 const normalizeAnswer = (value = "") =>
   String(value)
@@ -145,14 +147,14 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
         <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-blue-200">Chọn nghĩa đúng</p>
         <h2 className="break-words text-4xl sm:text-5xl font-black text-white mb-3 tracking-wide">{card.term}</h2>
         {card.phonetic && <p className="mb-4 text-lg font-semibold text-white/60">/{card.phonetic}/</p>}
-        <button onClick={() => playAudio(card.term)} className="mx-auto p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors">
+        <Button onClick={() => playAudio(card.term)} className="mx-auto p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors">
           <Volume2 className="w-6 h-6" />
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
         {options.map((opt, idx) => (
-          <button
+          <Button
             key={`${opt.id}-${idx}`}
             disabled={disabled}
             onClick={() => onAnswer(opt.id === card.id)}
@@ -163,7 +165,7 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
             )}
           >
             {opt.translation}
-          </button>
+          </Button>
         ))}
       </div>
       {renderAnswerFeedback("translation")}
@@ -179,7 +181,7 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
         {extra}
       </div>
       <form onSubmit={handleSubmit} className="w-full relative">
-        <input
+        <Input
           ref={inputRef}
           type="text"
           value={inputValue}
@@ -188,13 +190,13 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
           placeholder="Gõ đáp án tiếng Anh vào đây..."
           className="w-full bg-white/10 border-2 border-white/30 rounded-2xl px-6 py-5 pr-16 text-xl font-bold text-white outline-none focus:border-blue-500 focus:bg-white/20 transition-all placeholder:text-white/30"
         />
-        <button
+        <Button
           type="submit"
           disabled={disabled || !inputValue.trim()}
           className="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 disabled:opacity-50 transition-colors"
         >
           <Send className="w-5 h-5" />
-        </button>
+        </Button>
       </form>
       {renderAnswerFeedback("word")}
     </div>
@@ -204,9 +206,9 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
     <div className="w-full flex flex-col items-center">
       <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 sm:p-12 rounded-3xl w-full text-center mb-8 shadow-2xl relative">
         {isX2 && <div className="absolute top-0 right-0 bg-yellow-500 text-black font-black px-6 py-2 rounded-bl-3xl">X2 ĐIỂM</div>}
-        <button onClick={() => playAudio(card.term)} className="mx-auto p-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-[0_0_30px_rgba(37,99,235,0.5)] animate-pulse">
+        <Button onClick={() => playAudio(card.term)} className="mx-auto p-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-[0_0_30px_rgba(37,99,235,0.5)] animate-pulse">
           <Volume2 className="w-12 h-12" />
-        </button>
+        </Button>
         <p className="text-blue-200 text-lg mt-6 uppercase tracking-widest font-bold">Nghe và gõ lại từ/cụm từ</p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           <InfoChip icon={<Target className="h-4 w-4" />}>{getLengthHint(card.term)}</InfoChip>
@@ -214,7 +216,7 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
         </div>
       </div>
       <form onSubmit={handleSubmit} className="w-full relative">
-        <input
+        <Input
           ref={inputRef}
           type="text"
           value={inputValue}
@@ -223,13 +225,13 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
           placeholder="Gõ từ bạn nghe được..."
           className="w-full bg-white/10 border-2 border-white/30 rounded-2xl px-6 py-5 pr-16 text-xl font-bold text-white outline-none focus:border-blue-500 focus:bg-white/20 transition-all placeholder:text-white/30"
         />
-        <button
+        <Button
           type="submit"
           disabled={disabled || !inputValue.trim()}
           className="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 disabled:opacity-50 transition-colors"
         >
           <Send className="w-5 h-5" />
-        </button>
+        </Button>
       </form>
       {renderAnswerFeedback("word")}
     </div>

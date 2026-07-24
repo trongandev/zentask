@@ -3,6 +3,8 @@ import { adminService } from "../../services/adminService";
 import { Clock, Play, Edit2, CheckCircle2, XCircle } from "lucide-react";
 import toastService from "@/src/services/toastService";
 import { format } from "date-fns";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 interface BotJob {
   _id: string;
@@ -115,7 +117,7 @@ export function AdminBotJobs() {
                       <code className="px-2 py-1 bg-gray-100 text-pink-600 rounded text-sm font-mono">{job.cronExpression}</code>
                     </td>
                     <td className="p-4">
-                      <button onClick={() => handleToggleActive(job)} className="flex items-center gap-1 focus:outline-none">
+                      <Button onClick={() => handleToggleActive(job)} className="flex items-center gap-1 focus:outline-none">
                         {job.isActive ? (
                           <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2.5 py-1 rounded-full text-xs font-bold">
                             <CheckCircle2 className="w-4 h-4" /> Bật
@@ -125,14 +127,14 @@ export function AdminBotJobs() {
                             <XCircle className="w-4 h-4" /> Tắt
                           </span>
                         )}
-                      </button>
+                      </Button>
                     </td>
                     <td className="p-4 text-sm text-gray-500">
                       {job.lastRun ? format(new Date(job.lastRun), "dd/MM/yyyy HH:mm:ss") : "Chưa từng chạy"}
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button
+                        <Button
                           onClick={() => {
                             setEditingJob(job);
                             setEditCron(job.cronExpression);
@@ -142,14 +144,14 @@ export function AdminBotJobs() {
                           title="Sửa cron expression"
                         >
                           <Edit2 className="w-5 h-5" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => handleTrigger(job.jobId)}
                           className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                           title="Chạy ngay lập tức"
                         >
                           <Play className="w-5 h-5" />
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -166,7 +168,7 @@ export function AdminBotJobs() {
             <h2 className="text-xl font-bold mb-4">Chỉnh sửa Job: {editingJob.name}</h2>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">Cron Expression</label>
-              <input
+              <Input
                 type="text"
                 value={editCron}
                 onChange={(e) => setEditCron(e.target.value)}
@@ -177,7 +179,7 @@ export function AdminBotJobs() {
               </p>
             </div>
             <div className="mb-6 flex items-center gap-2">
-              <input
+              <Input
                 type="checkbox"
                 id="isActive"
                 checked={editActive}
@@ -187,18 +189,18 @@ export function AdminBotJobs() {
               <label htmlFor="isActive" className="text-sm text-gray-700 font-medium">Bật / Tắt Job này</label>
             </div>
             <div className="flex justify-end gap-3">
-              <button
+              <Button
                 onClick={() => setEditingJob(null)}
                 className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors"
               >
                 Hủy
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleSaveEdit}
                 className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-xl font-medium transition-colors"
               >
                 Lưu thay đổi
-              </button>
+              </Button>
             </div>
           </div>
         </div>

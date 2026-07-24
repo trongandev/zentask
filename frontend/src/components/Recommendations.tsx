@@ -1,5 +1,6 @@
 import { Diamond, ChevronRight, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/src/components/ui/Button";
 
 export function Recommendations() {
   const navigate = useNavigate();
@@ -67,10 +68,10 @@ export function Recommendations() {
           <Diamond className="w-5 h-5 text-blue-600" />
           <h3 className="font-bold text-gray-900 text-lg">Đề xuất cho bạn</h3>
         </div>
-        <button className="text-sm font-semibold text-blue-600 flex items-center gap-1 hover:text-blue-700 transition-colors">
+        <Button className="text-sm font-semibold text-blue-600 flex items-center gap-1 hover:text-blue-700 transition-colors">
           Xem tất cả
           <ChevronRight className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -80,10 +81,10 @@ export function Recommendations() {
             <p className="text-xs text-gray-500 mb-6">{item.desc}</p>
             
             <div className="flex items-end justify-between mt-auto">
-              <button className="flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
+              <Button className="flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
                 Bắt đầu
                 <Play className="w-3 h-3 fill-current" />
-              </button>
+              </Button>
               <div className="transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
                 {item.icon}
               </div>

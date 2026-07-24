@@ -5,6 +5,7 @@ import { useQuizStore, QuizResult as ResultType, Quiz } from "../../services/qui
 import confetti from "canvas-confetti";
 import toastService from "@/src/services/toastService";
 import toast from "react-hot-toast";
+import { Button } from "@/src/components/ui/Button";
 
 export function QuizResult() {
   const { resultId } = useParams<{ resultId: string }>();
@@ -198,7 +199,7 @@ export function QuizResult() {
             <p className="text-white/90 font-medium">Bạn có 1 đặc quyền chọn 1 câu đã làm sai để sửa lại và gỡ điểm. Hãy dùng cẩn thận!</p>
           </div>
           <div className="z-10">
-            <button
+            <Button
               onClick={() => {
                 document.getElementById("review-section")?.scrollIntoView({ behavior: "smooth" });
                 toast.dismiss("Hãy chọn 1 câu sai bên dưới và bấm nút Hồi Sinh");
@@ -206,7 +207,7 @@ export function QuizResult() {
               className="px-6 py-3 bg-white text-red-600 font-bold rounded-2xl shadow-md hover:scale-105 transition-transform"
             >
               Dùng ngay
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -234,7 +235,7 @@ export function QuizResult() {
                     {q.options
                       .filter((o) => o)
                       .map((opt, idx) => (
-                        <button
+                        <Button
                           key={idx}
                           onClick={() => setRebirthAnswer(opt)}
                           className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
@@ -249,12 +250,12 @@ export function QuizResult() {
                             {String.fromCharCode(65 + idx)}
                           </div>
                           <span className="font-semibold text-gray-800">{opt}</span>
-                        </button>
+                        </Button>
                       ))}
                   </div>
 
                   <div className="flex gap-4 pt-4">
-                    <button
+                    <Button
                       onClick={() => {
                         setRebirthTarget(null);
                         setRebirthAnswer("");
@@ -262,8 +263,8 @@ export function QuizResult() {
                       className="flex-1 py-3 font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-colors"
                     >
                       Hủy bỏ
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={handleRebirth}
                       disabled={!rebirthAnswer || rebirthLoading}
                       className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 transition-all flex items-center justify-center gap-2"
@@ -275,7 +276,7 @@ export function QuizResult() {
                           <Sparkles className="w-5 h-5" /> Chốt đáp án
                         </>
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               );
@@ -311,12 +312,12 @@ export function QuizResult() {
                     </div>
                   </div>
                   {!isCorrect && canRebirth && (
-                    <button
+                    <Button
                       onClick={() => setRebirthTarget(q.id)}
                       className="px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-600 font-bold text-sm rounded-xl transition-colors flex items-center gap-1.5 flex-shrink-0"
                     >
                       <Flame className="w-4 h-4" /> Hồi sinh
-                    </button>
+                    </Button>
                   )}
                 </div>
 

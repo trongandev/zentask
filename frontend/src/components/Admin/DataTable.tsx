@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
 
 interface Column<T> {
   header: string;
@@ -82,20 +83,20 @@ export function DataTable<T extends { id?: string | number }>({
             Trang <span className="font-bold text-gray-900">{currentPage}</span> / {totalPages}
           </p>
           <div className="flex items-center gap-2">
-            <button
+            <Button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
               className="p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
               className="p-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronRight className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
         </div>
       )}

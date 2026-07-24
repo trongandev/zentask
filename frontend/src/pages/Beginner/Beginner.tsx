@@ -5,6 +5,7 @@ import { cn } from "../../lib/utils";
 import { useAuth } from "../../contexts/AuthContext";
 import { SEO } from "../../components/SEO";
 import axiosInstance from "../../services/axiosConfig";
+import { Button } from "@/src/components/ui/Button";
 
 // Các mức offset theo chu kỳ để tạo đường đi zigzag
 const PATH_OFFSETS = [0, -30, -60, -30, 0, 30, 60, 30];
@@ -244,7 +245,7 @@ export function Beginner() {
                                             </div>
                                         )}
 
-                                        <button
+                                        <Button
                                             onClick={() => handleNodeClick(node)}
                                             className={cn(
                                                 "w-[70px] h-[70px] rounded-full border-b-[6px] active:border-b-0 active:translate-y-[6px] transition-all flex items-center justify-center relative",
@@ -267,7 +268,7 @@ export function Beginner() {
 
                                             {/* Vòng sáng quanh node current */}
                                             {isCurrent && <div className="absolute inset-0 rounded-full border-4 border-blue-200 animate-ping opacity-50 -z-10 scale-125"></div>}
-                                        </button>
+                                        </Button>
 
                                         {/* Nhãn bài học bên cạnh */}
                                         <div
@@ -308,9 +309,9 @@ export function Beginner() {
             {selectedNode && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in" onClick={() => setSelectedNode(null)}>
                     <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => setSelectedNode(null)} className="absolute top-4 right-4 text-slate-400 hover:bg-slate-100 p-2 rounded-full transition-colors">
+                        <Button onClick={() => setSelectedNode(null)} className="absolute top-4 right-4 text-slate-400 hover:bg-slate-100 p-2 rounded-full transition-colors">
                             <X className="w-6 h-6" />
-                        </button>
+                        </Button>
                         <h3 className="text-2xl font-black text-slate-800 mb-1 pr-8 leading-tight">{selectedNode.title}</h3>
                         <p className="text-slate-500 font-medium mb-6">
                             Phần {selectedNode.lessonIndex + 1}/{selectedNode.totalLessonsInTopic}
@@ -321,7 +322,7 @@ export function Beginner() {
                             <p className="text-blue-600 text-sm mt-1">Bấm nút bên dưới để bắt đầu luyện tập!</p>
                         </div>
 
-                        <button
+                        <Button
                             onClick={handleStartLesson}
                             className={cn(
                                 "w-full py-4 rounded-2xl font-bold text-lg shadow-xl active:translate-y-1 transition-all border-b-4 flex items-center justify-center gap-2",
@@ -346,7 +347,7 @@ export function Beginner() {
                             ) : (
                                 "Bắt đầu +10XP"
                             )}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}

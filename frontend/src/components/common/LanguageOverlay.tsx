@@ -3,9 +3,10 @@ import { Volume2, Loader2, ArrowRight } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../contexts/AuthContext";
 import axiosInstance from "../../services/axiosConfig";
-import { Modal } from "../shared/Modal";
+import { Modal } from "../ui/Modal";
 import { LANGUAGE_LEVELS, getDefaultLevels } from "../../config/languageLevels";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
+import { Button } from "@/src/components/ui/Button";
 
 const LANGUAGES = [
   { code: "en", name: "Tiếng Anh" },
@@ -277,9 +278,9 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
             <p className="text-slate-500 text-lg">Chọn một ngôn ngữ để bắt đầu. Bạn có thể thay đổi sau.</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5">
             {LANGUAGES.map((lang) => (
-              <button
+              <Button
                 key={lang.code}
                 onClick={() => handleSelectLanguage(lang.code)}
                 className="flex flex-col items-center justify-center p-6 bg-slate-50 hover:bg-blue-50 border-2 border-transparent hover:border-blue-400 rounded-2xl transition-all hover:scale-105 hover:shadow-lg group"
@@ -288,7 +289,7 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
                   <img src={`/flag/${lang.code}.svg`} alt={lang.name} className="w-full h-full object-cover" />
                 </div>
                 <span className="font-bold text-slate-700 group-hover:text-blue-600 transition-colors">{lang.name}</span>
-              </button>
+              </Button>
             ))}
           </div>
         </>
@@ -297,9 +298,9 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
       {/* STEP 2: CHỌN TRÌNH ĐỘ HOẶC LÀM TEST */}
       {step === "LEVEL_OR_TEST" && (
         <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300">
-          <button onClick={() => setStep("LANGUAGE")} className="self-start text-slate-500 hover:text-slate-800 font-medium mb-6 flex items-center">
+          <Button onClick={() => setStep("LANGUAGE")} className="self-start text-slate-500 hover:text-slate-800 font-medium mb-6 flex items-center">
             <ArrowRight className="w-4 h-4 mr-1 rotate-180" /> Quay lại chọn ngôn ngữ
-          </button>
+          </Button>
 
           <div className="text-center mb-8">
             <h2 className="text-3xl font-extrabold text-slate-800 mb-3">Xác định trình độ của bạn</h2>
@@ -310,26 +311,26 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
 
           {selectedLang === "en" ? (
             <div className="flex flex-col gap-4 max-w-md mx-auto w-full mb-8">
-              <button
+              <Button
                 onClick={handleStartTest}
                 className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-xl shadow-indigo-600/30 transition-all active:scale-[0.98] flex flex-col items-center justify-center gap-1 border-b-4 border-indigo-800"
               >
                 <span className="text-lg">Bắt đầu Test Năng lực</span>
                 <span className="text-indigo-200 text-sm font-medium">Khuyên dùng • Chỉ mất 5 phút</span>
-              </button>
+              </Button>
 
               <div className="mt-8">
                 <p className="text-center text-sm font-medium text-slate-400 mb-4 uppercase tracking-widest">Hoặc tự chọn</p>
-                <div className="grid grid-cols-2 gap-3 max-h-[30vh] overflow-y-auto p-1">
+                <div className="grid grid-cols-2 gap-3 p-1">
                   {levels.map((lvl) => (
-                    <button
+                    <Button
                       key={lvl.id}
                       onClick={() => handleSelectLevel(lvl.id)}
                       className="p-3 bg-white border-2 border-slate-200 hover:border-slate-400 hover:bg-slate-50 rounded-xl text-center transition-all group"
                     >
                       <span className="font-bold text-slate-700 block mb-1">{lvl.id}</span>
                       <span className="text-xs text-slate-500 line-clamp-2">{lvl.name}</span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -337,14 +338,14 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 max-h-[50vh] overflow-y-auto p-1">
               {levels.map((lvl) => (
-                <button
+                <Button
                   key={lvl.id}
                   onClick={() => handleSelectLevel(lvl.id)}
                   className="flex flex-col items-start p-4 bg-white border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 rounded-xl text-left transition-all group"
                 >
                   <span className="font-bold text-slate-800 group-hover:text-blue-700 mb-1">{lvl.name}</span>
                   <span className="text-sm text-slate-500">{lvl.description}</span>
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -371,16 +372,16 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
               </p>
               <p className="text-slate-600 italic mb-10 max-w-md mx-auto bg-slate-50 p-4 rounded-xl border border-slate-100">"{evaluationResult.feedback}"</p>
 
-              <button
+              <Button
                 onClick={() => handleSelectLevel(evaluationResult.levelId)}
                 className="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-xl shadow-indigo-600/30 transition-all active:scale-[0.98] text-lg border-b-4 border-indigo-800"
               >
                 Bắt đầu học ngay ở mức {evaluationResult.levelId}
-              </button>
+              </Button>
             </div>
           ) : activeQuestions.length > 0 ? (
             <div className="flex flex-col flex-1 animate-in slide-in-from-right-4 duration-300">
-              <button
+              <Button
                 onClick={() => {
                   if (window.confirm("Bạn có chắc chắn muốn thoát? Bài test sẽ bị hủy bỏ.")) {
                     setStep("LEVEL_OR_TEST");
@@ -390,7 +391,7 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
                 className="self-start text-slate-500 hover:text-slate-800 font-medium mb-4 flex items-center text-sm"
               >
                 <ArrowRight className="w-4 h-4 mr-1 rotate-180" /> Thoát bài test, tự chọn trình độ
-              </button>
+              </Button>
 
               <div className="flex items-center justify-between mb-6">
                 <span className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center">
@@ -405,26 +406,26 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
 
               <div className="flex-1 flex flex-col justify-center">
                 {activeQuestions[currentQuestionIndex]?.audioText && (
-                  <button
+                  <Button
                     onClick={playTTS}
                     disabled={isPlaying}
                     className="self-start mb-6 p-4 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200 shadow-sm disabled:opacity-50"
                   >
                     {isPlaying ? <Loader2 className="w-6 h-6 animate-spin" /> : <Volume2 className="w-6 h-6" />}
-                  </button>
+                  </Button>
                 )}
 
                 <h3 className="text-2xl font-bold text-slate-800 mb-8 leading-snug">{activeQuestions[currentQuestionIndex]?.question}</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-auto">
                   {activeQuestions[currentQuestionIndex]?.options.map((opt: string, i: number) => (
-                    <button
+                    <Button
                       key={i}
                       onClick={() => handleAnswerTest(opt)}
                       className="p-5 rounded-2xl border-2 border-slate-200 text-slate-700 font-bold hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 text-left transition-all active:bg-indigo-100 shadow-sm"
                     >
                       {opt}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>

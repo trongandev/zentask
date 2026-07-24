@@ -1,8 +1,12 @@
 import React from "react";
-import { Modal } from "../../../components/shared/Modal";
+import { Modal } from "../../../components/ui/Modal";
 import { Globe2, Lock, Crown, Trash2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import toastService from "@/src/services/toastService";
+import { Button } from "@/src/components/ui/Button";
+import { Select } from "@/src/components/ui/Select";
+import { Input } from "@/src/components/ui/Input";
+import { Textarea } from "@/src/components/ui/Textarea";
 
 // COLORS defined in Flashcards.tsx
 export const COLORS = [
@@ -47,7 +51,7 @@ export function CreateEditFolderModal({ isOpen, onClose, editingFolder, newFolde
         <div className="space-y-4 mb-6">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Tên thư mục</label>
-            <input
+            <Input
               type="text"
               autoFocus
               value={newFolderName}
@@ -63,7 +67,7 @@ export function CreateEditFolderModal({ isOpen, onClose, editingFolder, newFolde
             <label className="block text-sm font-bold text-gray-700 mb-2">Màu sắc</label>
             <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
               {COLORS.map((c) => (
-                <button
+                <Button
                   key={c}
                   onClick={() => setNewFolderColor(c)}
                   className={cn("w-6 h-6 rounded-full shadow-sm transition-transform flex-shrink-0", c, newFolderColor === c ? "ring-2 ring-offset-2 ring-blue-500 scale-125" : "hover:scale-110")}
@@ -73,12 +77,12 @@ export function CreateEditFolderModal({ isOpen, onClose, editingFolder, newFolde
           </div>
         </div>
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl transition-colors">
+          <Button onClick={onClose} className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl transition-colors">
             Hủy
-          </button>
-          <button onClick={handleCreateOrUpdateFolder} disabled={loading} className="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl transition-colors shadow-md">
+          </Button>
+          <Button onClick={handleCreateOrUpdateFolder} disabled={loading} className="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl transition-colors shadow-md">
             Hoàn tất
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>
@@ -109,16 +113,16 @@ export function DeleteFolderModal({ folderToDelete, onClose, handleDeleteFolderC
           )}
 
           <div className="flex gap-3">
-            <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl transition-colors">
+            <Button onClick={onClose} className="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-xl transition-colors">
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleDeleteFolderConfirmed(folderToDelete.folder.id, folderToDelete.step === 2)}
               disabled={loading}
               className="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl transition-colors"
             >
               Xóa vĩnh viễn
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -163,7 +167,7 @@ export function CreateEditSetModal({
       <div className="p-6 space-y-4">
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Tên bộ thẻ</label>
-          <input
+          <Input
             type="text"
             value={newTitle}
             autoFocus
@@ -175,7 +179,7 @@ export function CreateEditSetModal({
         </div>
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Mô tả (Tùy chọn)</label>
-          <textarea
+          <Textarea
             value={newDesc}
             onChange={(e) => setNewDesc(e.target.value)}
             placeholder="Mô tả về bộ thẻ này..."
@@ -185,7 +189,7 @@ export function CreateEditSetModal({
         </div>
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Ngôn ngữ học</label>
-          <select
+          <Select
             value={selectedLanguage}
             onChange={(e) => setSelectedLanguage(e.target.value)}
             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
@@ -195,12 +199,12 @@ export function CreateEditSetModal({
                 {lang.label}
               </option>
             ))}
-          </select>
+          </Select>
           <p className="mt-1 text-xs text-gray-400">AI sẽ tạo từ vựng theo ngôn ngữ bộ thẻ này.</p>
         </div>
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Đề mục</label>
-          <select
+          <Select
             value={selectedCategoryId}
             onChange={(e) => setSelectedCategoryId(e.target.value)}
             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
@@ -211,12 +215,12 @@ export function CreateEditSetModal({
                 {category.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">Quyền riêng tư</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
+            <Button
               type="button"
               onClick={() => setSetIsPublic(true)}
               className={`rounded-2xl border p-4 text-left transition-all ${setIsPublic ? "border-emerald-400 bg-emerald-50 ring-4 ring-emerald-100" : "border-gray-200 bg-gray-50 hover:bg-white"}`}
@@ -225,8 +229,8 @@ export function CreateEditSetModal({
                 <Globe2 className="w-5 h-5 text-emerald-600" /> Công khai
               </div>
               <p className="mt-1 text-xs font-medium text-gray-500">Mặc định. Mọi người có thể xem và lưu bộ thẻ này.</p>
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => {
                 if (!isVip) {
@@ -241,14 +245,14 @@ export function CreateEditSetModal({
                 <Lock className="w-5 h-5 text-slate-600" /> Riêng tư {!isVip && <Crown className="w-4 h-4 text-yellow-500" />}
               </div>
               <p className="mt-1 text-xs font-medium text-gray-500">Chỉ tài khoản VIP mới được tạo bộ thẻ riêng tư.</p>
-            </button>
+            </Button>
           </div>
         </div>
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">Màu sắc</label>
           <div className="flex flex-wrap gap-2">
             {COLORS.map((c) => (
-              <button
+              <Button
                 key={c}
                 onClick={() => setSelectedColor(c)}
                 className={cn("w-6 h-6 rounded-full shadow-sm transition-transform", c, selectedColor === c ? "ring-2 ring-offset-2 ring-blue-500 scale-125" : "hover:scale-110")}
@@ -256,13 +260,13 @@ export function CreateEditSetModal({
             ))}
           </div>
         </div>
-        <button
+        <Button
           onClick={handleCreateOrUpdateSet}
           disabled={loading}
           className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
         >
           {loading ? "Đang xử lý..." : "Hoàn tất"}
-        </button>
+        </Button>
       </div>
     </Modal>
   );
@@ -283,16 +287,16 @@ export function DeleteSetModal({ setToDelete, onClose, handleDeleteSet, loading 
             <span className="text-red-500 font-medium">Lưu ý: Tất cả từ vựng bên trong bộ thẻ này cũng sẽ bị xóa vĩnh viễn.</span>
           </p>
           <div className="flex gap-3">
-            <button onClick={onClose} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">
+            <Button onClick={onClose} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors">
               Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleDeleteSet(setToDelete.id)}
               disabled={loading}
               className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors shadow-sm disabled:opacity-50"
             >
               {loading ? "Đang xóa..." : "Xóa vĩnh viễn"}
-            </button>
+            </Button>
           </div>
         </div>
       )}

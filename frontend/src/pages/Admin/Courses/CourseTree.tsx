@@ -5,8 +5,9 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import axiosInstance from "../../../services/axiosConfig";
 import toastService from "../../../services/toastService";
-import { Modal } from "../../../components/shared/Modal";
+import { Modal } from "../../../components/ui/Modal";
 import { useContextMenu } from "../../../hooks/useContextMenu";
+import { Button } from "@/src/components/ui/Button";
 
 interface Props {
   localCourses: any[];
@@ -62,7 +63,7 @@ const SortableLesson = ({ lesson, selectedLessonId, loadLesson, handleDeleteLess
         </span>
         <span className="text-[10px] text-slate-400 ml-1 shrink-0 bg-white px-1.5 rounded-full border border-slate-200">{lesson.wordCount} từ</span>
       </div>
-      <button
+      <Button
         onClick={(e) => {
           e.stopPropagation();
           handleDeleteLesson(lesson.id);
@@ -70,7 +71,7 @@ const SortableLesson = ({ lesson, selectedLessonId, loadLesson, handleDeleteLess
         className={`p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-100 text-red-500 shrink-0`}
       >
         <Trash2 className="w-3.5 h-3.5" />
-      </button>
+      </Button>
     </div>
   );
 };
@@ -95,7 +96,7 @@ const DroppableTier = ({ tier, expanded, toggleTier, handleCreateLesson, childre
             Tier {tier.tierNum} <span className="text-xs text-slate-400 font-normal">({tier.cefr})</span>
           </span>
         </div>
-        <button
+        <Button
           onClick={(e) => {
             e.stopPropagation();
             handleCreateLesson(tier.id);
@@ -103,7 +104,7 @@ const DroppableTier = ({ tier, expanded, toggleTier, handleCreateLesson, childre
           className="text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
         >
           + Add
-        </button>
+        </Button>
       </div>
 
       {expanded && <div className={`ml-3 pl-3 border-l ${isOver ? "border-blue-300" : "border-slate-200"} py-1 space-y-0.5 min-h-[24px]`}>{children}</div>}
@@ -165,12 +166,12 @@ export function CourseTree({
   const exportCourse = async (courseId: string, languageCode: string) => {
     try {
       const response = await axiosInstance.get(`/api/admin/courses/${courseId}/export`, {
-        responseType: 'blob',
+        responseType: "blob",
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `${languageCode}_course_export.txt`);
+      link.setAttribute("download", `${languageCode}_course_export.txt`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -203,22 +204,22 @@ export function CourseTree({
             Lộ trình
           </h2>
           <div className="flex items-center gap-1">
-            <button onClick={undo} disabled={!canUndo} className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors disabled:opacity-30" title="Hoàn tác">
+            <Button onClick={undo} disabled={!canUndo} className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors disabled:opacity-30" title="Hoàn tác">
               <Undo2 className="w-4 h-4" />
-            </button>
-            <button onClick={redo} disabled={!canRedo} className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors disabled:opacity-30" title="Làm lại">
+            </Button>
+            <Button onClick={redo} disabled={!canRedo} className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors disabled:opacity-30" title="Làm lại">
               <Redo2 className="w-4 h-4" />
-            </button>
+            </Button>
             <div className="w-px h-4 bg-slate-200 mx-1"></div>
-            <button onClick={collapseAll} className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors" title="Thu gọn tất cả">
+            <Button onClick={collapseAll} className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors" title="Thu gọn tất cả">
               <CopyMinus className="w-4 h-4" />
-            </button>
-            <button onClick={openCreateCourseModal} className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors" title="Thêm khoá học">
+            </Button>
+            <Button onClick={openCreateCourseModal} className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors" title="Thêm khoá học">
               <FolderPen className="w-4 h-4" />
-            </button>
-            <button onClick={fetchTree} className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors" title="Làm mới">
+            </Button>
+            <Button onClick={fetchTree} className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors" title="Làm mới">
               <RefreshCw className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -251,7 +252,7 @@ export function CourseTree({
                   <img src={`/flag/${course.languageCode}.svg`} alt={course.languageCode} className="w-6 object-cover rounded-[2px]" />
                   <span className="font-bold text-sm">{course.name.replace("Tiếng", "")}</span>
                 </div>
-                <button
+                <Button
                   onClick={(e) => {
                     e.stopPropagation();
                     evaluateCourse(course);
@@ -260,7 +261,7 @@ export function CourseTree({
                   className="text-[10px] flex items-center gap-1 font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
                 >
                   <Sparkles className="w-3 h-3" /> Đánh giá
-                </button>
+                </Button>
               </div>
 
               {isCourseExpanded && (
@@ -341,9 +342,9 @@ export function CourseTree({
       <Modal isOpen={!!aiEvaluationResult} onClose={() => setAiEvaluationResult(null)} title="Đánh Giá Từ AI">
         <div className="p-5 max-h-[70vh] overflow-y-auto whitespace-pre-wrap text-sm text-slate-700">{aiEvaluationResult}</div>
         <div className="p-4 border-t border-slate-100 flex justify-end">
-          <button onClick={() => setAiEvaluationResult(null)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow">
+          <Button onClick={() => setAiEvaluationResult(null)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow">
             Đóng
-          </button>
+          </Button>
         </div>
       </Modal>
 
@@ -357,7 +358,7 @@ export function CourseTree({
             {contextMenu.data.type === "lesson" && "Thao tác Bài học"}
           </div>
 
-          <button
+          <Button
             className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700"
             onClick={() => {
               onSelectNode(contextMenu.data.type, contextMenu.data.data);
@@ -365,11 +366,11 @@ export function CourseTree({
             }}
           >
             <FolderOpen className="w-4 h-4" /> Mở xem
-          </button>
+          </Button>
 
           {contextMenu.data.type === "course" && (
             <>
-              <button
+              <Button
                 className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 flex items-center gap-2 text-blue-600"
                 onClick={() => {
                   evaluateCourse(contextMenu.data.data);
@@ -377,8 +378,8 @@ export function CourseTree({
                 }}
               >
                 <Sparkles className="w-4 h-4" /> AI Đánh giá
-              </button>
-              <button
+              </Button>
+              <Button
                 className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700 border-t border-slate-100"
                 onClick={() => {
                   exportCourse(contextMenu.data.data.id, contextMenu.data.data.languageCode);
@@ -386,8 +387,8 @@ export function CourseTree({
                 }}
               >
                 <FileText className="w-4 h-4" /> Xuất file .txt
-              </button>
-              <button
+              </Button>
+              <Button
                 className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 flex items-center gap-2 text-red-600 border-t border-slate-100"
                 onClick={() => {
                   onDeleteCourse(contextMenu.data.data.id);
@@ -395,12 +396,12 @@ export function CourseTree({
                 }}
               >
                 <Trash2 className="w-4 h-4" /> Xóa Khóa Học
-              </button>
+              </Button>
             </>
           )}
 
           {contextMenu.data.type === "tier" && (
-            <button
+            <Button
               className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700"
               onClick={() => {
                 handleCreateLesson(contextMenu.data.data.id);
@@ -408,11 +409,11 @@ export function CourseTree({
               }}
             >
               <Plus className="w-4 h-4" /> Thêm Bài học
-            </button>
+            </Button>
           )}
 
           {contextMenu.data.type === "lesson" && (
-            <button
+            <Button
               className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 flex items-center gap-2 text-red-600"
               onClick={() => {
                 handleDeleteLesson(contextMenu.data.data.id);
@@ -420,7 +421,7 @@ export function CourseTree({
               }}
             >
               <Trash2 className="w-4 h-4" /> Xóa Bài học
-            </button>
+            </Button>
           )}
         </div>
       )}

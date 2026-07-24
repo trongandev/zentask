@@ -4,6 +4,10 @@ import toastService from "@/src/services/toastService";
 import { voiceOptions } from "../lib/voiceOptions";
 import { useEtcStore } from "../services/etcService";
 import { utilitiesService, type CalculatorHistoryItem, type StudyMethodItem, type TranslationHistoryItem } from "../services/utilitiesService";
+import { Button } from "@/src/components/ui/Button";
+import { Select } from "@/src/components/ui/Select";
+import { Textarea } from "@/src/components/ui/Textarea";
+import { Input } from "@/src/components/ui/Input";
 
 type UtilityTab = "calculator" | "clock" | "translate";
 type CalcMode = "basic" | "advanced";
@@ -585,13 +589,13 @@ export function Utilities() {
             ["translate", Languages, "Dịch thuật"],
           ] as const
         ).map(([id, Icon, label]) => (
-          <button
+          <Button
             key={id}
             onClick={() => setActiveTab(id)}
             className={`flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold transition ${activeTab === id ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-600 hover:bg-slate-50"}`}
           >
             <Icon className="h-5 w-5" /> {label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -604,12 +608,12 @@ export function Utilities() {
                 <p className="text-sm text-slate-500">Tính nhanh hoặc giải các bài toán nâng cao.</p>
               </div>
               <div className="rounded-2xl bg-slate-100 p-1">
-                <button onClick={() => setCalcMode("basic")} className={`rounded-xl px-4 py-2 text-sm font-bold ${calcMode === "basic" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>
+                <Button onClick={() => setCalcMode("basic")} className={`rounded-xl px-4 py-2 text-sm font-bold ${calcMode === "basic" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>
                   Cơ bản
-                </button>
-                <button onClick={() => setCalcMode("advanced")} className={`rounded-xl px-4 py-2 text-sm font-bold ${calcMode === "advanced" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>
+                </Button>
+                <Button onClick={() => setCalcMode("advanced")} className={`rounded-xl px-4 py-2 text-sm font-bold ${calcMode === "advanced" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>
                   Nâng cao
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -621,13 +625,13 @@ export function Utilities() {
                 </div>
                 <div className="grid grid-cols-4 gap-3">
                   {basicButtons.map((button) => (
-                    <button
+                    <Button
                       key={button}
                       onClick={() => handleBasicButton(button)}
                       className={`h-14 rounded-2xl text-lg font-black transition ${button === "=" ? "bg-blue-500 text-white hover:bg-blue-400" : ["C", "CE", "⌫"].includes(button) ? "bg-slate-700 text-white hover:bg-slate-600" : ["÷", "×", "-", "+"].includes(button) ? "bg-orange-500 text-white hover:bg-orange-400" : "bg-white text-slate-900 hover:bg-slate-100"}`}
                     >
                       {button}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -641,7 +645,7 @@ export function Utilities() {
                       ["expression", "Tính biểu thức"],
                     ] as const
                   ).map(([id, label]) => (
-                    <button
+                    <Button
                       key={id}
                       onClick={() => {
                         const template = advancedTemplates.find((item) => item.mode === id);
@@ -651,7 +655,7 @@ export function Utilities() {
                       className={`rounded-2xl px-4 py-2 text-sm font-bold ${advancedMode === id ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
                     >
                       {label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
 
@@ -661,7 +665,7 @@ export function Utilities() {
                       <h3 className="text-sm font-extrabold text-blue-900">Bấm nút để chèn công thức</h3>
                       <p className="text-xs text-blue-700/80">Không cần nhớ cú pháp như sqrt hoặc ^. Bạn chỉ cần chọn nút phù hợp rồi nhập số vào chỗ trống.</p>
                     </div>
-                    <button
+                    <Button
                       type="button"
                       onClick={() => {
                         setAdvancedInput("");
@@ -671,7 +675,7 @@ export function Utilities() {
                       className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-slate-500 shadow-sm hover:text-red-600"
                     >
                       Xóa nội dung
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="space-y-3">
@@ -680,7 +684,7 @@ export function Utilities() {
                         <div className="mb-2 text-xs font-bold uppercase tracking-wide text-blue-700/70">{group.title}</div>
                         <div className="flex flex-wrap gap-2">
                           {group.buttons.map((button) => (
-                            <button
+                            <Button
                               key={`${group.title}-${button.label}`}
                               type="button"
                               title={button.hint}
@@ -688,7 +692,7 @@ export function Utilities() {
                               className="rounded-2xl border border-blue-100 bg-white px-4 py-2 text-sm font-black text-slate-800 shadow-sm hover:border-blue-300 hover:text-blue-700"
                             >
                               {button.label}
-                            </button>
+                            </Button>
                           ))}
                         </div>
                       </div>
@@ -700,7 +704,7 @@ export function Utilities() {
                   <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">Mẫu có sẵn</div>
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {advancedTemplates.map((template) => (
-                      <button
+                      <Button
                         key={template.label}
                         type="button"
                         onClick={() => applyAdvancedTemplate(template)}
@@ -709,12 +713,12 @@ export function Utilities() {
                         <div className="text-sm font-extrabold text-slate-800">{template.label}</div>
                         <div className="mt-1 text-xs text-slate-500">{template.note}</div>
                         <div className="mt-2 whitespace-pre-wrap rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-blue-700">{template.value}</div>
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
 
-                <textarea
+                <Textarea
                   ref={advancedInputRef}
                   value={advancedInput}
                   onChange={(event) => setAdvancedInput(event.target.value)}
@@ -722,9 +726,9 @@ export function Utilities() {
                   placeholder="Bấm các nút phía trên để chèn công thức, hoặc nhập trực tiếp tại đây..."
                 />
                 <div className="flex flex-wrap items-center gap-3">
-                  <button onClick={calculateAdvanced} className="rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700">
+                  <Button onClick={calculateAdvanced} className="rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700">
                     Tính kết quả
-                  </button>
+                  </Button>
                   <div className="rounded-2xl bg-blue-50 px-5 py-3 text-sm font-bold text-blue-700">Kết quả: {result}</div>
                 </div>
                 <p className="text-sm text-slate-500">
@@ -739,7 +743,7 @@ export function Utilities() {
               <h3 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
                 <History className="h-5 w-5 text-blue-600" /> Lịch sử tính
               </h3>
-              <button
+              <Button
                 onClick={async () => {
                   await utilitiesService.clearCalculatorHistory();
                   setCalcHistory([]);
@@ -747,15 +751,15 @@ export function Utilities() {
                 className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
               >
                 <Trash2 className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
             <div className="max-h-[600px] space-y-2 overflow-y-auto pr-1">
               {calcHistory.length === 0 && <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Chưa có phép tính nào.</div>}
               {calcHistory.map((item) => (
-                <button key={item.id} onClick={() => recallCalculation(item)} className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-3 text-left hover:border-blue-200 hover:bg-blue-50">
+                <Button key={item.id} onClick={() => recallCalculation(item)} className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-3 text-left hover:border-blue-200 hover:bg-blue-50">
                   <div className="break-all text-sm font-bold text-slate-800">{item.expression}</div>
                   <div className="mt-1 break-all text-sm text-blue-700">= {item.result}</div>
-                </button>
+                </Button>
               ))}
             </div>
           </aside>
@@ -773,9 +777,9 @@ export function Utilities() {
                   ["study", "Phương pháp học"],
                 ] as const
               ).map(([id, label]) => (
-                <button key={id} onClick={() => setClockMode(id)} className={`rounded-xl px-4 py-2 text-sm font-bold ${clockMode === id ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>
+                <Button key={id} onClick={() => setClockMode(id)} className={`rounded-xl px-4 py-2 text-sm font-bold ${clockMode === id ? "bg-white text-blue-600 shadow-sm" : "text-slate-500"}`}>
                   {label}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -783,13 +787,13 @@ export function Utilities() {
               <div className="flex flex-col items-center justify-center rounded-[2rem] bg-slate-950 p-8 text-white">
                 <div className="mb-8 text-6xl font-black tracking-tight md:text-7xl">{formatTime(stopwatchSeconds)}</div>
                 <div className="flex flex-wrap justify-center gap-3">
-                  <button onClick={() => setStopwatchRunning(true)} className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 font-bold text-white">
+                  <Button onClick={() => setStopwatchRunning(true)} className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 font-bold text-white">
                     <Play className="h-5 w-5" /> Bắt đầu
-                  </button>
-                  <button onClick={() => setStopwatchRunning(false)} className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white">
+                  </Button>
+                  <Button onClick={() => setStopwatchRunning(false)} className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white">
                     <Pause className="h-5 w-5" /> Tạm dừng
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => {
                       setStopwatchRunning(false);
                       setStopwatchSeconds(0);
@@ -797,7 +801,7 @@ export function Utilities() {
                     className="flex items-center gap-2 rounded-2xl bg-slate-700 px-6 py-3 font-bold text-white"
                   >
                     <RotateCcw className="h-5 w-5" /> Đặt lại
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -805,7 +809,7 @@ export function Utilities() {
             {clockMode === "timer" && (
               <div className="rounded-[2rem] bg-blue-50 p-6 text-center">
                 <div className="mb-5 flex justify-center gap-3">
-                  <input
+                  <Input
                     type="number"
                     min={1}
                     value={timerMinutes}
@@ -820,15 +824,15 @@ export function Utilities() {
                 </div>
                 <div className="mb-8 text-6xl font-black text-blue-700 md:text-7xl">{formatTime(timerSecondsLeft)}</div>
                 <div className="flex flex-wrap justify-center gap-3">
-                  <button onClick={startTimer} className="flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white">
+                  <Button onClick={startTimer} className="flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white">
                     <Play className="h-5 w-5" /> Bắt đầu
-                  </button>
-                  <button onClick={() => setTimerRunning(false)} className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white">
+                  </Button>
+                  <Button onClick={() => setTimerRunning(false)} className="flex items-center gap-2 rounded-2xl bg-amber-500 px-6 py-3 font-bold text-white">
                     <Pause className="h-5 w-5" /> Tạm dừng
-                  </button>
-                  <button onClick={resetTimer} className="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 font-bold text-blue-700">
+                  </Button>
+                  <Button onClick={resetTimer} className="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 font-bold text-blue-700">
                     <RotateCcw className="h-5 w-5" /> Đặt lại
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -840,15 +844,15 @@ export function Utilities() {
                   <div className="mb-2 text-6xl font-black md:text-7xl">{formatTime(studySecondsLeft)}</div>
                   <div className="mb-6 text-blue-100">{phase === "break" ? "Đang nghỉ" : phase === "finished" ? "Đã hoàn thành" : studySegments[studySegmentIndex]?.label || "Sẵn sàng học"}</div>
                   <div className="flex flex-wrap justify-center gap-3">
-                    <button onClick={startStudy} className="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 font-bold text-blue-700">
+                    <Button onClick={startStudy} className="flex items-center gap-2 rounded-2xl bg-white px-6 py-3 font-bold text-blue-700">
                       <Play className="h-5 w-5" /> Bắt đầu
-                    </button>
-                    <button onClick={() => setStudyRunning(false)} className="flex items-center gap-2 rounded-2xl bg-white/15 px-6 py-3 font-bold text-white">
+                    </Button>
+                    <Button onClick={() => setStudyRunning(false)} className="flex items-center gap-2 rounded-2xl bg-white/15 px-6 py-3 font-bold text-white">
                       <Pause className="h-5 w-5" /> Tạm dừng
-                    </button>
-                    <button onClick={resetStudy} className="flex items-center gap-2 rounded-2xl bg-white/15 px-6 py-3 font-bold text-white">
+                    </Button>
+                    <Button onClick={resetStudy} className="flex items-center gap-2 rounded-2xl bg-white/15 px-6 py-3 font-bold text-white">
                       <RotateCcw className="h-5 w-5" /> Đặt lại
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -874,7 +878,7 @@ export function Utilities() {
               <div className="space-y-2">
                 {allMethods.map((method) => (
                   <div key={method.id} className={`rounded-2xl border p-3 transition ${selectedMethodId === method.id ? "border-blue-300 bg-blue-50" : "border-slate-100 bg-slate-50 hover:bg-white"}`}>
-                    <button type="button" onClick={() => selectStudyMethod(method)} className="w-full text-left">
+                    <Button type="button" onClick={() => selectStudyMethod(method)} className="w-full text-left">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <div className="truncate font-bold text-slate-800">{method.name}</div>
@@ -884,15 +888,15 @@ export function Utilities() {
                         </div>
                         {!method.isCustom && <span className="shrink-0 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-400">Có sẵn</span>}
                       </div>
-                    </button>
+                    </Button>
                     {method.isCustom && (
                       <div className="mt-3 flex gap-2">
-                        <button type="button" onClick={() => startEditStudyMethod(method)} className="flex-1 rounded-xl bg-white px-3 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50">
+                        <Button type="button" onClick={() => startEditStudyMethod(method)} className="flex-1 rounded-xl bg-white px-3 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50">
                           Sửa
-                        </button>
-                        <button type="button" onClick={() => void deleteCustomStudyMethod(method)} className="flex-1 rounded-xl bg-white px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50">
+                        </Button>
+                        <Button type="button" onClick={() => void deleteCustomStudyMethod(method)} className="flex-1 rounded-xl bg-white px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50">
                           Xóa
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -905,7 +909,7 @@ export function Utilities() {
                 <Plus className="h-5 w-5 text-blue-600" /> {editingMethodId ? "Chỉnh sửa phương pháp" : "Tạo phương pháp riêng"}
               </h3>
               <div className="space-y-3">
-                <input
+                <Input
                   value={customMethod.name}
                   onChange={(e) => setCustomMethod((v) => ({ ...v, name: e.target.value }))}
                   className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-300"
@@ -914,7 +918,7 @@ export function Utilities() {
                 <div className="grid grid-cols-3 gap-2">
                   <label className="text-xs font-bold text-slate-500">
                     Học
-                    <input
+                    <Input
                       type="number"
                       min={1}
                       value={customMethod.studyMinutes}
@@ -924,7 +928,7 @@ export function Utilities() {
                   </label>
                   <label className="text-xs font-bold text-slate-500">
                     Nghỉ
-                    <input
+                    <Input
                       type="number"
                       min={1}
                       value={customMethod.breakMinutes}
@@ -934,7 +938,7 @@ export function Utilities() {
                   </label>
                   <label className="text-xs font-bold text-slate-500">
                     Số lần
-                    <input
+                    <Input
                       type="number"
                       min={0}
                       value={customMethod.breakCount}
@@ -945,16 +949,16 @@ export function Utilities() {
                 </div>
                 <div className="flex gap-2">
                   {editingMethodId && (
-                    <button type="button" onClick={resetStudyMethodForm} className="flex-1 rounded-2xl bg-slate-100 px-4 py-3 font-bold text-slate-600 hover:bg-slate-200">
+                    <Button type="button" onClick={resetStudyMethodForm} className="flex-1 rounded-2xl bg-slate-100 px-4 py-3 font-bold text-slate-600 hover:bg-slate-200">
                       Hủy
-                    </button>
+                    </Button>
                   )}
-                  <button
+                  <Button
                     onClick={() => void saveCustomStudyMethod()}
                     className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700"
                   >
                     <Save className="h-4 w-4" /> {editingMethodId ? "Cập nhật" : "Lưu phương pháp"}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </section>
@@ -970,22 +974,22 @@ export function Utilities() {
                 <h2 className="text-2xl font-extrabold text-slate-900">Dịch thuật</h2>
                 <p className="text-sm text-slate-500">Dịch văn bản, lưu lịch sử và nghe giọng đọc hai phía.</p>
               </div>
-              <button onClick={handleTranslate} disabled={isTranslating} className="flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-bold text-white disabled:opacity-50">
+              <Button onClick={handleTranslate} disabled={isTranslating} className="flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-bold text-white disabled:opacity-50">
                 {isTranslating ? <RotateCcw className="h-5 w-5 animate-spin" /> : <Languages className="h-5 w-5" />} Dịch ngay
-              </button>
+              </Button>
             </div>
 
             <div className="grid gap-5 lg:grid-cols-2">
               <div className="space-y-3">
                 <div className="flex gap-2">
-                  <select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)} className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700">
+                  <Select value={sourceLang} onChange={(e) => setSourceLang(e.target.value)} className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700">
                     {languageOptions.map((item) => (
                       <option key={item.value} value={item.value}>
                         {item.label}
                       </option>
                     ))}
-                  </select>
-                  <select
+                  </Select>
+                  <Select
                     value={sourceVoice}
                     onChange={(e) => setSourceVoice(e.target.value)}
                     className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700"
@@ -995,30 +999,30 @@ export function Utilities() {
                         {voice.name} · {voice.country}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
-                <textarea
+                <Textarea
                   value={sourceText}
                   onChange={(e) => setSourceText(e.target.value)}
                   className="h-72 w-full resize-none rounded-3xl border border-slate-200 bg-slate-50 p-5 text-base outline-none focus:border-blue-300 focus:bg-white"
                   placeholder="Nhập nội dung cần dịch..."
                 />
                 <div className="flex gap-2">
-                  <button
+                  <Button
                     onClick={() => void playText(sourceText, sourceVoice)}
                     className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-200"
                   >
                     <Volume2 className="h-4 w-4" /> Đọc bên trái
-                  </button>
-                  <button onClick={() => setSourceText("")} className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-500 hover:text-red-600">
+                  </Button>
+                  <Button onClick={() => setSourceText("")} className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-500 hover:text-red-600">
                     <Eraser className="h-4 w-4" />
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <div className="flex gap-2">
-                  <select value={targetLang} onChange={(e) => setTargetLang(e.target.value)} className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700">
+                  <Select value={targetLang} onChange={(e) => setTargetLang(e.target.value)} className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700">
                     {languageOptions
                       .filter((item) => item.value !== "auto")
                       .map((item) => (
@@ -1026,8 +1030,8 @@ export function Utilities() {
                           {item.label}
                         </option>
                       ))}
-                  </select>
-                  <select
+                  </Select>
+                  <Select
                     value={targetVoice}
                     onChange={(e) => setTargetVoice(e.target.value)}
                     className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700"
@@ -1037,25 +1041,25 @@ export function Utilities() {
                         {voice.name} · {voice.country}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
-                <textarea
+                <Textarea
                   value={translatedText}
                   onChange={(e) => setTranslatedText(e.target.value)}
                   className="h-72 w-full resize-none rounded-3xl border border-blue-100 bg-blue-50/70 p-5 text-base text-blue-950 outline-none focus:border-blue-300"
                   placeholder="Bản dịch sẽ xuất hiện ở đây..."
                 />
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <Button
                     onClick={() => void playText(translatedText, targetVoice)}
                     disabled={playingAudio}
                     className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
                   >
                     <Volume2 className="h-4 w-4" /> Đọc bản dịch
-                  </button>
-                  <button onClick={() => navigator.clipboard.writeText(translatedText)} className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700">
+                  </Button>
+                  <Button onClick={() => navigator.clipboard.writeText(translatedText)} className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700">
                     <Copy className="h-4 w-4" /> Sao chép
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1066,7 +1070,7 @@ export function Utilities() {
               <h3 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
                 <History className="h-5 w-5 text-blue-600" /> Lịch sử dịch
               </h3>
-              <button
+              <Button
                 onClick={async () => {
                   await utilitiesService.clearTranslationHistory();
                   setTranslationHistory([]);
@@ -1074,18 +1078,18 @@ export function Utilities() {
                 className="rounded-xl p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
               >
                 <Trash2 className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
             <div className="max-h-[680px] space-y-2 overflow-y-auto pr-1">
               {translationHistory.length === 0 && <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Chưa có lịch sử dịch.</div>}
               {translationHistory.map((item) => (
-                <button key={item.id} onClick={() => recallTranslation(item)} className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-3 text-left hover:border-blue-200 hover:bg-blue-50">
+                <Button key={item.id} onClick={() => recallTranslation(item)} className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-3 text-left hover:border-blue-200 hover:bg-blue-50">
                   <div className="line-clamp-2 text-sm font-bold text-slate-800">{item.sourceText}</div>
                   <div className="mt-1 line-clamp-2 text-sm text-blue-700">{item.translatedText}</div>
                   <div className="mt-2 text-[11px] font-bold uppercase text-slate-400">
                     {item.source} → {item.target}
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           </aside>

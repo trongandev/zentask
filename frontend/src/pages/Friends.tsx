@@ -4,6 +4,10 @@ import toastService from "@/src/services/toastService";
 import { useAuth } from "../contexts/AuthContext";
 import { friendsService, type FriendMessage, type FriendRequestItem, type FriendUser, type ShareOptions } from "../services/friendsService";
 import { cn, timeAgo } from "../lib/utils";
+import { Button } from "@/src/components/ui/Button";
+import { Select } from "@/src/components/ui/Select";
+import { Input } from "@/src/components/ui/Input";
+import { Textarea } from "@/src/components/ui/Textarea";
 
 function Avatar({ user, size = "md" }: { user?: Partial<FriendUser> | null; size?: "sm" | "md" | "lg" }) {
   const cls = size === "sm" ? "h-9 w-9" : size === "lg" ? "h-14 w-14" : "h-11 w-11";
@@ -242,13 +246,13 @@ export default function Friends() {
                   ["discover", "Tìm bạn", searchResults.length],
                 ] as const
               ).map(([key, label, count]) => (
-                <button
+                <Button
                   key={key}
                   onClick={() => setTab(key)}
                   className={cn("flex-1 rounded-xl px-3 py-2 text-xs font-extrabold transition", tab === key ? "bg-blue-600 text-white shadow" : "text-gray-600 hover:bg-white")}
                 >
                   {label} {count > 0 && <span className="ml-1">{count}</span>}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -256,7 +260,7 @@ export default function Friends() {
               <div className="space-y-2">
                 {friends.length ? (
                   friends.map((friend) => (
-                    <button
+                    <Button
                       key={friend.uid}
                       onClick={() => setActiveFriend(friend)}
                       className={cn(
@@ -270,7 +274,7 @@ export default function Friends() {
                         <p className="truncate text-xs text-gray-500">{friend.email || "Bạn học Zentask"}</p>
                       </div>
                       <MessageCircle className="h-4 w-4 text-blue-500" />
-                    </button>
+                    </Button>
                   ))
                 ) : (
                   <div className="rounded-2xl bg-gray-50 p-5 text-center text-sm text-gray-500">Bạn chưa có bạn bè. Hãy tìm người học để gửi lời mời.</div>
@@ -293,18 +297,18 @@ export default function Friends() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <button
+                          <Button
                             onClick={() => respondRequest(request.id, "accept")}
                             className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white"
                           >
                             <Check className="h-4 w-4" /> Chấp nhận
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() => respondRequest(request.id, "decline")}
                             className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-white px-3 py-2 text-xs font-bold text-gray-600"
                           >
                             <X className="h-4 w-4" /> Từ chối
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     ))
@@ -333,7 +337,7 @@ export default function Friends() {
               <div className="space-y-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <input
+                  <Input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Tìm theo tên hoặc email..."
@@ -352,9 +356,9 @@ export default function Friends() {
                     ) : item.friendStatus === "sent" ? (
                       <span className="text-xs font-bold text-gray-400">Đã gửi</span>
                     ) : (
-                      <button onClick={() => sendFriendRequest(item)} className="rounded-xl bg-blue-600 p-2 text-white">
+                      <Button onClick={() => sendFriendRequest(item)} className="rounded-xl bg-blue-600 p-2 text-white">
                         <UserPlus className="h-4 w-4" />
-                      </button>
+                      </Button>
                     )}
                   </div>
                 ))}
@@ -393,16 +397,16 @@ export default function Friends() {
                                 <p className="font-bold">{message.share.title}</p>
                                 <p className={cn("text-xs", mine ? "text-blue-100" : "text-gray-500")}>{message.share.summary}</p>
                                 <div className="mt-3 flex flex-wrap gap-2">
-                                  <button
+                                  <Button
                                     onClick={() => openSharePreview(message.id)}
                                     className={cn("flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold", mine ? "bg-white text-blue-700" : "bg-blue-600 text-white")}
                                   >
                                     <Eye className="h-4 w-4" /> Xem trước
-                                  </button>
+                                  </Button>
                                   {!mine && (
-                                    <button onClick={() => openSharePreview(message.id)} className="flex items-center gap-1 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white">
+                                    <Button onClick={() => openSharePreview(message.id)} className="flex items-center gap-1 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white">
                                       <Save className="h-4 w-4" /> Lưu
-                                    </button>
+                                    </Button>
                                   )}
                                 </div>
                               </div>
@@ -420,7 +424,7 @@ export default function Friends() {
 
                 <div className="border-t border-gray-100 bg-white p-4">
                   <div className="flex gap-3">
-                    <input
+                    <Input
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
                       onKeyDown={(e) => {
@@ -429,9 +433,9 @@ export default function Friends() {
                       placeholder='Nhập tin nhắn... hoặc gõ "lưu flashcard" để mở bản xem trước gần nhất'
                       className="h-12 min-w-0 flex-1 rounded-2xl border border-gray-200 px-4 text-sm outline-none focus:border-blue-300"
                     />
-                    <button onClick={() => void sendMessage()} className="flex h-12 items-center gap-2 rounded-2xl bg-blue-600 px-5 font-bold text-white">
+                    <Button onClick={() => void sendMessage()} className="flex h-12 items-center gap-2 rounded-2xl bg-blue-600 px-5 font-bold text-white">
                       <Send className="h-5 w-5" /> Gửi
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </>
@@ -451,7 +455,7 @@ export default function Friends() {
                 <h3 className="font-extrabold text-gray-900">Chia sẻ học liệu</h3>
               </div>
               <div className="mb-3 grid grid-cols-2 gap-2 rounded-2xl bg-gray-50 p-1.5">
-                <button
+                <Button
                   onClick={() => {
                     setShareType("flashcard_folder");
                     setShareId("");
@@ -459,8 +463,8 @@ export default function Friends() {
                   className={cn("rounded-xl px-3 py-2 text-xs font-bold", shareType === "flashcard_folder" ? "bg-blue-600 text-white" : "text-gray-600")}
                 >
                   Flashcard
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => {
                     setShareType("quiz");
                     setShareId("");
@@ -468,29 +472,29 @@ export default function Friends() {
                   className={cn("rounded-xl px-3 py-2 text-xs font-bold", shareType === "quiz" ? "bg-blue-600 text-white" : "text-gray-600")}
                 >
                   Quiz
-                </button>
+                </Button>
               </div>
-              <select value={shareId} onChange={(e) => setShareId(e.target.value)} className="mb-3 h-11 w-full rounded-2xl border border-gray-200 px-3 text-sm outline-none">
+              <Select value={shareId} onChange={(e) => setShareId(e.target.value)} className="mb-3 h-11 w-full rounded-2xl border border-gray-200 px-3 text-sm outline-none">
                 <option value="">Chọn {shareType === "flashcard_folder" ? "thư mục flashcard" : "quiz"}</option>
                 {shareItems.map((item: any) => (
                   <option key={item.id} value={item.id}>
                     {item.name || item.title} {item.setCount !== undefined ? `• ${item.setCount} bộ` : item.questionCount !== undefined ? `• ${item.questionCount} câu` : ""}
                   </option>
                 ))}
-              </select>
-              <textarea
+              </Select>
+              <Textarea
                 value={shareNote}
                 onChange={(e) => setShareNote(e.target.value)}
                 placeholder="Lời nhắn kèm theo..."
                 className="mb-3 h-24 w-full resize-none rounded-2xl border border-gray-200 px-3 py-3 text-sm outline-none"
               />
-              <button
+              <Button
                 disabled={!activeFriend || !shareId}
                 onClick={() => void shareContent()}
                 className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 font-bold text-white disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" /> Gửi chia sẻ
-              </button>
+              </Button>
               <p className="mt-3 text-xs leading-relaxed text-gray-500">Người nhận sẽ thấy trong tin nhắn và chuông thông báo. Khi lưu flashcard, hệ thống luôn mở bản xem trước trước.</p>
             </section>
           </aside>
@@ -505,9 +509,9 @@ export default function Friends() {
                 <h2 className="text-xl font-extrabold text-gray-900">Xem trước trước khi lưu</h2>
                 <p className="text-sm text-gray-500">Kiểm tra nội dung rồi mới lưu vào tài khoản cá nhân.</p>
               </div>
-              <button onClick={() => setPreview(null)} className="rounded-full bg-gray-100 p-2 text-gray-500">
+              <Button onClick={() => setPreview(null)} className="rounded-full bg-gray-100 p-2 text-gray-500">
                 <X className="h-5 w-5" />
-              </button>
+              </Button>
             </div>
             <div className="max-h-[65vh] overflow-y-auto p-5">
               {previewLoading ? (
@@ -566,17 +570,17 @@ export default function Friends() {
               ) : null}
             </div>
             <div className="flex flex-col gap-3 border-t border-gray-100 p-5 sm:flex-row sm:justify-end">
-              <button onClick={() => setPreview(null)} className="rounded-2xl bg-gray-100 px-5 py-3 font-bold text-gray-700">
+              <Button onClick={() => setPreview(null)} className="rounded-2xl bg-gray-100 px-5 py-3 font-bold text-gray-700">
                 Đóng
-              </button>
-              <button
+              </Button>
+              <Button
                 disabled={preview.saved}
                 onClick={() => void savePreview()}
                 className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 font-bold text-white disabled:opacity-60"
               >
                 {preview.saved ? <CheckCircle2 className="h-5 w-5" /> : <Save className="h-5 w-5" />}
                 {preview.saved ? "Đã lưu" : preview.share?.type === "flashcard_folder" ? "Lưu flashcard" : "Lưu quiz"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -1,12 +1,13 @@
 import { Trophy, Flame, ChevronUp, ChevronDown, Minus, Medal, Gift, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import toastService from "@/src/services/toastService";
-import { UserAvatar } from "../components/UserAvatar";
-import { UserLevelBadge } from "../components/UserLevelBadge";
+import { UserAvatar } from "../components/ui/UserAvatar";
+import { UserLevelBadge } from "@/src/components/ui/UserLevelBadge";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useEtcStore } from "../services/etcService";
+import { Button } from "@/src/components/ui/Button";
 
 export function Leaderboard() {
   const { user } = useAuth();
@@ -169,9 +170,9 @@ export function Leaderboard() {
               <p className="text-emerald-100 text-sm">Tổng kết bảng xếp hạng {rewards[0].type === "week" ? "tuần" : "tháng"} trước</p>
             </div>
           </div>
-          <button onClick={() => handleClaimReward(rewards[0])} className="px-6 py-2 bg-white text-emerald-600 rounded-xl font-bold shadow-sm hover:bg-emerald-50 transition-colors flex-shrink-0">
+          <Button onClick={() => handleClaimReward(rewards[0])} className="px-6 py-2 bg-white text-emerald-600 rounded-xl font-bold shadow-sm hover:bg-emerald-50 transition-colors flex-shrink-0">
             Nhận {rewards[0].xp} XP
-          </button>
+          </Button>
         </div>
       )}
 
@@ -214,39 +215,39 @@ export function Leaderboard() {
           </div>
           <div className="flex items-center gap-2">
             <div className="flex bg-gray-100 p-1 rounded-lg self-start md:self-auto">
-              <button
+              <Button
                 onClick={() => setTimeframe("week")}
                 className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "week" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
               >
                 Tuần
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setTimeframe("month")}
                 className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "month" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
               >
                 Tháng
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setTimeframe("all")}
                 className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "all" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
               >
                 Tất cả
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setTimeframe("rank")}
                 className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", timeframe === "rank" ? "bg-white shadow-sm font-bold text-blue-600" : "text-gray-600 hover:text-gray-900")}
               >
                 Rank
-              </button>
+              </Button>
             </div>
-            <button
+            <Button
               onClick={handleReload}
               disabled={!canReload || loading}
               className="p-1.5 rounded-lg bg-gray-100 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all disabled:opacity-50"
               title={!canReload ? "Vui lòng đợi 10 phút" : "Làm mới"}
             >
               <RefreshCw className={cn("w-5 h-5", loading && "animate-spin")} />
-            </button>
+            </Button>
           </div>
         </div>
 

@@ -9,6 +9,7 @@ import { Check } from "lucide-react";
 import { VoiceSelectorModal } from "../../components/practice/VoiceSelectorModal";
 import { getVoiceForLanguage } from "../../lib/ttsVoiceStorage";
 import axiosInstance from "@/src/services/axiosConfig";
+import { Button } from "@/src/components/ui/Button";
 
 type ViewMode = "line" | "grid" | "compact";
 
@@ -60,9 +61,9 @@ export function BeginnerFlashcardDetail() {
         return (
             <div className="text-center py-12">
                 <p className="text-gray-500">Không tìm thấy bộ thẻ</p>
-                <button onClick={() => navigate("/beginner")} className="mt-4 text-blue-600 font-semibold">
+                <Button onClick={() => navigate("/beginner")} className="mt-4 text-blue-600 font-semibold">
                     Quay lại danh sách
-                </button>
+                </Button>
             </div>
         );
     }
@@ -81,7 +82,7 @@ export function BeginnerFlashcardDetail() {
                     <div className="flex items-center gap-2">
                         <h3 className="text-xl font-bold text-gray-900">{card.term}</h3>
                         {learnedWords.includes(card.id) && <Check className="w-5 h-5 text-green-500" />}
-                        <button
+                        <Button
                             onClick={() => handlePlayAudio(card.term)}
                             disabled={isLoading && loadingText === card.term}
                             className="text-gray-400 hover:text-blue-500 transition-colors disabled:opacity-50">
@@ -90,7 +91,7 @@ export function BeginnerFlashcardDetail() {
                             ) : (
                                 <Volume2 className="w-4 h-4" />
                             )}
-                        </button>
+                        </Button>
                     </div>
                 </div>
                 {card.phonetic && <p className="text-gray-400 font-mono text-sm mb-2">{card.phonetic}</p>}
@@ -107,7 +108,7 @@ export function BeginnerFlashcardDetail() {
                 {card.examples?.length > 0 ? (
                     card.examples.map((ex: any, idx: number) => (
                         <div key={idx} className="flex items-start gap-2">
-                            <button
+                            <Button
                                 onClick={() => handlePlayAudio(ex.en)}
                                 disabled={isLoading && loadingText === ex.en}
                                 className="mt-0.5 text-gray-300 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50">
@@ -116,7 +117,7 @@ export function BeginnerFlashcardDetail() {
                                 ) : (
                                     <Volume2 className="w-4 h-4" />
                                 )}
-                            </button>
+                            </Button>
                             <div>
                                 <p className="text-gray-800 font-medium text-sm">{ex.en}</p>
                                 <p className="text-gray-500 text-xs">{ex.vi}</p>
@@ -139,7 +140,7 @@ export function BeginnerFlashcardDetail() {
                     <div className="flex items-center gap-2 min-w-0">
                         <h3 className="text-lg font-bold text-gray-900 truncate">{card.term}</h3>
                         {learnedWords.includes(card.id) && <Check className="w-4 h-4 text-green-500 shrink-0" />}
-                        <button
+                        <Button
                             onClick={() => handlePlayAudio(card.term)}
                             disabled={isLoading && loadingText === card.term}
                             className="text-gray-400 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50">
@@ -148,7 +149,7 @@ export function BeginnerFlashcardDetail() {
                             ) : (
                                 <Volume2 className="w-4 h-4" />
                             )}
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -156,24 +157,24 @@ export function BeginnerFlashcardDetail() {
                 <p className="text-blue-600 font-bold text-sm">{card.translation}</p>
 
                 {/* Toggle example */}
-                <button
+                <Button
                     onClick={() => setExpandedGridCardId(isExpanded ? null : card.id)}
                     className="mt-auto flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 font-medium transition-colors self-start">
                     {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                     {isExpanded ? "Ẩn ví dụ" : "Xem ví dụ"}
-                </button>
+                </Button>
 
                 {isExpanded && card.examples?.length > 0 && (
                     <div className="pt-3 border-t border-gray-100 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
                         <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Ví dụ</h4>
                         {card.examples.map((ex: any, idx: number) => (
                             <div key={idx} className="flex items-start gap-2">
-                                <button
+                                <Button
                                     onClick={() => handlePlayAudio(ex.en)}
                                     disabled={isLoading && loadingText === ex.en}
                                     className="mt-0.5 text-gray-300 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50">
                                     <Volume2 className="w-3.5 h-3.5" />
-                                </button>
+                                </Button>
                                 <div>
                                     <p className="text-gray-800 font-medium text-sm">{ex.en}</p>
                                     <p className="text-gray-500 text-xs">{ex.vi}</p>
@@ -189,12 +190,12 @@ export function BeginnerFlashcardDetail() {
     // COMPACT VIEW
     const renderCompactCard = (card: any) => (
         <div key={card.id} className="bg-white rounded-xl border border-gray-100 px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
-            <button
+            <Button
                 onClick={() => handlePlayAudio(card.term)}
                 disabled={isLoading && loadingText === card.term}
                 className="text-gray-400 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50">
                 {isLoading && loadingText === card.term ? <div className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-4 h-4" />}
-            </button>
+            </Button>
             <div className="min-w-0 flex-1 flex items-center justify-between">
                 <div>
                     <p className="font-bold text-gray-900 text-sm truncate">{card.term}</p>
@@ -209,25 +210,25 @@ export function BeginnerFlashcardDetail() {
         <div className="max-w-5xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate("/beginner")} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                    <Button onClick={() => navigate("/beginner")} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
                         <ArrowLeft className="w-6 h-6 text-gray-600" />
-                    </button>
+                    </Button>
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">{currentSet.title}</h1>
                         <p className="text-gray-500">{cards.length} từ vựng</p>
                     </div>
                 </div>
-                <button onClick={() => setIsVoiceModalOpen(true)} className="px-4 py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors">
+                <Button onClick={() => setIsVoiceModalOpen(true)} className="px-4 py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors">
                     Thay đổi giọng nói
-                </button>
+                </Button>
             </div>
 
             <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                <button
+                <Button
                     onClick={() => navigate(`/beginner/flashcard/${id}/practice`)}
                     className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-colors">
                     <Play className="w-5 h-5 fill-current" /> Ôn tập ngay
-                </button>
+                </Button>
                 <div className="flex items-center gap-2">
                     <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-0.5">
                         {(
@@ -237,13 +238,13 @@ export function BeginnerFlashcardDetail() {
                                 { key: "compact", icon: <Rows3 className="w-4 h-4" />, title: "Thu gọn" },
                             ] as { key: ViewMode; icon: React.ReactNode; title: string }[]
                         ).map(({ key, icon, title }) => (
-                            <button
+                            <Button
                                 key={key}
                                 title={title}
                                 onClick={() => setViewMode(key)}
                                 className={cn("p-2 rounded-lg transition-all", viewMode === key ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}>
                                 {icon}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                 </div>

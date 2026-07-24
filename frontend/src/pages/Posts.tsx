@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserAvatar } from "../components/UserAvatar";
+import { UserAvatar } from "../components/ui/UserAvatar";
 import { Calendar, Clock, ChevronRight, BookOpen, Star, Zap } from "lucide-react";
 import { cn } from "../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 export const CATEGORIES = [
   { id: "all", label: "Tất cả" },
@@ -173,7 +174,7 @@ export function Posts() {
       {/* Categories */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
         {CATEGORIES.map((category) => (
-          <button
+          <Button
             key={category.id}
             onClick={() => setActiveCategory(category.id)}
             className={cn(
@@ -182,7 +183,7 @@ export function Posts() {
             )}
           >
             {category.label}
-          </button>
+          </Button>
         ))}
       </div>
 

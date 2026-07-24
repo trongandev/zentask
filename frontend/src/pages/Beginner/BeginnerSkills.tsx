@@ -1,6 +1,7 @@
 import React from "react";
 import { Headphones, Mic, BookOpen, PenTool, PlayCircle, Trophy } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 const SKILLS = [
   {
@@ -78,9 +79,9 @@ export function BeginnerSkills() {
             <h3 className="text-2xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{skill.title}</h3>
             <p className="text-slate-500 line-clamp-2 flex-1 mb-6">{skill.description}</p>
 
-            <button className="w-full py-3 bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors border border-slate-200 hover:border-indigo-200">
+            <Button className="w-full py-3 bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors border border-slate-200 hover:border-indigo-200">
               <PlayCircle className="w-5 h-5" /> Bắt đầu luyện
-            </button>
+            </Button>
           </div>
         ))}
       </div>
@@ -94,9 +95,9 @@ export function BeginnerSkills() {
           <h3 className="text-xl font-bold text-slate-800">Thử thách tổng hợp (Sắp ra mắt)</h3>
           <p className="text-slate-500 mt-1">Bài test 15 phút trộn lẫn cả 4 kỹ năng giúp bạn đánh giá toàn diện năng lực của mình.</p>
         </div>
-        <button disabled className="px-6 py-3 bg-slate-200 text-slate-400 rounded-2xl font-bold whitespace-nowrap cursor-not-allowed">
+        <Button disabled className="px-6 py-3 bg-slate-200 text-slate-400 rounded-2xl font-bold whitespace-nowrap cursor-not-allowed">
           Chưa mở khoá
-        </button>
+        </Button>
       </div>
     </div>
   );

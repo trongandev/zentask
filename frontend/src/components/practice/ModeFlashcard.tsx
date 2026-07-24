@@ -4,6 +4,7 @@ import { cn } from "../../lib/utils";
 import { Volume2, CheckCircle, XCircle, RotateCw } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
+import { Button } from "@/src/components/ui/Button";
 
 interface ModeFlashcardProps {
   cards: Flashcard[];
@@ -63,13 +64,13 @@ export function ModeFlashcard({ cards, setId, onComplete, completionActions }: M
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Hoàn thành!</h2>
         <p className="text-gray-500 mb-8">Bạn đã ôn tập xong toàn bộ thẻ.</p>
-        <button 
+        <Button 
           onClick={() => { setCompleted(false); setCurrentIndex(0); setWrongCardIds([]); wrongCardIdsRef.current = []; }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Ôn tập lại
-        </button>
+        </Button>
         {completionActions}
       </div>
     );
@@ -94,7 +95,7 @@ export function ModeFlashcard({ cards, setId, onComplete, completionActions }: M
             {currentCard.phonetic && (
               <p className="text-xl text-gray-400 font-mono mb-6">{currentCard.phonetic}</p>
             )}
-            <button 
+            <Button 
               onClick={(e) => handlePlayAudio(e, currentCard.term)}
               disabled={isLoading && loadingText === currentCard.term}
               className="p-4 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors disabled:opacity-50"
@@ -104,7 +105,7 @@ export function ModeFlashcard({ cards, setId, onComplete, completionActions }: M
               ) : (
                 <Volume2 className="w-8 h-8" />
               )}
-            </button>
+            </Button>
             <p className="absolute bottom-6 text-sm text-gray-400 font-medium tracking-widest uppercase">Click để lật</p>
           </div>
 
@@ -126,20 +127,20 @@ export function ModeFlashcard({ cards, setId, onComplete, completionActions }: M
         "flex gap-4 mt-8 transition-all duration-300 w-full px-4",
         isFlipped ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
       )}>
-        <button 
+        <Button 
           onClick={(e) => { e.stopPropagation(); handleNext(false); }}
           className="flex-1 bg-white border-2 border-red-100 hover:border-red-500 hover:bg-red-50 text-red-600 font-bold py-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group"
         >
           <XCircle className="w-8 h-8 text-red-400 group-hover:text-red-500" />
           Chưa thuộc
-        </button>
-        <button 
+        </Button>
+        <Button 
           onClick={(e) => { e.stopPropagation(); handleNext(true); }}
           className="flex-1 bg-white border-2 border-green-100 hover:border-green-500 hover:bg-green-50 text-green-600 font-bold py-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group"
         >
           <CheckCircle className="w-8 h-8 text-green-400 group-hover:text-green-500" />
           Đã thuộc
-        </button>
+        </Button>
       </div>
     </div>
   );

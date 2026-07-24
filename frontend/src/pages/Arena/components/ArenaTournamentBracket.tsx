@@ -1,5 +1,7 @@
 import React from "react";
 import { Users, Trophy, ChevronLeft, Plus, Play, UserPlus } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 interface ArenaTournamentBracketProps {
   tournamentTitle: string;
@@ -86,9 +88,9 @@ export function ArenaTournamentBracket({
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-6 bg-slate-900/50 border-b border-white/5 z-10 backdrop-blur-md gap-4">
         <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/70">
+          <Button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-white/70">
             <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-          </button>
+          </Button>
           <div className="flex-1">
             <h1 className="text-lg md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 uppercase tracking-wider flex items-center gap-2 md:gap-3">
               <Trophy className="w-5 h-5 md:w-6 md:h-6 text-yellow-500 shrink-0" />
@@ -177,7 +179,7 @@ export function ArenaTournamentBracket({
         <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 w-[95%] md:w-[800px] max-h-[40vh] md:max-h-none overflow-y-auto custom-scrollbar bg-slate-800/95 backdrop-blur-xl rounded-2xl md:rounded-3xl border border-white/10 shadow-2xl p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 z-20">
           <div className="flex-1 bg-slate-900/50 p-4 md:p-5 rounded-2xl border border-white/5">
             <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4 text-white/80 flex items-center gap-2"><Plus className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" /> Tạo Giải Đấu Mới</h3>
-            <input
+            <Input
               value={tournamentTitle}
               onChange={(e) => setTournamentTitle(e.target.value)}
               placeholder="Tên giải đấu"
@@ -190,7 +192,7 @@ export function ArenaTournamentBracket({
                   {tournamentFriends.map((friend) => {
                     const isSelected = selectedInviteIds.includes(friend.uid);
                     return (
-                      <button
+                      <Button
                         key={friend.uid}
                         onClick={() => setSelectedInviteIds(prev => isSelected ? prev.filter(id => id !== friend.uid) : [...prev, friend.uid])}
                         className={`flex-shrink-0 flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full border text-[10px] md:text-xs font-bold transition-all ${
@@ -199,18 +201,18 @@ export function ArenaTournamentBracket({
                       >
                         <img src={friend.photoURL || "/mascot/Lopy (1).png"} alt="" className="w-4 h-4 md:w-5 md:h-5 rounded-full" />
                         {friend.displayName?.split(" ")[0] || "Bạn"}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
               </div>
             )}
-            <button
+            <Button
               onClick={onCreateRoom}
               className="w-full bg-yellow-500 text-black font-black py-2.5 md:py-3 rounded-xl hover:bg-yellow-400 transition-colors text-sm md:text-base"
             >
               TẠO PHÒNG CỐ ĐỊNH
-            </button>
+            </Button>
           </div>
 
           <div className="hidden md:block w-[1px] bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
@@ -218,18 +220,18 @@ export function ArenaTournamentBracket({
 
           <div className="flex-1 bg-slate-900/50 p-4 md:p-5 rounded-2xl border border-white/5">
             <h3 className="font-bold text-base md:text-lg mb-3 md:mb-4 text-white/80 flex items-center gap-2"><UserPlus className="w-4 h-4 md:w-5 md:h-5 text-blue-400" /> Vào Phóng Đã Có</h3>
-            <input
+            <Input
               value={tournamentCode}
               onChange={(e) => setTournamentCode(e.target.value)}
               placeholder="Nhập mã phòng 6 số"
               className="w-full rounded-xl bg-slate-800 px-3 md:px-4 py-2.5 md:py-3 outline-none text-sm mb-3 md:mb-4 border border-white/10 focus:border-blue-400/50 transition-colors text-center font-mono tracking-widest text-lg md:text-xl"
             />
-            <button
+            <Button
               onClick={onJoinByCode}
               className="w-full bg-blue-600 text-white font-black py-2.5 md:py-3 rounded-xl hover:bg-blue-500 transition-colors text-sm md:text-base"
             >
               VÀO PHÒNG
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
@@ -241,14 +243,14 @@ export function ArenaTournamentBracket({
               <span className="text-sm font-bold text-white/80">Trạng thái: Đang chờ</span>
               <span className="text-xs text-white/50">{tournamentParticipants.length < 2 ? "Cần tối thiểu 2 người để bắt đầu" : "Đã có thể bắt đầu!"}</span>
            </div>
-           <button
+           <Button
             onClick={onStartMatch}
             disabled={!tournamentCanStart || tournamentParticipants.length < 2}
             className="w-full md:w-auto mt-2 md:mt-0 flex justify-center items-center gap-2 bg-yellow-500 text-black px-8 py-3 rounded-full font-black disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform"
            >
              <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" />
              BẮT ĐẦU NGAY
-           </button>
+           </Button>
         </div>
       )}
     </div>

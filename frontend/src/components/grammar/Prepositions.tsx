@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { MapPin, Calendar, CheckCircle2, XCircle } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
 
 type Item = { id: string; text: string; correctLayer: "IN" | "ON" | "AT" };
 
@@ -67,9 +68,9 @@ export function Prepositions() {
                     </div>
                     {/* Action buttons on hover to simulate placement */}
                     <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded-lg shadow-lg flex p-1 gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      <button onClick={() => handlePlaceItem(item, "IN")} className="px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded">IN</button>
-                      <button onClick={() => handlePlaceItem(item, "ON")} className="px-2 py-1 text-xs font-bold text-teal-600 hover:bg-teal-50 rounded">ON</button>
-                      <button onClick={() => handlePlaceItem(item, "AT")} className="px-2 py-1 text-xs font-bold text-orange-600 hover:bg-orange-50 rounded">AT</button>
+                      <Button onClick={() => handlePlaceItem(item, "IN")} className="px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded">IN</Button>
+                      <Button onClick={() => handlePlaceItem(item, "ON")} className="px-2 py-1 text-xs font-bold text-teal-600 hover:bg-teal-50 rounded">ON</Button>
+                      <Button onClick={() => handlePlaceItem(item, "AT")} className="px-2 py-1 text-xs font-bold text-orange-600 hover:bg-orange-50 rounded">AT</Button>
                     </div>
                     {feedback?.id === item.id && feedback.type === "error" && (
                       <XCircle className="absolute -top-2 -right-2 w-5 h-5 text-red-500 bg-white rounded-full" />

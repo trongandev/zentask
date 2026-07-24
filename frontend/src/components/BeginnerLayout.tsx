@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Map, BookOpen, Headphones, Trophy, Swords } from "lucide-react";
 import { cn } from "../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 export function BeginnerLayout() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export function BeginnerLayout() {
     <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden relative">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm px-4 py-3 flex items-center">
-        <button
+        <Button
           onClick={() => {
             if (isLessonPage) {
               navigate("/beginner");
@@ -37,7 +38,7 @@ export function BeginnerLayout() {
           className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors text-slate-500 hover:text-slate-900"
         >
           <ArrowLeft className="w-6 h-6" />
-        </button>
+        </Button>
         <h1 className="ml-2 text-lg font-bold">{isLessonPage ? "Học bài mới" : "Lộ trình cho người mới"}</h1>
       </header>
 
@@ -53,14 +54,14 @@ export function BeginnerLayout() {
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
-                <button
+                <Button
                   key={item.path}
                   onClick={() => navigate(item.path)}
                   className={cn("flex flex-col items-center gap-1 p-2 rounded-xl transition-all min-w-[72px]", isActive ? "text-blue-600" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50")}
                 >
                   <div className={cn("p-1.5 rounded-xl transition-all", isActive ? "bg-blue-100" : "")}>{item.icon}</div>
                   <span className="text-[10px] font-bold uppercase tracking-wider">{item.label}</span>
-                </button>
+                </Button>
               );
             })}
           </div>

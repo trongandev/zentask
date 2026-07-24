@@ -9,6 +9,7 @@ import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { Bold, Italic, Strikethrough, List, ListOrdered, Palette, Type } from "lucide-react";
 import { useEffect, useState } from "react";
 import { containsForbiddenPublicContent } from "../utils/publicContentGuard";
+import { Button } from "@/src/components/ui/Button";
 
 // Custom Extension for Font Size
 const FontSize = Extension.create({
@@ -160,50 +161,50 @@ export function RichTextEditor({ content, onChange, placeholder = "Nhập nội 
   return (
     <div className="w-full bg-white rounded-2xl border border-gray-200 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all flex flex-col relative z-0">
       <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-100 bg-gray-50 rounded-t-2xl relative z-10">
-        <button
+        <Button
           onClick={() => editor.chain().focus().toggleBold().run()}
           className={`p-1.5 rounded-lg transition-colors ${editor.isActive("bold") ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"}`}
           title="In đậm"
         >
           <Bold className="w-4 h-4" />
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => editor.chain().focus().toggleItalic().run()}
           className={`p-1.5 rounded-lg transition-colors ${editor.isActive("italic") ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"}`}
           title="In nghiêng"
         >
           <Italic className="w-4 h-4" />
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => editor.chain().focus().toggleStrike().run()}
           className={`p-1.5 rounded-lg transition-colors ${editor.isActive("strike") ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"}`}
           title="Gạch ngang"
         >
           <Strikethrough className="w-4 h-4" />
-        </button>
+        </Button>
 
         <div className="w-px h-5 bg-gray-300 mx-1"></div>
 
-        <button
+        <Button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={`p-1.5 rounded-lg transition-colors ${editor.isActive("bulletList") ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"}`}
           title="Danh sách dấu chấm"
         >
           <List className="w-4 h-4" />
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           className={`p-1.5 rounded-lg transition-colors ${editor.isActive("orderedList") ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"}`}
           title="Danh sách số"
         >
           <ListOrdered className="w-4 h-4" />
-        </button>
+        </Button>
 
         <div className="w-px h-5 bg-gray-300 mx-1"></div>
 
         {/* Font Size */}
         <div className="relative">
-          <button
+          <Button
             onClick={() => {
               setShowFontSizes(!showFontSizes);
               setShowColors(false);
@@ -212,11 +213,11 @@ export function RichTextEditor({ content, onChange, placeholder = "Nhập nội 
             title="Cỡ chữ"
           >
             <Type className="w-4 h-4" />
-          </button>
+          </Button>
           {showFontSizes && (
             <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-lg py-2 w-32 flex flex-col z-20">
               {FONT_SIZES.map((size) => (
-                <button
+                <Button
                   key={size.value}
                   onClick={() => {
                     // @ts-ignore
@@ -226,7 +227,7 @@ export function RichTextEditor({ content, onChange, placeholder = "Nhập nội 
                   className="px-4 py-1.5 text-left text-sm hover:bg-gray-50 text-gray-700"
                 >
                   {size.label}
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -234,7 +235,7 @@ export function RichTextEditor({ content, onChange, placeholder = "Nhập nội 
 
         {/* Color */}
         <div className="relative">
-          <button
+          <Button
             onClick={() => {
               setShowColors(!showColors);
               setShowFontSizes(false);
@@ -243,11 +244,11 @@ export function RichTextEditor({ content, onChange, placeholder = "Nhập nội 
             title="Màu chữ"
           >
             <Palette className="w-4 h-4" />
-          </button>
+          </Button>
           {showColors && (
             <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-lg p-2 flex gap-1 z-20">
               {COLORS.map((color) => (
-                <button
+                <Button
                   key={color}
                   onClick={() => {
                     editor.chain().focus().setColor(color).run();

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Volume2, CheckCircle } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
-
+import { Button } from "@/src/components/ui/Button";
 
 interface Round6ReverseQuizProps {
   topicId: string | undefined;
@@ -53,7 +53,7 @@ export function Round6ReverseQuiz({ topicId, currentWord, allLessonWords, isCorr
             }
           }
           return (
-            <button
+            <Button
               key={opt.id}
               onClick={() => handleSelect(opt.term)}
               disabled={isCorrect !== null}
@@ -68,7 +68,7 @@ export function Round6ReverseQuiz({ topicId, currentWord, allLessonWords, isCorr
                   <CheckCircle className="w-6 h-6 opacity-80" />
                 </div>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>

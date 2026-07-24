@@ -1,5 +1,7 @@
 import axiosInstance from "@/src/services/axiosConfig";
 import React, { useState } from "react";
+import { Button } from "@/src/components/ui/Button";
+import { Textarea } from "@/src/components/ui/Textarea";
 
 export function Honeypot() {
     const [message, setMessage] = useState("");
@@ -40,7 +42,7 @@ export function Honeypot() {
 
                 {!success ? (
                     <div className="flex flex-col gap-4">
-                        <textarea
+                        <Textarea
                             className="w-full h-32 p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-gray-800"
                             placeholder="Hãy nhập những góp ý, hoặc báo lỗi bạn tìm thấy tại đây... (nhỏ nhất 5 kí tự)"
                             value={message}
@@ -50,9 +52,9 @@ export function Honeypot() {
                             }}
                         />
                         {error && <p className="text-red-500 font-medium text-sm text-left">{error}</p>}
-                        <button onClick={handleSubmit} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-sm">
+                        <Button onClick={handleSubmit} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-sm">
                             Gửi Góp Ý Yêu Thương
-                        </button>
+                        </Button>
                         <div className="mt-4 pt-4 border-t border-gray-100">
                             <p className="text-sm text-gray-500 mb-3">Hoặc bạn có thể tham gia cộng đồng của chúng tôi để cùng học tập:</p>
                             <a

@@ -1,7 +1,8 @@
 import React from "react";
 import { X, Star } from "lucide-react";
 import { useConfigStore } from "../services/configService";
-import { UserLevelBadge } from "./UserLevelBadge";
+import { UserLevelBadge } from "@/src/components/ui/UserLevelBadge";
+import { Button } from "@/src/components/ui/Button";
 
 interface LevelUpModalProps {
   newLevel: number;
@@ -15,9 +16,9 @@ export function LevelUpModal({ newLevel, onClose }: LevelUpModalProps) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
       <div className="bg-white w-full max-w-sm rounded-3xl p-6 relative flex flex-col items-center text-center shadow-2xl animate-in zoom-in-95 duration-500 spring-bounce">
-        <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-gray-100 text-gray-500 rounded-full hover:bg-gray-200 transition-colors">
+        <Button onClick={onClose} className="absolute top-4 right-4 p-2 bg-gray-100 text-gray-500 rounded-full hover:bg-gray-200 transition-colors">
           <X className="w-5 h-5" />
-        </button>
+        </Button>
 
         <div className="w-24 h-24 rounded-full flex items-center justify-center  mb-6 relative">
           <UserLevelBadge level={newLevel} size="2xl" showText={false} className="z-10 relative drop-shadow-md" />
@@ -38,12 +39,12 @@ export function LevelUpModal({ newLevel, onClose }: LevelUpModalProps) {
           <p className="text-2xl font-extrabold text-orange-600 font-heading relative z-10">{levelData.title}</p>
         </div>
 
-        <button
+        <Button
           onClick={onClose}
           className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-orange-500/25 transition-all active:scale-95"
         >
           Tiếp tục học tập
-        </button>
+        </Button>
       </div>
     </div>
   );

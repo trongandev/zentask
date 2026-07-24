@@ -1,7 +1,6 @@
 import { Flame, Target, Trophy, ChevronRight, Check, X, PanelRightOpen, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
-import { UserAvatar } from "./UserAvatar";
-import { UserLevelBadge } from "./UserLevelBadge";
+import { UserAvatar } from "./ui/UserAvatar";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
@@ -12,6 +11,8 @@ import { useEffect, useState } from "react";
 import { FloatingChat } from "./FloatingChat";
 import { Users } from "lucide-react";
 import { friendsService } from "../services/friendsService";
+import { UserLevelBadge } from "@/src/components/ui/UserLevelBadge";
+import { Button } from "@/src/components/ui/Button";
 
 const getTimeUntilReset = () => {
   const now = new Date();
@@ -184,17 +185,17 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
     <>
       <aside className={cn("w-full bg-white border-l border-gray-100 h-full space-y-6 relative flex flex-col", isOpen ? "p-6 overflow-y-auto" : "p-3 items-center py-6 overflow-visible")}>
         {isOpen ? (
-          <button onClick={onClose} className="absolute top-4 right-4 p-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors z-20">
+          <Button onClick={onClose} className="absolute top-4 right-4 p-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors z-20">
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         ) : (
-          <button onClick={onOpen} className="p-2 mb-4 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors group relative border border-gray-100 shadow-sm">
+          <Button onClick={onOpen} className="p-2 mb-4 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors group relative border border-gray-100 shadow-sm">
             <PanelRightOpen className="w-6 h-6" />
             <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-gray-900 text-white text-xs font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-lg">
               Mở rộng
               <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-4 border-transparent border-l-gray-900"></div>
             </div>
-          </button>
+          </Button>
         )}
 
         {/* Mascot Card */}
@@ -225,9 +226,9 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
             </div>
             <h3 className="font-bold text-gray-900 mb-2">Trải nghiệm đầy đủ</h3>
             <p className="text-xs text-gray-500 mb-4 px-2">Đăng nhập để nhận điểm danh hàng ngày, kết nối bạn bè và làm nhiệm vụ nhận XP!</p>
-            <button onClick={() => (window.location.href = "/auth")} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition-colors text-sm">
+            <Button onClick={() => (window.location.href = "/auth")} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition-colors text-sm">
               Đăng nhập ngay
-            </button>
+            </Button>
           </div>
         )}
 
@@ -257,7 +258,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
 
               {(() => {
                 return (
-                  <button
+                  <Button
                     onClick={async () => {
                       if (isCheckedInToday || checkingIn) return;
                       const res = await checkIn();
@@ -277,7 +278,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                     )}
                   >
                     {checkingIn ? "Đang điểm danh..." : isCheckedInToday ? "Đã điểm danh hôm nay" : "Điểm danh ngay"}
-                  </button>
+                  </Button>
                 );
               })()}
 
@@ -475,7 +476,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
           <div className="bg-purple-50 rounded-2xl border border-purple-100 p-4 shadow-sm mt-4">
             <h3 className="font-bold text-purple-900 mb-2 text-xs uppercase tracking-wider">Dev Tools (Test XP)</h3>
             <div className="flex gap-2">
-              <button
+              <Button
                 onClick={async () => {
                   const res = await useUserStore.getState().gainXp(100, "test");
                   if (res) {
@@ -485,8 +486,8 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                 className="flex-1 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
               >
                 +100 XP
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={async () => {
                   const res = await useUserStore.getState().gainXp(-100, "test");
                   if (res) {
@@ -496,7 +497,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                 className="flex-1 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-xs font-bold transition-colors shadow-sm"
               >
                 -100 XP
-              </button>
+              </Button>
             </div>
           </div>
         )}

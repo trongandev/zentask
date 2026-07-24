@@ -4,6 +4,7 @@ import { BookOpen, CheckCircle, Lock, Play, Star } from "lucide-react";
 import { cn } from "../../lib/utils";
 import axiosInstance from "../../services/axiosConfig";
 import { GRAMMAR_CATEGORIES } from "@/src/data/beginner/grammarData";
+import { Button } from "@/src/components/ui/Button";
 
 export function BeginnerGrammar() {
   const navigate = useNavigate();
@@ -75,12 +76,12 @@ export function BeginnerGrammar() {
             </div>
 
             {firstIncompleteTopic && (
-              <button
+              <Button
                 onClick={() => navigate(`/beginner/grammar/${firstIncompleteTopic}`)}
                 className="bg-white text-blue-600 font-bold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:bg-slate-50 transition-all flex items-center gap-2"
               >
                 Tiếp tục học <Play className="w-5 h-5 fill-current" />
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -127,12 +128,12 @@ export function BeginnerGrammar() {
                           <CheckCircle className="w-6 h-6" />
                         </div>
                       ) : (
-                        <button
+                        <Button
                           onClick={() => navigate(`/beginner/grammar/${topic.id}`)}
                           className="w-10 h-10 bg-blue-100 hover:bg-blue-500 hover:text-white rounded-full flex items-center justify-center text-blue-500 transition-colors"
                         >
                           <Play className="w-5 h-5 ml-1" />
-                        </button>
+                        </Button>
                       )}
                     </div>
 

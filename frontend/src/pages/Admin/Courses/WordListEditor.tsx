@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Plus, X, Trash2, LayoutGrid, List, Edit3, Volume2, GripVertical } from "lucide-react";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 interface Props {
   words: any[];
@@ -70,32 +72,32 @@ export function WordListEditor({ words, setWords, onAddWord }: Props) {
 
         <div className="flex items-center gap-3">
           <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
-            <button
+            <Button
               onClick={() => setViewMode("edit")}
               title="Chế độ sửa"
               className={`p-2 rounded-md flex items-center justify-center transition-colors ${viewMode === "edit" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
             >
               <Edit3 className="w-4 h-4" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setViewMode("table")}
               title="Dạng bảng"
               className={`p-2 rounded-md flex items-center justify-center transition-colors ${viewMode === "table" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
             >
               <List className="w-4 h-4" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setViewMode("grid")}
               title="Dạng thẻ"
               className={`p-2 rounded-md flex items-center justify-center transition-colors ${viewMode === "grid" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"}`}
             >
               <LayoutGrid className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
 
-          <button onClick={onAddWord} className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 text-sm shadow-md transition-colors">
+          <Button onClick={onAddWord} className="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 text-sm shadow-md transition-colors">
             <Plus className="w-4 h-4" /> Thêm từ mới
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -104,17 +106,17 @@ export function WordListEditor({ words, setWords, onAddWord }: Props) {
           words.map((w, idx) => (
             <DraggableWordItem key={w.id || idx} w={w} idx={idx}>
               <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 relative group">
-                <button
+                <Button
                   onClick={() => removeWord(idx)}
                   className="absolute -right-3 -top-3 bg-red-100 text-red-600 hover:bg-red-500 hover:text-white p-2 rounded-full shadow-md transition-colors opacity-0 group-hover:opacity-100 z-10"
                 >
                   <X className="w-4 h-4" />
-                </button>
+                </Button>
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Từ vựng</label>
-                    <input
+                    <Input
                       type="text"
                       value={w.term || ""}
                       onChange={(e) => updateWord(idx, "term", e.target.value)}
@@ -124,7 +126,7 @@ export function WordListEditor({ words, setWords, onAddWord }: Props) {
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Dịch nghĩa</label>
-                    <input
+                    <Input
                       type="text"
                       value={w.translation || ""}
                       onChange={(e) => updateWord(idx, "translation", e.target.value)}
@@ -134,7 +136,7 @@ export function WordListEditor({ words, setWords, onAddWord }: Props) {
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Phiên âm</label>
-                    <input
+                    <Input
                       type="text"
                       value={w.phonetic || ""}
                       onChange={(e) => updateWord(idx, "phonetic", e.target.value)}
@@ -144,7 +146,7 @@ export function WordListEditor({ words, setWords, onAddWord }: Props) {
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Ghi chú</label>
-                    <input
+                    <Input
                       type="text"
                       value={w.notes || ""}
                       onChange={(e) => updateWord(idx, "notes", e.target.value)}
@@ -157,23 +159,23 @@ export function WordListEditor({ words, setWords, onAddWord }: Props) {
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <div className="flex justify-between items-center mb-3">
                     <label className="text-sm font-bold text-slate-700 flex items-center gap-2">Ví dụ ({w.examples?.length || 0})</label>
-                    <button onClick={() => addExample(idx)} className="text-xs font-bold text-blue-600 bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                    <Button onClick={() => addExample(idx)} className="text-xs font-bold text-blue-600 bg-blue-100 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
                       <Plus className="w-3 h-3" /> Thêm ví dụ
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="space-y-2">
                     {(w.examples || []).map((ex: any, exIdx: number) => (
                       <div key={exIdx} className="flex gap-2 items-start relative group/ex">
                         <div className="flex-1 space-y-2">
-                          <input
+                          <Input
                             type="text"
                             value={ex.en || ""}
                             onChange={(e) => updateExample(idx, exIdx, "en", e.target.value)}
                             className="w-full p-2.5 text-sm bg-white border border-slate-200 rounded-lg focus:border-blue-500 outline-none"
                             placeholder="Câu tiếng Anh..."
                           />
-                          <input
+                          <Input
                             type="text"
                             value={ex.vi || ""}
                             onChange={(e) => updateExample(idx, exIdx, "vi", e.target.value)}
@@ -181,12 +183,12 @@ export function WordListEditor({ words, setWords, onAddWord }: Props) {
                             placeholder="Dịch nghĩa..."
                           />
                         </div>
-                        <button
+                        <Button
                           onClick={() => removeExample(idx, exIdx)}
                           className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-1 opacity-0 group-hover/ex:opacity-100"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </Button>
                       </div>
                     ))}
                     {(!w.examples || w.examples.length === 0) && <p className="text-xs text-slate-400 italic text-center py-2">Chưa có ví dụ nào.</p>}
@@ -233,9 +235,9 @@ export function WordListEditor({ words, setWords, onAddWord }: Props) {
                       )}
                     </td>
                     <td className="p-4 align-top text-right">
-                      <button onClick={() => removeWord(idx)} className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg">
+                      <Button onClick={() => removeWord(idx)} className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-lg">
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -248,9 +250,9 @@ export function WordListEditor({ words, setWords, onAddWord }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {words.map((w, idx) => (
               <div key={w.id || idx} className="bg-white border border-slate-200 hover:border-blue-300 hover:shadow-md rounded-2xl p-6 relative group transition-all">
-                <button onClick={() => removeWord(idx)} className="absolute right-3 top-3 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button onClick={() => removeWord(idx)} className="absolute right-3 top-3 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </Button>
                 <div className="text-center mb-4">
                   <h4 className="text-2xl font-black text-slate-800 mb-1">{w.term}</h4>
                   {w.phonetic && <p className="text-sm text-blue-500 font-medium mb-1">{w.phonetic}</p>}
@@ -273,9 +275,9 @@ export function WordListEditor({ words, setWords, onAddWord }: Props) {
         {words.length === 0 && (
           <div className="text-center py-12 text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl">
             <p>Chưa có từ vựng nào.</p>
-            <button onClick={onAddWord} className="text-blue-500 font-bold mt-2 hover:underline">
+            <Button onClick={onAddWord} className="text-blue-500 font-bold mt-2 hover:underline">
               Tạo ngay
-            </button>
+            </Button>
           </div>
         )}
       </div>

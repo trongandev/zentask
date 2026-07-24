@@ -3,6 +3,7 @@ import { adminService } from "../../services/adminService";
 import { format } from "date-fns";
 import { Activity, Search, AlertCircle, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import toastService from "@/src/services/toastService";
+import { Button } from "@/src/components/ui/Button";
 
 interface SystemLog {
   id: string;
@@ -122,9 +123,9 @@ export function SystemLogs() {
                     </td>
                     <td className="p-4 text-sm text-gray-500 font-mono text-xs">{log.ip || "N/A"}</td>
                     <td className="p-4 text-right">
-                      <button onClick={() => setSelectedLog(log)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Xem chi tiết">
+                      <Button onClick={() => setSelectedLog(log)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Xem chi tiết">
                         <Eye className="w-5 h-5" />
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))
@@ -140,20 +141,20 @@ export function SystemLogs() {
               Trang {page} / {totalPages}
             </span>
             <div className="flex gap-2">
-              <button
+              <Button
                 disabled={page === 1}
                 onClick={() => setPage((p) => p - 1)}
                 className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
+              </Button>
+              <Button
                 disabled={page === totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -168,9 +169,9 @@ export function SystemLogs() {
                 <span className={`px-2 py-0.5 text-sm font-bold rounded-md ${getMethodColor(selectedLog.method)}`}>{selectedLog.method}</span>
                 Chi tiết Request
               </h2>
-              <button onClick={() => setSelectedLog(null)} className="text-gray-400 hover:text-red-500 transition-colors font-bold text-2xl leading-none">
+              <Button onClick={() => setSelectedLog(null)} className="text-gray-400 hover:text-red-500 transition-colors font-bold text-2xl leading-none">
                 &times;
-              </button>
+              </Button>
             </div>
 
             <div className="p-6 overflow-y-auto flex-1 space-y-4">
@@ -212,9 +213,9 @@ export function SystemLogs() {
             </div>
 
             <div className="p-4 border-t border-gray-100 bg-gray-50 text-right">
-              <button onClick={() => setSelectedLog(null)} className="px-6 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-sm">
+              <Button onClick={() => setSelectedLog(null)} className="px-6 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-colors shadow-sm">
                 Đóng
-              </button>
+              </Button>
             </div>
           </div>
         </div>

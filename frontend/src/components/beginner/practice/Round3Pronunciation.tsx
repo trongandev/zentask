@@ -3,6 +3,7 @@ import { Volume2, Mic, Loader2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
 import { usePronunciationAssessment, pickWords } from "../../../hooks/usePronunciationAssessment";
+import { Button } from "@/src/components/ui/Button";
 
 interface Round3PronunciationProps {
   currentWord: any;
@@ -32,15 +33,15 @@ export function Round3Pronunciation({ currentWord, isCorrect, setIsCorrect }: Ro
     <div className="space-y-6 animate-in slide-in-from-right">
       <h2 className="text-2xl font-bold text-slate-800 text-center">Nghe và phát âm lại</h2>
       <div className="flex flex-col items-center gap-8 mt-12">
-        <button
+        <Button
           onClick={() => playAudio(currentWord.term, currentWord.langCode)}
           className="w-24 h-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:scale-105 transition-all"
         >
           <Volume2 className="w-12 h-12" />
-        </button>
+        </Button>
         <p className="font-bold text-3xl">{currentWord.term}</p>
 
-        <button
+        <Button
           onClick={status === "recording" ? stopRecording : startRecording}
           disabled={status === "checking" || isCorrect === true}
           className={cn(
@@ -50,7 +51,7 @@ export function Round3Pronunciation({ currentWord, isCorrect, setIsCorrect }: Ro
           )}
         >
           {status === "checking" ? <Loader2 className="w-8 h-8 animate-spin" /> : <Mic className="w-8 h-8" />}
-        </button>
+        </Button>
         <p className="text-sm text-slate-400">{status === "recording" ? "Đang ghi âm... Bấm lần nữa để dừng" : status === "checking" ? "Đang chấm điểm..." : "Bấm vào micro để đọc từ"}</p>
 
         {mainScore !== null && (

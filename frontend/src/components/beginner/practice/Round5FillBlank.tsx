@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Volume2, CheckCircle } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
-
+import { Button } from "@/src/components/ui/Button";
 
 interface Round5FillBlankProps {
   topicId: string | undefined;
@@ -54,12 +54,12 @@ export function Round5FillBlank({ topicId, currentWord, allLessonWords, isCorrec
       <h2 className="text-2xl font-bold text-slate-800 mb-8">Hoàn thành câu</h2>
       
       <div className="bg-white p-8 rounded-3xl border-2 border-slate-100 shadow-sm w-full max-w-lg mb-8">
-        <button
+        <Button
           onClick={() => playAudio(currentWord?.examples?.[0]?.en || currentWord?.term)}
           className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 hover:bg-blue-200 hover:scale-110 transition-all"
         >
           <Volume2 className="w-8 h-8" />
-        </button>
+        </Button>
 
         {sentenceWithBlank.hasExample ? (
           <div className="text-2xl font-medium text-slate-700 leading-relaxed mb-4">
@@ -94,7 +94,7 @@ export function Round5FillBlank({ topicId, currentWord, allLessonWords, isCorrec
           }
 
           return (
-            <button
+            <Button
               key={opt.id}
               onClick={() => handleSelect(opt.term)}
               disabled={isCorrect !== null}
@@ -109,7 +109,7 @@ export function Round5FillBlank({ topicId, currentWord, allLessonWords, isCorrec
                   <CheckCircle className="w-6 h-6 opacity-80" />
                 </div>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>

@@ -7,6 +7,7 @@ import { InteractiveFlashcard } from "../components/landing/InteractiveFlashcard
 import { InteractiveArena } from "../components/landing/InteractiveArena";
 import { InteractiveZaloBot } from "../components/landing/InteractiveZaloBot";
 import { InteractiveExtension } from "../components/landing/InteractiveExtension";
+import { Button } from "@/src/components/ui/Button";
 
 export function LandingPage() {
   const { user } = useAuth();
@@ -30,19 +31,19 @@ export function LandingPage() {
           </Link>
           <div className="flex items-center gap-4">
             {user ? (
-              <button
+              <Button
                 onClick={() => navigate("/dashboard")}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20 transition-all"
               >
                 Vào Dashboard <ChevronRight className="w-4 h-4" />
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 onClick={() => navigate("/auth")}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 hover:shadow-lg transition-all"
               >
                 Đăng nhập
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -67,20 +68,20 @@ export function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button
+            <Button
               onClick={() => navigate(user ? "/dashboard" : "/auth")}
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-blue-600 text-white font-bold text-lg hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
             >
               Bắt đầu miễn phí <ChevronRight className="w-5 h-5" />
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
               }}
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white text-slate-700 border border-slate-200 font-bold text-lg hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
             >
               Khám phá tính năng
-            </button>
+            </Button>
           </div>
 
           <div className="mt-20">
@@ -116,12 +117,12 @@ export function LandingPage() {
             <p className="text-slate-300 font-medium text-lg mb-10 max-w-xl mx-auto relative z-10">
               Gia nhập cộng đồng người học trên Zentask ngay hôm nay để trải nghiệm phương pháp học tập tương lai.
             </p>
-            <button
+            <Button
               onClick={() => navigate(user ? "/dashboard" : "/auth")}
               className="relative z-10 px-8 py-4 rounded-2xl bg-blue-500 text-white font-bold text-lg hover:bg-blue-400 hover:shadow-xl hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2 mx-auto"
             >
               Tạo tài khoản ngay <ChevronRight className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
         </section>
       </main>

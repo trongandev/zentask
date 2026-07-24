@@ -1,7 +1,8 @@
 import React from "react";
 import { Check, Sparkles, Zap } from "lucide-react";
-import { Modal } from "./shared/Modal";
+import { Modal } from "./ui/Modal";
 import { Link } from "react-router-dom";
+import { Button } from "@/src/components/ui/Button";
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -29,9 +30,9 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
             <FeatureItem text="Đăng Community tối đa 2 bài/ngày" />
           </ul>
 
-          <button onClick={onClose} className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-all">
+          <Button onClick={onClose} className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-all">
             Tiếp tục miễn phí
-          </button>
+          </Button>
         </div>
 
         {/* Pro Plan */}
@@ -70,9 +71,9 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
             </ul>
 
             <Link to={"https://zalo.me/g/vappqohaaewiockcc9zc"} target="_blank">
-              <button className="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 cursor-pointer font-black text-lg rounded-2xl shadow-xl shadow-blue-900/40 transition-all active:scale-[0.98] transform hover:-translate-y-0.5">
+              <Button className="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 cursor-pointer font-black text-lg rounded-2xl shadow-xl shadow-blue-900/40 transition-all active:scale-[0.98] transform hover:-translate-y-0.5">
                 Nâng cấp ngay
-              </button>
+              </Button>
             </Link>
           </div>
         </div>

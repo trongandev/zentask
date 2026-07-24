@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { X, Swords } from "lucide-react";
-import { UserAvatar } from "../../../components/UserAvatar";
+import { UserAvatar } from "../../../components/ui/UserAvatar";
+import { Button } from "@/src/components/ui/Button";
 
 interface ArenaChallengeModalProps {
   challenger: {
@@ -46,17 +47,10 @@ export function ArenaChallengeModal({ challenger, onAccept, onDecline }: ArenaCh
 
         {/* Challenger info */}
         <div className="flex flex-col items-center gap-3 mb-6 p-4 rounded-2xl bg-white/5 border border-white/10">
-          <UserAvatar
-            src={challenger.avatar || "/mascot/Lopy (1).png"}
-            level={challenger.level || 1}
-            className="w-20 h-20"
-            disableLink
-          />
+          <UserAvatar src={challenger.avatar || "/mascot/Lopy (1).png"} level={challenger.level || 1} className="w-20 h-20" disableLink />
           <div className="text-center">
             <div className="text-lg font-bold text-white">{challenger.name}</div>
-            {challenger.rankInfo && (
-              <div className="text-sm text-yellow-400/80 font-medium mt-0.5">{challenger.rankInfo}</div>
-            )}
+            {challenger.rankInfo && <div className="text-sm text-yellow-400/80 font-medium mt-0.5">{challenger.rankInfo}</div>}
             {challenger.challengeMode && (
               <div className="text-xs font-bold px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-lg mt-2 inline-block uppercase">
                 {challenger.challengeMode === "solo" ? "Solo 1vs1" : challenger.challengeMode === "team2v2" ? "Đồng đội 2vs2" : challenger.challengeMode}
@@ -68,28 +62,22 @@ export function ArenaChallengeModal({ challenger, onAccept, onDecline }: ArenaCh
         {/* Timer */}
         <div className="text-center mb-5">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-            <div
-              className="w-2 h-2 rounded-full animate-pulse"
-              style={{ backgroundColor: timeLeft > 10 ? "#22c55e" : timeLeft > 5 ? "#eab308" : "#ef4444" }}
-            />
+            <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: timeLeft > 10 ? "#22c55e" : timeLeft > 5 ? "#eab308" : "#ef4444" }} />
             <span className="text-sm font-bold text-gray-300">Tự động từ chối sau {timeLeft}s</span>
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex gap-3">
-          <button
-            onClick={onDecline}
-            className="flex-1 py-3 px-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors"
-          >
+          <Button onClick={onDecline} className="flex-1 py-3 px-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-colors">
             Từ chối
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onAccept}
             className="flex-1 py-3 px-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-black rounded-xl transition-all shadow-lg"
           >
             Chấp nhận
-          </button>
+          </Button>
         </div>
       </div>
     </div>

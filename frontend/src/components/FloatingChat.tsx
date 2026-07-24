@@ -3,8 +3,10 @@ import { X, Send, Minimize2, Maximize2 } from "lucide-react";
 import { friendsService } from "../services/friendsService";
 import { useSocket } from "../contexts/SocketContext";
 import { useAuth } from "../contexts/AuthContext";
-import { UserAvatar } from "./UserAvatar";
+import { UserAvatar } from "./ui/UserAvatar";
 import { cn } from "../lib/utils";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 export function FloatingChat({
   friend,
@@ -109,7 +111,7 @@ export function FloatingChat({
             <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-[6px] border-transparent border-l-gray-900"></div>
           </div>
 
-          <button
+          <Button
             onClick={(e) => {
               e.stopPropagation();
               onClose();
@@ -117,7 +119,7 @@ export function FloatingChat({
             className="absolute -top-1 -left-1 bg-white border border-gray-200 rounded-full p-1 text-gray-500 hover:text-white hover:bg-red-500 transition-colors shadow-sm opacity-0 group-hover:opacity-100 z-40"
           >
             <X className="w-3 h-3" />
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -134,7 +136,7 @@ export function FloatingChat({
           <span className="truncate max-w-[150px]">{friend.displayName}</span>
         </div>
         <div className="flex items-center gap-1">
-          <button
+          <Button
             className="p-1 hover:bg-blue-700 rounded transition-colors"
             onClick={(e) => {
               e.stopPropagation();
@@ -142,8 +144,8 @@ export function FloatingChat({
             }}
           >
             <Minimize2 className="w-4 h-4" />
-          </button>
-          <button
+          </Button>
+          <Button
             className="p-1 hover:bg-blue-700 rounded transition-colors"
             onClick={(e) => {
               e.stopPropagation();
@@ -151,7 +153,7 @@ export function FloatingChat({
             }}
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -167,7 +169,7 @@ export function FloatingChat({
         <div ref={messagesEndRef} />
       </div>
       <div className="p-2 bg-white border-t border-gray-100 flex items-center gap-2">
-        <input
+        <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
@@ -175,9 +177,9 @@ export function FloatingChat({
           autoFocus
           className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm outline-none focus:bg-gray-200 transition-colors"
         />
-        <button onClick={sendMessage} className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
+        <Button onClick={sendMessage} className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
           <Send className="w-5 h-5" />
-        </button>
+        </Button>
       </div>
     </div>
   );

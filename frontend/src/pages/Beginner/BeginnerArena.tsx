@@ -4,13 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSocket } from "../../contexts/SocketContext";
 import axiosInstance from "../../services/axiosConfig";
-import { UserAvatar } from "../../components/UserAvatar";
-import { UserLevelBadge } from "../../components/UserLevelBadge";
+import { UserAvatar } from "../../components/ui/UserAvatar";
+import { UserLevelBadge } from "@/src/components/ui/UserLevelBadge";
 import { ArenaPlayingHUD } from "../Arena/components/ArenaPlayingHUD";
 import { ArenaResult } from "../Arena/components/ArenaResult";
 import { RANK_NAMES } from "../../config/rankTopicConfig";
 import { cn } from "../../lib/utils";
 import { BeginnerArenaLobby } from "./components/BeginnerArenaLobby";
+import { Button } from "@/src/components/ui/Button";
 
 const TIER_NAMES: Record<number, string> = { 1: "I", 2: "II", 3: "III", 4: "IV", 5: "V" };
 
@@ -49,16 +50,19 @@ export function BeginnerArena() {
   }, [roomCode]);
 
   // Clean up on leave
-  const cleanupArenaSession = useCallback((reason: "leave" | "cancel" | "surrender" = "leave") => {
-    if (!socket || isLeavingArenaRef.current) return;
-    if (matchStateRef.current === "searching") socket.emit("cancel_arena_search");
-    if (roomCodeRef.current) socket.emit("arena_leave", { roomCode: roomCodeRef.current, reason });
-  }, [socket]);
+  const cleanupArenaSession = useCallback(
+    (reason: "leave" | "cancel" | "surrender" = "leave") => {
+      if (!socket || isLeavingArenaRef.current) return;
+      if (matchStateRef.current === "searching") socket.emit("cancel_arena_search");
+      if (roomCodeRef.current) socket.emit("arena_leave", { roomCode: roomCodeRef.current, reason });
+    },
+    [socket],
+  );
 
   useEffect(() => {
     return () => {
       if (matchStateRef.current !== "lobby") {
-          cleanupArenaSession("leave");
+        cleanupArenaSession("leave");
       }
       if (prepIntervalRef.current) clearInterval(prepIntervalRef.current);
     };
@@ -67,7 +71,7 @@ export function BeginnerArena() {
   const stopTimer = () => {
     if (timerRef.current) window.clearInterval(timerRef.current);
   };
-  
+
   const startTimer = useCallback(() => {
     stopTimer();
     setTimeLeft(10);
@@ -94,7 +98,7 @@ export function BeginnerArena() {
       setMatchData(data.matchData);
       setOpponent(data.p1.uid === user.uid ? data.p2 : data.p1);
       setMatchState("found");
-      
+
       setPrepCountdown(7);
       let countdown = 7;
       if (prepIntervalRef.current) clearInterval(prepIntervalRef.current);
@@ -109,21 +113,21 @@ export function BeginnerArena() {
     };
 
     socket.on("arena_match_found", onMatchFound);
-    
+
     socket.on("arena_start_match", () => {
       setMatchState("playing");
       startTimer();
     });
 
     socket.on("arena_score_update", (data: any) => {
-        if (data.userScores?.[user.uid] !== undefined) {
-            setUserScore(data.userScores[user.uid]);
-            setHasAnswered(data.userAnswered[user.uid]);
-        }
-        if (opponent && data.userScores?.[opponent.uid] !== undefined) {
-            setOpponentScore(data.userScores[opponent.uid]);
-            setOppAnswered(data.userAnswered[opponent.uid]);
-        }
+      if (data.userScores?.[user.uid] !== undefined) {
+        setUserScore(data.userScores[user.uid]);
+        setHasAnswered(data.userAnswered[user.uid]);
+      }
+      if (opponent && data.userScores?.[opponent.uid] !== undefined) {
+        setOpponentScore(data.userScores[opponent.uid]);
+        setOppAnswered(data.userAnswered[opponent.uid]);
+      }
     });
 
     socket.on("arena_both_answered", () => {
@@ -220,17 +224,17 @@ export function BeginnerArena() {
 
   const handleCloseClick = () => {
     if (matchState === "playing") {
-        const ok = window.confirm("Bạn có chắc muốn thoát không? Nếu thoát, bạn sẽ rời khỏi phòng đấu hạng.");
-        if (ok) {
-            cleanupArenaSession("leave");
-            isLeavingArenaRef.current = true;
-            stopTimer();
-            navigate("/beginner");
-        }
-    } else {
-        cancelSearch();
-        handleReset();
+      const ok = window.confirm("Bạn có chắc muốn thoát không? Nếu thoát, bạn sẽ rời khỏi phòng đấu hạng.");
+      if (ok) {
+        cleanupArenaSession("leave");
+        isLeavingArenaRef.current = true;
+        stopTimer();
         navigate("/beginner");
+      }
+    } else {
+      cancelSearch();
+      handleReset();
+      navigate("/beginner");
     }
   };
 
@@ -246,16 +250,14 @@ export function BeginnerArena() {
   if (matchState === "searching" || matchState === "found") {
     return (
       <div className="fixed inset-0 z-[60] bg-slate-900 flex flex-col items-center justify-center text-white">
-        <h2 className="text-2xl font-black mb-12 animate-pulse text-indigo-300">
-          {matchState === "searching" ? "Đang tìm đối thủ..." : "Đã tìm thấy trận!"}
-        </h2>
+        <h2 className="text-2xl font-black mb-12 animate-pulse text-indigo-300">{matchState === "searching" ? "Đang tìm đối thủ..." : "Đã tìm thấy trận!"}</h2>
 
         <div className="flex items-center gap-8 md:gap-16">
           <div className="flex flex-col items-center">
             <UserAvatar src={user?.photoURL || ""} level={user?.level || 1} className="w-20 h-20 md:w-28 md:h-28" />
             <span className="font-bold mt-4">{user?.displayName}</span>
           </div>
-          
+
           <div className="font-black text-4xl text-red-500 italic">VS</div>
 
           {opponent ? (
@@ -273,10 +275,8 @@ export function BeginnerArena() {
         {matchState === "found" && (
           <div className="mt-16 text-center flex flex-col items-center">
             <p className="text-slate-400 mb-2 font-bold uppercase tracking-widest">Trận đấu bắt đầu sau</p>
-            <div className="text-6xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] mb-8">
-              {prepCountdown}
-            </div>
-            <button
+            <div className="text-6xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] mb-8">{prepCountdown}</div>
+            <Button
               onClick={() => {
                 if (prepIntervalRef.current) clearInterval(prepIntervalRef.current);
                 socket?.emit("arena_ready", { roomCode });
@@ -284,7 +284,7 @@ export function BeginnerArena() {
               className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors shadow-lg shadow-indigo-600/30"
             >
               Bắt đầu ngay
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -295,13 +295,13 @@ export function BeginnerArena() {
     <div className="fixed inset-0 z-[60] bg-slate-900 flex flex-col items-center overflow-y-auto">
       {/* Background */}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-          <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 -right-40 w-96 h-96 bg-red-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 -right-40 w-96 h-96 bg-red-600/20 rounded-full blur-3xl"></div>
       </div>
 
-      <button onClick={handleCloseClick} className="absolute top-4 left-4 text-white/50 hover:text-white bg-white/5 p-3 rounded-full backdrop-blur-sm transition-all z-50">
-          <X className="w-6 h-6" />
-      </button>
+      <Button onClick={handleCloseClick} className="absolute top-4 left-4 text-white/50 hover:text-white bg-white/5 p-3 rounded-full backdrop-blur-sm transition-all z-50">
+        <X className="w-6 h-6" />
+      </Button>
 
       {matchState === "playing" && (
         <ArenaPlayingHUD
@@ -331,7 +331,7 @@ export function BeginnerArena() {
 
       {import.meta.env.VITE_NODE === "development" && matchState === "playing" && (
         <div className="absolute bottom-4 left-4 flex gap-2 z-50">
-          <button
+          <Button
             onClick={async () => {
               stopTimer();
               setMatchState("finished");
@@ -347,8 +347,8 @@ export function BeginnerArena() {
             className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded shadow-lg"
           >
             Thắng ngay
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={async () => {
               stopTimer();
               setMatchState("finished");
@@ -364,19 +364,12 @@ export function BeginnerArena() {
             className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded shadow-lg"
           >
             Thua ngay
-          </button>
+          </Button>
         </div>
       )}
 
       {matchState === "finished" && opponent && (
-        <ArenaResult 
-          user={user} 
-          opponent={opponent} 
-          userScore={userScore} 
-          opponentScore={opponentScore} 
-          rankUpdateStatus={rankUpdateStatus} 
-          onReset={handleReset} 
-        />
+        <ArenaResult user={user} opponent={opponent} userScore={userScore} opponentScore={opponentScore} rankUpdateStatus={rankUpdateStatus} onReset={handleReset} />
       )}
     </div>
   );

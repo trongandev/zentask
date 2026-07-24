@@ -5,7 +5,7 @@ import { DataTable } from "@/src/components/Admin/DataTable";
 import { AdminStatCards } from "@/src/components/Admin/AdminStatCards";
 import { useAdminStore } from "@/src/store/useAdminStore";
 
-import { UserAvatar } from "@/src/components/UserAvatar";
+import { UserAvatar } from "@/src/components/ui/UserAvatar";
 
 export function AdminQuizHistory() {
   const { quizHistory, fetchQuizHistory } = useAdminStore();
@@ -52,7 +52,9 @@ export function AdminQuizHistory() {
         }
         return (
           <div>
-            <p className="font-bold text-gray-900 max-w-[200px] truncate" title={q.title}>{q.title}</p>
+            <p className="font-bold text-gray-900 max-w-[200px] truncate" title={q.title}>
+              {q.title}
+            </p>
             <p className="text-xs text-gray-500">Độ khó: {q.difficulty}</p>
           </div>
         );
@@ -89,9 +91,7 @@ export function AdminQuizHistory() {
   const totalHistory = quizHistory.totalItems || 0;
   const highScores = pageData.items.filter((item: any) => item.score >= 80).length;
   const perfectScores = pageData.items.filter((item: any) => item.score === 100).length;
-  const avgScore = pageData.items.length > 0 
-    ? Math.round(pageData.items.reduce((acc: number, cur: any) => acc + (cur.score || 0), 0) / pageData.items.length)
-    : 0;
+  const avgScore = pageData.items.length > 0 ? Math.round(pageData.items.reduce((acc: number, cur: any) => acc + (cur.score || 0), 0) / pageData.items.length) : 0;
 
   const stats = [
     { title: "Lượt làm bài", value: totalHistory, icon: History, color: "text-blue-600", bg: "bg-blue-50" },

@@ -1,5 +1,6 @@
 import React from "react";
 import { X } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
 
 interface ModalProps {
   isOpen: boolean;
@@ -23,12 +24,12 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
           <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-          <button 
+          <Button 
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
         <div className="p-6 max-h-[80vh] overflow-y-auto">
           {children}

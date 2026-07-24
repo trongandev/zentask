@@ -3,7 +3,7 @@ import { Folder, HelpCircle, Plus, Trash2, GripVertical, Save, Edit2, X, Chevron
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import axiosInstance from "../../../services/axiosConfig";
 import toastService from "../../../services/toastService";
-import { Modal } from "../../../components/shared/Modal";
+import { Modal } from "../../../components/ui/Modal";
 import { LANGUAGE_LEVELS, getDefaultLevels } from "../../../config/languageLevels";
 
 interface Props {
@@ -48,9 +48,9 @@ const DraggableWord = ({ word, onDelete }: any) => {
         <p className="font-bold text-sm text-blue-700 line-clamp-1">{word.term}</p>
         <p className="text-xs font-medium text-slate-600 mt-0.5">{word.translation}</p>
       </div>
-      <button onClick={handleDelete} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
+      <Button onClick={handleDelete} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
         <Trash2 className="w-4 h-4" />
-      </button>
+      </Button>
     </div>
   );
 };
@@ -97,9 +97,9 @@ const DraggableUnassignedLesson = ({ lesson, onDelete, isSelected, onClick, onCo
         </div>
       </div>
 
-      <button onClick={handleDelete} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
+      <Button onClick={handleDelete} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
         <Trash2 className="w-4 h-4" />
-      </button>
+      </Button>
     </div>
   );
 };
@@ -130,15 +130,16 @@ const DraggableQuestion = ({ question, onDelete }: any) => {
         <p className="font-medium text-sm text-slate-800 line-clamp-2">{question.question}</p>
         <p className="text-xs text-slate-400 mt-1">{question.options?.length} lựa chọn</p>
       </div>
-      <button onClick={handleDelete} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
+      <Button onClick={handleDelete} className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity">
         <Trash2 className="w-4 h-4" />
-      </button>
+      </Button>
     </div>
   );
 };
 
 import { useContextMenu } from "../../../hooks/useContextMenu";
 import ModalCreateTopic from "./ModalCreateTopic";
+import { Button } from "@/src/components/ui/Button";
 
 export function ResourceBankPane({ courseId, onOpenLesson }: Props) {
   const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([]);
@@ -298,12 +299,12 @@ export function ResourceBankPane({ courseId, onOpenLesson }: Props) {
 
       <div className="flex-1 overflow-y-auto p-4">
         <div ref={setTopicsRef} className={`min-h-[200px] transition-colors rounded-xl p-2 ${isTopicsOver ? "bg-blue-50 border-2 border-dashed border-blue-300" : ""}`}>
-          <button
+          <Button
             onClick={() => setCreateTopicModalOpen(true)}
             className="w-full mb-4 flex items-center justify-center gap-2 py-2 border-2 border-dashed border-blue-300 text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition-colors"
           >
             <Plus className="w-4 h-4" /> Tạo thêm dữ li
-          </button>
+          </Button>
           {loading ? (
             <p className="text-center text-sm text-slate-400 mt-10">Đang tải...</p>
           ) : unassignedLessons.length === 0 ? (
@@ -335,7 +336,7 @@ export function ResourceBankPane({ courseId, onOpenLesson }: Props) {
         <div className="fixed bg-white border border-slate-200 shadow-xl rounded-lg py-1 w-48 z-50 overflow-hidden" style={{ top: contextMenu.y, left: contextMenu.x }}>
           <div className="px-3 py-2 text-xs font-bold text-slate-400 border-b border-slate-100 uppercase">Thao tác hàng loạt</div>
           {contextMenu.data.type === "multi-topics" && (
-            <button
+            <Button
               className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 flex items-center gap-2 text-red-600"
               onClick={() => {
                 if (window.confirm(`Bạn có chắc chắn muốn xóa ${selectedTopicIds.length} chủ đề đang chọn?`)) {
@@ -346,7 +347,7 @@ export function ResourceBankPane({ courseId, onOpenLesson }: Props) {
               }}
             >
               <Trash2 className="w-4 h-4" /> Xóa {selectedTopicIds.length} chủ đề
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -354,33 +355,27 @@ export function ResourceBankPane({ courseId, onOpenLesson }: Props) {
       {/* MODALS */}
       <Modal isOpen={!!topicToDelete} onClose={() => setTopicToDelete(null)} title="Xác nhận xoá">
         <div className="p-5 flex justify-end gap-2 border-t border-slate-100 mt-2">
-          <button onClick={() => setTopicToDelete(null)} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">
+          <Button onClick={() => setTopicToDelete(null)} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">
             Huỷ
-          </button>
-          <button onClick={executeDeleteTopic} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow">
+          </Button>
+          <Button onClick={executeDeleteTopic} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow">
             Xoá
-          </button>
+          </Button>
         </div>
       </Modal>
 
       <Modal isOpen={!!wordToDelete} onClose={() => setWordToDelete(null)} title="Xác nhận xoá">
         <div className="p-5 flex justify-end gap-2 border-t border-slate-100 mt-2">
-          <button onClick={() => setWordToDelete(null)} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">
+          <Button onClick={() => setWordToDelete(null)} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">
             Huỷ
-          </button>
-          <button onClick={executeDeleteWord} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow">
+          </Button>
+          <Button onClick={executeDeleteWord} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow">
             Xoá
-          </button>
+          </Button>
         </div>
       </Modal>
 
-
-      <ModalCreateTopic
-        isOpen={createTopicModalOpen}
-        onClose={() => setCreateTopicModalOpen(false)}
-        courseId={courseId}
-        onSuccess={() => fetchUnassignedLessons()}
-      />
+      <ModalCreateTopic isOpen={createTopicModalOpen} onClose={() => setCreateTopicModalOpen(false)} courseId={courseId} onSuccess={() => fetchUnassignedLessons()} />
     </div>
   );
 }

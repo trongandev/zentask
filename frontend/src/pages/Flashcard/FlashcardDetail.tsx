@@ -10,7 +10,10 @@ import toastService from "@/src/services/toastService";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { VoiceSelectorModal } from "../../components/practice/VoiceSelectorModal";
 import { getVoiceForLanguage } from "../../lib/ttsVoiceStorage";
-import { Modal } from "../../components/shared/Modal";
+import { Modal } from "../../components/ui/Modal";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
+import { Textarea } from "@/src/components/ui/Textarea";
 
 type ViewMode = "line" | "grid" | "compact";
 
@@ -198,9 +201,9 @@ export function FlashcardDetail() {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Không tìm thấy bộ thẻ</p>
-        <button onClick={() => navigate("/flashcards")} className="mt-4 text-blue-600 font-semibold">
+        <Button onClick={() => navigate("/flashcards")} className="mt-4 text-blue-600 font-semibold">
           Quay lại danh sách
-        </button>
+        </Button>
       </div>
     );
   }
@@ -215,12 +218,12 @@ export function FlashcardDetail() {
     }
     return (
       <div data-popover-root className="relative" onClick={(e) => e.stopPropagation()}>
-        <button onClick={() => setOpenPopoverId(openPopoverId === cardId ? null : cardId)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+        <Button onClick={() => setOpenPopoverId(openPopoverId === cardId ? null : cardId)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
           <MoreVertical className="w-4 h-4" />
-        </button>
+        </Button>
         {openPopoverId === cardId && (
           <div className="absolute right-0 top-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 animate-in fade-in slide-in-from-top-2 duration-150">
-            <button
+            <Button
               onClick={() => {
                 setOpenPopoverId(null);
                 toastService.info("Tính năng chỉnh sửa đang phát triển");
@@ -229,8 +232,8 @@ export function FlashcardDetail() {
             >
               <Pencil className="w-4 h-4 text-blue-500" />
               Chỉnh sửa từ vựng
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 setMemoryModalCardId(cardId);
                 setOpenPopoverId(null);
@@ -239,12 +242,12 @@ export function FlashcardDetail() {
             >
               <Star className="w-4 h-4 text-yellow-500" />
               Thay đổi độ nhớ
-            </button>
+            </Button>
             <div className="my-1 border-t border-gray-100" />
-            <button onClick={() => handleDeleteCard(cardId)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+            <Button onClick={() => handleDeleteCard(cardId)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
               <Trash2 className="w-4 h-4" />
               Xóa từ
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -268,9 +271,9 @@ export function FlashcardDetail() {
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <h3 className="text-xl font-bold text-gray-900">{card.term}</h3>
-            <button onClick={() => handlePlayAudio(card.term)} disabled={isLoading && loadingText === card.term} className="text-gray-400 hover:text-blue-500 transition-colors disabled:opacity-50">
+            <Button onClick={() => handlePlayAudio(card.term)} disabled={isLoading && loadingText === card.term} className="text-gray-400 hover:text-blue-500 transition-colors disabled:opacity-50">
               {isLoading && loadingText === card.term ? <div className="w-5 h-5 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-4 h-4" />}
-            </button>
+            </Button>
           </div>
           {renderPopover(card.id)}
         </div>
@@ -289,13 +292,13 @@ export function FlashcardDetail() {
         {card.examples?.length > 0 ? (
           card.examples.map((ex: any, idx: number) => (
             <div key={idx} className="flex items-start gap-2">
-              <button
+              <Button
                 onClick={() => handlePlayAudio(ex.en)}
                 disabled={isLoading && loadingText === ex.en}
                 className="mt-0.5 text-gray-300 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50"
               >
                 {isLoading && loadingText === ex.en ? <div className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-4 h-4" />}
-              </button>
+              </Button>
               <div>
                 <p className="text-gray-800 font-medium text-sm">{ex.en}</p>
                 <p className="text-gray-500 text-xs">{ex.vi}</p>
@@ -317,13 +320,13 @@ export function FlashcardDetail() {
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <h3 className="text-lg font-bold text-gray-900 truncate">{card.term}</h3>
-            <button
+            <Button
               onClick={() => handlePlayAudio(card.term)}
               disabled={isLoading && loadingText === card.term}
               className="text-gray-400 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50"
             >
               {isLoading && loadingText === card.term ? <div className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-4 h-4" />}
-            </button>
+            </Button>
           </div>
           {renderPopover(card.id)}
         </div>
@@ -333,26 +336,26 @@ export function FlashcardDetail() {
         {renderBadge(card.id)}
 
         {/* Toggle example */}
-        <button
+        <Button
           onClick={() => setExpandedGridCardId(isExpanded ? null : card.id)}
           className="mt-auto flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 font-medium transition-colors self-start"
         >
           {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           {isExpanded ? "Ẩn ví dụ" : "Xem ví dụ"}
-        </button>
+        </Button>
 
         {isExpanded && card.examples?.length > 0 && (
           <div className="pt-3 border-t border-gray-100 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Ví dụ</h4>
             {card.examples.map((ex: any, idx: number) => (
               <div key={idx} className="flex items-start gap-2">
-                <button
+                <Button
                   onClick={() => handlePlayAudio(ex.en)}
                   disabled={isLoading && loadingText === ex.en}
                   className="mt-0.5 text-gray-300 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50"
                 >
                   <Volume2 className="w-3.5 h-3.5" />
-                </button>
+                </Button>
                 <div>
                   <p className="text-gray-800 font-medium text-sm">{ex.en}</p>
                   <p className="text-gray-500 text-xs">{ex.vi}</p>
@@ -368,9 +371,9 @@ export function FlashcardDetail() {
   // COMPACT VIEW (3 per row, minimal)
   const renderCompactCard = (card: any) => (
     <div key={card.id} className="bg-white rounded-xl border border-gray-100 px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
-      <button onClick={() => handlePlayAudio(card.term)} disabled={isLoading && loadingText === card.term} className="text-gray-400 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50">
+      <Button onClick={() => handlePlayAudio(card.term)} disabled={isLoading && loadingText === card.term} className="text-gray-400 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50">
         {isLoading && loadingText === card.term ? <div className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-4 h-4" />}
-      </button>
+      </Button>
       <div className="min-w-0 flex-1">
         <p className="font-bold text-gray-900 text-sm truncate">{card.term}</p>
         <p className="text-blue-600 text-xs truncate">{card.translation}</p>
@@ -383,7 +386,7 @@ export function FlashcardDetail() {
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 relative">
+    <div className="w-full space-y-6 relative">
       {/* Sentinel for sticky header */}
       <div ref={headerSentinelRef} className="absolute top-0 w-full h-px pointer-events-none" />
 
@@ -396,24 +399,24 @@ export function FlashcardDetail() {
           )}
         >
           <div className="flex items-center gap-3 min-w-0">
-            <button onClick={() => navigate(-1)} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors shrink-0">
+            <Button onClick={() => navigate(-1)} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors shrink-0">
               <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </button>
+            </Button>
             <div className="flex flex-col min-w-0">
               <span className="font-bold text-gray-900 text-sm leading-tight truncate">{currentSet.title}</span>
               <span className="text-xs text-gray-500">{currentSet.cardCount} thẻ</span>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button onClick={() => setIsVoiceModalOpen(true)} className="px-3 py-1.5 bg-gray-100 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors hidden sm:block">
+            <Button onClick={() => setIsVoiceModalOpen(true)} className="px-3 py-1.5 bg-gray-100 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors hidden sm:block">
               Đổi giọng
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => navigate(`/flashcard/${id}/practice`)}
               className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-blue-100 transition-colors"
             >
               <Play className="w-4 h-4 fill-current" /> Học
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -421,9 +424,9 @@ export function FlashcardDetail() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+          <Button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
             <ArrowLeft className="w-6 h-6 text-gray-600" />
-          </button>
+          </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{currentSet.title}</h1>
             <p className="text-gray-500">
@@ -431,16 +434,20 @@ export function FlashcardDetail() {
             </p>
           </div>
         </div>
-        <button onClick={() => setIsVoiceModalOpen(true)} className="px-4 py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors">
+        <Button onClick={() => setIsVoiceModalOpen(true)} className="px-4 py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors">
           Thay đổi giọng nói
-        </button>
+        </Button>
       </div>
 
       {/* Action bar */}
       <div className="flex justify-between items-center flex-wrap gap-3 md:gap-0 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-        <button onClick={() => navigate(`/flashcard/${id}/practice`)} className="bg-blue-50 text-blue-600 px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-100 transition-colors">
+        <Button
+          onClick={() => navigate(`/flashcard/${id}/practice`)}
+          disabled={currentSet.cardCount === 0}
+          className="bg-blue-50 text-blue-600 px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-100 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+        >
           <Play className="w-5 h-5 fill-current" /> Học bộ thẻ này
-        </button>
+        </Button>
         <div className="flex items-center gap-2">
           {/* View mode switcher */}
           <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-0.5">
@@ -451,18 +458,18 @@ export function FlashcardDetail() {
                 { key: "compact", icon: <Rows3 className="w-4 h-4" />, title: "Thu gọn" },
               ] as { key: ViewMode; icon: React.ReactNode; title: string }[]
             ).map(({ key, icon, title }) => (
-              <button
+              <Button
                 key={key}
                 title={title}
                 onClick={() => setViewMode(key)}
                 className={cn("p-2 rounded-lg transition-all", viewMode === key ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
               >
                 {icon}
-              </button>
+              </Button>
             ))}
           </div>
           {!isBuiltInSet && (
-            <button
+            <Button
               onClick={() => {
                 setIsModalOpen(true);
                 resetForm();
@@ -470,7 +477,7 @@ export function FlashcardDetail() {
               className="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-800 transition-colors"
             >
               <Plus className="w-5 h-5" /> Thêm từ mới
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -509,10 +516,10 @@ export function FlashcardDetail() {
               </div>
             </div>
             {unknownCards.length > 0 && (
-              <button onClick={() => setOverviewExpanded(!overviewExpanded)} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
+              <Button onClick={() => setOverviewExpanded(!overviewExpanded)} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
                 {overviewExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 {overviewExpanded ? "Ẩn" : `${unknownCards.length} chưa nhớ`}
-              </button>
+              </Button>
             )}
           </div>
           <div className="px-5 pb-4 flex items-center gap-6 text-xs text-gray-500">
@@ -547,7 +554,7 @@ export function FlashcardDetail() {
           <h3 className="text-lg font-bold text-gray-900 mb-2">Chưa có từ vựng nào</h3>
           <p className="text-gray-500 mb-6">{isBuiltInSet ? "Bộ thẻ có sẵn này đang chưa có dữ liệu." : "Hãy thêm những từ vựng đầu tiên vào bộ thẻ này."}</p>
           {!isBuiltInSet && (
-            <button
+            <Button
               onClick={() => {
                 setIsModalOpen(true);
                 resetForm();
@@ -555,7 +562,7 @@ export function FlashcardDetail() {
               className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 mx-auto hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-5 h-5" /> Thêm từ mới
-            </button>
+            </Button>
           )}
         </div>
       ) : viewMode === "line" ? (
@@ -582,9 +589,9 @@ export function FlashcardDetail() {
                       <span className="font-bold text-gray-800">{card.term}</span> — {card.translation}
                     </p>
                   </div>
-                  <button onClick={() => setMemoryModalCardId(null)} className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                  <Button onClick={() => setMemoryModalCardId(null)} className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
                     <X className="w-5 h-5" />
-                  </button>
+                  </Button>
                 </div>
                 <div className="p-6 space-y-3">
                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-4">Chọn mức độ ghi nhớ</p>
@@ -592,7 +599,7 @@ export function FlashcardDetail() {
                     const cfg = MEMORY_CONFIG[level];
                     const isActive = currentLevel === level;
                     return (
-                      <button
+                      <Button
                         key={level}
                         onClick={() => handleManualMemory(level)}
                         className={cn(
@@ -608,7 +615,7 @@ export function FlashcardDetail() {
                           </p>
                         </div>
                         {isActive && <Check className="w-5 h-5 shrink-0" />}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -621,13 +628,13 @@ export function FlashcardDetail() {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Thêm từ mới" className="max-w-2xl">
         <div className="flex border-b border-gray-100">
           {(["ai", "manual"] as const).map((tab) => (
-            <button
+            <Button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn("flex-1 py-3 font-bold text-sm transition-colors", activeTab === tab ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" : "text-gray-500 hover:bg-gray-50")}
             >
               {tab === "ai" ? "Tạo bằng AI" : "Tạo thủ công"}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -635,7 +642,7 @@ export function FlashcardDetail() {
           {activeTab === "ai" ? (
             <div className="space-y-4">
               <p className="text-gray-600 text-sm">Nhập từ vựng tiếng Anh, AI sẽ tự động điền phiên âm, nghĩa tiếng Việt và các ví dụ cụ thể.</p>
-              <input
+              <Input
                 value={term}
                 autoFocus
                 onChange={(e) => setTerm(e.target.value)}
@@ -646,20 +653,20 @@ export function FlashcardDetail() {
                 placeholder="Ví dụ: determine"
                 className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium outline-none focus:border-blue-500 focus:bg-white transition-colors"
               />
-              <button
+              <Button
                 disabled={loading}
                 onClick={handleCreateAI}
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {loading ? "Đang tạo..." : "Tạo bằng AI ✨"}
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1">Tiêu đề (Tiếng Anh)</label>
-                  <input
+                  <Input
                     value={term}
                     onChange={(e) => setTerm(e.target.value)}
                     type="text"
@@ -669,7 +676,7 @@ export function FlashcardDetail() {
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1">Phiên âm</label>
-                  <input
+                  <Input
                     value={phonetic}
                     onChange={(e) => setPhonetic(e.target.value)}
                     type="text"
@@ -680,7 +687,7 @@ export function FlashcardDetail() {
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">Dịch nghĩa (Tiếng Việt)</label>
-                <input
+                <Input
                   value={translation}
                   onChange={(e) => setTranslation(e.target.value)}
                   type="text"
@@ -693,14 +700,14 @@ export function FlashcardDetail() {
                 <div className="space-y-3">
                   {[0, 1, 2].map((idx) => (
                     <div key={idx} className="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-2">
-                      <input
+                      <Input
                         value={examples[idx].en}
                         onChange={(e) => handleExampleChange(idx, "en", e.target.value)}
                         type="text"
                         className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
                         placeholder="Tiếng Anh (ví dụ: Hello there!)"
                       />
-                      <input
+                      <Input
                         value={examples[idx].vi}
                         onChange={(e) => handleExampleChange(idx, "vi", e.target.value)}
                         type="text"
@@ -713,7 +720,7 @@ export function FlashcardDetail() {
               </div>
               <div className="pt-2 border-t border-gray-100">
                 <label className="block text-sm font-bold text-gray-700 mb-1">Ghi chú (Tùy chọn)</label>
-                <textarea
+                <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
@@ -721,13 +728,13 @@ export function FlashcardDetail() {
                   placeholder="Ghi chú thêm về từ này..."
                 />
               </div>
-              <button
+              <Button
                 disabled={loading}
                 onClick={handleCreateManual}
                 className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
               >
                 {loading ? "Đang tạo..." : "Lưu thủ công"}
-              </button>
+              </Button>
             </div>
           )}
         </div>

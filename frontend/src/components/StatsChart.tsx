@@ -3,6 +3,7 @@ import { BarChart3, ChevronRight, ChevronDown } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { useUserStore } from "../services/userService";
 import { useAuth } from "../contexts/AuthContext";
+import { Button } from "@/src/components/ui/Button";
 
 export function StatsChart() {
   const { getStats } = useUserStore();
@@ -43,9 +44,9 @@ export function StatsChart() {
         <BarChart3 className="w-12 h-12 text-gray-300 mb-4" />
         <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Thống kê học tập</h3>
         <p className="text-gray-500 mb-6 text-center text-sm">Vui lòng đăng nhập để xem biểu đồ thống kê thời gian học của bạn trong tuần!</p>
-        <button onClick={() => window.location.href = '/auth'} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
+        <Button onClick={() => window.location.href = '/auth'} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
           Đăng nhập ngay
-        </button>
+        </Button>
       </div>
     );
   }
@@ -68,10 +69,10 @@ export function StatsChart() {
           </div>
           <h3 className="font-bold text-gray-900 text-lg">Thống kê học tập</h3>
         </div>
-        <button className="flex items-center gap-2 text-sm font-medium text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+        <Button className="flex items-center gap-2 text-sm font-medium text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
           7 ngày qua
           <ChevronDown className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
 
       {loading ? (
@@ -141,10 +142,10 @@ export function StatsChart() {
       </div>
 
       <div className="mt-auto">
-        <button className="w-full py-3.5 flex items-center justify-center gap-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors border border-gray-100 hover:border-blue-100">
+        <Button className="w-full py-3.5 flex items-center justify-center gap-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition-colors border border-gray-100 hover:border-blue-100">
           Xem thống kê chi tiết
           <ChevronRight className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );

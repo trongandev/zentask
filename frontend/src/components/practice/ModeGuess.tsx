@@ -4,6 +4,7 @@ import { cn } from "../../lib/utils";
 import { CheckCircle, RotateCw, Lightbulb, Volume2 } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
+import { Button } from "@/src/components/ui/Button";
 
 interface ModeGuessProps {
   cards: Flashcard[];
@@ -196,13 +197,13 @@ export function ModeGuess({ cards, setId, onComplete, completionActions }: ModeG
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Thật thông minh!</h2>
         <p className="text-gray-500 mb-8">Bạn đã đoán đúng tất cả các từ.</p>
-        <button 
+        <Button 
           onClick={() => { setCompleted(false); setCurrentIndex(0); setWrongCardIds([]); wrongCardIdsRef.current = []; }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
         >
           <RotateCw className="w-5 h-5" />
           Chơi lại
-        </button>
+        </Button>
         {completionActions}
       </div>
     );
@@ -265,14 +266,14 @@ export function ModeGuess({ cards, setId, onComplete, completionActions }: ModeG
 
         {/* Translation / Hint toggle */}
         <div className="w-full flex justify-center gap-4">
-          <button
+          <Button
             onClick={() => setShowMeaning(true)}
             disabled={showMeaning}
             className="px-6 py-2 rounded-full border border-gray-200 text-gray-600 font-medium hover:bg-gray-50 disabled:opacity-0 transition-all flex items-center gap-2"
           >
             <Lightbulb className="w-4 h-4 text-yellow-500" />
             Xem nghĩa
-          </button>
+          </Button>
         </div>
         
         {showMeaning && (
@@ -287,7 +288,7 @@ export function ModeGuess({ cards, setId, onComplete, completionActions }: ModeG
       <div className="w-full max-w-2xl bg-gray-50/80 backdrop-blur p-6 rounded-3xl border border-gray-100 shadow-inner">
         <div className="flex flex-wrap justify-center gap-3">
           {options.map((opt) => (
-            <button
+            <Button
               key={opt.id}
               onClick={() => handleOptionClick(opt)}
               disabled={opt.used || status !== "idle"}
@@ -299,19 +300,19 @@ export function ModeGuess({ cards, setId, onComplete, completionActions }: ModeG
               )}
             >
               {opt.char}
-            </button>
+            </Button>
           ))}
         </div>
         
         <div className="mt-8 flex justify-center">
-          <button 
+          <Button 
             onClick={handleHint}
             disabled={status !== "idle"}
             className="flex items-center gap-2 text-blue-600 font-bold bg-blue-50 px-6 py-3 rounded-xl hover:bg-blue-100 transition-colors disabled:opacity-50"
           >
             <Lightbulb className="w-5 h-5" />
             Gợi ý 1 từ
-          </button>
+          </Button>
         </div>
       </div>
     </div>

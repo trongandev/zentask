@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Modal } from "../../../components/shared/Modal";
+import { Modal } from "../../../components/ui/Modal";
 import { ChevronDown, HelpCircle, Plus, RefreshCw, Save, Sparkles } from "lucide-react";
 import axiosInstance from "../../../services/axiosConfig";
 import toastService from "../../../services/toastService";
+import { Button } from "@/src/components/ui/Button";
+import { Select } from "@/src/components/ui/Select";
+import { Textarea } from "@/src/components/ui/Textarea";
+import { Input } from "@/src/components/ui/Input";
 
 const SUPPORTED_LANGS = [
   { id: "en", name: "Tiếng Anh" },
@@ -296,21 +300,21 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Tạo mới Dữ liệu">
       <div className="flex border-b bg-slate-50">
-        <button
+        <Button
           onClick={() => setMainTab("course")}
           className={`flex-1 py-3 font-bold border-b-2 text-sm ${mainTab === "course" ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500"}`}
         >
           Khóa học
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setMainTab("topic")}
           className={`flex-1 py-3 font-bold border-b-2 text-sm ${mainTab === "topic" ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500"}`}
         >
           Chủ đề
-        </button>
-        <button onClick={() => setMainTab("word")} className={`flex-1 py-3 font-bold border-b-2 text-sm ${mainTab === "word" ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500"}`}>
+        </Button>
+        <Button onClick={() => setMainTab("word")} className={`flex-1 py-3 font-bold border-b-2 text-sm ${mainTab === "word" ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500"}`}>
           Từ vựng
-        </button>
+        </Button>
       </div>
 
       <div className="p-5 max-h-[70vh] overflow-y-auto">
@@ -318,7 +322,7 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
           <div className="space-y-4">
             <div className="relative">
               <label className="text-xs font-bold text-slate-500 block mb-1">Chọn Khóa Học</label>
-              <select
+              <Select
                 value={selectedAiCourseId}
                 onChange={(e) => {
                   setSelectedAiCourseId(e.target.value);
@@ -331,30 +335,30 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
                     {c.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div className="flex justify-between items-center bg-slate-100 p-2 rounded-lg">
               <div className="flex gap-2">
-                <button
+                <Button
                   onClick={() => setCourseSubTab("ui")}
                   className={`px-4 py-1.5 text-sm font-medium rounded-md ${courseSubTab === "ui" ? "bg-white shadow text-blue-600" : "text-slate-500 hover:bg-slate-200"}`}
                 >
                   UI
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setCourseSubTab("text")}
                   className={`px-4 py-1.5 text-sm font-medium rounded-md ${courseSubTab === "text" ? "bg-white shadow text-blue-600" : "text-slate-500 hover:bg-slate-200"}`}
                 >
                   Text
-                </button>
+                </Button>
               </div>
-              <button
+              <Button
                 onClick={fetchTree}
                 disabled={isTreeLoading}
                 className="text-sm font-bold flex items-center gap-2 bg-slate-800 text-white px-3 py-1.5 rounded-lg hover:bg-slate-900 transition disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${isTreeLoading ? "animate-spin" : ""}`} /> Lấy cây dữ liệu
-              </button>
+              </Button>
             </div>
 
             {courseSubTab === "ui" && (
@@ -369,7 +373,7 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
                       {rank.tiers?.map((tier: any) => (
                         <div key={tier._id} className="grid grid-cols-[80px_1fr] gap-3 items-start">
                           <div className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1.5 rounded text-center">Tier {tier.tierNum}</div>
-                          <textarea
+                          <Textarea
                             value={tier.topics?.join("; ") || ""}
                             onChange={(e) => handleUpdateUITopic(tier._id, e.target.value)}
                             className="w-full border border-slate-200 rounded-lg p-2 text-sm outline-none focus:border-blue-500 resize-y min-h-[50px]"
@@ -381,20 +385,20 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
                   </div>
                 ))}
                 {courseTree.length > 0 && !courseTree[getSafeIndex()]?.ranks?.some((r: any) => r.tiers?.some((t: any) => t.topics && t.topics.length > 0)) && (
-                  <button
+                  <Button
                     onClick={handleGenerateTextData}
                     disabled={isGeneratingTextData}
                     className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 mb-4"
                   >
                     {isGeneratingTextData ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />} Tạo gợi ý các chủ đề cho từng tier
-                  </button>
+                  </Button>
                 )}
                 {courseTree.length > 0 && courseTree[getSafeIndex()]?.ranks?.some((r: any) => r.tiers?.some((t: any) => t.topics && t.topics.length > 0)) && (
                   <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-4">
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="text-xs font-bold text-slate-500 block mb-1">Số từ vựng/chủ đề</label>
-                        <select
+                        <Select
                           value={wordCountPerTopic}
                           onChange={(e) => setWordCountPerTopic(Number(e.target.value))}
                           className="w-full p-2.5 border rounded-lg bg-white text-sm font-semibold text-slate-700 outline-none"
@@ -404,11 +408,11 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
                               {n} từ vựng
                             </option>
                           ))}
-                        </select>
+                        </Select>
                       </div>
                       <div>
                         <label className="text-xs font-bold text-slate-500 block mb-1">Số câu ví dụ/từ</label>
-                        <select
+                        <Select
                           value={exampleCountPerWord}
                           onChange={(e) => setExampleCountPerWord(Number(e.target.value))}
                           className="w-full p-2.5 border rounded-lg bg-white text-sm font-semibold text-slate-700 outline-none"
@@ -418,30 +422,30 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
                               {n} ví dụ
                             </option>
                           ))}
-                        </select>
+                        </Select>
                       </div>
                     </div>
-                    <button
+                    <Button
                       onClick={handleAIGenerateCourse}
                       disabled={isGeneratingCourse}
                       className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {isGeneratingCourse ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />} Sinh Lộ Trình Từ Vựng
-                    </button>
+                    </Button>
                   </div>
                 )}
                 {courseTree.length > 0 && (
                   <div className="flex gap-2">
-                    <button onClick={syncUIToText} className="flex-1 bg-slate-100 text-slate-600 font-bold py-2.5 rounded-xl hover:bg-slate-200">
+                    <Button onClick={syncUIToText} className="flex-1 bg-slate-100 text-slate-600 font-bold py-2.5 rounded-xl hover:bg-slate-200">
                       Đồng bộ sang Text
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={handleSaveCourse}
                       disabled={isSavingCourse}
                       className="flex-1 bg-blue-600 text-white font-bold py-2.5 rounded-xl hover:bg-blue-700 flex justify-center items-center gap-2 disabled:opacity-50"
                     >
                       <Save className="w-4 h-4" /> Lưu Lộ trình
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -454,14 +458,14 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
                   #TIER|&lt;id&gt; <br />
                   Chủ đề 1; Chủ đề 2; Chủ đề 3
                 </div>
-                <textarea
+                <Textarea
                   value={courseTextData}
                   onChange={(e) => setCourseTextData(e.target.value)}
                   className="w-full h-[400px] border border-slate-200 rounded-xl p-4 outline-none focus:border-blue-500 text-sm font-mono whitespace-pre"
                 />
-                <button onClick={syncTextToUI} className="w-full bg-slate-800 text-white font-bold py-2.5 rounded-xl hover:bg-slate-900">
+                <Button onClick={syncTextToUI} className="w-full bg-slate-800 text-white font-bold py-2.5 rounded-xl hover:bg-slate-900">
                   Đồng bộ Text sang UI
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -469,7 +473,7 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
 
         {mainTab === "topic" && (
           <div className="space-y-4">
-            <textarea
+            <Textarea
               className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500 min-h-[100px] resize-y"
               placeholder="Ví dụ: Động vật; Màu sắc; Gia đình (ngăn cách bằng dấu ;)"
               value={newTopicTitles}
@@ -503,20 +507,20 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-500 block mb-1">Cấp độ</label>
-                <select value={selectedLevel} onChange={(e) => setSelectedLevel(e.target.value)} className="w-full p-2.5 border rounded-lg bg-white text-sm font-semibold text-slate-700">
+                <Select value={selectedLevel} onChange={(e) => setSelectedLevel(e.target.value)} className="w-full p-2.5 border rounded-lg bg-white text-sm font-semibold text-slate-700">
                   {levels.map((lvl: any) => (
                     <option key={lvl.id} value={lvl.id}>
                       {lvl.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-bold text-slate-500 block mb-1">Số từ vựng/chủ đề</label>
-                <select
+                <Select
                   value={wordCountPerTopic}
                   onChange={(e) => setWordCountPerTopic(Number(e.target.value))}
                   className="w-full p-2.5 border rounded-lg bg-white text-sm font-semibold text-slate-700"
@@ -526,11 +530,11 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
                       {n} từ vựng
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
               <div>
                 <label className="text-xs font-bold text-slate-500 block mb-1">Số ví dụ/từ</label>
-                <select
+                <Select
                   value={exampleCountPerWord}
                   onChange={(e) => setExampleCountPerWord(Number(e.target.value))}
                   className="w-full p-2.5 border rounded-lg bg-white text-sm font-semibold text-slate-700"
@@ -540,36 +544,36 @@ export default function ModalCreateTopic({ isOpen, onClose, courseId, onSuccess 
                       {n} ví dụ
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             </div>
 
-            <button
+            <Button
               onClick={executeCreateTopic}
               disabled={isGeneratingTopic}
               className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl hover:bg-blue-700 disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
             >
               {isGeneratingTopic ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Tạo chủ đề
-            </button>
+            </Button>
           </div>
         )}
 
         {mainTab === "word" && (
           <div className="space-y-4">
-            <input type="text" value={newWord.term} onChange={(e) => setNewWord({ ...newWord, term: e.target.value })} placeholder="Từ vựng (vd: Apple)" className="w-full p-3 border rounded-xl" />
-            <input
+            <Input type="text" value={newWord.term} onChange={(e) => setNewWord({ ...newWord, term: e.target.value })} placeholder="Từ vựng (vd: Apple)" className="w-full p-3 border rounded-xl" />
+            <Input
               type="text"
               value={newWord.translation}
               onChange={(e) => setNewWord({ ...newWord, translation: e.target.value })}
               placeholder="Dịch nghĩa (vd: Quả táo)"
               className="w-full p-3 border rounded-xl"
             />
-            <input type="text" value={newWord.phonetic} onChange={(e) => setNewWord({ ...newWord, phonetic: e.target.value })} placeholder="Phiên âm" className="w-full p-3 border rounded-xl" />
-            <input type="text" value={newWord.notes} onChange={(e) => setNewWord({ ...newWord, notes: e.target.value })} placeholder="Ghi chú" className="w-full p-3 border rounded-xl" />
+            <Input type="text" value={newWord.phonetic} onChange={(e) => setNewWord({ ...newWord, phonetic: e.target.value })} placeholder="Phiên âm" className="w-full p-3 border rounded-xl" />
+            <Input type="text" value={newWord.notes} onChange={(e) => setNewWord({ ...newWord, notes: e.target.value })} placeholder="Ghi chú" className="w-full p-3 border rounded-xl" />
 
-            <button onClick={executeCreateWord} disabled={isSavingWord} className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl hover:bg-indigo-700 disabled:opacity-50">
+            <Button onClick={executeCreateWord} disabled={isSavingWord} className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl hover:bg-indigo-700 disabled:opacity-50">
               Tạo từ vựng mới
-            </button>
+            </Button>
           </div>
         )}
       </div>

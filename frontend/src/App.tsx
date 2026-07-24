@@ -87,7 +87,7 @@ function ProtectedRouteLayout() {
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Yêu cầu đăng nhập</h2>
         <p className="text-gray-500 max-w-md mx-auto mb-8 text-sm">Bạn cần đăng nhập để sử dụng tính năng này. Hãy đăng nhập để lưu trữ tiến trình và kết nối với cộng đồng Zentask nhé!</p>
-        <button
+        <Button
           onClick={() => {
             sessionStorage.setItem("redirect_url", location.pathname);
             window.location.href = "/auth";
@@ -95,7 +95,7 @@ function ProtectedRouteLayout() {
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all active:scale-95"
         >
           Đăng nhập ngay
-        </button>
+        </Button>
       </div>
     );
   }
@@ -225,14 +225,14 @@ function MainLayout() {
 
       {/* Mobile Floating Button to open Right Sidebar */}
       {!isPracticePage && !isRightMobileMenuOpen && (
-        <button
+        <Button
           onClick={() => setIsRightMobileMenuOpen(true)}
           className="fixed right-0 top-1/2 -translate-y-1/2 z-[55] lg:hidden bg-white p-2.5 rounded-l-2xl shadow-lg border border-r-0 border-gray-200 text-blue-600 flex flex-col items-center gap-1 opacity-90 hover:opacity-100 transition-opacity"
         >
           <div className="w-1 h-8 bg-blue-100 rounded-full flex flex-col justify-center items-center overflow-hidden">
             <div className="w-full h-1/3 bg-blue-500 rounded-full"></div>
           </div>
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -241,6 +241,7 @@ function MainLayout() {
 import { LandingPage } from "./pages/LandingPage";
 import { BeginnerLessonPractice } from "./pages/Beginner/BeginnerLessonPractice";
 import { AdminCourses } from "./pages/Admin/AdminCourses";
+import { Button } from "@/src/components/ui/Button";
 
 function AppContent() {
   const { user, loading, isIpBanned } = useAuth();

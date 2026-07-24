@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { cn } from "../../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 interface Round4CompleteWordProps {
   currentWord: any;
@@ -164,7 +165,7 @@ export function Round4CompleteWord({ currentWord, isCorrect, onCheckAnswer }: Ro
       {/* Letter Options */}
       <div className="flex flex-wrap justify-center gap-3 w-full max-w-md mx-auto">
         {options.map(opt => (
-          <button
+          <Button
             key={opt.id}
             onClick={() => handleOptionClick(opt)}
             disabled={opt.used || isCorrect !== null}
@@ -176,7 +177,7 @@ export function Round4CompleteWord({ currentWord, isCorrect, onCheckAnswer }: Ro
             )}
           >
             {opt.char}
-          </button>
+          </Button>
         ))}
       </div>
     </div>

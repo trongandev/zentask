@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowRightLeft } from "lucide-react";
+import { Button } from "@/src/components/ui/Button";
 
 export function PassiveVoice() {
   const [isPassive, setIsPassive] = useState(false);
@@ -86,13 +87,13 @@ export function PassiveVoice() {
 
         </div>
 
-        <button 
+        <Button 
           onClick={() => setIsPassive(!isPassive)}
           className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform active:scale-95"
         >
           <ArrowRightLeft className="w-5 h-5" />
           {isPassive ? "Trở về Chủ động (Active)" : "Chuyển sang Bị động (Passive)"}
-        </button>
+        </Button>
 
       </div>
     </div>

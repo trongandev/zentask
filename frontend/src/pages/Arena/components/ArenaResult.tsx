@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { cn } from "../../../lib/utils";
-import { RankCard } from "../../../components/shared/RankCard";
-import { UserAvatar } from "../../../components/UserAvatar";
+import { RankCard } from "../../../components/ui/RankCard";
+import { UserAvatar } from "../../../components/ui/UserAvatar";
+import { Button } from "@/src/components/ui/Button";
 
 interface ArenaResultProps {
   user: any;
@@ -68,15 +69,15 @@ export function ArenaResult({ user, opponent, userScore, opponentScore, rankUpda
       </div>
 
       <div className="mt-8 md:mt-12 flex flex-col md:flex-row gap-4 w-full md:w-auto">
-        <button onClick={() => navigate("/beginner")} className="w-full md:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all text-center">
+        <Button onClick={() => navigate("/beginner")} className="w-full md:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl transition-all text-center">
           Về trang chủ
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onReset}
           className="w-full md:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] text-center"
         >
           Chơi trận khác
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 interface ModalProps {
   isOpen: boolean;
@@ -33,7 +34,7 @@ export function Modal({ isOpen, onClose, children, title, desc, className, hideC
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal Content */}
-      <div className={cn("relative z-10 w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden", className)}>
+      <div className={cn("relative z-10 w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]", className)}>
         {title && (
           <div className="flex items-center justify-between p-5 border-b border-slate-100">
             <div className="flex flex-col gap-1">
@@ -41,18 +42,18 @@ export function Modal({ isOpen, onClose, children, title, desc, className, hideC
               {desc && <p className="text-sm text-slate-500">{desc}</p>}
             </div>
             {!hideCloseButton && (
-              <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+              <Button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             )}
           </div>
         )}
         {!title && !hideCloseButton && (
-          <button onClick={onClose} className="absolute top-4 right-4 z-20 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors bg-white/50 backdrop-blur-sm">
+          <Button onClick={onClose} className="absolute top-4 right-4 z-20 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors bg-white/50 backdrop-blur-sm">
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         )}
-        {children}
+        <div className="overflow-y-auto flex-1">{children}</div>
       </div>
     </div>,
     document.body,

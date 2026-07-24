@@ -2,7 +2,7 @@ import { Hero } from "../components/Hero";
 import { ProgressCard } from "../components/ProgressCard";
 import { StatsChart } from "../components/StatsChart";
 import { Recommendations } from "../components/Recommendations";
-import { RankCard } from "../components/shared/RankCard";
+import { RankCard } from "../components/ui/RankCard";
 import { DueFlashcards } from "../components/dashboard/DueFlashcards";
 import { CalendarCheckin } from "../components/dashboard/CalendarCheckin";
 import { Link } from "react-router-dom";

@@ -4,6 +4,7 @@ import toastService from "../../services/toastService";
 import { useAuth } from "../../contexts/AuthContext";
 import { CheckCircle2 } from "lucide-react";
 import axiosInstance from "@/src/services/axiosConfig";
+import { Button } from "@/src/components/ui/Button";
 
 export function ZaloAuthorize() {
     const { id } = useParams<{ id: string }>();
@@ -44,15 +45,15 @@ export function ZaloAuthorize() {
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Uỷ quyền thành công!</h2>
                     <p className="text-gray-500 mb-6">Tài khoản Zalo của bạn đã được kết nối với hệ thống ZenTask. Bạn có thể quay lại Zalo để tiếp tục.</p>
-                    <button onClick={() => (window.location.href = "zalo://")} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 px-4 rounded-xl transition-colors">
+                    <Button onClick={() => (window.location.href = "zalo://")} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 px-4 rounded-xl transition-colors">
                         Mở Zalo ngay
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => navigate("/")}
                         disabled={loading}
                         className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 px-4 rounded-xl transition-colors mt-5 cursor-pointer">
                         Quay về trang chủ
-                    </button>
+                    </Button>
                 </div>
             </div>
         );
@@ -84,18 +85,18 @@ export function ZaloAuthorize() {
                     </ul>
                 </div>
 
-                <button
+                <Button
                     onClick={handleAuthorize}
                     disabled={loading}
                     className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-90 text-white font-bold py-3.5 px-4 rounded-xl transition-all disabled:opacity-50 mb-3">
                     {loading ? "Đang xử lý..." : "Chấp nhận uỷ quyền"}
-                </button>
-                <button
+                </Button>
+                <Button
                     onClick={() => navigate("/")}
                     disabled={loading}
                     className="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-3.5 px-4 rounded-xl transition-colors">
                     Hủy bỏ
-                </button>
+                </Button>
             </div>
         </div>
     );

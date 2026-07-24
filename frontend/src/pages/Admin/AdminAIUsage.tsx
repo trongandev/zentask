@@ -3,6 +3,7 @@ import { adminService } from "../../services/adminService";
 import { format } from "date-fns";
 import { Activity, ChevronLeft, ChevronRight } from "lucide-react";
 import toastService from "@/src/services/toastService";
+import { Button } from "@/src/components/ui/Button";
 
 interface AIUsage {
   id: string;
@@ -133,12 +134,12 @@ export function AdminAIUsage() {
           <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50">
             <span className="text-sm text-gray-500">Trang {page} / {totalPages}</span>
             <div className="flex gap-2">
-              <button disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50">
+              <Button disabled={page === 1} onClick={() => setPage((p) => p - 1)} className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50">
                 <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button disabled={page === totalPages} onClick={() => setPage((p) => p + 1)} className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50">
+              </Button>
+              <Button disabled={page === totalPages} onClick={() => setPage((p) => p + 1)} className="p-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50">
                 <ChevronRight className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
           </div>
         )}

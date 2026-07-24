@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { adminService } from "../../services/adminService";
 import { Bot, Save, Plus, Trash2, BarChart2, Settings2 } from "lucide-react";
 import toastService from "@/src/services/toastService";
+import { Button } from "@/src/components/ui/Button";
+import { Input } from "@/src/components/ui/Input";
 
 interface TimeDistribution {
   [key: string]: number;
@@ -127,25 +129,25 @@ export default function BotConfigPage() {
           </h1>
           <p className="text-gray-500 mt-1">Điều chỉnh tỷ lệ chính xác và tốc độ phản hồi của Bot khi solo theo Rank</p>
         </div>
-        <button onClick={handleAddDefaultConfigs} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
+        <Button onClick={handleAddDefaultConfigs} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
           <Plus className="w-4 h-4" />
           Thêm Rank còn thiếu
-        </button>
+        </Button>
       </div>
 
       <div className="flex gap-6 border-b border-gray-200">
-        <button
+        <Button
           onClick={() => setActiveTab("config")}
           className={`pb-3 px-2 flex items-center gap-2 font-medium transition-colors ${activeTab === "config" ? "border-b-2 border-indigo-600 text-indigo-600" : "text-gray-500 hover:text-gray-800"}`}
         >
           <Settings2 className="w-4 h-4" /> Cấu hình
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => setActiveTab("visual")}
           className={`pb-3 px-2 flex items-center gap-2 font-medium transition-colors ${activeTab === "visual" ? "border-b-2 border-indigo-600 text-indigo-600" : "text-gray-500 hover:text-gray-800"}`}
         >
           <BarChart2 className="w-4 h-4" /> Trực quan hóa
-        </button>
+        </Button>
       </div>
 
       {configs.length === 0 ? (
@@ -158,7 +160,7 @@ export default function BotConfigPage() {
                 <div className="flex items-center gap-4">
                   <img src={`/rank/${config.rankId}.png`} alt={`Rank ${config.rankId}`} className="w-10 h-10 object-contain drop-shadow-sm" onError={(e) => (e.currentTarget.style.display = "none")} />
                   <span className="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-sm">Rank ID: {config.rankId}</span>
-                  <input
+                  <Input
                     type="text"
                     value={config.rankName}
                     onChange={(e) => handleChange(idx, "rankName", e.target.value)}
@@ -168,14 +170,14 @@ export default function BotConfigPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   {config.id && (
-                    <button onClick={() => handleDelete(config.id as string)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
+                    <Button onClick={() => handleDelete(config.id as string)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Xóa">
                       <Trash2 className="w-5 h-5" />
-                    </button>
+                    </Button>
                   )}
-                  <button onClick={() => handleSave(config)} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors">
+                  <Button onClick={() => handleSave(config)} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors">
                     <Save className="w-4 h-4" />
                     Lưu Rank này
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -186,7 +188,7 @@ export default function BotConfigPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tỷ lệ trả lời ĐÚNG (%)</label>
-                    <input
+                    <Input
                       type="number"
                       value={config.correctRate}
                       onChange={(e) => handleChange(idx, "correctRate", Number(e.target.value))}
@@ -198,7 +200,7 @@ export default function BotConfigPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tỷ lệ phản hồi nhanh {"<="} 10 giây (%)</label>
-                    <input
+                    <Input
                       type="number"
                       value={config.fastResponseRate}
                       onChange={(e) => handleChange(idx, "fastResponseRate", Number(e.target.value))}
@@ -210,7 +212,7 @@ export default function BotConfigPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tỷ lệ phản hồi chậm {">"} 10 giây (%)</label>
-                    <input
+                    <Input
                       type="number"
                       value={config.slowResponseRate}
                       onChange={(e) => handleChange(idx, "slowResponseRate", Number(e.target.value))}
@@ -233,7 +235,7 @@ export default function BotConfigPage() {
                       <div key={sec} className="flex items-center gap-2">
                         <label className="w-20 text-sm text-gray-600">Giây {sec}:</label>
                         <div className="relative flex-1">
-                          <input
+                          <Input
                             type="number"
                             value={config.timeDistribution?.[String(sec)] || 0}
                             onChange={(e) => handleTimeDistChange(idx, String(sec), Number(e.target.value))}

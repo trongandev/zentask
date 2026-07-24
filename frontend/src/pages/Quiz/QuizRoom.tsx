@@ -5,6 +5,7 @@ import { useSocket } from "../../contexts/SocketContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useQuizStore, QuizRoom as QuizRoomType, Quiz } from "../../services/quizService";
 import toastService from "@/src/services/toastService";
+import { Button } from "@/src/components/ui/Button";
 
 interface ParticipantProgress {
   uid: string;
@@ -226,9 +227,9 @@ export function QuizRoom() {
               </div>
               <div className="text-sm font-bold text-gray-500 uppercase">Đã hoàn thành</div>
             </div>
-            <button onClick={handleEndQuiz} className="px-6 py-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-2xl font-bold flex items-center gap-2 transition-colors shadow-sm">
+            <Button onClick={handleEndQuiz} className="px-6 py-3 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-2xl font-bold flex items-center gap-2 transition-colors shadow-sm">
               <LogOut className="w-5 h-5" /> Kết thúc chơi
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -297,20 +298,20 @@ export function QuizRoom() {
         <p className="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wider">Mã phòng tham gia</p>
         <div className="flex items-center justify-center gap-4 mb-8">
           <div className="text-5xl md:text-7xl font-black text-gray-900 tracking-[0.2em] font-mono">{code}</div>
-          <button onClick={copyCode} className="p-3 bg-gray-50 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-xl transition-colors" title="Copy mã phòng">
+          <Button onClick={copyCode} className="p-3 bg-gray-50 hover:bg-blue-50 text-gray-400 hover:text-blue-600 rounded-xl transition-colors" title="Copy mã phòng">
             {copied ? <Check className="w-6 h-6 text-green-500" /> : <Copy className="w-6 h-6" />}
-          </button>
+          </Button>
         </div>
 
         {isCreator ? (
           <div className="space-y-4">
-            <button
+            <Button
               onClick={handleStart}
               className="px-12 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 mx-auto text-lg"
             >
               <Play className="w-6 h-6 fill-current" />
               Bắt đầu bài thi
-            </button>
+            </Button>
             <p className="text-sm text-gray-500">Học viên sẽ không thể vào thi sau khi bạn bấm Bắt đầu.</p>
           </div>
         ) : (
@@ -328,12 +329,12 @@ export function QuizRoom() {
           Người tham gia ({participantList.length})
         </h3>
         {!isCreator && (
-          <button
+          <Button
             onClick={handleExit}
             className="text-red-500 hover:bg-red-50 px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-colors text-sm border border-transparent hover:border-red-100"
           >
             <LogOut className="w-4 h-4" /> Thoát phòng
-          </button>
+          </Button>
         )}
       </div>
 
@@ -349,13 +350,13 @@ export function QuizRoom() {
             </div>
 
             {isCreator && p.uid !== user?.uid && (
-              <button
+              <Button
                 onClick={() => handleKick(p.uid)}
                 title="Mời ra khỏi phòng"
                 className="absolute -top-2 -right-2 w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all shadow-sm"
               >
                 <X className="w-4 h-4" />
-              </button>
+              </Button>
             )}
           </div>
         ))}

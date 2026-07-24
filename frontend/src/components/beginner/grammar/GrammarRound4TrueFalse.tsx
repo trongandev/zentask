@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Check, X } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { Button } from "@/src/components/ui/Button";
 
 interface GrammarRound4TrueFalseProps {
   topicId: string;
@@ -29,7 +30,7 @@ export function GrammarRound4TrueFalse({ topicId, isCorrect, setIsCorrect, data 
       </div>
 
       <div className="grid grid-cols-2 gap-4 w-full max-w-lg">
-        <button
+        <Button
           onClick={() => handleSelect(true)}
           disabled={isCorrect !== null}
           className={cn(
@@ -45,8 +46,8 @@ export function GrammarRound4TrueFalse({ topicId, isCorrect, setIsCorrect, data 
             <Check className="w-6 h-6" />
           </div>
           Đúng
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => handleSelect(false)}
           disabled={isCorrect !== null}
           className={cn(
@@ -62,7 +63,7 @@ export function GrammarRound4TrueFalse({ topicId, isCorrect, setIsCorrect, data 
             <X className="w-6 h-6" />
           </div>
           Sai
-        </button>
+        </Button>
       </div>
     </div>
   );

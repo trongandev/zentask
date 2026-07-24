@@ -17,6 +17,7 @@ import { Round7WordBuilder } from "../../components/beginner/practice/Round7Word
 import { RoundPlaceholder } from "../../components/beginner/practice/RoundPlaceholders";
 import axiosInstance from "@/src/services/axiosConfig";
 import { useUserStore } from "@/src/services/userService";
+import { Button } from "@/src/components/ui/Button";
 
 type RoundType = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
@@ -241,9 +242,9 @@ export function BeginnerLessonPractice() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <h2 className="text-2xl font-bold mb-4">Tuyệt vời, bạn đã biết hết các từ này!</h2>
-        <button onClick={finishLesson} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold">
+        <Button onClick={finishLesson} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold">
           {isSubmitting ? "Đang lưu..." : "Hoàn thành bài học"}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -259,9 +260,9 @@ export function BeginnerLessonPractice() {
     <div className="max-w-xl mx-auto w-full pt-8 px-4 flex flex-col min-h-[80vh]">
       {/* Progress Bar */}
       <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate("/beginner")} className="text-slate-400 hover:text-slate-700">
+        <Button onClick={() => navigate("/beginner")} className="text-slate-400 hover:text-slate-700">
           <X className="w-6 h-6" />
-        </button>
+        </Button>
         <div className="flex-1 bg-slate-200 h-4 rounded-full overflow-hidden">
           <div
             className="bg-blue-500 h-full transition-all duration-300"
@@ -337,12 +338,12 @@ export function BeginnerLessonPractice() {
         <div className="max-w-xl mx-auto flex items-center justify-between">
           {activeRound === 1 ? (
             <>
-              <button onClick={handleKnowWord} className="font-bold text-slate-500 px-6 py-3 hover:bg-slate-100 rounded-2xl">
+              <Button onClick={handleKnowWord} className="font-bold text-slate-500 px-6 py-3 hover:bg-slate-100 rounded-2xl">
                 Tôi đã biết từ này
-              </button>
-              <button onClick={nextStep} className="font-bold text-white bg-blue-500 hover:bg-blue-600 px-8 py-3 rounded-2xl flex items-center gap-2">
+              </Button>
+              <Button onClick={nextStep} className="font-bold text-white bg-blue-500 hover:bg-blue-600 px-8 py-3 rounded-2xl flex items-center gap-2">
                 Tiếp tục <ArrowRight className="w-5 h-5" />
-              </button>
+              </Button>
             </>
           ) : (
             <div
@@ -365,7 +366,7 @@ export function BeginnerLessonPractice() {
               </div>
               <div className="flex items-center gap-3">
                 {isCorrect === null && (
-                  <button
+                  <Button
                     onClick={skipStep}
                     disabled={skipCount >= 5}
                     className={cn(
@@ -374,9 +375,9 @@ export function BeginnerLessonPractice() {
                     )}
                   >
                     Bỏ qua {skipCount < 5 ? `(${5 - skipCount})` : "(Hết lượt)"}
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button
                   onClick={nextStep}
                   className={cn(
                     "font-bold px-8 py-3 rounded-2xl flex items-center gap-2",
@@ -384,7 +385,7 @@ export function BeginnerLessonPractice() {
                   )}
                 >
                   {isCorrect === null ? "Kiểm tra" : "Tiếp tục"}
-                </button>
+                </Button>
               </div>
             </div>
           )}

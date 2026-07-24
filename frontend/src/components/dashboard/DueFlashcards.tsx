@@ -4,6 +4,7 @@ import { useFlashcardStore } from "../../services/flashcardService";
 import { useNavigate } from "react-router-dom";
 import { cn } from "../../lib/utils";
 import { useAuth } from "@/src/contexts/AuthContext";
+import { Button } from "@/src/components/ui/Button";
 
 export function DueFlashcards() {
   const { getDueCards } = useFlashcardStore();
@@ -32,9 +33,9 @@ export function DueFlashcards() {
         <Clock className="w-12 h-12 text-gray-300 mb-4" />
         <h3 className="text-xl font-bold text-gray-900 mb-2 text-center">Từ vựng cần ôn tập</h3>
         <p className="text-gray-500 mb-6 text-center text-sm">Vui lòng đăng nhập để lưu trữ và ôn tập từ vựng của riêng bạn!</p>
-        <button onClick={() => (window.location.href = "/auth")} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
+        <Button onClick={() => (window.location.href = "/auth")} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors">
           Đăng nhập ngay
-        </button>
+        </Button>
       </div>
     );
   }
@@ -76,7 +77,7 @@ export function DueFlashcards() {
             <div
               key={card.id}
               className="group p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-colors flex items-center justify-between cursor-pointer"
-              onClick={() => navigate(`/flashcard/practice/${card.progress.setId}`)}
+              onClick={() => navigate(`/flashcard/${card.progress.setId}/practice`)}
             >
               <div>
                 <h4 className="font-bold text-gray-900 text-base">{card.term}</h4>
@@ -89,7 +90,7 @@ export function DueFlashcards() {
       </div>
 
       <div className="mt-auto pt-4 border-t border-gray-100">
-        <button
+        <Button
           onClick={() => navigate("/flashcards")}
           className={cn(
             "w-full py-3.5 flex items-center justify-center gap-2 text-sm font-bold rounded-xl transition-all",
@@ -98,7 +99,7 @@ export function DueFlashcards() {
         >
           {cards.length > 0 ? "Ôn tập ngay" : "Đi tới bộ thẻ của bạn"}
           <ChevronRight className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );

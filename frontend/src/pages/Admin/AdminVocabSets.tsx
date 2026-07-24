@@ -4,8 +4,9 @@ import { adminService } from "@/src/services/adminService";
 import { DataTable } from "@/src/components/Admin/DataTable";
 import { AdminStatCards } from "@/src/components/Admin/AdminStatCards";
 import { useAdminStore } from "@/src/store/useAdminStore";
-import { UserAvatar } from "@/src/components/UserAvatar";
+import { UserAvatar } from "@/src/components/ui/UserAvatar";
 import { Link } from "react-router-dom";
+import { Button } from "@/src/components/ui/Button";
 
 export function AdminVocabSets() {
   const { vocabSets, fetchVocabSets } = useAdminStore();
@@ -78,9 +79,9 @@ export function AdminVocabSets() {
       header: "Thao tác",
       align: "right" as const,
       render: (item: any) => (
-        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors inline-block">
+        <Button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors inline-block">
           <Trash2 className="w-5 h-5" />
-        </button>
+        </Button>
       ),
     },
   ];
