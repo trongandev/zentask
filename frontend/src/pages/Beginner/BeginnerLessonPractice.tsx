@@ -253,7 +253,11 @@ export function BeginnerLessonPractice() {
     if (isCorrect !== null) return;
     setIsCorrect(correct);
     if (currentWord) {
-      playAudio(currentWord.term, undefined, correct ? "correct" : "wrong");
+      let targetText = currentWord.term;
+      if (activeRound === 7) {
+        targetText = (currentWord.examples?.[0]?.en || currentWord.example?.[0]?.en || currentWord.term).trim();
+      }
+      playAudio(targetText, undefined, correct ? "correct" : "wrong");
     }
   };
   return (
@@ -276,10 +280,11 @@ export function BeginnerLessonPractice() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col justify-center pb-24">
-        {activeRound === 1 && <Round1Listen currentWord={currentWord} />}
+        {activeRound === 1 && <Round1Listen key={currentWord?.id} currentWord={currentWord} />}
 
         {activeRound === 2 && (
           <Round2ChooseMeaning
+            key={currentWord?.id}
             topicId={topicId}
             currentWord={currentWord}
             allLessonWords={words}
@@ -291,12 +296,13 @@ export function BeginnerLessonPractice() {
           />
         )}
 
-        {activeRound === 3 && <Round3Pronunciation currentWord={currentWord} isCorrect={isCorrect} setIsCorrect={setIsCorrect} />}
+        {activeRound === 3 && <Round3Pronunciation key={currentWord?.id} currentWord={currentWord} isCorrect={isCorrect} setIsCorrect={setIsCorrect} />}
 
-        {activeRound === 4 && <Round4CompleteWord currentWord={currentWord} isCorrect={isCorrect} onCheckAnswer={checkAnswer} />}
+        {activeRound === 4 && <Round4CompleteWord key={currentWord?.id} currentWord={currentWord} isCorrect={isCorrect} onCheckAnswer={checkAnswer} />}
 
         {activeRound === 5 && (
           <Round5FillBlank
+            key={currentWord?.id}
             topicId={topicId}
             currentWord={currentWord}
             allLessonWords={words}
@@ -310,6 +316,7 @@ export function BeginnerLessonPractice() {
 
         {activeRound === 6 && (
           <Round6ReverseQuiz
+            key={currentWord?.id}
             topicId={topicId}
             currentWord={currentWord}
             allLessonWords={words}
@@ -323,6 +330,7 @@ export function BeginnerLessonPractice() {
 
         {activeRound === 7 && (
           <Round7WordBuilder
+            key={currentWord?.id}
             currentWord={currentWord}
             isCorrect={isCorrect}
             onCheckAnswer={(answer, correct) => {

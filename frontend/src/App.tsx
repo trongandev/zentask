@@ -3,70 +3,122 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation, Link } from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
-import { Dashboard } from "./pages/Dashboard";
-import { Flashcards } from "./pages/Flashcard/Flashcards";
-import { FlashcardDetail } from "./pages/Flashcard/FlashcardDetail";
-import { FlashcardPractice } from "./pages/Flashcard/FlashcardPractice";
-import { Quiz } from "./pages/Quiz/Quiz";
-import { QuizDetail } from "./pages/Quiz/QuizDetail";
 
-import { Profile } from "./pages/Profile";
-import { Leaderboard } from "./pages/Leaderboard";
-import { Community } from "./pages/Community";
-import { Settings } from "./pages/Settings";
-import { Notifications } from "./pages/Notifications";
-import { Auth } from "./pages/Auth";
-import { Arena } from "./pages/Arena/Arena";
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { AdminLayout } from "./components/AdminLayout";
 import { BeginnerLayout } from "./components/BeginnerLayout";
-import { AdminDashboard } from "./pages/Admin/AdminDashboard";
-import { AdminTasks } from "./pages/Admin/AdminTasks";
-import { AdminUsers } from "./pages/Admin/AdminUsers";
-import { AdminVocabSets } from "./pages/Admin/AdminVocabSets";
-import { AdminVocab } from "./pages/Admin/AdminVocab";
-import { AdminQuizzes } from "./pages/Admin/AdminQuizzes";
-import { AdminQuizHistory } from "./pages/Admin/AdminQuizHistory";
-import { AdminCommunityPosts } from "./pages/Admin/AdminCommunityPosts";
-import { AdminBannedIPs } from "./pages/Admin/AdminBannedIPs";
+
+
+
+
+
+
+
+
+
 import { Honeypot } from "./components/Honeypot";
-import { PrivacyPolicy } from "./pages/PrivacyPolicy";
-import { TermsOfService } from "./pages/TermsOfService";
+
+
 import { useAuth } from "./contexts/AuthContext";
 import { SocketProvider } from "./contexts/SocketContext";
-import AIChat from "./pages/AIChat";
-import Notebook from "./pages/Notebook";
-import Utilities from "./pages/Utilities";
 
-import { Posts } from "./pages/Posts";
-import { PostDetail } from "./pages/PostDetail";
+
+
+
+
+
 import { RightSidebar } from "./components/RightSidebar";
 import { LevelUpModal } from "./components/LevelUpModal";
 import { useUserStore } from "./services/userService";
-import { Beginner } from "./pages/Beginner/Beginner";
-import { BeginnerGrammar } from "./pages/Beginner/BeginnerGrammar";
-import { BeginnerGrammarLesson } from "./pages/Beginner/BeginnerGrammarLesson";
-import { BeginnerSkills } from "./pages/Beginner/BeginnerSkills";
-import { BeginnerRank } from "./pages/Beginner/BeginnerRank";
-import { BeginnerArena } from "./pages/Beginner/BeginnerArena";
-import { BeginnerFlashcardDetail } from "./pages/Flashcard/BeginnerFlashcardDetail";
-import { QuizCreate } from "./pages/Quiz/QuizCreate";
-import { QuizRoom } from "./pages/Quiz/QuizRoom";
-import { QuizPlay } from "./pages/Quiz/QuizPlay";
-import { QuizResult } from "./pages/Quiz/QuizResult";
 
-import Friends from "./pages/Friends";
-import SkillPracticeRoom from "./pages/SkillPracticeRoom";
-import BotConfigPage from "./pages/Admin/BotConfigPage";
-import { SystemLogs } from "./pages/Admin/SystemLogs";
-import { AdminAIUsage } from "./pages/Admin/AdminAIUsage";
-import { AdminBotJobs } from "./pages/Admin/AdminBotJobs";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
-import { ZaloGo } from "./pages/ZaloAuth/ZaloGo";
-import { ZaloAuthorize } from "./pages/ZaloAuth/ZaloAuthorize";
+
+
+
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const Flashcards = lazy(() => import('./pages/Flashcard/Flashcards').then(m => ({ default: m.Flashcards })));
+const FlashcardDetail = lazy(() => import('./pages/Flashcard/FlashcardDetail').then(m => ({ default: m.FlashcardDetail })));
+const FlashcardPractice = lazy(() => import('./pages/Flashcard/FlashcardPractice').then(m => ({ default: m.FlashcardPractice })));
+const Quiz = lazy(() => import('./pages/Quiz/Quiz').then(m => ({ default: m.Quiz })));
+const QuizDetail = lazy(() => import('./pages/Quiz/QuizDetail').then(m => ({ default: m.QuizDetail })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const Leaderboard = lazy(() => import('./pages/Leaderboard').then(m => ({ default: m.Leaderboard })));
+const Community = lazy(() => import('./pages/Community').then(m => ({ default: m.Community })));
+const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
+const Notifications = lazy(() => import('./pages/Notifications').then(m => ({ default: m.Notifications })));
+const Auth = lazy(() => import('./pages/Auth').then(m => ({ default: m.Auth })));
+const Arena = lazy(() => import('./pages/Arena/Arena').then(m => ({ default: m.Arena })));
+const AdminDashboard = lazy(() => import('./pages/Admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const AdminTasks = lazy(() => import('./pages/Admin/AdminTasks').then(m => ({ default: m.AdminTasks })));
+const AdminUsers = lazy(() => import('./pages/Admin/AdminUsers').then(m => ({ default: m.AdminUsers })));
+const AdminVocabSets = lazy(() => import('./pages/Admin/AdminVocabSets').then(m => ({ default: m.AdminVocabSets })));
+const AdminVocab = lazy(() => import('./pages/Admin/AdminVocab').then(m => ({ default: m.AdminVocab })));
+const AdminQuizzes = lazy(() => import('./pages/Admin/AdminQuizzes').then(m => ({ default: m.AdminQuizzes })));
+const AdminQuizHistory = lazy(() => import('./pages/Admin/AdminQuizHistory').then(m => ({ default: m.AdminQuizHistory })));
+const AdminCommunityPosts = lazy(() => import('./pages/Admin/AdminCommunityPosts').then(m => ({ default: m.AdminCommunityPosts })));
+const AdminBannedIPs = lazy(() => import('./pages/Admin/AdminBannedIPs').then(m => ({ default: m.AdminBannedIPs })));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
+const TermsOfService = lazy(() => import('./pages/TermsOfService').then(m => ({ default: m.TermsOfService })));
+const Posts = lazy(() => import('./pages/Posts').then(m => ({ default: m.Posts })));
+const PostDetail = lazy(() => import('./pages/PostDetail').then(m => ({ default: m.PostDetail })));
+const Beginner = lazy(() => import('./pages/Beginner/Beginner').then(m => ({ default: m.Beginner })));
+const BeginnerGrammar = lazy(() => import('./pages/Beginner/BeginnerGrammar').then(m => ({ default: m.BeginnerGrammar })));
+const BeginnerGrammarLesson = lazy(() => import('./pages/Beginner/BeginnerGrammarLesson').then(m => ({ default: m.BeginnerGrammarLesson })));
+const BeginnerSkills = lazy(() => import('./pages/Beginner/BeginnerSkills').then(m => ({ default: m.BeginnerSkills })));
+const BeginnerRank = lazy(() => import('./pages/Beginner/BeginnerRank').then(m => ({ default: m.BeginnerRank })));
+const BeginnerArena = lazy(() => import('./pages/Beginner/BeginnerArena').then(m => ({ default: m.BeginnerArena })));
+const BeginnerFlashcardDetail = lazy(() => import('./pages/Flashcard/BeginnerFlashcardDetail').then(m => ({ default: m.BeginnerFlashcardDetail })));
+const QuizCreate = lazy(() => import('./pages/Quiz/QuizCreate').then(m => ({ default: m.QuizCreate })));
+const QuizRoom = lazy(() => import('./pages/Quiz/QuizRoom').then(m => ({ default: m.QuizRoom })));
+const QuizPlay = lazy(() => import('./pages/Quiz/QuizPlay').then(m => ({ default: m.QuizPlay })));
+const QuizResult = lazy(() => import('./pages/Quiz/QuizResult').then(m => ({ default: m.QuizResult })));
+const SystemLogs = lazy(() => import('./pages/Admin/SystemLogs').then(m => ({ default: m.SystemLogs })));
+const AdminAIUsage = lazy(() => import('./pages/Admin/AdminAIUsage').then(m => ({ default: m.AdminAIUsage })));
+const AdminBotJobs = lazy(() => import('./pages/Admin/AdminBotJobs').then(m => ({ default: m.AdminBotJobs })));
+const ZaloGo = lazy(() => import('./pages/ZaloAuth/ZaloGo').then(m => ({ default: m.ZaloGo })));
+const ZaloAuthorize = lazy(() => import('./pages/ZaloAuth/ZaloAuthorize').then(m => ({ default: m.ZaloAuthorize })));
+const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
+const BeginnerLessonPractice = lazy(() => import('./pages/Beginner/BeginnerLessonPractice').then(m => ({ default: m.BeginnerLessonPractice })));
+const AdminCourses = lazy(() => import('./pages/Admin/AdminCourses').then(m => ({ default: m.AdminCourses })));
+const AIChat = lazy(() => import('./pages/AIChat'));
+const Notebook = lazy(() => import('./pages/Notebook'));
+const Utilities = lazy(() => import('./pages/Utilities'));
+const Friends = lazy(() => import('./pages/Friends'));
+const SkillPracticeRoom = lazy(() => import('./pages/SkillPracticeRoom'));
+const BotConfigPage = lazy(() => import('./pages/Admin/BotConfigPage'));
 
 function ProtectedRouteLayout() {
   const { user, loading } = useAuth();
@@ -238,9 +290,9 @@ function MainLayout() {
   );
 }
 
-import { LandingPage } from "./pages/LandingPage";
-import { BeginnerLessonPractice } from "./pages/Beginner/BeginnerLessonPractice";
-import { AdminCourses } from "./pages/Admin/AdminCourses";
+
+
+
 import { Button } from "@/src/components/ui/Button";
 
 function AppContent() {
@@ -261,6 +313,7 @@ function AppContent() {
 
   return (
     <>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#F4F7FE]"><div className="w-10 h-10 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div></div>}>
       <Routes>
         <Route path="/auth" element={<Auth />} />
 
@@ -342,6 +395,7 @@ function AppContent() {
           </Route>
         </Route>
       </Routes>
+      </Suspense>
       {levelUpData && <LevelUpModal newLevel={levelUpData.newLevel} onClose={clearLevelUp} />}
     </>
   );
