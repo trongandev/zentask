@@ -196,10 +196,12 @@ export const getBeginnerStats = async (req, res) => {
     const rewardClaimedCount = records.filter((r) => r.rewardClaimed).length;
 
     // Extract base topicIds (e.g. "t1_do_an_uong")
-    const baseTopicIds = completedLessonIds.map(id => {
-      const lastUnderscore = id.lastIndexOf("_");
-      return lastUnderscore > 0 ? id.substring(0, lastUnderscore) : id;
-    });
+    const baseTopicIds = completedLessonIds
+      .filter((id) => typeof id === "string" && id.length > 0)
+      .map((id) => {
+        const lastUnderscore = id.lastIndexOf("_");
+        return lastUnderscore > 0 ? id.substring(0, lastUnderscore) : id;
+      });
     const uniqueBaseTopicIds = [...new Set(baseTopicIds)];
 
     // Fetch word count for completed base topics
@@ -213,26 +215,28 @@ export const getBeginnerStats = async (req, res) => {
     });
 
     let learnedWords = 0;
-    completedLessonIds.forEach(id => {
-      const lastUnderscore = id.lastIndexOf("_");
-      const baseId = lastUnderscore > 0 ? id.substring(0, lastUnderscore) : id;
-      const index = lastUnderscore > 0 ? parseInt(id.substring(lastUnderscore + 1), 10) : 0;
-      
-      const totalWordsInTopic = wordCountMap[baseId] || 0;
-      if (totalWordsInTopic > 0) {
-        const WORDS_PER_LESSON = 5;
-        const totalLessonsInTopic = Math.ceil(totalWordsInTopic / WORDS_PER_LESSON) || 1;
+    completedLessonIds
+      .filter((id) => typeof id === "string" && id.length > 0)
+      .forEach((id) => {
+        const lastUnderscore = id.lastIndexOf("_");
+        const baseId = lastUnderscore > 0 ? id.substring(0, lastUnderscore) : id;
+        const index = lastUnderscore > 0 ? parseInt(id.substring(lastUnderscore + 1), 10) : 0;
         
-        if (index === totalLessonsInTopic - 1) {
-          // Last chunk
-          const remainder = totalWordsInTopic - (index * WORDS_PER_LESSON);
-          learnedWords += remainder > 0 ? remainder : WORDS_PER_LESSON;
-        } else {
-          // Normal chunk
-          learnedWords += WORDS_PER_LESSON;
+        const totalWordsInTopic = wordCountMap[baseId] || 0;
+        if (totalWordsInTopic > 0) {
+          const WORDS_PER_LESSON = 5;
+          const totalLessonsInTopic = Math.ceil(totalWordsInTopic / WORDS_PER_LESSON) || 1;
+          
+          if (index === totalLessonsInTopic - 1) {
+            // Last chunk
+            const remainder = totalWordsInTopic - (index * WORDS_PER_LESSON);
+            learnedWords += remainder > 0 ? remainder : WORDS_PER_LESSON;
+          } else {
+            // Normal chunk
+            learnedWords += WORDS_PER_LESSON;
+          }
         }
-      }
-    });
+      });
 
     const completedTopics = records.length;
     const totalXP = completedTopics * 10 + rewardClaimedCount * 20;
