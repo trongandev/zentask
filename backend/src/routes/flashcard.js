@@ -93,6 +93,10 @@ router.delete(
   "/card/:cardId",
   asyncHandler(async (req, res) => res.json(await FlashcardService.deleteCard(req.user.uid, req.params.cardId))),
 );
+router.patch(
+  "/card/:cardId",
+  asyncHandler(async (req, res) => res.json(await FlashcardService.updateCard(req.user.uid, req.params.cardId, req.body))),
+);
 
 router.post(
   "/generate-ai",

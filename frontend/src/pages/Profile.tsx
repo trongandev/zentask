@@ -539,7 +539,7 @@ export function Profile() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {SYSTEM_BADGES.filter((b) => user.achievedBadges.includes(b.id))
+                  {SYSTEM_BADGES.filter((b) => user.achievedBadges.some(id => String(id) === String(b.id)))
                     .slice(0, 5)
                     .map((badge) => (
                       <div key={badge.id} className="w-12 h-12 flex items-center justify-center drop-shadow-sm" title={badge.name}>
@@ -580,7 +580,7 @@ export function Profile() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {SYSTEM_BADGES.map((badge) => {
-                const isAchieved = user.achievedBadges.includes(badge.id);
+                const isAchieved = user.achievedBadges.some(id => String(id) === String(badge.id));
                 return (
                   <div
                     key={badge.id}

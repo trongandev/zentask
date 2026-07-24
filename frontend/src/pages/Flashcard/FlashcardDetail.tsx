@@ -1,68 +1,28 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Play, Volume2, Trash2, Brain, ChevronDown, ChevronUp, MoreVertical, Pencil, Star, LayoutGrid, AlignJustify, Rows3, ChevronRight, X, Check } from "lucide-react";
+import { Search, Plus, Play, Volume2, Trash2, Pencil, Star, Info, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X, ArrowLeft, Brain, BookOpen, LayoutGrid, List } from "lucide-react";
 import { useFlashcardStore, getMemoryLevel, type MemoryLevel } from "../../services/flashcardService";
-import { useConfigStore } from "../../services/configService";
-import { useAuth } from "../../contexts/AuthContext";
-import { useUserStore } from "../../services/userService";
-import { cn } from "../../lib/utils";
-import toastService from "@/src/services/toastService";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
-import { VoiceSelectorModal } from "../../components/practice/VoiceSelectorModal";
 import { getVoiceForLanguage } from "../../lib/ttsVoiceStorage";
 import { Modal } from "../../components/ui/Modal";
 import { Button } from "@/src/components/ui/Button";
 import { Input } from "@/src/components/ui/Input";
 import { Textarea } from "@/src/components/ui/Textarea";
-
-type ViewMode = "line" | "grid" | "compact";
-
-const MEMORY_CONFIG = {
-  known: { label: "Đã nhớ", cls: "bg-green-100 text-green-700 border-green-200", icon: "✓", activeCls: "bg-green-500 text-white border-green-600" },
-  almost: { label: "Gần nhớ", cls: "bg-yellow-100 text-yellow-700 border-yellow-200", icon: "◎", activeCls: "bg-yellow-400 text-white border-yellow-500" },
-  unknown: { label: "Chưa nhớ", cls: "bg-red-100 text-red-600 border-red-200", icon: "✗", activeCls: "bg-red-500 text-white border-red-600" },
-};
+import toastService from "@/src/services/toastService";
+import { cn } from "../../lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function FlashcardDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { fetchCards, createCard, deleteCard, fetchProgress, setManualProgress, cardProgress, currentSet, cards, loading } = useFlashcardStore();
-
-  const { incrementTaskProgress } = useConfigStore();
-  const { updateUser } = useAuth();
-  const { triggerLevelUp } = useUserStore();
+  const { fetchCards, createCard, updateCard, deleteCard, fetchProgress, setManualProgress, cardProgress, currentSet, cards, loading } = useFlashcardStore();
   const { playAudio, isLoading, loadingText } = useTTSAudio();
 
-  // UI state
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"ai" | "manual">("ai");
-  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
-  const [overviewExpanded, setOverviewExpanded] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("line");
-  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
-  const [memoryModalCardId, setMemoryModalCardId] = useState<string | null>(null);
-  // Grid: track which card is expanded (col-span-full)
-  const [expandedGridCardId, setExpandedGridCardId] = useState<string | null>(null);
-
-  const [currentVoiceId, setCurrentVoiceId] = useState(() => {
-    return getVoiceForLanguage();
-  });
-
-  // Sticky header state
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const headerSentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!headerSentinelRef.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsHeaderVisible(entry.isIntersecting);
-      },
-      { threshold: 0, rootMargin: "-1px 0px 0px 0px" },
-    );
-    observer.observe(headerSentinelRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [currentVoiceId, setCurrentVoiceId] = useState(() => getVoiceForLanguage());
 
   // Form states
   const [term, setTerm] = useState("");
@@ -75,18 +35,6 @@ export function FlashcardDetail() {
     { en: "", vi: "" },
   ]);
 
-  // Close popover when clicking outside
-  const popoverRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (openPopoverId && !(e.target as Element).closest("[data-popover-root]")) {
-        setOpenPopoverId(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [openPopoverId]);
-
   useEffect(() => {
     if (id) {
       fetchCards(id);
@@ -94,33 +42,79 @@ export function FlashcardDetail() {
     }
   }, [id, fetchCards, fetchProgress]);
 
-  // Update voice when set language is known
   useEffect(() => {
     if (currentSet?.language) {
       setCurrentVoiceId(getVoiceForLanguage(currentSet.language));
     }
   }, [currentSet?.language]);
 
-  // Compute memory statistics
-  const memoryStats = useMemo(() => {
-    let known = 0,
-      almost = 0,
-      unknown = 0;
-    cards.forEach((card) => {
-      const level = getMemoryLevel(cardProgress[card.id]);
-      if (level === "known") known++;
-      else if (level === "almost") almost++;
+  // --- NEW UI STATE ---
+  const [activeCardId, setActiveCardId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [filterMode, setFilterMode] = useState<"all" | "relearn" | "mastered" | "unknown">("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [direction, setDirection] = useState(1);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  const itemsPerPage = viewMode === "list" ? 6 : 12;
+  const filterCounts = useMemo(() => {
+    let all = cards.length;
+    let relearn = 0;
+    let mastered = 0;
+    let unknown = 0;
+    cards.forEach((c) => {
+      const lvl = getMemoryLevel(cardProgress[c.id]);
+      if (lvl === "known") mastered++;
+      else if (lvl === "almost") relearn++;
       else unknown++;
     });
-    return { known, almost, unknown, total: cards.length };
+    return { all, relearn, mastered, unknown };
   }, [cards, cardProgress]);
 
-  const unknownCards = useMemo(() => cards.filter((c) => getMemoryLevel(cardProgress[c.id]) === "unknown"), [cards, cardProgress]);
+  // Filter cards
+  const filteredCards = useMemo(() => {
+    let filtered = cards;
+    if (filterMode === "relearn") {
+      filtered = filtered.filter((c) => getMemoryLevel(cardProgress[c.id]) === "almost");
+    } else if (filterMode === "mastered") {
+      filtered = filtered.filter((c) => getMemoryLevel(cardProgress[c.id]) === "known");
+    } else if (filterMode === "unknown") {
+      filtered = filtered.filter((c) => getMemoryLevel(cardProgress[c.id]) === "unknown");
+    }
+    if (searchTerm) {
+      filtered = filtered.filter((c) => c.term.toLowerCase().includes(searchTerm.toLowerCase()) || c.translation.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+    return filtered;
+  }, [cards, filterMode, searchTerm, cardProgress]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredCards.length / itemsPerPage));
+  const currentCards = filteredCards.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+
+  const activeCard = cards.find((c) => c.id === activeCardId) || currentCards[0] || cards[0];
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [filterMode, searchTerm, viewMode]);
+
+  // Sync activeCardId if currentCards changes and activeCard is not in view
+  useEffect(() => {
+    if (currentCards.length > 0 && (!activeCardId || !currentCards.find((c) => c.id === activeCardId))) {
+      setActiveCardId(currentCards[0].id);
+    }
+  }, [currentCards, activeCardId]);
+
+  const handlePageChange = (newPage: number) => {
+    setDirection(newPage > currentPage ? 1 : -1);
+    setCurrentPage(newPage);
+  };
 
   const handlePlayAudio = (text: string) => {
     playAudio(text, currentVoiceId);
   };
 
+  const isBuiltInSet = Boolean((currentSet as any)?.isBuiltIn || String(currentSet?.id || "").startsWith("builtin_"));
+
+  // --- FORM LOGIC ---
   const handleExampleChange = (index: number, field: "en" | "vi", value: string) => {
     const newExamples = [...examples];
     newExamples[index][field] = value;
@@ -145,7 +139,14 @@ export function FlashcardDetail() {
       return;
     }
     const filteredExamples = examples.filter((ex) => ex.en.trim() !== "");
-    if (id) {
+    if (editingCardId) {
+      const res = await updateCard(editingCardId, { term, phonetic, translation, notes, examples: filteredExamples });
+      if (res) {
+        setIsModalOpen(false);
+        resetForm();
+        setEditingCardId(null);
+      }
+    } else if (id) {
       const res = await createCard(id, { term, phonetic, translation, notes, examples: filteredExamples });
       if (res) {
         setIsModalOpen(false);
@@ -156,8 +157,8 @@ export function FlashcardDetail() {
 
   const handleDeleteCard = async (cardId: string) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa thẻ này?")) {
-      setOpenPopoverId(null);
       await deleteCard(cardId);
+      if (activeCardId === cardId) setActiveCardId(null);
     }
   };
 
@@ -183,16 +184,15 @@ export function FlashcardDetail() {
     }
   };
 
-  const handleManualMemory = async (level: MemoryLevel) => {
-    if (!memoryModalCardId || !id) return;
-    await setManualProgress(memoryModalCardId, id, level);
-    setMemoryModalCardId(null);
+  const handleManualMemory = async (level: MemoryLevel, cardId: string) => {
+    if (!id) return;
+    await setManualProgress(cardId, id, level);
   };
 
   if (loading && !currentSet) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -208,434 +208,348 @@ export function FlashcardDetail() {
     );
   }
 
-  const isBuiltInSet = Boolean((currentSet as any)?.isBuiltIn || String(currentSet.id || "").startsWith("builtin_"));
-
-  // ─── Card item renderers per view ───────────────────────────────────────────
-
-  const renderPopover = (cardId: string) => {
-    if (isBuiltInSet) {
-      return <span className="rounded-full bg-indigo-50 px-2 py-1 text-xs font-extrabold text-indigo-600">Có sẵn</span>;
-    }
-    return (
-      <div data-popover-root className="relative" onClick={(e) => e.stopPropagation()}>
-        <Button onClick={() => setOpenPopoverId(openPopoverId === cardId ? null : cardId)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-          <MoreVertical className="w-4 h-4" />
-        </Button>
-        {openPopoverId === cardId && (
-          <div className="absolute right-0 top-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 animate-in fade-in slide-in-from-top-2 duration-150">
-            <Button
-              onClick={() => {
-                setOpenPopoverId(null);
-                toastService.info("Tính năng chỉnh sửa đang phát triển");
-              }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <Pencil className="w-4 h-4 text-blue-500" />
-              Chỉnh sửa từ vựng
-            </Button>
-            <Button
-              onClick={() => {
-                setMemoryModalCardId(cardId);
-                setOpenPopoverId(null);
-              }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <Star className="w-4 h-4 text-yellow-500" />
-              Thay đổi độ nhớ
-            </Button>
-            <div className="my-1 border-t border-gray-100" />
-            <Button onClick={() => handleDeleteCard(cardId)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
-              <Trash2 className="w-4 h-4" />
-              Xóa từ
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderBadge = (cardId: string) => {
-    const level = getMemoryLevel(cardProgress[cardId]);
-    const cfg = MEMORY_CONFIG[level];
-    return (
-      <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border", cfg.cls)}>
-        {cfg.icon} {cfg.label}
-      </span>
-    );
-  };
-
-  // LINE VIEW (default)
-  const renderLineCard = (card: any) => (
-    <div key={card.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6">
-      <div className="md:w-1/3 border-b md:border-b-0 md:border-r border-gray-100 pb-4 md:pb-0 md:pr-6">
-        <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-xl font-bold text-gray-900">{card.term}</h3>
-            <Button onClick={() => handlePlayAudio(card.term)} disabled={isLoading && loadingText === card.term} className="text-gray-400 hover:text-blue-500 transition-colors disabled:opacity-50">
-              {isLoading && loadingText === card.term ? <div className="w-5 h-5 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-4 h-4" />}
-            </Button>
-          </div>
-          {renderPopover(card.id)}
-        </div>
-        {card.phonetic && <p className="text-gray-400 font-mono text-sm mb-2">{card.phonetic}</p>}
-        <p className="text-blue-600 font-bold mb-3">{card.translation}</p>
-        {renderBadge(card.id)}
-        {card.notes && (
-          <div className="mt-3 p-3 bg-yellow-50 rounded-lg text-sm text-yellow-800 border border-yellow-100">
-            <span className="font-bold block mb-1">Ghi chú:</span>
-            {card.notes}
-          </div>
-        )}
-      </div>
-      <div className="md:w-2/3 space-y-3">
-        <h4 className="font-bold text-gray-900 text-xs uppercase tracking-wider">Ví dụ</h4>
-        {card.examples?.length > 0 ? (
-          card.examples.map((ex: any, idx: number) => (
-            <div key={idx} className="flex items-start gap-2">
-              <Button
-                onClick={() => handlePlayAudio(ex.en)}
-                disabled={isLoading && loadingText === ex.en}
-                className="mt-0.5 text-gray-300 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50"
-              >
-                {isLoading && loadingText === ex.en ? <div className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-4 h-4" />}
-              </Button>
-              <div>
-                <p className="text-gray-800 font-medium text-sm">{ex.en}</p>
-                <p className="text-gray-500 text-xs">{ex.vi}</p>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-400 text-sm italic">Không có ví dụ</p>
-        )}
-      </div>
-    </div>
-  );
-
-  // GRID VIEW (2 per row, expandable examples)
-  const renderGridCard = (card: any) => {
-    const isExpanded = expandedGridCardId === card.id;
-    return (
-      <div key={card.id} className={cn("bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-3 transition-all duration-300", isExpanded ? "col-span-2" : "")}>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2 min-w-0">
-            <h3 className="text-lg font-bold text-gray-900 truncate">{card.term}</h3>
-            <Button
-              onClick={() => handlePlayAudio(card.term)}
-              disabled={isLoading && loadingText === card.term}
-              className="text-gray-400 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50"
-            >
-              {isLoading && loadingText === card.term ? <div className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-4 h-4" />}
-            </Button>
-          </div>
-          {renderPopover(card.id)}
-        </div>
-
-        {card.phonetic && <p className="text-gray-400 font-mono text-xs">{card.phonetic}</p>}
-        <p className="text-blue-600 font-bold text-sm">{card.translation}</p>
-        {renderBadge(card.id)}
-
-        {/* Toggle example */}
-        <Button
-          onClick={() => setExpandedGridCardId(isExpanded ? null : card.id)}
-          className="mt-auto flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 font-medium transition-colors self-start"
-        >
-          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-          {isExpanded ? "Ẩn ví dụ" : "Xem ví dụ"}
-        </Button>
-
-        {isExpanded && card.examples?.length > 0 && (
-          <div className="pt-3 border-t border-gray-100 space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Ví dụ</h4>
-            {card.examples.map((ex: any, idx: number) => (
-              <div key={idx} className="flex items-start gap-2">
-                <Button
-                  onClick={() => handlePlayAudio(ex.en)}
-                  disabled={isLoading && loadingText === ex.en}
-                  className="mt-0.5 text-gray-300 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50"
-                >
-                  <Volume2 className="w-3.5 h-3.5" />
-                </Button>
-                <div>
-                  <p className="text-gray-800 font-medium text-sm">{ex.en}</p>
-                  <p className="text-gray-500 text-xs">{ex.vi}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // COMPACT VIEW (3 per row, minimal)
-  const renderCompactCard = (card: any) => (
-    <div key={card.id} className="bg-white rounded-xl border border-gray-100 px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
-      <Button onClick={() => handlePlayAudio(card.term)} disabled={isLoading && loadingText === card.term} className="text-gray-400 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50">
-        {isLoading && loadingText === card.term ? <div className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div> : <Volume2 className="w-4 h-4" />}
-      </Button>
-      <div className="min-w-0 flex-1">
-        <p className="font-bold text-gray-900 text-sm truncate">{card.term}</p>
-        <p className="text-blue-600 text-xs truncate">{card.translation}</p>
-      </div>
-      {renderBadge(card.id)}
-      {renderPopover(card.id)}
-    </div>
-  );
-
-  // ─── Render ──────────────────────────────────────────────────────────────────
-
   return (
-    <div className="w-full space-y-6 relative">
-      {/* Sentinel for sticky header */}
-      <div ref={headerSentinelRef} className="absolute top-0 w-full h-px pointer-events-none" />
+    <div className="w-full relative min-h-[calc(100vh-8rem)] rounded-3xl bg-gray-50/80 p-4 sm:p-6 shadow-sm border border-gray-200 flex flex-col gap-6 overflow-hidden">
+      {/* Background decoration */}
+      <div
+        className="absolute inset-0 opacity-10 pointer-events-none"
+        style={{ backgroundImage: "radial-gradient(circle at center, #9ca3af 1px, transparent 1px)", backgroundSize: "20px 20px" }}
+      ></div>
 
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-50 h-0 overflow-visible">
-        <div
-          className={cn(
-            "absolute top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300 flex items-center justify-between px-4 sm:px-6 py-3 rounded-b-2xl -mx-4 sm:-mx-6",
-            !isHeaderVisible ? "translate-y-0 opacity-100 pointer-events-auto" : "-translate-y-full opacity-0 pointer-events-none",
-          )}
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <Button onClick={() => navigate(-1)} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors shrink-0">
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+      {/* HEADER / NAVIGATION */}
+      <div className="relative z-10 flex flex-col gap-4">
+        {/* Top breadcrumb & Practice button */}
+        <div className="flex items-center justify-between text-gray-900 mb-2">
+          <div className="flex items-center gap-3">
+            <Button onClick={() => navigate("/flashcards")} className="bg-white hover:bg-gray-100 text-gray-600 border border-gray-200 rounded-full p-2 transition-colors">
+              <ArrowLeft className="w-5 h-5" />
             </Button>
-            <div className="flex flex-col min-w-0">
-              <span className="font-bold text-gray-900 text-sm leading-tight truncate">{currentSet.title}</span>
-              <span className="text-xs text-gray-500">{currentSet.cardCount} thẻ</span>
-            </div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-blue-600" /> {currentSet.title}
+            </h1>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button onClick={() => setIsVoiceModalOpen(true)} className="px-3 py-1.5 bg-gray-100 text-gray-600 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors hidden sm:block">
-              Đổi giọng
-            </Button>
-            <Button
-              onClick={() => navigate(`/flashcard/${id}/practice`)}
-              className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-blue-100 transition-colors"
-            >
-              <Play className="w-4 h-4 fill-current" /> Học
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-            <ArrowLeft className="w-6 h-6 text-gray-600" />
+          <Button
+            onClick={() => navigate(`/flashcard/${id}/practice`)}
+            disabled={currentSet.cardCount === 0}
+            className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold shadow-sm hover:shadow-md hover:bg-blue-700 transition-all flex items-center gap-2 disabled:opacity-50"
+          >
+            <Play className="w-4 h-4 fill-current" /> Học bộ thẻ ({currentSet.cardCount})
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{currentSet.title}</h1>
-            <p className="text-gray-500">
-              {currentSet.cardCount} thẻ {isBuiltInSet ? "• Học liệu có sẵn, không thể xóa/sửa" : ""}
-            </p>
-          </div>
         </div>
-        <Button onClick={() => setIsVoiceModalOpen(true)} className="px-4 py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors">
-          Thay đổi giọng nói
-        </Button>
-      </div>
 
-      {/* Action bar */}
-      <div className="flex justify-between items-center flex-wrap gap-3 md:gap-0 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-        <Button
-          onClick={() => navigate(`/flashcard/${id}/practice`)}
-          disabled={currentSet.cardCount === 0}
-          className="bg-blue-50 text-blue-600 px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-100 transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-        >
-          <Play className="w-5 h-5 fill-current" /> Học bộ thẻ này
-        </Button>
-        <div className="flex items-center gap-2">
-          {/* View mode switcher */}
-          <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-0.5">
-            {(
-              [
-                { key: "line", icon: <AlignJustify className="w-4 h-4" />, title: "Dạng dòng" },
-                { key: "grid", icon: <LayoutGrid className="w-4 h-4" />, title: "Dạng lưới" },
-                { key: "compact", icon: <Rows3 className="w-4 h-4" />, title: "Thu gọn" },
-              ] as { key: ViewMode; icon: React.ReactNode; title: string }[]
-            ).map(({ key, icon, title }) => (
-              <Button
-                key={key}
-                title={title}
-                onClick={() => setViewMode(key)}
-                className={cn("p-2 rounded-lg transition-all", viewMode === key ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
-              >
-                {icon}
-              </Button>
-            ))}
+        {/* Filter Radio Buttons & Pagination */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white border border-gray-200 rounded-2xl p-3 shadow-sm">
+          <div className="flex items-center gap-6 text-sm font-semibold">
+            <label className={cn("flex items-center gap-2 cursor-pointer transition-colors", filterMode === "all" ? "text-blue-700" : "text-gray-700 hover:text-blue-600")}>
+              <input type="radio" checked={filterMode === "all"} onChange={() => setFilterMode("all")} className="w-4 h-4 accent-blue-600" /> Tất cả ({filterCounts.all})
+            </label>
+            <label className={cn("flex items-center gap-2 cursor-pointer transition-colors", filterMode === "unknown" ? "text-gray-900" : "text-gray-700 hover:text-gray-900")}>
+              <input type="radio" checked={filterMode === "unknown"} onChange={() => setFilterMode("unknown")} className="w-4 h-4 accent-gray-500" /> Chưa học ({filterCounts.unknown})
+            </label>
+            <label className={cn("flex items-center gap-2 cursor-pointer transition-colors", filterMode === "relearn" ? "text-yellow-700" : "text-gray-700 hover:text-yellow-600")}>
+              <input type="radio" checked={filterMode === "relearn"} onChange={() => setFilterMode("relearn")} className="w-4 h-4 accent-yellow-500" /> Cần ôn tập ({filterCounts.relearn})
+            </label>
+            <label className={cn("flex items-center gap-2 cursor-pointer transition-colors", filterMode === "mastered" ? "text-green-700" : "text-gray-700 hover:text-green-600")}>
+              <input type="radio" checked={filterMode === "mastered"} onChange={() => setFilterMode("mastered")} className="w-4 h-4 accent-green-600" /> Đã thuộc ({filterCounts.mastered})
+            </label>
           </div>
-          {!isBuiltInSet && (
-            <Button
-              onClick={() => {
-                setIsModalOpen(true);
-                resetForm();
-              }}
-              className="bg-gray-900 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-gray-800 transition-colors"
-            >
-              <Plus className="w-5 h-5" /> Thêm từ mới
+          <div className="flex items-center gap-1 text-gray-600">
+            <Button variant="ghost" onClick={() => handlePageChange(0)} disabled={currentPage === 0} className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto">
+              <ChevronsLeft className="w-5 h-5" />
             </Button>
-          )}
+            <Button
+              variant="ghost"
+              onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
+              disabled={currentPage === 0}
+              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <span className="text-sm font-bold px-2 text-gray-800">
+              {currentPage + 1} / {totalPages}
+            </span>
+            <Button
+              variant="ghost"
+              onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+              disabled={currentPage >= totalPages - 1}
+              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => handlePageChange(totalPages - 1)}
+              disabled={currentPage >= totalPages - 1}
+              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
+            >
+              <ChevronsRight className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Card Overview */}
-      {cards.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-5 flex items-center gap-4">
-            <div className="flex items-center gap-2 text-gray-700">
-              <Brain className="w-5 h-5 text-blue-500" />
-              <span className="font-bold text-sm">Tổng quan học tập</span>
-            </div>
-            <div className="flex-1 flex items-center gap-3">
-              <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden flex">
-                {memoryStats.total > 0 && (
-                  <>
-                    <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${(memoryStats.known / memoryStats.total) * 100}%` }} />
-                    <div className="h-full bg-yellow-400 transition-all duration-500" style={{ width: `${(memoryStats.almost / memoryStats.total) * 100}%` }} />
-                    <div className="h-full bg-red-400 transition-all duration-500" style={{ width: `${(memoryStats.unknown / memoryStats.total) * 100}%` }} />
-                  </>
-                )}
-              </div>
-              <div className="flex items-center gap-3 shrink-0 text-sm font-bold">
-                <span className="flex items-center gap-1 text-green-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
-                  {memoryStats.known}
-                </span>
-                <span className="flex items-center gap-1 text-yellow-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 inline-block" />
-                  {memoryStats.almost}
-                </span>
-                <span className="flex items-center gap-1 text-red-500">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />
-                  {memoryStats.unknown}
-                </span>
-              </div>
-            </div>
-            {unknownCards.length > 0 && (
-              <Button onClick={() => setOverviewExpanded(!overviewExpanded)} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
-                {overviewExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                {overviewExpanded ? "Ẩn" : `${unknownCards.length} chưa nhớ`}
-              </Button>
+        {/* Action Row: Search & Create */}
+        <div className="flex flex-col md:flex-row items-center gap-3">
+          <div className="flex bg-white border border-gray-200 p-1 rounded-full shadow-sm shrink-0">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={cn("p-2 rounded-full transition-all", viewMode === "grid" ? "bg-gray-100 text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600")}
+              title="Grid View"
+            >
+              <LayoutGrid className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={cn("p-2 rounded-full transition-all", viewMode === "list" ? "bg-gray-100 text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600")}
+              title="List View"
+            >
+              <List className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-white text-gray-800 border border-gray-200 rounded-full pl-11 pr-10 py-3 font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-gray-400 shadow-sm transition-all"
+              placeholder="Tìm kiếm từ vựng..."
+            />
+            {searchTerm && (
+              <button onClick={() => setSearchTerm("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
             )}
           </div>
-          <div className="px-5 pb-4 flex items-center gap-6 text-xs text-gray-500">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-500 inline-block" /> Đã nhớ ({memoryStats.known})
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" /> Gần nhớ ({memoryStats.almost})
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-400 inline-block" /> Chưa nhớ ({memoryStats.unknown})
-            </span>
-          </div>
-          {overviewExpanded && unknownCards.length > 0 && (
-            <div className="border-t border-gray-100 px-5 py-4">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Từ cần học thêm</p>
-              <div className="flex flex-wrap gap-2">
-                {unknownCards.map((card) => (
-                  <span key={card.id} className="px-3 py-1.5 bg-red-50 text-red-700 rounded-lg text-sm font-semibold border border-red-100">
-                    {card.term}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Cards List */}
-      {cards.length === 0 ? (
-        <div className="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-300">
-          <h3 className="text-lg font-bold text-gray-900 mb-2">Chưa có từ vựng nào</h3>
-          <p className="text-gray-500 mb-6">{isBuiltInSet ? "Bộ thẻ có sẵn này đang chưa có dữ liệu." : "Hãy thêm những từ vựng đầu tiên vào bộ thẻ này."}</p>
           {!isBuiltInSet && (
             <Button
               onClick={() => {
+                setEditingCardId(null);
+                setActiveTab("ai");
                 setIsModalOpen(true);
                 resetForm();
               }}
-              className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 mx-auto hover:bg-blue-700 transition-colors"
+              className="bg-gray-900 text-white hover:bg-gray-800 px-5 py-3 rounded-full font-bold shadow-sm transition-all flex items-center gap-2 whitespace-nowrap"
             >
               <Plus className="w-5 h-5" /> Thêm từ mới
             </Button>
           )}
         </div>
-      ) : viewMode === "line" ? (
-        <div className="space-y-4">{cards.map(renderLineCard)}</div>
-      ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-2 gap-4">{cards.map(renderGridCard)}</div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">{cards.map(renderCompactCard)}</div>
-      )}
+      </div>
 
-      {/* ── Memory Level Modal ── */}
-      {memoryModalCardId &&
-        (() => {
-          const card = cards.find((c) => c.id === memoryModalCardId);
-          if (!card) return null;
-          const currentLevel = getMemoryLevel(cardProgress[memoryModalCardId]);
-          return (
-            <div className="fixed inset-0 bg-gray-900/60 z-[110] flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setMemoryModalCardId(null)}>
-              <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-bold text-gray-900">Thay đổi độ nhớ</h2>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      <span className="font-bold text-gray-800">{card.term}</span> — {card.translation}
-                    </p>
-                  </div>
-                  <Button onClick={() => setMemoryModalCardId(null)} className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-                    <X className="w-5 h-5" />
+      {/* ─── MAIN BOOK SPLIT LAYOUT ─── */}
+      <div className="relative z-10 flex-1 flex flex-col lg:flex-row gap-4 min-h-[500px]">
+        {/* LEFT PANEL: Active Card Details (Notepad Style) */}
+        <div className="w-full lg:w-2/5 bg-white rounded-[2rem] shadow-sm border border-gray-200 flex flex-col relative overflow-hidden">
+          {/* Notepad rings decoration */}
+          <div className="absolute top-0 left-0 right-0 h-4 flex justify-around px-8 mt-3 pointer-events-none opacity-40">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="w-4 h-4 rounded-full bg-gray-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]"></div>
+            ))}
+          </div>
+
+          {activeCard ? (
+            <div className="p-8 pt-12 flex-1 flex flex-col h-full overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex gap-2 items-center ">
+                  {/* We use level badge as the 'type' badge here for aesthetics */}
+                  {activeCard.phonetic && <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold font-mono">{activeCard.phonetic}</span>}
+                </div>
+                <div className="flex gap-2">
+                  {activeCard.notes && (
+                    <Button
+                      onClick={() => setIsNoteModalOpen(true)}
+                      className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-blue-600 flex items-center justify-center transition-colors"
+                    >
+                      <Info className="w-5 h-5" />
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => handlePlayAudio(activeCard.term)}
+                    className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-blue-600 flex items-center justify-center transition-colors"
+                  >
+                    {isLoading && loadingText === activeCard.term ? (
+                      <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Volume2 className="w-5 h-5" />
+                    )}
                   </Button>
                 </div>
-                <div className="p-6 space-y-3">
-                  <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-4">Chọn mức độ ghi nhớ</p>
-                  {(["known", "almost", "unknown"] as MemoryLevel[]).map((level) => {
-                    const cfg = MEMORY_CONFIG[level];
-                    const isActive = currentLevel === level;
-                    return (
-                      <Button
-                        key={level}
-                        onClick={() => handleManualMemory(level)}
-                        className={cn(
-                          "w-full flex items-center gap-4 px-5 py-4 rounded-2xl border-2 transition-all duration-200 text-left",
-                          isActive ? cfg.activeCls + " scale-[1.02] shadow-md" : "bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700",
-                        )}
-                      >
-                        <span className="text-2xl">{cfg.icon}</span>
-                        <div className="flex-1">
-                          <p className="font-bold text-base">{cfg.label}</p>
-                          <p className="text-xs opacity-70">
-                            {level === "known" ? "Tôi nhớ rõ từ này, không cần ôn sớm" : level === "almost" ? "Tôi gần nhớ, cần ôn lại trong vài ngày" : "Tôi chưa nhớ, cần ôn lại sớm"}
-                          </p>
-                        </div>
-                        {isActive && <Check className="w-5 h-5 shrink-0" />}
-                      </Button>
-                    );
-                  })}
+              </div>
+
+              <h2 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">{activeCard.term}</h2>
+
+              <div className="bg-blue-50 rounded-2xl p-5 mb-6 border border-blue-100">
+                <p className="text-blue-800 text-lg font-medium leading-relaxed">{activeCard.translation}</p>
+              </div>
+
+              {activeCard.examples && activeCard.examples.length > 0 && (
+                <div className="mb-6 space-y-4">
+                  <h4 className="flex items-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest">Ví dụ</h4>
+                  {activeCard.examples.map((ex: any, idx: number) => (
+                    <div key={idx} className="group">
+                      <p className="text-gray-800 text-base font-medium flex items-start gap-2">
+                        <button onClick={() => handlePlayAudio(ex.en)} className="mt-0.5 text-gray-400 group-hover:text-blue-500 transition-colors">
+                          <Volume2 className="w-4 h-4" />
+                        </button>
+                        <span>{ex.en}</span>
+                      </p>
+                      <p className="text-gray-500 text-sm pl-6 mt-1">{ex.vi}</p>
+                    </div>
+                  ))}
                 </div>
+              )}
+
+              <div className="mt-auto pt-6">
+                {!isBuiltInSet && (
+                  <div className="flex items-center gap-3">
+                    <Button
+                      onClick={() => {
+                        setTerm(activeCard.term);
+                        setPhonetic(activeCard.phonetic || "");
+                        setTranslation(activeCard.translation);
+                        setNotes(activeCard.notes || "");
+                        const ex = activeCard.examples || [];
+                        setExamples([ex[0] || { en: "", vi: "" }, ex[1] || { en: "", vi: "" }, ex[2] || { en: "", vi: "" }]);
+                        setEditingCardId(activeCard.id);
+                        setActiveTab("manual");
+                        setIsModalOpen(true);
+                      }}
+                      className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm transition-colors"
+                    >
+                      <Pencil className="w-4 h-4" /> Chỉnh sửa
+                    </Button>
+                    <Button
+                      onClick={() => handleDeleteCard(activeCard.id)}
+                      className="bg-red-50 hover:bg-red-100 text-red-600 p-3.5 rounded-xl font-bold flex items-center justify-center shadow-sm transition-colors"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
-          );
-        })()}
+          ) : (
+            <div className="p-8 flex-1 flex flex-col items-center justify-center text-gray-400">
+              <Brain className="w-16 h-16 mb-4 opacity-50" />
+              <p className="font-bold text-lg text-gray-600">Không có từ vựng nào</p>
+              <p className="text-sm">Hãy thử tìm kiếm từ khác hoặc thêm mới.</p>
+            </div>
+          )}
+        </div>
 
-      {/* ── Add Word Modal ── */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Thêm từ mới" className="max-w-2xl">
+        {/* RIGHT PANEL: Grid of Cards (Book Page Flip) */}
+        <div className="w-full lg:w-3/5 bg-gray-100/50 rounded-[2rem] p-4 sm:p-6 shadow-inner border border-gray-200 relative overflow-hidden flex flex-col">
+          {viewMode === "list" ? (
+            <div className="flex flex-col overflow-y-auto pr-2 h-full pb-4 ">
+              {currentCards.map((card) => {
+                const level = getMemoryLevel(cardProgress[card.id]);
+
+                return (
+                  <div
+                    key={card.id}
+                    onClick={() => setActiveCardId(card.id)}
+                    className={cn("p-4 m-2 rounded-xl cursor-pointer flex gap-4 items-center transition-all border shadow-sm active:scale-[0.97]", "bg-white border-gray-200 hover:bg-gray-50")}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <h3 className={cn("font-medium text-lg leading-tight truncate", "text-gray-900")}>
+                        {card.term}
+                        {card.phonetic && <span className="ml-3 font-normal text-xs font-mono text-gray-400">{card.phonetic}</span>}
+                      </h3>
+                      <p className={cn("text-sm font-medium truncate mt-1", "text-gray-600")}>{card.translation}</p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlayAudio(card.term);
+                        }}
+                        className={cn("p-2 rounded-full transition-all bg-gray-100 text-gray-500 hover:text-blue-600 hover:bg-blue-50")}
+                      >
+                        <Volume2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <AnimatePresence mode="popLayout" custom={direction}>
+              <motion.div
+                key={currentPage}
+                custom={direction}
+                initial={{ opacity: 0, x: direction * 50, rotateY: direction * 10 }}
+                animate={{ opacity: 1, x: 0, rotateY: 0 }}
+                exit={{ opacity: 0, x: direction * -50, rotateY: direction * -10, transition: { duration: 0.2 } }}
+                transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
+                className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-x-4 content-start flex-1 pb-10 pt-20"
+              >
+                {currentCards.map((card, index) => {
+                  const level = getMemoryLevel(cardProgress[card.id]);
+
+                  let bgClass = "bg-white hover:bg-gray-50 border-gray-200";
+                  if (level === "known") bgClass = "bg-green-50 hover:bg-green-100 border-green-200";
+                  else if (level === "almost") bgClass = "bg-yellow-50 hover:bg-yellow-100 border-yellow-200";
+
+                  return (
+                    <div
+                      key={card.id}
+                      onClick={() => setActiveCardId(card.id)}
+                      style={{ zIndex: index }}
+                      className={cn(
+                        "relative p-4 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col h-[150px] border shadow-sm group hover:-translate-y-6  active:scale-[0.97]",
+                        bgClass,
+                        // Màn hình nhỏ (2 cột): Từ thẻ thứ 3 trở đi lùi lên
+                        // Màn hình lớn (3 cột): Từ thẻ thứ 4 trở đi lùi lên
+                        "max-xl:[&:nth-child(n+3)]:-mt-16 xl:[&:nth-child(n+4)]:-mt-16",
+                      )}
+                    >
+                      <div className={cn("absolute top-3 right-3 w-2 h-2 rounded-full", level === "known" ? "bg-green-500" : level === "almost" ? "bg-yellow-500" : "bg-gray-300")}></div>
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className={cn("font-medium text-lg leading-tight line-clamp-2")}>{card.term}</h3>
+                      </div>
+                      {card.phonetic && <p className="text-xs font-mono text-gray-400 mb-2 opacity-80">{card.phonetic}</p>}
+
+                      <div className="mt-auto flex justify-between items-end">
+                        <p className={cn("text-sm font-medium line-clamp-2 flex-1 pr-2")}>{card.translation}</p>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePlayAudio(card.term);
+                          }}
+                          className={cn("p-2 rounded-full shrink-0 mt-2", "bg-gray-100 text-gray-500 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-all")}
+                        >
+                          <Volume2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
+          )}
+
+          {currentCards.length === 0 && <div className="absolute inset-0 flex items-center justify-center text-gray-400 font-medium text-lg">Trang này trống</div>}
+        </div>
+      </div>
+
+      {/* ── Add/Edit Word Modal ── */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCardId ? "Chỉnh sửa thẻ" : "Thêm từ mới"} className="max-w-2xl">
         <div className="flex border-b border-gray-100">
-          {(["ai", "manual"] as const).map((tab) => (
+          {!editingCardId && (
             <Button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={cn("flex-1 py-3 font-bold text-sm transition-colors", activeTab === tab ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50/50" : "text-gray-500 hover:bg-gray-50")}
+              onClick={() => setActiveTab("ai")}
+              className={cn("flex-1 py-3 font-bold text-sm transition-colors", activeTab === "ai" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50" : "text-gray-500 hover:bg-gray-50")}
             >
-              {tab === "ai" ? "Tạo bằng AI" : "Tạo thủ công"}
+              Tạo bằng AI
             </Button>
-          ))}
+          )}
+          <Button
+            onClick={() => setActiveTab("manual")}
+            className={cn("flex-1 py-3 font-bold text-sm transition-colors", activeTab === "manual" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50" : "text-gray-500 hover:bg-gray-50")}
+          >
+            {editingCardId ? "Chỉnh sửa thủ công" : "Tạo thủ công"}
+          </Button>
         </div>
 
         <div className="p-6 max-h-[70vh] overflow-y-auto">
@@ -728,19 +642,33 @@ export function FlashcardDetail() {
                   placeholder="Ghi chú thêm về từ này..."
                 />
               </div>
-              <Button
-                disabled={loading}
-                onClick={handleCreateManual}
-                className="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 mt-4"
-              >
-                {loading ? "Đang tạo..." : "Lưu thủ công"}
-              </Button>
+              <div className="pt-4 flex justify-end gap-3">
+                <Button onClick={() => setIsModalOpen(false)} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-6 py-2.5 rounded-xl font-bold transition-colors">
+                  Hủy
+                </Button>
+                <Button
+                  disabled={loading}
+                  onClick={handleCreateManual}
+                  className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2.5 rounded-xl font-bold shadow-sm transition-colors disabled:opacity-50"
+                >
+                  {loading ? "Đang xử lý..." : editingCardId ? "Lưu thay đổi" : "Lưu thẻ"}
+                </Button>
+              </div>
             </div>
           )}
         </div>
       </Modal>
-
-      <VoiceSelectorModal isOpen={isVoiceModalOpen} onClose={() => setIsVoiceModalOpen(false)} currentVoiceId={currentVoiceId} onSelectVoice={setCurrentVoiceId} language={currentSet?.language} />
+      {/* ── Note Modal ── */}
+      <Modal isOpen={isNoteModalOpen} onClose={() => setIsNoteModalOpen(false)} title="Ghi chú" className="max-w-md">
+        <div className="p-6">
+          <div className="bg-blue-50/50 p-4 rounded-xl text-gray-700 whitespace-pre-wrap leading-relaxed border border-blue-100">{activeCard?.notes}</div>
+          <div className="mt-6 flex justify-end">
+            <Button onClick={() => setIsNoteModalOpen(false)} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-6 py-2 rounded-xl font-bold transition-colors">
+              Đóng
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

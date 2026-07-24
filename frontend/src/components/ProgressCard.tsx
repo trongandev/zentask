@@ -26,7 +26,6 @@ export function ProgressCard() {
         .catch((err) => console.error("Error fetching beginner stats:", err));
     }
   }, [user]);
-  console.log(stats);
   const percentage = stats.totalWords > 0 ? Math.round((stats.learnedWords / stats.totalWords) * 100) : 0;
 
   if (!user) {

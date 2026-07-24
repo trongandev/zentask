@@ -483,6 +483,31 @@ class FlashcardService {
     };
   }
 
+  async updateCard(userId, cardId, data) {
+    const card = await Flashcard.findById(cardId);
+    if (!card) throw { statusCode: 404, message: "Flashcard not found" };
+
+    const set = await FlashcardSet.findById(card.setId);
+    if (!set || set.userId.toString() !== userId) throw { statusCode: 403, message: "Unauthorized" };
+
+    const { term, phonetic, translation, examples, notes } = data;
+    await validatePublicObject({ term, translation, examples, notes }, "Nội dung flashcard");
+
+    if (term !== undefined) card.term = String(term).trim();
+    if (phonetic !== undefined) card.phonetic = phonetic;
+    if (translation !== undefined) card.translation = String(translation).trim();
+    if (examples !== undefined) card.examples = examples;
+    if (notes !== undefined) card.notes = notes;
+
+    await card.save();
+
+    const cardObj = card.toObject();
+    return {
+      id: cardObj._id,
+      ...cardObj,
+    };
+  }
+
   async deleteSet(userId, setId) {
     const set = await FlashcardSet.findById(setId);
     if (!set || set.userId.toString() !== userId) throw { statusCode: 404, message: "Flashcard set not found" };

@@ -118,6 +118,7 @@ interface FlashcardState {
 
     fetchCards: (setId: string) => Promise<void>;
     createCard: (setId: string, data: Partial<Flashcard>) => Promise<Flashcard | null>;
+    updateCard: (cardId: string, data: Partial<Flashcard>) => Promise<Flashcard | null>;
     deleteCard: (cardId: string) => Promise<void>;
 
     // SM-2 methods
@@ -417,6 +418,26 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
             return data;
         } catch (err: any) {
             toastService.error(err.message || "Lỗi khi tạo từ mới");
+            return null;
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    updateCard: async (cardId, cardData) => {
+        set({ loading: true });
+        try {
+            const res = await axiosInstance.patch(`/api/flashcard/card/${cardId}`, cardData);
+            const data = await res.data;
+
+            set((state) => ({
+                cards: state.cards.map((c) => (c.id === cardId ? { ...c, ...data } : c)),
+            }));
+
+            toastService.success("Đã cập nhật từ vựng");
+            return data;
+        } catch (err: any) {
+            toastService.error(err.message || "Lỗi khi cập nhật từ vựng");
             return null;
         } finally {
             set({ loading: false });
