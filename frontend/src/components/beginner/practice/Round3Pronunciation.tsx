@@ -40,20 +40,6 @@ export function Round3Pronunciation({ currentWord, isCorrect, setIsCorrect }: Ro
           <Volume2 className="w-12 h-12" />
         </Button>
         <p className="font-bold text-3xl">{currentWord.term}</p>
-
-        <Button
-          onClick={status === "recording" ? stopRecording : startRecording}
-          disabled={status === "checking" || isCorrect === true}
-          className={cn(
-            "w-20 h-20 mt-8 rounded-full flex items-center justify-center transition-all border-4 shadow-xl text-white",
-            status === "recording" ? "bg-red-500 animate-pulse border-red-200" : "bg-blue-500 hover:bg-blue-600 border-blue-200",
-            (status === "checking" || isCorrect === true) && "opacity-50 cursor-not-allowed",
-          )}
-        >
-          {status === "checking" ? <Loader2 className="w-8 h-8 animate-spin" /> : <Mic className="w-8 h-8" />}
-        </Button>
-        <p className="text-sm text-slate-400">{status === "recording" ? "Đang ghi âm... Bấm lần nữa để dừng" : status === "checking" ? "Đang chấm điểm..." : "Bấm vào micro để đọc từ"}</p>
-
         {mainScore !== null && (
           <div className="text-center mt-2">
             <p className={cn("text-2xl font-black", mainScore >= 50 ? "text-green-500" : "text-yellow-500")}>{mainScore}/100</p>
@@ -85,6 +71,18 @@ export function Round3Pronunciation({ currentWord, isCorrect, setIsCorrect }: Ro
             </div>
           </div>
         )}
+        <Button
+          onClick={status === "recording" ? stopRecording : startRecording}
+          disabled={status === "checking" || isCorrect === true}
+          className={cn(
+            "w-20 h-20 mt-8 rounded-full flex items-center justify-center transition-all border-4 shadow-xl text-white",
+            status === "recording" ? "bg-red-500 animate-pulse border-red-200" : "bg-blue-500 hover:bg-blue-600 border-blue-200",
+            (status === "checking" || isCorrect === true) && "opacity-50 cursor-not-allowed",
+          )}
+        >
+          {status === "checking" ? <Loader2 className="w-8 h-8 animate-spin" /> : <Mic className="w-8 h-8" />}
+        </Button>
+        <p className="text-sm text-slate-400">{status === "recording" ? "Đang ghi âm... Bấm lần nữa để dừng" : status === "checking" ? "Đang chấm điểm..." : "Bấm vào micro để đọc từ"}</p>
       </div>
     </div>
   );

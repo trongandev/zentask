@@ -233,6 +233,15 @@ export function BeginnerLessonPractice() {
     }
   };
 
+  // Derived state for correct answer display
+  const getCorrectAnswerDisplay = () => {
+    if (!currentWord) return "";
+    if (activeRound === 7) {
+      return (currentWord.examples?.[0]?.en || currentWord.example?.[0]?.en || currentWord.term).trim();
+    }
+    return currentWord.term;
+  };
+
   if (!currentWord && activeWords.length > 0) {
     return <div className="p-8 text-center">Loading...</div>;
   }
@@ -368,7 +377,7 @@ export function BeginnerLessonPractice() {
                 )}
                 {isCorrect === false && (
                   <span className="font-bold flex items-center gap-2">
-                    <X className="w-6 h-6" /> Đáp án đúng: {currentWord.term}
+                    <X className="w-6 h-6" /> Đáp án đúng: {getCorrectAnswerDisplay()}
                   </span>
                 )}
               </div>

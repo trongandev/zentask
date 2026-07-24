@@ -126,12 +126,8 @@ export function ModeArrange({ cards, setId, onComplete, completionActions }: Mod
         return next;
       });
       playSoundEffect("wrong");
-
-      // Let user try again after a brief moment showing error state
-      setTimeout(() => {
-        setStatus("idle");
-        setIsChecking(false);
-      }, 1000);
+      setIsChecking(false);
+      // Wait for user to click "Thử lại"
     }
   };
 
@@ -220,6 +216,20 @@ export function ModeArrange({ cards, setId, onComplete, completionActions }: Mod
             </DndContext>
           </div>
 
+          {status === "wrong" && (
+            <div className="w-full mt-6 p-4 bg-red-50 border border-red-100 rounded-xl text-left animate-in slide-in-from-bottom-2">
+              <p className="text-red-600 font-bold mb-1 text-sm uppercase tracking-wider">Đáp án đúng:</p>
+              <p className="text-2xl font-black text-slate-800 mb-3">{currentCard.term}</p>
+              {currentCard.examples && currentCard.examples.length > 0 && currentCard.examples[0].en && (
+                <div className="text-sm bg-white p-3 rounded-lg border border-red-50">
+                  <p className="font-semibold text-slate-700 mb-1">Ví dụ:</p>
+                  <p className="text-slate-900 font-medium">{currentCard.examples[0].en}</p>
+                  <p className="text-slate-500">{currentCard.examples[0].vi}</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Actions Area */}
           <div className="flex items-center justify-center gap-4 mt-12 w-full flex-wrap">
             <Button
@@ -244,8 +254,15 @@ export function ModeArrange({ cards, setId, onComplete, completionActions }: Mod
             </Button>
 
             <Button
-              onClick={handleCheck}
-              disabled={status !== "idle"}
+              onClick={() => {
+                if (status === "wrong") {
+                  setStatus("idle");
+                  // Optional: we can reset the order if we want, or let them continue from their wrong order
+                } else {
+                  handleCheck();
+                }
+              }}
+              disabled={status === "correct" || isChecking}
               className={cn(
                 "flex-1 max-w-[200px] px-8 py-4 rounded-xl font-black text-white text-lg transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg",
                 status === "correct" ? "bg-green-500 shadow-green-500/30" : status === "wrong" ? "bg-red-500 shadow-red-500/30" : "bg-indigo-600 shadow-indigo-600/30 hover:bg-indigo-700",
@@ -256,7 +273,9 @@ export function ModeArrange({ cards, setId, onComplete, completionActions }: Mod
                   <CheckCircle className="w-6 h-6" /> Chuẩn!
                 </>
               ) : status === "wrong" ? (
-                "Sai rồi!"
+                <>
+                  <RotateCw className="w-6 h-6" /> Thử lại
+                </>
               ) : (
                 <>
                   <Play className="w-6 h-6" /> Kiểm Tra

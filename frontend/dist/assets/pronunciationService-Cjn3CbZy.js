@@ -1,1 +1,0 @@
-import{a}from"./index-DLFF45kd.js";const i={async assess(s){const n={title:s.title,base64Audio:s.base64Audio,language:s.language||"en"},t=await a.post("/api/pronunciation/assess",n);if(t.status!==200)throw new Error("Âm thanh quá nhỏ hoặc nhiều tạp âm. Hãy thử lại.");return t.data}};export{i as p};

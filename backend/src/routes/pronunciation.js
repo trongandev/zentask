@@ -116,7 +116,7 @@ router.post(
       });
       const upstreamMessage = "Âm thanh quá nhỏ hoặc nhiều tạp âm. Hãy thử lại.";
 
-      return res.status(upstreamRes.status >= 500 ? 502 : upstreamRes.status).json({
+      return res.status(400).json({
         error: upstreamMessage,
       });
     }

@@ -22,7 +22,7 @@ export function LandingPage() {
     <div className="min-h-screen bg-slate-50 font-sans selection:bg-blue-200">
       {/* Header */}
       <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <img src="/logo.png" className="w-10 flex-shrink-0" alt="Zentask Logo" />
             <span className="font-extrabold text-xl tracking-tight text-slate-800">
@@ -52,8 +52,6 @@ export function LandingPage() {
       <main className="pt-24 pb-16">
         {/* Hero Section */}
         <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24 text-center">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/20 rounded-full blur-[100px] -z-10 animate-pulse pointer-events-none" />
-
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-600 font-bold text-sm mb-8 border border-blue-100">
             <Sparkles className="w-4 h-4 text-amber-500" /> Nền tảng học tập tiếng Anh thông minh
           </div>
