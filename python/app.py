@@ -30,6 +30,46 @@ async def read_root():
 
 import hashlib
 
+    
+@app.get('/edge-tts')
+async def get_edge_tts_voices(text: str, voice: str = "en-US-AriaNeural"):
+    """API endpoint to return audio blob of text using edge-tts
+    
+    Args:
+        text: Text to convert to speech
+        voice: Voice ID (default: en-US-AriaNeural)
+        
+    Returns:
+        Audio file as streaming response (audio/mpeg)
+    """
+    try:
+        print(f"Generating TTS for text: {text[:50]}... with voice: {voice}")
+        
+        # Tạo communicate object với voice được chọn
+        communicate = edge_tts.Communicate(text, voice)
+        audio_data = b""
+        
+        # Stream audio chunks
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio":
+                audio_data += chunk["data"]
+        
+        # Trả về audio dưới dạng streaming response
+        return Response(
+            content=audio_data,
+            media_type="audio/mpeg",
+            headers={
+                "Content-Disposition": "inline; filename=speech.mp3",
+                "Accept-Ranges": "bytes",
+                "Cache-Control": "no-cache"
+            }
+        )
+        
+    except Exception as e:
+        print(f"Error generating TTS: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating speech: {str(e)}")
+
+
 @app.get('/edge-tts-stream')
 async def get_edge_tts_voices_stream(text: str, voice: str = "en-US-AriaNeural"):
     """API endpoint to return audio blob of text using edge-tts with streaming and caching"""

@@ -73,7 +73,7 @@ export const useEtcStore = create<EtcState>((set, get) => ({
 
   textToSpeech: async (text, voice) => {
     try {
-      const response = await fetch(`https://python.quizzet.id.vn/edge-tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`);
+      const response = await fetch(`https://python.zentask.io.vn/edge-tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const audioBlob = await response.blob();
       return URL.createObjectURL(audioBlob);
@@ -83,7 +83,7 @@ export const useEtcStore = create<EtcState>((set, get) => ({
   },
   textToSpeechStreaming: async (text, voice) => {
     try {
-      const response = await fetch(`https://python.quizzet.id.vn/edge-tts-streaming?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`);
+      const response = await fetch(`https://python.zentask.io.vn/edge-tts-streaming?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const audioBlob = await response.blob();
       return URL.createObjectURL(audioBlob);
