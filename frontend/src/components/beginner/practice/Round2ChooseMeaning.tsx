@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Volume2, CheckCircle } from "lucide-react";
+import { Volume2, CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
 import { Button } from "@/src/components/ui/Button";
@@ -13,7 +13,7 @@ interface Round2ChooseMeaningProps {
 }
 
 export function Round2ChooseMeaning({ topicId, currentWord, allLessonWords, isCorrect, onCheckAnswer }: Round2ChooseMeaningProps) {
-  const { playAudio } = useTTSAudio();
+  const { playAudio, isLoading, loadingText } = useTTSAudio();
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
   const options = useMemo(() => {
@@ -36,8 +36,16 @@ export function Round2ChooseMeaning({ topicId, currentWord, allLessonWords, isCo
       <h2 className="text-2xl font-bold text-slate-800">Nghĩa của từ này là gì?</h2>
       <div className="text-center mb-8">
         <p className="font-bold text-4xl text-blue-600 mb-4">{currentWord?.term}</p>
-        <Button onClick={() => playAudio(currentWord?.term)} className="text-blue-500 hover:bg-blue-50 p-2 rounded-full inline-flex">
-          <Volume2 className="w-6 h-6" />
+        <Button
+          onClick={() => playAudio(currentWord?.term)}
+          disabled={isLoading && loadingText === currentWord?.term}
+          className="text-blue-500 hover:bg-blue-50 p-2 rounded-full inline-flex disabled:opacity-75"
+        >
+          {isLoading && loadingText === currentWord?.term ? (
+            <Loader2 className="w-6 h-6 animate-spin" />
+          ) : (
+            <Volume2 className="w-6 h-6" />
+          )}
         </Button>
       </div>
 

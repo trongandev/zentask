@@ -12,7 +12,7 @@ interface Round3PronunciationProps {
 }
 
 export function Round3Pronunciation({ currentWord, isCorrect, setIsCorrect }: Round3PronunciationProps) {
-  const { playAudio } = useTTSAudio();
+  const { playAudio, isLoading, loadingText } = useTTSAudio();
 
   const { status, result, mainScore, startRecording, stopRecording, resetState } = usePronunciationAssessment({
     targetText: currentWord?.term || "",
@@ -35,9 +35,14 @@ export function Round3Pronunciation({ currentWord, isCorrect, setIsCorrect }: Ro
       <div className="flex flex-col items-center gap-8 mt-12">
         <Button
           onClick={() => playAudio(currentWord.term, currentWord.langCode)}
-          className="w-24 h-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:scale-105 transition-all"
+          disabled={isLoading && loadingText === currentWord.term}
+          className="w-24 h-24 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:scale-105 transition-all disabled:opacity-75"
         >
-          <Volume2 className="w-12 h-12" />
+          {isLoading && loadingText === currentWord.term ? (
+            <Loader2 className="w-12 h-12 animate-spin" />
+          ) : (
+            <Volume2 className="w-12 h-12" />
+          )}
         </Button>
         <p className="font-bold text-3xl">{currentWord.term}</p>
         {mainScore !== null && (

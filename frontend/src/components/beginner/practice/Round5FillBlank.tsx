@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Volume2, CheckCircle } from "lucide-react";
+import { Volume2, CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
 import { Button } from "@/src/components/ui/Button";
@@ -13,7 +13,7 @@ interface Round5FillBlankProps {
 }
 
 export function Round5FillBlank({ topicId, currentWord, allLessonWords, isCorrect, onCheckAnswer }: Round5FillBlankProps) {
-  const { playAudio } = useTTSAudio();
+  const { playAudio, isLoading, loadingText } = useTTSAudio();
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
   // Generate blank sentence
@@ -49,16 +49,23 @@ export function Round5FillBlank({ topicId, currentWord, allLessonWords, isCorrec
     onCheckAnswer(term, correct);
   };
 
+  const targetAudioText = currentWord?.examples?.[0]?.en || currentWord?.term;
+
   return (
     <div className="space-y-6 animate-in slide-in-from-right text-center flex flex-col items-center">
       <h2 className="text-2xl font-bold text-slate-800 mb-8">Hoàn thành câu</h2>
       
       <div className="bg-white p-8 rounded-3xl border-2 border-slate-100 shadow-sm w-full max-w-lg mb-8">
         <Button
-          onClick={() => playAudio(currentWord?.examples?.[0]?.en || currentWord?.term)}
-          className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 hover:bg-blue-200 hover:scale-110 transition-all"
+          onClick={() => playAudio(targetAudioText)}
+          disabled={isLoading && loadingText === targetAudioText}
+          className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 hover:bg-blue-200 hover:scale-110 transition-all disabled:opacity-75"
         >
-          <Volume2 className="w-8 h-8" />
+          {isLoading && loadingText === targetAudioText ? (
+            <Loader2 className="w-8 h-8 animate-spin" />
+          ) : (
+            <Volume2 className="w-8 h-8" />
+          )}
         </Button>
 
         {sentenceWithBlank.hasExample ? (
