@@ -23,9 +23,15 @@ export function BeginnerLayout() {
     (location.pathname.includes("/arena") && location.pathname !== "/beginner/arena") ||
     (location.pathname.includes("/rank/") && location.pathname !== "/beginner/rank");
 
+  const isHideHeader =
+    location.pathname.includes("/beginner/listening") ||
+    location.pathname.includes("/beginner/speaking") ||
+    location.pathname.includes("/beginner/reading");
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden relative">
       {/* Header */}
+      {!isHideHeader && (
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm px-4 py-3 flex items-center">
         <Button
           onClick={() => {
@@ -41,6 +47,7 @@ export function BeginnerLayout() {
         </Button>
         <h1 className="ml-2 text-lg font-bold">{isLessonPage ? "Học bài mới" : "Lộ trình cho người mới"}</h1>
       </header>
+      )}
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pb-24">

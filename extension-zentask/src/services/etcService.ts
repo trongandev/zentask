@@ -1,9 +1,7 @@
 class EtcService {
   async textToSpeech(text: string, voice: string = "en-US-JennyNeural") {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_PYTHON}/edge-tts?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`,
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_PYTHON}/edge-tts-stream?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -19,11 +17,7 @@ class EtcService {
     }
   }
 
-  async enhanceWithAI(
-    text: string,
-    target_language: string = "tiếng việt",
-    token: string = "",
-  ) {
+  async enhanceWithAI(text: string, target_language: string = "tiếng việt", token: string = "") {
     try {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -32,14 +26,11 @@ class EtcService {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_ENDPOINT}/flashcards/translate`,
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ word: text, language: target_language }),
-        },
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}/flashcards/translate`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ word: text, language: target_language }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -52,11 +43,7 @@ class EtcService {
     }
   }
 
-  async createFlashcardWithAI(
-    path: string,
-    payload: any,
-    token: string,
-  ) {
+  async createFlashcardWithAI(path: string, payload: any, token: string) {
     try {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -65,14 +52,11 @@ class EtcService {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_API_ENDPOINT}${path}`,
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify(payload),
-        },
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_ENDPOINT}${path}`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

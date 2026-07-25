@@ -41,8 +41,6 @@ export const useTTSAudio = () => {
     try {
       const audioUrl = await useEtcStore.getState().textToSpeech(text, voice);
       audioCache.set(cacheKey, audioUrl);
-    } catch (error) {
-      console.error("Preload error:", error);
     } finally {
       preloadingSet.delete(cacheKey);
     }

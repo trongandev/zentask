@@ -151,6 +151,10 @@ export function BeginnerSkills() {
               onClick={() => {
                 if (skill.id === "listening") {
                   navigate("/beginner/listening");
+                } else if (skill.id === "speaking") {
+                  navigate("/beginner/speaking");
+                } else if (skill.id === "reading") {
+                  navigate("/beginner/reading");
                 } else {
                   navigate(`/beginner/skill/${skill.id}`);
                 }

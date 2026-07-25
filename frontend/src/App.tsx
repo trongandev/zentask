@@ -100,6 +100,11 @@ const BeginnerGrammarLesson = lazy(() => import('./pages/Beginner/BeginnerGramma
 const BeginnerSkills = lazy(() => import('./pages/Beginner/BeginnerSkills').then(m => ({ default: m.BeginnerSkills })));
 const BeginnerSkillComingSoon = lazy(() => import('./pages/Beginner/BeginnerSkillComingSoon').then(m => ({ default: m.BeginnerSkillComingSoon })));
 const BeginnerListening = lazy(() => import('./pages/Beginner/BeginnerListening').then(m => ({ default: m.BeginnerListening })));
+const BeginnerListeningDetail = lazy(() => import('./pages/Beginner/BeginnerListeningDetail').then(m => ({ default: m.BeginnerListeningDetail })));
+const BeginnerSpeaking = lazy(() => import('./pages/Beginner/BeginnerSpeaking').then(m => ({ default: m.BeginnerSpeaking })));
+const BeginnerSpeakingDetail = lazy(() => import('./pages/Beginner/BeginnerSpeakingDetail').then(m => ({ default: m.BeginnerSpeakingDetail })));
+const BeginnerReading = lazy(() => import('./pages/Beginner/BeginnerReading').then(m => ({ default: m.BeginnerReading })));
+const BeginnerReadingDetail = lazy(() => import('./pages/Beginner/BeginnerReadingDetail').then(m => ({ default: m.BeginnerReadingDetail })));
 const BeginnerRank = lazy(() => import('./pages/Beginner/BeginnerRank').then(m => ({ default: m.BeginnerRank })));
 const BeginnerArena = lazy(() => import('./pages/Beginner/BeginnerArena').then(m => ({ default: m.BeginnerArena })));
 const BeginnerFlashcardDetail = lazy(() => import('./pages/Flashcard/BeginnerFlashcardDetail').then(m => ({ default: m.BeginnerFlashcardDetail })));
@@ -388,6 +393,11 @@ function AppContent() {
             <Route path="beginner/grammar/:topicId" element={<BeginnerGrammarLesson />} />
             <Route path="beginner/skills" element={<BeginnerSkills />} />
             <Route path="beginner/listening" element={<BeginnerListening />} />
+            <Route path="beginner/listening/:id" element={<BeginnerListeningDetail />} />
+            <Route path="beginner/speaking" element={<BeginnerSpeaking />} />
+            <Route path="beginner/speaking/:id" element={<BeginnerSpeakingDetail />} />
+            <Route path="beginner/reading" element={<BeginnerReading />} />
+            <Route path="beginner/reading/:id" element={<BeginnerReadingDetail />} />
             <Route path="beginner/skill/:skillId" element={<BeginnerSkillComingSoon />} />
             <Route path="beginner/rank" element={<BeginnerRank />} />
             <Route path="beginner/arena" element={<BeginnerArena />} />
