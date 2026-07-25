@@ -42,7 +42,9 @@ interface UserProfile {
     onboarding?: OnboardingState;
     targetLanguage?: string | null;
     learningLanguages?: string[];
-    listeningPreferences?: string[];
+    languageLevels?: Record<string, string>;
+    learningPreferences?: string[];
+    dailyLearningOptIn?: boolean;
 }
 
 interface AuthContextType {

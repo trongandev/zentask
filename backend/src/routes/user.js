@@ -320,6 +320,11 @@ router.put(
       user.learningLanguages.push(languageCode);
     }
 
+    if (level) {
+      if (!user.languageLevels) user.languageLevels = new Map();
+      user.languageLevels.set(languageCode, level);
+    }
+
     let targetRankId = 1;
     let targetTier = 3;
 
@@ -332,9 +337,6 @@ router.put(
         if (tier && tier.rankId) {
           targetRankId = tier.rankId.rankId;
           targetTier = tier.tierNum;
-          // Set user's languageLevels map
-          if (!user.languageLevels) user.languageLevels = new Map();
-          user.languageLevels.set(languageCode, level);
         }
       }
     }
@@ -357,13 +359,17 @@ router.put(
       });
     }
 
+    const languageLevelsObj = user.languageLevels instanceof Map 
+      ? Object.fromEntries(user.languageLevels) 
+      : (user.languageLevels ? Object.fromEntries(user.languageLevels) : {});
+
     res.json({
       status: "success",
       targetLanguage: languageCode,
       learningLanguages: user.learningLanguages,
       rankId: user.rankId,
       tier: user.tier,
-      level: user.languageLevels?.get(languageCode),
+      languageLevels: languageLevelsObj,
     });
   }),
 );

@@ -109,9 +109,17 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: ['en'],
     },
-    listeningPreferences: {
+    learningPreferences: {
       type: [String],
       default: [],
+    },
+    dailyLearningOptIn: {
+      type: Boolean,
+      default: false,
+    },
+    lastActiveDate: {
+      type: Date,
+      default: null,
     },
     languageLevels: {
       type: Map,

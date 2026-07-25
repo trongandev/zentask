@@ -7,6 +7,8 @@ import { Modal } from "@/src/components/ui/Modal";
 import { useAuth } from "../../contexts/AuthContext";
 import axiosInstance from "@/src/services/axiosConfig";
 import toastService from "@/src/services/toastService";
+import { LANGUAGE_LEVELS } from "../../config/languageLevels";
+import { Loader2 } from "lucide-react";
 
 const SKILLS = [
   {
@@ -85,12 +87,40 @@ export function BeginnerSkills() {
   const [step, setStep] = useState(1);
   const [selectedPrefs, setSelectedPrefs] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGeneratingDev, setIsGeneratingDev] = useState(false);
+  const [dailyTasks, setDailyTasks] = useState<any[]>([]);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(true);
 
   useEffect(() => {
-    if (user && (!user.listeningPreferences || user.listeningPreferences.length === 0)) {
+    if (user && !user.dailyLearningOptIn) {
       setShowModal(true);
     }
   }, [user]);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const res = await axiosInstance.get("/api/beginner/daily-tasks");
+        setDailyTasks(res.data.tasks || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoadingTasks(false);
+      }
+    };
+    if (user?.dailyLearningOptIn) {
+      fetchTasks();
+    } else {
+      setIsLoadingTasks(false);
+    }
+  }, [user]);
+
+  // Determine user level string
+  const targetLang = user?.targetLanguage || "en";
+  const langLevels = LANGUAGE_LEVELS[targetLang] || LANGUAGE_LEVELS["en"];
+  const userLevelId = user?.languageLevels?.[targetLang] || langLevels[0].id;
+  const levelObj = langLevels.find((l) => l.id === userLevelId) || langLevels[0];
+  const userLevelStr = levelObj.name.split(" ")[0] || "A1";
 
   const togglePref = (id: string) => {
     setSelectedPrefs((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
@@ -103,15 +133,29 @@ export function BeginnerSkills() {
     }
     setIsSaving(true);
     try {
-      await axiosInstance.put("/api/user/profile", {
-        listeningPreferences: selectedPrefs,
+      await axiosInstance.post("/api/beginner/opt-in", {
+        preferences: selectedPrefs,
       });
-      updateUser({ listeningPreferences: selectedPrefs });
+      updateUser({ learningPreferences: selectedPrefs, dailyLearningOptIn: true });
       setStep(2);
-    } catch (err) {
-      toastService.error("Có lỗi xảy ra, vui lòng thử lại.");
+    } catch (error) {
+      console.error(error);
+      toastService.error("Có lỗi xảy ra khi lưu sở thích.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDevGenerate = async () => {
+    setIsGeneratingDev(true);
+    try {
+      await axiosInstance.post("/api/beginner/dev-generate-tasks");
+      toastService.success("Đã ra lệnh sinh dữ liệu. Vui lòng tải lại trang sau ít phút.");
+    } catch (error) {
+      console.error(error);
+      toastService.error("Có lỗi xảy ra khi gọi lệnh sinh data.");
+    } finally {
+      setIsGeneratingDev(false);
     }
   };
 
@@ -122,9 +166,19 @@ export function BeginnerSkills() {
         <div className="z-10 text-center md:text-left space-y-4 max-w-lg">
           <h1 className="text-3xl font-black">Luyện tập 4 Kỹ Năng</h1>
           <p className="text-indigo-100 text-lg">Áp dụng ngay từ vựng và ngữ pháp bạn đã học vào 4 kỹ năng Nghe - Nói - Đọc - Viết để ghi nhớ sâu hơn.</p>
-          <div className="flex items-center gap-3 justify-center md:justify-start bg-indigo-700/30 px-4 py-2 rounded-xl w-fit backdrop-blur-sm">
-            <Trophy className="w-5 h-5 text-yellow-300" />
-            <span className="font-bold text-sm">Thử thách hằng ngày: 0/4 hoàn thành</span>
+          <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
+            <div className="flex items-center gap-2 bg-indigo-700/30 px-4 py-2 rounded-xl backdrop-blur-sm">
+              <Trophy className="w-5 h-5 text-yellow-300" />
+              <span className="font-bold text-sm">
+                Thử thách hằng ngày: {dailyTasks.filter(t => t.status === 'completed').length}/{Math.max(4, dailyTasks.length)} hoàn thành
+              </span>
+            </div>
+            {import.meta.env.MODE === "development" && (
+              <Button onClick={handleDevGenerate} disabled={isGeneratingDev} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-xl shadow-lg border-2 border-orange-400">
+                {isGeneratingDev ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : null}
+                [DEV] Sinh dữ liệu ngay
+              </Button>
+            )}
           </div>
         </div>
         <img src="/mascot/Lopy (1).png" alt="Mascot" className="w-44 h-44 object-contain z-10 mt-6 md:mt-0 animate-bounce-slow" />
@@ -133,38 +187,41 @@ export function BeginnerSkills() {
       </div>
 
       {/* Skills Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {SKILLS.map((skill) => (
-          <div
-            key={skill.id}
-            className="group bg-white rounded-3xl p-6 border-2 border-slate-100 hover:border-indigo-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
-          >
-            <div className="flex justify-between items-start mb-6">
-              <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm", skill.lightColor, skill.textColor)}>{skill.icon}</div>
-              <span className="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">{skill.level}</span>
-            </div>
-
-            <h3 className="text-2xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{skill.title}</h3>
-            <p className="text-slate-500 line-clamp-2 flex-1 mb-6">{skill.description}</p>
-
-            <Button
-              onClick={() => {
-                if (skill.id === "listening") {
-                  navigate("/beginner/listening");
-                } else if (skill.id === "speaking") {
-                  navigate("/beginner/speaking");
-                } else if (skill.id === "reading") {
-                  navigate("/beginner/reading");
-                } else {
-                  navigate(`/beginner/skill/${skill.id}`);
-                }
-              }}
-              className="w-full py-3 bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors border border-slate-200 hover:border-indigo-200"
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold text-slate-700">Danh sách kỹ năng</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {SKILLS.map((skill) => (
+            <div
+              key={skill.id}
+              className="group bg-white rounded-3xl p-6 border-2 border-slate-100 hover:border-slate-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
             >
-              <PlayCircle className="w-5 h-5" /> Bắt đầu luyện
-            </Button>
-          </div>
-        ))}
+              <div className="flex justify-between items-start mb-6">
+                <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm", skill.lightColor, skill.textColor)}>{skill.icon}</div>
+                <span className="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">{userLevelStr}</span>
+              </div>
+
+              <h3 className="text-2xl font-bold text-slate-800 mb-2 group-hover:text-slate-600 transition-colors">{skill.title}</h3>
+              <p className="text-slate-500 line-clamp-2 flex-1 mb-6">{skill.description}</p>
+
+              <Button
+                onClick={() => {
+                  if (skill.id === "listening") {
+                    navigate("/beginner/listening");
+                  } else if (skill.id === "speaking") {
+                    navigate("/beginner/speaking");
+                  } else if (skill.id === "reading") {
+                    navigate("/beginner/reading");
+                  } else {
+                    navigate(`/beginner/skill/${skill.id}`);
+                  }
+                }}
+                className="w-full py-3 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors border border-slate-200"
+              >
+                <PlayCircle className="w-5 h-5" /> Bắt đầu luyện
+              </Button>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Daily Challenge Banner */}
@@ -184,8 +241,8 @@ export function BeginnerSkills() {
       <Modal isOpen={showModal} onClose={() => step === 2 && setShowModal(false)} hideCloseButton={step === 1}>
         {step === 1 ? (
           <div className="p-6">
-            <h2 className="text-2xl font-black text-slate-800 mb-2">Chọn nội dung bạn thích nghe</h2>
-            <p className="text-slate-500 mb-6 text-sm">Zentask sẽ lưu lại sở thích của bạn để thiết kế các bài học phù hợp nhất! (Có thể chọn nhiều)</p>
+            <h2 className="text-2xl font-black text-slate-800 mb-2">Chọn nội dung bạn thích học</h2>
+            <p className="text-slate-500 mb-6 text-sm">Zentask sẽ lưu lại sở thích của bạn để thiết kế các bài học lộ trình cá nhân hóa phù hợp nhất! (Có thể chọn nhiều)</p>
 
             <div className="space-y-3 mb-8">
               {PREFERENCES.map((pref) => {
@@ -215,67 +272,17 @@ export function BeginnerSkills() {
             </Button>
           </div>
         ) : (
-          <div className="p-6">
-            <h2 className="text-2xl font-black text-slate-800 mb-6 text-center">Mẹo nhỏ giúp bạn luyện nghe</h2>
-
-            <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-              <div className="bg-red-50 border border-red-100 rounded-2xl p-4">
-                <h3 className="font-bold text-red-700 mb-2">Sai lầm thường gặp khi luyện nghe</h3>
-                <p className="text-sm text-slate-700 leading-relaxed">
-                  Một sai lầm phổ biến (và mình cũng từng mắc phải) là chọn bài nghe quá khó so với trình độ hiện tại. Vì muốn “thử thách bản thân”, nhiều bạn tra hàng trăm từ vựng mỗi ngày nhưng lại
-                  không áp dụng được trong nghe – nói. Kết quả là học xong thấy chán nản, không tiến bộ.
-                </p>
-                <p className="text-sm font-bold text-red-800 mt-2">👉 Bài học rút ra: hãy luyện nghe theo đúng trình độ của mình, và tăng độ khó từ từ.</p>
-              </div>
-
-              <div>
-                <h3 className="font-bold text-indigo-900 mb-3 text-lg border-b pb-2">Listening Focus cho từng trình độ</h3>
-
-                <div className="space-y-4">
-                  <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                    <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                      Beginner (A1–A2)
-                    </h4>
-                    <ul className="text-sm text-slate-600 space-y-1 list-disc list-inside ml-2">
-                      <li>Nghe đi nghe lại các video đã dịch để tăng phản xạ.</li>
-                      <li>Tập trung vào ý chính (main ideas) thay vì cố hiểu từng chi tiết.</li>
-                      <li>Chú ý ngữ điệu, trọng âm, cách lên xuống giọng.</li>
-                      <li>Học những mẫu câu thông dụng (daily expressions) để áp dụng ngay.</li>
-                    </ul>
-                  </div>
-
-                  <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                    <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                      Intermediate (B1–B2)
-                    </h4>
-                    <ul className="text-sm text-slate-600 space-y-1 list-disc list-inside ml-2">
-                      <li>Nghe các đoạn hội thoại nhanh hơn.</li>
-                      <li>Làm quen với idioms và slangs trong đời sống.</li>
-                      <li>Phân biệt và luyện theo accent (US, UK, AUS).</li>
-                      <li>Luyện kỹ năng context guessing: dựa vào ngữ cảnh, cử chỉ, biểu cảm để đoán nghĩa.</li>
-                    </ul>
-                  </div>
-
-                  <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                    <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                      Advanced (C1–C2)
-                    </h4>
-                    <ul className="text-sm text-slate-600 space-y-1 list-disc list-inside ml-2">
-                      <li>Tập trung vào fast speech (tốc độ tự nhiên, thậm chí nhanh).</li>
-                      <li>Học idioms nâng cao, từ vựng chuyên ngành (law, business…).</li>
-                      <li>Chú ý đến cultural jokes – câu chuyện cười, lối nói dí dỏm phản ánh văn hóa.</li>
-                      <li>Mở rộng nhiều chủ đề khác nhau để xây dựng bản sắc ngôn ngữ riêng.</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
+          <div className="p-8 text-center flex flex-col items-center justify-center">
+            <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
+              <CheckCircle2 className="w-10 h-10" />
             </div>
-
-            <Button onClick={() => setShowModal(false)} className="w-full mt-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl shadow-lg">
-              Đã hiểu và Bắt đầu luyện!
+            <h2 className="text-2xl font-black text-slate-800 mb-4">Đã lưu sở thích thành công!</h2>
+            <p className="text-slate-600 mb-8 leading-relaxed">
+              Chúng tôi đang thiết kế lộ trình phù hợp với bạn bằng AI.<br />
+              Bạn hãy quay lại vào ngày mai để bắt đầu những bài học cá nhân hóa đầu tiên nhé!
+            </p>
+            <Button onClick={() => setShowModal(false)} className="px-8 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl">
+              Đã hiểu
             </Button>
           </div>
         )}

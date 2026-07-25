@@ -78,8 +78,7 @@ export function BeginnerListeningDetail() {
   const navigate = useNavigate();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const data = id ? LISTENING_DATA[id] : null;
-
+  const [data, setData] = useState<any>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -88,6 +87,44 @@ export function BeginnerListeningDetail() {
 
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    if (id.length === 24) {
+      // MongoDB ObjectId -> Fetch AI generated task
+      import("@/src/services/axiosConfig").then(({ default: axiosInstance }) => {
+        axiosInstance.get(`/api/beginner/skill-task/${id}`)
+          .then(res => {
+            const taskData = res.data.task;
+            const mappedData = {
+              title: taskData.content.topic?.en || taskData.topic,
+              desc: `Chủ đề: ${taskData.content.topic?.vi || taskData.topic}. Lắng nghe và trả lời câu hỏi bên dưới.`,
+              conversation: taskData.content.dialogues.map((d: any, idx: number) => ({
+                id: idx + 1,
+                speaker: d.speaker,
+                text: d.text,
+                voice: d.voice
+              })),
+              questions: taskData.content.questions.map((q: any, idx: number) => ({
+                id: idx + 1,
+                question: q.question,
+                options: q.options,
+                correctAnswer: q.correctAnswer,
+                explanation: q.explanation
+              }))
+            };
+            setData(mappedData);
+          })
+          .catch(err => {
+            console.error(err);
+            toastService.error("Không tìm thấy bài tập");
+          });
+      });
+    } else {
+      setData(LISTENING_DATA[id] || null);
+    }
+  }, [id]);
 
   useEffect(() => {
     if (!data) return;
@@ -96,19 +133,11 @@ export function BeginnerListeningDetail() {
     const loadAudio = async () => {
       setIsLoadingAudio(true);
       try {
-        const blobPromises = data.conversation.map(async (line) => {
-          const res = await fetch(`https://python.zentask.io.vn/edge-tts-stream?text=${encodeURIComponent(line.text)}&voice=${encodeURIComponent(line.voice)}`);
-          if (!res.ok) throw new Error("Audio fetch failed");
-          return await res.blob();
-        });
-
-        const blobs = await Promise.all(blobPromises);
+        const { generateConversationAudio } = await import("../../hooks/useTTSAudio");
+        const url = await generateConversationAudio(data.conversation);
         if (!isActive) return;
-
-        const combinedBlob = new Blob(blobs, { type: "audio/mpeg" });
-        const url = URL.createObjectURL(combinedBlob);
+        
         setAudioUrl(url);
-
         if (audioRef.current) {
           audioRef.current.load();
         }
@@ -238,15 +267,26 @@ export function BeginnerListeningDetail() {
 
         {/* Transcript */}
         <div className="mb-10">
-          <h2 className="text-xl font-bold text-slate-800 mb-4">Nội dung (Transcript)</h2>
-          <div className="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100/50 space-y-3 max-h-60 overflow-y-auto custom-scrollbar">
-            {data.conversation.map((line) => (
-              <div key={line.id} className="flex gap-3">
-                <span className="font-bold text-indigo-900 whitespace-nowrap">{line.speaker}:</span>
-                <span className="text-slate-700">{line.text}</span>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-slate-800">Nội dung (Transcript)</h2>
+            <Button
+              onClick={() => setShowTranscript(!showTranscript)}
+              className="text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl"
+            >
+              {showTranscript ? "Ẩn nội dung" : "Hiện nội dung"}
+            </Button>
           </div>
+          
+          {showTranscript && (
+            <div className="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100/50 space-y-3 max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
+              {data.conversation.map((line: any) => (
+                <div key={line.id} className="flex gap-3">
+                  <span className="font-bold text-indigo-900 whitespace-nowrap">{line.speaker}:</span>
+                  <span className="text-slate-700">{line.text}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Questions */}

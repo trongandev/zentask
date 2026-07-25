@@ -16,6 +16,7 @@ import jwt from "jsonwebtoken";
 import connectDB from "./config/db.js";
 import { SystemLog, BannedIP } from "./models/Schemas.js";
 import { initializeSocket } from "./socket/index.js";
+import { initCronJobs } from "./services/cronService.js";
 
 // Route imports
 import authRoutes from "./routes/auth.js";
@@ -50,6 +51,9 @@ const port = process.env.PORT || 3001;
 
 // Connect to MongoDB
 connectDB();
+
+// Khởi tạo các cron job tự động
+initCronJobs();
 
 const server = http.createServer(app);
 

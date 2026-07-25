@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middleware/auth.js";
-import { getBeginnerProgress, completeGrammarTopic, seedBeginnerData, getBeginnerRanks, getBeginnerLesson, getBeginnerStats } from "../controllers/beginnerController.js";
+import { getBeginnerProgress, completeGrammarTopic, seedBeginnerData, getBeginnerRanks, getBeginnerLesson, getBeginnerStats, optInDailyLearning, devGenerateTasks, getDailyTasks, getSkillTaskById } from "../controllers/beginnerController.js";
 
 const router = express.Router();
 
@@ -14,7 +14,11 @@ router.get("/lesson/:lessonId", verifyToken, getBeginnerLesson);
 
 router.use(verifyToken);
 
-router.get("/progress", verifyToken, getBeginnerProgress);
+router.post("/opt-in", optInDailyLearning);
+router.post("/dev-generate-tasks", devGenerateTasks);
+router.get("/daily-tasks", getDailyTasks);
+router.get("/skill-task/:id", getSkillTaskById);
+router.get("/progress", getBeginnerProgress);
 router.get("/stats", verifyToken, getBeginnerStats);
 router.post("/grammar/complete", verifyToken, completeGrammarTopic);
 

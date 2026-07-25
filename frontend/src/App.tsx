@@ -105,6 +105,8 @@ const BeginnerSpeaking = lazy(() => import('./pages/Beginner/BeginnerSpeaking').
 const BeginnerSpeakingDetail = lazy(() => import('./pages/Beginner/BeginnerSpeakingDetail').then(m => ({ default: m.BeginnerSpeakingDetail })));
 const BeginnerReading = lazy(() => import('./pages/Beginner/BeginnerReading').then(m => ({ default: m.BeginnerReading })));
 const BeginnerReadingDetail = lazy(() => import('./pages/Beginner/BeginnerReadingDetail').then(m => ({ default: m.BeginnerReadingDetail })));
+const BeginnerWriting = lazy(() => import('./pages/Beginner/BeginnerWriting').then(m => ({ default: m.BeginnerWriting })));
+const BeginnerWritingDetail = lazy(() => import('./pages/Beginner/BeginnerWritingDetail').then(m => ({ default: m.BeginnerWritingDetail })));
 const BeginnerRank = lazy(() => import('./pages/Beginner/BeginnerRank').then(m => ({ default: m.BeginnerRank })));
 const BeginnerArena = lazy(() => import('./pages/Beginner/BeginnerArena').then(m => ({ default: m.BeginnerArena })));
 const BeginnerFlashcardDetail = lazy(() => import('./pages/Flashcard/BeginnerFlashcardDetail').then(m => ({ default: m.BeginnerFlashcardDetail })));
@@ -398,6 +400,8 @@ function AppContent() {
             <Route path="beginner/speaking/:id" element={<BeginnerSpeakingDetail />} />
             <Route path="beginner/reading" element={<BeginnerReading />} />
             <Route path="beginner/reading/:id" element={<BeginnerReadingDetail />} />
+            <Route path="beginner/writing" element={<BeginnerWriting />} />
+            <Route path="beginner/writing/:id" element={<BeginnerWritingDetail />} />
             <Route path="beginner/skill/:skillId" element={<BeginnerSkillComingSoon />} />
             <Route path="beginner/rank" element={<BeginnerRank />} />
             <Route path="beginner/arena" element={<BeginnerArena />} />

@@ -167,8 +167,11 @@ router.get("/me", verifyToken, async (req, res) => {
     }
     const userProfile = userProfileDoc.toJSON();
 
-    // Rank info is now globally retrieved directly from the User model (userProfile)
-    // No need to query UserLanguageProgress for rankId, tier, stars anymore.
+    if (userProfile.languageLevels instanceof Map) {
+      userProfile.languageLevels = Object.fromEntries(userProfile.languageLevels);
+    } else if (userProfileDoc.languageLevels && typeof userProfileDoc.languageLevels.get === 'function') {
+      userProfile.languageLevels = Object.fromEntries(userProfileDoc.languageLevels);
+    }
 
     // Fetch custom grammar tests
     try {

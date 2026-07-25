@@ -141,3 +141,15 @@ export const useTTSAudio = () => {
 
   return { playAudio, pauseAudio, stopAudio, preloadAudio, playSoundEffect, isPlaying, isLoading, loadingText, playingText };
 };
+
+export const generateConversationAudio = async (conversation: { text: string; voice: string }[]): Promise<string> => {
+  const blobPromises = conversation.map(async (line) => {
+    const res = await fetch(`https://python.zentask.io.vn/edge-tts-stream?text=${encodeURIComponent(line.text)}&voice=${encodeURIComponent(line.voice)}`);
+    if (!res.ok) throw new Error("Audio fetch failed");
+    return await res.blob();
+  });
+
+  const blobs = await Promise.all(blobPromises);
+  const combinedBlob = new Blob(blobs, { type: "audio/mpeg" });
+  return URL.createObjectURL(combinedBlob);
+};

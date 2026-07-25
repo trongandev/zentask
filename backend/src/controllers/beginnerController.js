@@ -1,5 +1,8 @@
 import { BeginnerProgress } from "../models/Schemas.js";
 import { Course, CourseRank, CourseTier, CourseLesson } from "../models/Course.js";
+import User from "../models/User.js";
+import BeginnerSkill from "../models/beginnerSkill.js";
+import { generateTasksForUser } from '../services/beginnerSkillGenerator.js';
 
 export const getBeginnerProgress = async (req, res) => {
   try {
@@ -9,6 +12,8 @@ export const getBeginnerProgress = async (req, res) => {
     if (!progress) {
       progress = await BeginnerProgress.create({
         uid,
+        userId: uid,           // Tránh lỗi index duplicate userId_1_lessonId_1 do schema cũ
+        lessonId: "general",   // Tránh lỗi index duplicate userId_1_lessonId_1 do schema cũ
         completedGrammarTopics: [],
         completedSkills: [],
       });
@@ -250,6 +255,84 @@ export const getBeginnerStats = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in getBeginnerStats:", error);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+export const optInDailyLearning = async (req, res) => {
+  try {
+    const uid = req.user.uid || req.user.id || req.user._id;
+    const { preferences } = req.body;
+
+    if (!Array.isArray(preferences) || preferences.length === 0) {
+      return res.status(400).json({ message: "Vui lòng chọn ít nhất 1 chủ đề yêu thích." });
+    }
+
+    const user = await User.findById(uid);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.learningPreferences = preferences;
+    user.dailyLearningOptIn = true;
+    user.lastActiveDate = new Date();
+    await user.save();
+
+    // Trigger async function to generate Day 1 tasks immediately if they don't exist yet for today
+    generateTasksForUser(user).catch(err => console.error("Error generating initial tasks:", err));
+
+    res.json({ message: "Đã lưu sở thích và kích hoạt Lộ trình hằng ngày!", preferences });
+  } catch (error) {
+    console.error("Error in optInDailyLearning:", error);
+    res.status(500).json({ message: "Lỗi server khi đăng ký lộ trình" });
+  }
+};
+
+export const getDailyTasks = async (req, res) => {
+  try {
+    const uid = req.user.uid || req.user.id || req.user._id;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tasks = await BeginnerSkill.find({
+      userId: uid,
+      date: { $gte: today }
+    }).sort({ createdAt: -1 });
+
+    res.json({ tasks });
+  } catch (error) {
+    console.error("Error fetching daily tasks:", error);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+export const getSkillTaskById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const task = await BeginnerSkill.findById(id);
+    if (!task) {
+      return res.status(404).json({ message: "Không tìm thấy bài tập này" });
+    }
+    res.json({ task });
+  } catch (error) {
+    console.error("Error fetching skill task by ID:", error);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+export const devGenerateTasks = async (req, res) => {
+  try {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(403).json({ message: "Chức năng này chỉ dành cho môi trường phát triển." });
+    }
+    const uid = req.user.uid || req.user.id || req.user._id;
+    const user = await User.findById(uid);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Force trigger background task
+    generateTasksForUser(user).catch(err => console.error("Dev trigger error:", err));
+
+    res.json({ message: "Đang tiến hành tạo bài tập mới ở background..." });
+  } catch (error) {
+    console.error("Error in devGenerateTasks:", error);
     res.status(500).json({ message: "Lỗi server" });
   }
 };

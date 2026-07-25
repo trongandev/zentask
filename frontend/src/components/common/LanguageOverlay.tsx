@@ -108,7 +108,11 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
     try {
       const res = await axiosInstance.put("/api/user/language-level", { languageCode: selectedLang, level });
       if (res.data.status === "success") {
-        updateUser({ targetLanguage: res.data.targetLanguage, learningLanguages: res.data.learningLanguages });
+        updateUser({ 
+          targetLanguage: res.data.targetLanguage, 
+          learningLanguages: res.data.learningLanguages,
+          languageLevels: res.data.languageLevels 
+        });
         onSelect(res.data.targetLanguage);
         setStep("LANGUAGE");
         localStorage.removeItem("zentask_placement_test");

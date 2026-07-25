@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/src/components/ui/Button";
@@ -93,13 +93,42 @@ export function BeginnerReadingDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  const data = id ? READING_DATA[id] : null;
-
+  const [data, setData] = useState<any>(null);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showResults, setShowResults] = useState(false);
 
+  useEffect(() => {
+    if (!id) return;
+    if (id.length === 24) {
+      import("@/src/services/axiosConfig").then(({ default: axiosInstance }) => {
+        axiosInstance.get(`/api/beginner/skill-task/${id}`)
+          .then(res => {
+            const taskData = res.data.task;
+            const mappedData = {
+              title: taskData.content.topic?.en || taskData.topic,
+              content: taskData.content.passage,
+              questions: taskData.content.questions.map((q: any, i: number) => ({
+                id: i + 1,
+                question: q.question,
+                options: q.options,
+                correctAnswer: q.correctAnswer,
+                explanation: q.explanation
+              }))
+            };
+            setData(mappedData);
+          })
+          .catch(err => {
+            console.error(err);
+            toastService.error("Không tìm thấy bài tập");
+          });
+      });
+    } else {
+      setData(READING_DATA[id] || null);
+    }
+  }, [id]);
+
   if (!data) {
-    return <div className="p-8 text-center">Không tìm thấy bài luyện tập.</div>;
+    return <div className="p-8 text-center">Đang tải dữ liệu...</div>;
   }
 
   const handleSelectAnswer = (qId: number, option: string) => {
