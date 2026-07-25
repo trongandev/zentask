@@ -452,8 +452,8 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
               disabled={ttsLoading || status === "recording" || status === "checking"}
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-50 px-5 py-3 font-bold text-blue-600 transition hover:bg-blue-100 disabled:opacity-50"
             >
-              <Volume2 className="h-5 w-5" />
-              Nghe mẫu
+              {ttsLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Volume2 className="h-5 w-5" />}
+              {ttsLoading ? "Đang phát..." : "Nghe mẫu"}
             </Button>
 
             {status === "recording" ? (

@@ -43,7 +43,14 @@ export function Round3Pronunciation({ currentWord, isCorrect, setIsCorrect }: Ro
         {mainScore !== null && (
           <div className="text-center mt-2">
             <p className={cn("text-2xl font-black", mainScore >= 50 ? "text-green-500" : "text-yellow-500")}>{mainScore}/100</p>
-            {mainScore < 50 && <p className="text-yellow-500 font-medium mt-1">Cần cố gắng thêm nhé!</p>}
+            {mainScore < 50 && (
+              <div className="mt-2 space-y-1">
+                <p className="text-yellow-500 font-semibold">Cần cố gắng thêm nhé!</p>
+                <p className="text-slate-500 text-sm max-w-sm mx-auto leading-relaxed">
+                  Bạn có thể bấm vào mic để thử lại nhé hoặc bấm nút tiếp tục để qua câu hỏi khác.
+                </p>
+              </div>
+            )}
 
             <div className="flex gap-2 justify-center mt-4 text-xl font-bold">
               {pickWords(result).map((wResult: any, i: number) => {
@@ -72,12 +79,19 @@ export function Round3Pronunciation({ currentWord, isCorrect, setIsCorrect }: Ro
           </div>
         )}
         <Button
-          onClick={status === "recording" ? stopRecording : startRecording}
-          disabled={status === "checking" || isCorrect === true}
+          onClick={() => {
+            if (status === "recording") {
+              stopRecording();
+            } else {
+              setIsCorrect(null);
+              startRecording();
+            }
+          }}
+          disabled={status === "checking"}
           className={cn(
             "w-20 h-20 mt-8 rounded-full flex items-center justify-center transition-all border-4 shadow-xl text-white",
             status === "recording" ? "bg-red-500 animate-pulse border-red-200" : "bg-blue-500 hover:bg-blue-600 border-blue-200",
-            (status === "checking" || isCorrect === true) && "opacity-50 cursor-not-allowed",
+            status === "checking" && "opacity-50 cursor-not-allowed",
           )}
         >
           {status === "checking" ? <Loader2 className="w-8 h-8 animate-spin" /> : <Mic className="w-8 h-8" />}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useTTSAudio } from "../hooks/useTTSAudio";
 import { cn } from "../lib/utils";
-import { Volume2, Send, Lightbulb, Target, Languages } from "lucide-react";
+import { Volume2, Send, Lightbulb, Target, Languages, Loader2 } from "lucide-react";
 import { Button } from "@/src/components/ui/Button";
 import { Input } from "@/src/components/ui/Input";
 
@@ -91,7 +91,7 @@ function InfoChip({ icon, children }: { icon?: React.ReactNode; children: React.
 }
 
 export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabled, answerStatus = null }: any) {
-  const { playAudio } = useTTSAudio();
+  const { playAudio, isLoading, loadingText } = useTTSAudio();
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -147,8 +147,8 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
         <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-blue-200">Chọn nghĩa đúng</p>
         <h2 className="break-words text-4xl sm:text-5xl font-black text-white mb-3 tracking-wide">{card.term}</h2>
         {card.phonetic && <p className="mb-4 text-lg font-semibold text-white/60">/{card.phonetic}/</p>}
-        <Button onClick={() => playAudio(card.term)} className="mx-auto p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors">
-          <Volume2 className="w-6 h-6" />
+        <Button onClick={() => playAudio(card.term)} disabled={isLoading && loadingText === card.term} className="mx-auto p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-75">
+          {isLoading && loadingText === card.term ? <Loader2 className="w-6 h-6 animate-spin" /> : <Volume2 className="w-6 h-6" />}
         </Button>
       </div>
 
@@ -206,8 +206,8 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
     <div className="w-full flex flex-col items-center">
       <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 sm:p-12 rounded-3xl w-full text-center mb-8 shadow-2xl relative">
         {isX2 && <div className="absolute top-0 right-0 bg-yellow-500 text-black font-black px-6 py-2 rounded-bl-3xl">X2 ĐIỂM</div>}
-        <Button onClick={() => playAudio(card.term)} className="mx-auto p-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-[0_0_30px_rgba(37,99,235,0.5)] animate-pulse">
-          <Volume2 className="w-12 h-12" />
+        <Button onClick={() => playAudio(card.term)} disabled={isLoading && loadingText === card.term} className="mx-auto p-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-[0_0_30px_rgba(37,99,235,0.5)] animate-pulse disabled:opacity-75">
+          {isLoading && loadingText === card.term ? <Loader2 className="w-12 h-12 animate-spin" /> : <Volume2 className="w-12 h-12" />}
         </Button>
         <p className="text-blue-200 text-lg mt-6 uppercase tracking-widest font-bold">Nghe và gõ lại từ/cụm từ</p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">

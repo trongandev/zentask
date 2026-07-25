@@ -173,7 +173,11 @@ export function BeginnerFlashcardDetail() {
                                     onClick={() => handlePlayAudio(ex.en)}
                                     disabled={isLoading && loadingText === ex.en}
                                     className="mt-0.5 text-gray-300 hover:text-blue-500 transition-colors shrink-0 disabled:opacity-50">
-                                    <Volume2 className="w-3.5 h-3.5" />
+                                    {isLoading && loadingText === ex.en ? (
+                                        <div className="w-3.5 h-3.5 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+                                    ) : (
+                                        <Volume2 className="w-3.5 h-3.5" />
+                                    )}
                                 </Button>
                                 <div>
                                     <p className="text-gray-800 font-medium text-sm">{ex.en}</p>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Search, Plus, Play, Volume2, Trash2, Pencil, Star, Info, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X, ArrowLeft, Brain, BookOpen, LayoutGrid, List } from "lucide-react";
+import { Search, Plus, Play, Volume2, Trash2, Pencil, Star, Info, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X, ArrowLeft, Brain, BookOpen, LayoutGrid, List, Loader2 } from "lucide-react";
 import { useFlashcardStore, getMemoryLevel, type MemoryLevel } from "../../services/flashcardService";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { getVoiceForLanguage } from "../../lib/ttsVoiceStorage";
@@ -389,7 +389,11 @@ export function FlashcardDetail() {
                     <div key={idx} className="group">
                       <p className="text-gray-800 text-base font-medium flex items-start gap-2">
                         <button onClick={() => handlePlayAudio(ex.en)} className="mt-0.5 text-gray-400 group-hover:text-blue-500 transition-colors">
-                          <Volume2 className="w-4 h-4" />
+                          {isLoading && loadingText === ex.en ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                          ) : (
+                            <Volume2 className="w-4 h-4" />
+                          )}
                         </button>
                         <span>{ex.en}</span>
                       </p>
@@ -463,9 +467,13 @@ export function FlashcardDetail() {
                           e.stopPropagation();
                           handlePlayAudio(card.term);
                         }}
-                        className={cn("p-2 rounded-full transition-all bg-gray-100 text-gray-500 hover:text-blue-600 hover:bg-blue-50")}
+                        className={cn("p-2 rounded-full transition-all bg-gray-100 text-gray-500 hover:text-blue-600 hover:bg-blue-50", isLoading && loadingText === card.term && "text-blue-600 bg-blue-50")}
                       >
-                        <Volume2 className="w-4 h-4" />
+                        {isLoading && loadingText === card.term ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Volume2 className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -517,9 +525,16 @@ export function FlashcardDetail() {
                             e.stopPropagation();
                             handlePlayAudio(card.term);
                           }}
-                          className={cn("p-2 rounded-full shrink-0 mt-2", "bg-gray-100 text-gray-500 hover:text-blue-600 hover:bg-blue-50 opacity-0 group-hover:opacity-100 transition-all")}
+                          className={cn(
+                            "p-2 rounded-full shrink-0 mt-2 transition-all bg-gray-100 text-gray-500 hover:text-blue-600 hover:bg-blue-50",
+                            isLoading && loadingText === card.term ? "opacity-100 text-blue-600 bg-blue-50" : "opacity-0 group-hover:opacity-100"
+                          )}
                         >
-                          <Volume2 className="w-4 h-4" />
+                          {isLoading && loadingText === card.term ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Volume2 className="w-4 h-4" />
+                          )}
                         </button>
                       </div>
                     </div>
