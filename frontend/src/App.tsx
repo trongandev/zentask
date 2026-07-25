@@ -98,6 +98,8 @@ const Beginner = lazy(() => import('./pages/Beginner/Beginner').then(m => ({ def
 const BeginnerGrammar = lazy(() => import('./pages/Beginner/BeginnerGrammar').then(m => ({ default: m.BeginnerGrammar })));
 const BeginnerGrammarLesson = lazy(() => import('./pages/Beginner/BeginnerGrammarLesson').then(m => ({ default: m.BeginnerGrammarLesson })));
 const BeginnerSkills = lazy(() => import('./pages/Beginner/BeginnerSkills').then(m => ({ default: m.BeginnerSkills })));
+const BeginnerSkillComingSoon = lazy(() => import('./pages/Beginner/BeginnerSkillComingSoon').then(m => ({ default: m.BeginnerSkillComingSoon })));
+const BeginnerListening = lazy(() => import('./pages/Beginner/BeginnerListening').then(m => ({ default: m.BeginnerListening })));
 const BeginnerRank = lazy(() => import('./pages/Beginner/BeginnerRank').then(m => ({ default: m.BeginnerRank })));
 const BeginnerArena = lazy(() => import('./pages/Beginner/BeginnerArena').then(m => ({ default: m.BeginnerArena })));
 const BeginnerFlashcardDetail = lazy(() => import('./pages/Flashcard/BeginnerFlashcardDetail').then(m => ({ default: m.BeginnerFlashcardDetail })));
@@ -385,6 +387,8 @@ function AppContent() {
             <Route path="beginner/grammar" element={<BeginnerGrammar />} />
             <Route path="beginner/grammar/:topicId" element={<BeginnerGrammarLesson />} />
             <Route path="beginner/skills" element={<BeginnerSkills />} />
+            <Route path="beginner/listening" element={<BeginnerListening />} />
+            <Route path="beginner/skill/:skillId" element={<BeginnerSkillComingSoon />} />
             <Route path="beginner/rank" element={<BeginnerRank />} />
             <Route path="beginner/arena" element={<BeginnerArena />} />
             <Route path="beginner/lesson/:topicId/:lessonIndex" element={<BeginnerLessonPractice />} />

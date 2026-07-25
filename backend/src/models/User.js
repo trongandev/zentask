@@ -109,6 +109,10 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: ['en'],
     },
+    listeningPreferences: {
+      type: [String],
+      default: [],
+    },
     languageLevels: {
       type: Map,
       of: String,

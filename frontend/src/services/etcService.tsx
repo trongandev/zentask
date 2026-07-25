@@ -81,4 +81,14 @@ export const useEtcStore = create<EtcState>((set, get) => ({
       throw error;
     }
   },
+  textToSpeechStreaming: async (text, voice) => {
+    try {
+      const response = await fetch(`https://python.quizzet.id.vn/edge-tts-streaming?text=${encodeURIComponent(text)}&voice=${encodeURIComponent(voice)}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const audioBlob = await response.blob();
+      return URL.createObjectURL(audioBlob);
+    } catch (error: any) {
+      throw error;
+    }
+  },
 }));

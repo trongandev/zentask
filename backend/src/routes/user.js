@@ -280,7 +280,7 @@ router.post(
 router.put(
   "/profile",
   asyncHandler(async (req, res) => {
-    const { displayName, photoURL, bio, username } = req.body;
+    const { displayName, photoURL, bio, username, listeningPreferences } = req.body;
 
     const updates = {};
     if (displayName !== undefined) updates.displayName = await cleanAndValidatePublicText(displayName, "Tên người dùng", { maxLength: 60 });
@@ -290,6 +290,11 @@ router.put(
         .slice(0, 1000);
     if (bio !== undefined) updates.bio = await cleanAndValidatePublicText(bio, "Tiểu sử", { maxLength: 500 });
     if (username !== undefined) updates.username = await cleanAndValidatePublicText(username, "Username", { maxLength: 40 });
+    if (listeningPreferences !== undefined) {
+      if (Array.isArray(listeningPreferences)) {
+        updates.listeningPreferences = listeningPreferences;
+      }
+    }
 
     const user = await User.findByIdAndUpdate(req.user.uid, updates, { new: true });
     if (!user) return res.status(404).json({ error: "User not found" });
