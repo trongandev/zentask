@@ -209,6 +209,10 @@ const fetchTokens = async () => {
         list_flashcard_id: lfi,
       };
       await chrome.storage.local.set(newStorage);
+
+      const title = lfi?.name || lfi?.title || "Flashcard";
+      updateContextMenu(title);
+
       return newStorage;
     } else {
       // Token có thể đã hết hạn
@@ -244,5 +248,134 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
   }
 });
 
-chrome.runtime.onInstalled.addListener(fetchTokens);
-chrome.runtime.onStartup.addListener(fetchTokens);
+// Bật tính năng cho phép click vào action (icon extension) để mở side panel
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch((error) => console.error(error));
+
+function setupContextMenu(flashcardName: string) {
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: "zentask_root",
+      title: "Zentask translation",
+      contexts: ["selection"],
+    });
+
+    chrome.contextMenus.create({
+      id: "translate_text",
+      parentId: "zentask_root",
+      title: "Dịch từ '%s' sang tiếng việt",
+      contexts: ["selection"],
+    });
+
+    chrome.contextMenus.create({
+      id: "add_to_flashcard",
+      parentId: "zentask_root",
+      title: `Thêm '%s' vào ${flashcardName}`,
+      contexts: ["selection"],
+    });
+  });
+}
+
+function updateContextMenu(flashcardName: string) {
+  const title = `Thêm '%s' vào ${flashcardName}`;
+  chrome.contextMenus.update("add_to_flashcard", { title }, () => {
+    if (chrome.runtime.lastError) {
+      setupContextMenu(flashcardName);
+    }
+  });
+}
+
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace === "local" && changes.list_flashcard_id) {
+    const newValue = changes.list_flashcard_id.newValue;
+    const title = newValue?.name || newValue?.title || "Flashcard";
+    updateContextMenu(title);
+  }
+});
+
+function saveToFlashcard(term: string, tab?: chrome.tabs.Tab) {
+  chrome.storage.local.get(["token", "list_flashcard_id"]).then(({ token, list_flashcard_id }) => {
+    if (!token || !list_flashcard_id) {
+      if (tab?.id) {
+        chrome.tabs.sendMessage(tab.id, { action: "SHOW_TOAST", type: "error", message: "Vui lòng đăng nhập và chọn thư mục" }).catch(() => {});
+      }
+      return;
+    }
+
+    if (tab?.id) {
+      chrome.tabs.sendMessage(tab.id, { action: "SHOW_TOAST", type: "waiting", message: `Đang lưu từ ${term}...` }).catch(() => {});
+    }
+
+    const setId = list_flashcard_id.id || list_flashcard_id._id;
+
+    fetch(`${import.meta.env.VITE_API_ENDPOINT}/api/flashcard/generate-ai`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ term, setId }),
+    })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok && data.ok !== false) {
+          if (tab?.id) {
+            chrome.tabs
+              .sendMessage(tab.id, {
+                action: "SHOW_TOAST",
+                type: "success",
+                message: `Lưu thành công từ ${term} vào ${list_flashcard_id.title || list_flashcard_id.name || "thư mục"}`,
+              })
+              .catch(() => {});
+          }
+        } else {
+          if (tab?.id) {
+            chrome.tabs
+              .sendMessage(tab.id, {
+                action: "SHOW_TOAST",
+                type: "error",
+                message: data.error || data.message || "Có lỗi từ server",
+              })
+              .catch(() => {});
+          }
+        }
+      })
+      .catch((e) => {
+        if (tab?.id) {
+          chrome.tabs.sendMessage(tab.id, { action: "SHOW_TOAST", type: "error", message: e.message || "Kết nối API thất bại" }).catch(() => {});
+        }
+      });
+  });
+}
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.selectionText) {
+    const term = info.selectionText.trim();
+    if (info.menuItemId === "add_to_flashcard") {
+      saveToFlashcard(term, tab);
+    } else if (info.menuItemId === "translate_text") {
+      if (tab?.windowId) {
+        chrome.sidePanel.open({ windowId: tab.windowId }).catch(console.error);
+      }
+      chrome.storage.local.set({ sidePanelInitWord: term });
+    }
+  }
+});
+
+chrome.commands.onCommand.addListener((command, tab) => {
+  if (command === "save_to_flashcard" && tab?.id) {
+    chrome.tabs.sendMessage(tab.id, { action: "GET_SELECTION" }, (response) => {
+      if (response && response.text) {
+        saveToFlashcard(response.text.trim(), tab);
+      }
+    });
+  }
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+  setupContextMenu("Flashcard");
+  fetchTokens();
+});
+chrome.runtime.onStartup.addListener(() => {
+  setupContextMenu("Flashcard");
+  fetchTokens();
+});

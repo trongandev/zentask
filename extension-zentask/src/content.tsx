@@ -106,8 +106,20 @@ const ContentApp = () => {
       }
     };
     chrome.storage.onChanged.addListener(handleStorageChange);
+
+    const messageListener = (request: any, _sender: any, sendResponse: any) => {
+      if (request.action === "SHOW_TOAST") {
+        setToast({ show: true, message: request.message, type: request.type });
+        setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3000);
+      } else if (request.action === "GET_SELECTION") {
+        sendResponse({ text: window.getSelection()?.toString() || "" });
+      }
+    };
+    chrome.runtime.onMessage.addListener(messageListener);
+
     return () => {
       chrome.storage.onChanged.removeListener(handleStorageChange);
+      chrome.runtime.onMessage.removeListener(messageListener);
     };
   }, []);
 

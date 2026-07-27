@@ -54,7 +54,7 @@ export default function App() {
 
   // Load ngôn ngữ và user
   useEffect(() => {
-    chrome.storage.local.get(["languageFrom", "languageTo", "user", "list_flashcard", "list_flashcard_id", "token", "quizzet_bookmarks"], (result) => {
+    chrome.storage.local.get(["languageFrom", "languageTo", "user", "list_flashcard", "list_flashcard_id", "token", "quizzet_bookmarks", "sidePanelInitWord"], (result) => {
       if (result.languageFrom) setFrom(result.languageFrom);
       if (result.languageTo) setTo(result.languageTo);
       if (result.user) setUser(result.user);
@@ -63,7 +63,23 @@ export default function App() {
       if (result.token) setUserToken(result.token);
       if (result.quizzet_bookmarks) setBookmarks(result.quizzet_bookmarks);
       if (result.checkinTime) setCheckinTime(result.checkinTime);
+      if (result.sidePanelInitWord) {
+        setInputFrom(result.sidePanelInitWord);
+        chrome.storage.local.remove("sidePanelInitWord");
+      }
     });
+
+    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
+      if (namespace === "local" && changes.sidePanelInitWord && changes.sidePanelInitWord.newValue) {
+        setInputFrom(changes.sidePanelInitWord.newValue);
+        chrome.storage.local.remove("sidePanelInitWord");
+      }
+    };
+    chrome.storage.onChanged.addListener(handleStorageChange);
+
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -307,7 +323,7 @@ export default function App() {
             setIsSavingSelected(false);
             setSelectedBookmarks([]);
             setIsSelectingBookmarks(false);
-          }
+          },
         );
       } catch (e: any) {
         console.error("Save to flashcard failed", e);
@@ -395,7 +411,7 @@ export default function App() {
   };
 
   return (
-    <div className="w-[450px] min-h-[500px] flex flex-col font-sans">
+    <div className="w-full  min-h-[500px] flex flex-col font-sans">
       {/* Header */}
       <div className="bg-teal-600 text-white flex items-center justify-between px-5 py-3 shadow-md z-10">
         <a href={import.meta.env.VITE_API_FRONTEND} target="_blank" rel="noopener noreferrer" className="text-2xl font-extrabold ">

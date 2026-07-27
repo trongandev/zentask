@@ -74,25 +74,29 @@ async def get_edge_tts_voices(text: str, voice: str = "en-US-AriaNeural"):
 async def get_edge_tts_voices_stream(text: str, voice: str = "en-US-AriaNeural"):
     """API endpoint to return audio blob of text using edge-tts with streaming and caching"""
     try:
-        CACHE_DIR = "cache"
-        if not os.path.exists(CACHE_DIR):
-            os.makedirs(CACHE_DIR)
-            
-        filename_hash = hashlib.md5(f"{text}_{voice}".encode()).hexdigest()
-        cache_path = os.path.join(CACHE_DIR, f"{filename_hash}.mp3")
+        should_cache = len(text.strip()) <= 100
+        cache_path = None
         
-        if os.path.exists(cache_path):
-            print(f"Cache hit for {voice}: {text[:30]}...")
-            def iterfile():
-                with open(cache_path, mode="rb") as file_like:
-                    # chunk size 4096 bytes
-                    while chunk := file_like.read(4096):
-                        yield chunk
-            return StreamingResponse(
-                iterfile(), 
-                media_type="audio/mpeg", 
-                headers={"Cache-Control": "public, max-age=31536000"}
-            )
+        if should_cache:
+            CACHE_DIR = "cache"
+            if not os.path.exists(CACHE_DIR):
+                os.makedirs(CACHE_DIR)
+                
+            filename_hash = hashlib.md5(f"{text}_{voice}".encode()).hexdigest()
+            cache_path = os.path.join(CACHE_DIR, f"{filename_hash}.mp3")
+            
+            if os.path.exists(cache_path):
+                print(f"Cache hit for {voice}: {text[:30]}...")
+                def iterfile():
+                    with open(cache_path, mode="rb") as file_like:
+                        # chunk size 4096 bytes
+                        while chunk := file_like.read(4096):
+                            yield chunk
+                return StreamingResponse(
+                    iterfile(), 
+                    media_type="audio/mpeg", 
+                    headers={"Cache-Control": "public, max-age=31536000"}
+                )
             
         print(f"Generating TTS for text: {text[:30]}... with voice: {voice}")
         
@@ -101,11 +105,13 @@ async def get_edge_tts_voices_stream(text: str, voice: str = "en-US-AriaNeural")
             audio_data = b""
             async for chunk in communicate.stream():
                 if chunk["type"] == "audio":
-                    audio_data += chunk["data"]
+                    if should_cache:
+                        audio_data += chunk["data"]
                     yield chunk["data"]
             # After fully streaming, write to cache
-            with open(cache_path, "wb") as f:
-                f.write(audio_data)
+            if should_cache and cache_path:
+                with open(cache_path, "wb") as f:
+                    f.write(audio_data)
 
         return StreamingResponse(
             audio_generator(),
