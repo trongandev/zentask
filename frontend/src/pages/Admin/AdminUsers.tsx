@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Users, Shield, UserPlus, Activity } from "lucide-react";
+import { Users, Shield, UserPlus, Activity, Eye } from "lucide-react";
 import { adminService } from "@/src/services/adminService";
 import { AdminStatCards } from "@/src/components/Admin/AdminStatCards";
 import { DataTable } from "@/src/components/Admin/DataTable";
@@ -8,11 +8,14 @@ import { UserAvatar } from "@/src/components/ui/UserAvatar";
 import { UserLevelBadge } from "@/src/components/ui/UserLevelBadge";
 import { Button } from "@/src/components/ui/Button";
 import { Select } from "@/src/components/ui/Select";
+import { AdminUserDetailsModal } from "@/src/components/Admin/AdminUserDetailsModal";
+import { useState } from "react";
 
 export function AdminUsers() {
   const { users, fetchUsers } = useAdminStore();
   const page = users.currentPage;
   const pageData = users.pages[page] || { items: [], totalPages: 1 };
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers(page);
@@ -96,19 +99,27 @@ export function AdminUsers() {
       header: "Hành động",
       align: "right" as const,
       render: (u: any) => (
-        <Button
-          onClick={() => handleBanUser(u.id, u.isBanned)}
-          disabled={u.role === "admin"}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${
-            u.role === "admin"
-              ? "bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed"
-              : u.isBanned
-                ? "bg-white text-green-600 border-green-200 hover:bg-green-50"
-                : "bg-white text-red-600 border-red-200 hover:bg-red-50"
-          }`}
-        >
-          {u.isBanned ? "MỞ KHOÁ" : "KHOÁ"}
-        </Button>
+        <div className="flex justify-end gap-2">
+          <Button
+            onClick={() => setSelectedUserId(u.id)}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 flex items-center gap-1"
+          >
+            <Eye className="w-3.5 h-3.5" /> Chi tiết
+          </Button>
+          <Button
+            onClick={() => handleBanUser(u.id, u.isBanned)}
+            disabled={u.role === "admin"}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border ${
+              u.role === "admin"
+                ? "bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed"
+                : u.isBanned
+                  ? "bg-white text-green-600 border-green-200 hover:bg-green-50"
+                  : "bg-white text-red-600 border-red-200 hover:bg-red-50"
+            }`}
+          >
+            {u.isBanned ? "MỞ KHOÁ" : "KHOÁ"}
+          </Button>
+        </div>
       ),
     },
   ];
@@ -145,6 +156,12 @@ export function AdminUsers() {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
         <DataTable columns={columns} data={pageData.items} loading={users.loading} currentPage={page} totalPages={pageData.totalPages} onPageChange={(p) => fetchUsers(p)} />
       </div>
+
+      <AdminUserDetailsModal
+        isOpen={!!selectedUserId}
+        onClose={() => setSelectedUserId(null)}
+        uid={selectedUserId}
+      />
     </div>
   );
 }

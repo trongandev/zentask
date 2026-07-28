@@ -105,10 +105,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'en',
     },
-    learningLanguages: {
-      type: [String],
-      default: ['en'],
-    },
+
     learningPreferences: {
       type: [String],
       default: [],
@@ -121,10 +118,9 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    languageLevels: {
-      type: Map,
-      of: String,
-      default: {},
+    languageLevel: {
+      type: String,
+      default: "",
     },
     placementTestCount: {
       type: Number,

@@ -163,4 +163,19 @@ export const adminService = {
     await axiosInstance.delete(`/api/admin/attacker-feedbacks/${id}`);
     return true;
   },
+
+  getAIUsageStats: async () => {
+    const res = await axiosInstance.get(`/api/admin/analytics/ai-usage-stats`);
+    return res.data;
+  },
+
+  getUserDetails: async (uid: string) => {
+    const res = await axiosInstance.get(`/api/admin/users/${uid}/details`);
+    return res.data;
+  },
+
+  manageUserDetails: async (uid: string, action: string, payload: any = {}) => {
+    const res = await axiosInstance.put(`/api/admin/users/${uid}/manage`, { action, payload });
+    return res.data;
+  },
 };

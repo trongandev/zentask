@@ -9,7 +9,7 @@ import { verifyToken } from "../middleware/auth.js";
 import fs from "fs";
 import path from "path";
 import { cleanAndValidatePublicText } from "../../utils/moderation.js";
-import { Course, CourseTier } from "../models/Course.js";
+import { Course, CourseTier, CourseLesson, CourseRank } from "../models/Course.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 const router = Router();
 
@@ -315,38 +315,82 @@ router.put(
     const user = await User.findById(req.user.uid);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    user.targetLanguage = languageCode;
-    if (!user.learningLanguages.includes(languageCode)) {
-      user.learningLanguages.push(languageCode);
+    if (user.targetLanguage !== languageCode) {
+      user.learningPreferences = [];
     }
-
+    user.targetLanguage = languageCode;
+    
     if (level) {
-      if (!user.languageLevels) user.languageLevels = new Map();
-      user.languageLevels.set(languageCode, level);
+      user.languageLevel = level;
+      
+      // Auto-complete previous topics if user skips to a higher level
+      if (level !== "Beginner" && req.body.skipTopics) {
+        const course = await Course.findOne({ languageCode });
+        if (course) {
+          const currentTier = await CourseTier.findOne({ courseId: course._id, cefr: level }).populate("rankId");
+          if (currentTier && currentTier.rankId) {
+            const currentRankNum = currentTier.rankId.rankId;
+            
+            // Find all ranks that come before the current rank
+            const previousRanks = await CourseRank.find({ rankId: { $lt: currentRankNum } });
+            const previousRankIds = previousRanks.map(r => r._id);
+            
+            // Tiers from previous ranks OR same rank but earlier tierNum
+            const previousTiers = await CourseTier.find({
+              courseId: course._id,
+              $or: [
+                { rankId: { $in: previousRankIds } },
+                { rankId: currentTier.rankId._id, tierNum: { $lt: currentTier.tierNum } }
+              ]
+            });
+            
+            if (previousTiers.length > 0) {
+              const previousTierIds = previousTiers.map(t => t._id);
+              const previousLessons = await CourseLesson.find({ tierId: { $in: previousTierIds } });
+              
+              if (previousLessons.length > 0) {
+                const previousLessonIds = [];
+                for (const lesson of previousLessons) {
+                  const wordCount = lesson.wordCount || 0;
+                  const totalChunks = Math.ceil(wordCount / 5) || 1;
+                  for (let i = 0; i < totalChunks; i++) {
+                    previousLessonIds.push(`${lesson.lessonId}_${i}`);
+                  }
+                }
+                
+                const progressOps = previousLessonIds.map(lId => ({
+                  updateOne: {
+                    filter: { uid: user._id, lessonId: lId },
+                    update: {
+                      $set: {
+                        uid: user._id,
+                        userId: user._id,
+                        lessonId: lId,
+                        score: 100,
+                        completedGrammarTopics: [],
+                        completedSkills: [],
+                        rewardClaimed: true // Pre-claim reward so they don't get free bonus for skipped topics
+                      }
+                    },
+                    upsert: true
+                  }
+                }));
+                
+                if (progressOps.length > 0) {
+                  await BeginnerProgress.bulkWrite(progressOps);
+                }
+              }
+            }
+          }
+        }
+      }
     }
 
     let targetRankId = 1;
     let targetTier = 3;
 
-    if (level && level !== "Beginner") {
-      // Find the corresponding tier for this language and cefr
-      const course = await Course.findOne({ languageCode });
-      if (course) {
-        // Query the tier matching the cefr level
-        const tier = await CourseTier.findOne({ courseId: course._id, cefr: level }).populate("rankId");
-        if (tier && tier.rankId) {
-          targetRankId = tier.rankId.rankId;
-          targetTier = tier.tierNum;
-        }
-      }
-    }
-
-    // Update global rank if jumping to higher level (e.g., from placement test)
-    if (targetRankId > user.rankId || (targetRankId === user.rankId && targetTier < user.tier)) {
-      user.rankId = targetRankId;
-      user.tier = targetTier;
-      user.stars = 0;
-    }
+    // Do NOT update user.rankId or user.tier here. Arena Rank must be earned via XP/Arena matches.
+    // The previous logic incorrectly bumped users to higher ranks (e.g. Lục bảo) just by picking A2.
     await user.save();
 
     // Upsert UserLanguageProgress (only language tracking now, rank is global)
@@ -359,17 +403,12 @@ router.put(
       });
     }
 
-    const languageLevelsObj = user.languageLevels instanceof Map 
-      ? Object.fromEntries(user.languageLevels) 
-      : (user.languageLevels ? Object.fromEntries(user.languageLevels) : {});
-
     res.json({
       status: "success",
       targetLanguage: languageCode,
-      learningLanguages: user.learningLanguages,
       rankId: user.rankId,
       tier: user.tier,
-      languageLevels: languageLevelsObj,
+      languageLevel: user.languageLevel,
     });
   }),
 );
@@ -500,12 +539,6 @@ router.get(
 
     const totalStudyHours = studyStats.length > 0 ? Math.round(studyStats[0].totalMinutes / 60) : 0;
 
-    let activeProgress = { rankId: 1, tier: 3, stars: 0 };
-    if (user.targetLanguage) {
-      const prog = languageProgressList.find((p) => p.language === user.targetLanguage);
-      if (prog) activeProgress = prog;
-    }
-
     res.json({
       uid: user._id,
       name: user.displayName || "Người dùng",
@@ -517,10 +550,9 @@ router.get(
       xp: user.xp || 0,
       streak: user.streak || 0,
       targetLanguage: user.targetLanguage || null,
-      learningLanguages: user.learningLanguages || [],
-      rankId: activeProgress.rankId,
-      tier: activeProgress.tier,
-      stars: activeProgress.stars,
+      rankId: user.rankId || 1,
+      tier: user.tier || 3,
+      stars: user.stars || 0,
       achievedBadges: user.achievedBadges || [],
       followers: user.followers || 0,
       following: user.following || 0,

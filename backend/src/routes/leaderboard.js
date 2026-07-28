@@ -51,14 +51,14 @@ router.get(
 
       if (type === "week") {
         const weekString = getWeekString();
-        docs = await LeaderboardWeekly.find({ period: weekString }).sort({ xp: -1 }).limit(30).populate("uid", "displayName username email photoURL level rankId tier").lean();
+        docs = await LeaderboardWeekly.find({ period: weekString }).sort({ xp: -1, _id: 1 }).limit(30).populate("uid", "displayName username email photoURL level rankId tier").lean();
       } else if (type === "month") {
         const monthString = getMonthString();
-        docs = await LeaderboardMonthly.find({ period: monthString }).sort({ xp: -1 }).limit(30).populate("uid", "displayName username email photoURL level rankId tier").lean();
+        docs = await LeaderboardMonthly.find({ period: monthString }).sort({ xp: -1, _id: 1 }).limit(30).populate("uid", "displayName username email photoURL level rankId tier").lean();
       } else if (type === "rank") {
-        docs = await User.find().sort({ rankId: -1, tier: 1, stars: -1 }).limit(20).lean();
+        docs = await User.find().sort({ rankId: -1, tier: 1, stars: -1, _id: 1 }).limit(20).lean();
       } else {
-        docs = await User.find().sort({ xp: -1 }).limit(30).lean();
+        docs = await User.find().sort({ xp: -1, _id: 1 }).limit(30).lean();
       }
 
       const leaderboard = [];

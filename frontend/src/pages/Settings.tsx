@@ -10,11 +10,13 @@ import { Button } from "@/src/components/ui/Button";
 import { Select } from "@/src/components/ui/Select";
 import { Textarea } from "@/src/components/ui/Textarea";
 import { Input } from "@/src/components/ui/Input";
+import { ChangePasswordModal } from "@/src/components/Settings/ChangePasswordModal";
+import { Link } from "react-router-dom";
 
 export function Settings() {
   const { user, updateUser } = useAuth();
   const [activeTab, setActiveTab] = useState("account");
-
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   // Form states
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
@@ -117,7 +119,7 @@ export function Settings() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4">
+    <div className="w-full max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4">
       {/* Header */}
       <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
         <h1 className="text-2xl font-extrabold text-gray-900 mb-2">Cài đặt</h1>
@@ -342,18 +344,9 @@ export function Settings() {
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Bảo mật</h2>
                 <div className="space-y-4">
                   <Button
-                    onClick={() => {
-                      window.location.href = "/?tour=1";
-                    }}
-                    className="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 transition-colors rounded-2xl border border-blue-100"
+                    onClick={() => setIsPasswordModalOpen(true)}
+                    className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-2xl border border-gray-100"
                   >
-                    <div className="text-left">
-                      <h3 className="font-bold text-blue-900">Xem lại hướng dẫn sử dụng ZenTask</h3>
-                      <p className="text-sm text-blue-700/80">Mở lại mascot Lopy và tour chi tiết cho người mới bắt đầu</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-blue-500" />
-                  </Button>
-                  <Button className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-2xl border border-gray-100">
                     <div className="text-left">
                       <h3 className="font-bold text-gray-900">Đổi mật khẩu</h3>
                       <p className="text-sm text-gray-500">Cập nhật mật khẩu mới cho tài khoản</p>
@@ -403,8 +396,9 @@ export function Settings() {
                         onClick={() => handlePreviewAppearance(item.id, accentColor)}
                         className={cn(
                           "flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left",
-                          active ? "border-blue-600 bg-blue-50 shadow-sm" : "border-transparent bg-gray-50 hover:border-gray-200",
+                          active ? "shadow-sm" : "border-transparent bg-gray-50 hover:border-gray-200",
                         )}
+                        style={active ? { borderColor: 'var(--zt-accent)', backgroundColor: 'color-mix(in srgb, var(--zt-accent) 10%, transparent)' } : undefined}
                       >
                         <div
                           className={cn("w-full h-24 rounded-xl shadow-sm border overflow-hidden flex flex-col", item.preview === "dark" ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200")}
@@ -415,7 +409,10 @@ export function Settings() {
                             <div className={cn("w-2/3 h-full rounded", item.preview === "dark" ? "bg-gray-800/60" : "bg-blue-50")}></div>
                           </div>
                         </div>
-                        <span className={cn("font-bold flex items-center gap-2", active ? "text-blue-700" : "text-gray-600")}>
+                        <span 
+                          className={cn("font-bold flex items-center gap-2", active ? "" : "text-gray-600")}
+                          style={active ? { color: 'var(--zt-accent)' } : undefined}
+                        >
                           <Icon className="w-4 h-4" /> {item.label}
                         </span>
                       </Button>
@@ -443,8 +440,13 @@ export function Settings() {
                       onClick={() => handlePreviewAppearance(themeMode, item.id)}
                       className={cn(
                         "flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-bold transition-all",
-                        accentColor === item.id ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50",
+                        accentColor === item.id ? "" : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50",
                       )}
+                      style={accentColor === item.id ? { 
+                        borderColor: 'var(--zt-accent)', 
+                        backgroundColor: 'color-mix(in srgb, var(--zt-accent) 10%, transparent)',
+                        color: 'var(--zt-accent)'
+                      } : undefined}
                     >
                       <span className="w-5 h-5 rounded-full shadow-sm" style={{ backgroundColor: item.color }} />
                       {item.label}
@@ -528,18 +530,6 @@ export function Settings() {
               <div>
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Trợ giúp & Hỗ trợ</h2>
                 <div className="space-y-4">
-                  <Button
-                    onClick={() => {
-                      window.location.href = "/?tour=1";
-                    }}
-                    className="w-full flex items-center justify-between p-4 bg-blue-50 hover:bg-blue-100 transition-colors rounded-2xl border border-blue-100"
-                  >
-                    <div className="text-left">
-                      <h3 className="font-bold text-blue-900">Xem lại hướng dẫn sử dụng ZenTask</h3>
-                      <p className="text-sm text-blue-700/80">Mở lại mascot Lopy và tour chi tiết cho người mới bắt đầu</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-blue-500" />
-                  </Button>
                   <Button className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-2xl border border-gray-100">
                     <div className="text-left">
                       <h3 className="font-bold text-gray-900">Trung tâm trợ giúp</h3>
@@ -547,20 +537,24 @@ export function Settings() {
                     </div>
                     <ChevronRight className="w-5 h-5 text-gray-400" />
                   </Button>
-                  <Button className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-2xl border border-gray-100">
-                    <div className="text-left">
-                      <h3 className="font-bold text-gray-900">Liên hệ hỗ trợ</h3>
-                      <p className="text-sm text-gray-500">Gửi tin nhắn cho đội ngũ phát triển Zentask</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400" />
-                  </Button>
-                  <Button className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-2xl border border-gray-100">
-                    <div className="text-left">
-                      <h3 className="font-bold text-gray-900">Góp ý & Báo lỗi</h3>
-                      <p className="text-sm text-gray-500">Giúp chúng tôi cải thiện ứng dụng tốt hơn</p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400" />
-                  </Button>
+                  <a href="https://zalo.me/g/vappqohaaewiockcc9zc" target="_blank" className="block">
+                    <Button className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-2xl border border-gray-100">
+                      <div className="text-left">
+                        <h3 className="font-bold text-gray-900">Liên hệ hỗ trợ</h3>
+                        <p className="text-sm text-gray-500">Gửi tin nhắn cho đội ngũ phát triển Zentask</p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                    </Button>
+                  </a>
+                  <a href="https://zalo.me/g/vappqohaaewiockcc9zc" target="_blank" className="block">
+                    <Button className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors rounded-2xl border border-gray-100">
+                      <div className="text-left">
+                        <h3 className="font-bold text-gray-900">Góp ý & Báo lỗi</h3>
+                        <p className="text-sm text-gray-500">Giúp chúng tôi cải thiện ứng dụng tốt hơn</p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                    </Button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -613,6 +607,8 @@ export function Settings() {
           </div>
         </div>
       )}
+
+      <ChangePasswordModal isOpen={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)} />
     </div>
   );
 }

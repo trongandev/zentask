@@ -2,7 +2,7 @@ import { Profiler, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, applyAppAppearance } from "./contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { HelmetProvider } from "react-helmet-async";
 
@@ -26,6 +26,9 @@ const onRender = (
     // console.log(`[Profiler] ⚡ ${id} (${phase}) rendered in ${actualDuration.toFixed(2)}ms`);
   }
 };
+
+// Áp dụng giao diện (theme, màu nhấn) ngay lập tức từ localStorage để tránh chớp giật (flicker) khi load trang
+applyAppAppearance();
 
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>

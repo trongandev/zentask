@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { adminService } from "../../services/adminService";
 import { format } from "date-fns";
-import { Activity, ChevronLeft, ChevronRight } from "lucide-react";
+import { Activity, ChevronLeft, ChevronRight, Cpu, Zap, AlertCircle, Database } from "lucide-react";
 import toastService from "@/src/services/toastService";
 import { Button } from "@/src/components/ui/Button";
+import { AdminStatCards } from "@/src/components/Admin/AdminStatCards";
 
 interface AIUsage {
   id: string;
@@ -28,6 +29,7 @@ export function AdminAIUsage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
+  const [stats, setStats] = useState<any>(null);
 
   const fetchUsages = async (p: number) => {
     try {
@@ -43,8 +45,18 @@ export function AdminAIUsage() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const data = await adminService.getAIUsageStats();
+      setStats(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchUsages(page);
+    fetchStats();
   }, [page]);
 
   const getStatusColor = (status: string) => {
@@ -61,10 +73,42 @@ export function AdminAIUsage() {
           </h1>
           <p className="text-gray-500 mt-2">Theo dõi lịch sử gọi API AI và sử dụng token</p>
         </div>
-        <div className="bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100 flex items-center gap-2 font-medium text-gray-600">
-          Tổng cộng: <span className="text-blue-600 font-bold">{total}</span> lượt gọi
-        </div>
       </div>
+
+      {stats && (
+        <AdminStatCards
+          stats={[
+            {
+              title: "Tổng lượt gọi AI",
+              value: stats.totalCalls.toLocaleString(),
+              icon: Zap,
+              color: "text-blue-600",
+              bg: "bg-blue-100",
+            },
+            {
+              title: "Tổng Token đã dùng",
+              value: stats.totalTokens.toLocaleString(),
+              icon: Database,
+              color: "text-indigo-600",
+              bg: "bg-indigo-100",
+            },
+            {
+              title: "Lượt gọi hôm nay",
+              value: stats.todayCalls.toLocaleString(),
+              icon: Cpu,
+              color: "text-green-600",
+              bg: "bg-green-100",
+            },
+            {
+              title: "Lỗi gọi AI",
+              value: stats.errorCalls.toLocaleString(),
+              icon: AlertCircle,
+              color: "text-red-600",
+              bg: "bg-red-100",
+            },
+          ]}
+        />
+      )}
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 flex-1 flex flex-col overflow-hidden">
         <div className="overflow-x-auto flex-1">

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { DailyTask, FlashcardSet, Flashcard, Quiz, QuizResult, BotConfig, SystemLog, CommunityPost, BannedIP, AttackerFeedback, AITokenUsage, BotJobSchedule } from "../models/Schemas.js";
+import { DailyTask, FlashcardSet, Flashcard, Quiz, QuizResult, BotConfig, SystemLog, CommunityPost, BannedIP, AttackerFeedback, AITokenUsage, BotJobSchedule, BeginnerProgress, UserLanguageProgress } from "../models/Schemas.js";
 import { verifyToken } from "../middleware/auth.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { reloadJob, triggerJob } from "../../utils/jobManager.js";
@@ -625,6 +625,130 @@ router.get(
       page,
       totalPages,
     });
+  })
+);
+
+router.get(
+  "/analytics/ai-usage-stats",
+  asyncHandler(async (req, res) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const stats = await AITokenUsage.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalCalls: { $sum: 1 },
+          totalPromptTokens: { $sum: "$promptTokens" },
+          totalCompletionTokens: { $sum: "$completionTokens" },
+          totalTokens: { $sum: "$totalTokens" },
+          errorCalls: { $sum: { $cond: [{ $eq: ["$status", "error"] }, 1, 0] } }
+        }
+      }
+    ]);
+
+    const todayStats = await AITokenUsage.aggregate([
+      { $match: { createdAt: { $gte: today } } },
+      {
+        $group: {
+          _id: null,
+          totalCalls: { $sum: 1 },
+          totalTokens: { $sum: "$totalTokens" }
+        }
+      }
+    ]);
+
+    const globalStats = stats[0] || {
+      totalCalls: 0,
+      totalPromptTokens: 0,
+      totalCompletionTokens: 0,
+      totalTokens: 0,
+      errorCalls: 0
+    };
+
+    const dailyStats = todayStats[0] || {
+      totalCalls: 0,
+      totalTokens: 0
+    };
+
+    res.json({
+      totalCalls: globalStats.totalCalls,
+      totalTokens: globalStats.totalTokens,
+      errorCalls: globalStats.errorCalls,
+      todayCalls: dailyStats.totalCalls,
+      todayTokens: dailyStats.totalTokens
+    });
+  })
+);
+
+router.get(
+  "/users/:uid/details",
+  asyncHandler(async (req, res) => {
+    const { uid } = req.params;
+    const user = await User.findById(uid).lean();
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const [beginnerProgressCount, flashcardCount, quizCount, langProgress] = await Promise.all([
+      BeginnerProgress.countDocuments({ $or: [{ uid }, { userId: uid }] }),
+      Flashcard.countDocuments({ userId: uid }),
+      QuizResult.countDocuments({ uid }),
+      UserLanguageProgress.findOne({ uid, language: user.targetLanguage || "en" }).lean()
+    ]);
+
+    res.json({
+      user,
+      stats: {
+        beginnerCompletedLessons: beginnerProgressCount,
+        totalFlashcards: flashcardCount,
+        totalQuizzesTaken: quizCount,
+      },
+      rankProgress: langProgress || { rankId: 1, tier: 3 }
+    });
+  })
+);
+
+router.put(
+  "/users/:uid/manage",
+  asyncHandler(async (req, res) => {
+    const { uid } = req.params;
+    const { action, payload } = req.body;
+    const user = await User.findById(uid);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    switch (action) {
+      case "UPDATE_RANK":
+        // Update user's rank/tier in UserLanguageProgress and User
+        const targetLang = user.targetLanguage || "en";
+        await UserLanguageProgress.findOneAndUpdate(
+          { uid, language: targetLang },
+          { $set: { rankId: payload.rankId, tier: payload.tier } },
+          { upsert: true }
+        );
+        await User.findByIdAndUpdate(uid, {
+          $set: { rankId: payload.rankId, tier: payload.tier }
+        });
+        res.json({ status: "success", message: "Đã cập nhật Rank" });
+        break;
+
+      case "RESET_BEGINNER_PROGRESS":
+        await BeginnerProgress.deleteMany({ $or: [{ uid }, { userId: uid }] });
+        res.json({ status: "success", message: "Đã reset lộ trình học cơ bản" });
+        break;
+
+      case "RESET_FLASHCARDS":
+        await Flashcard.deleteMany({ userId: uid });
+        await FlashcardSet.deleteMany({ userId: uid });
+        res.json({ status: "success", message: "Đã xoá toàn bộ Flashcards" });
+        break;
+
+      case "RESET_QUIZZES":
+        await QuizResult.deleteMany({ uid });
+        res.json({ status: "success", message: "Đã xoá toàn bộ lịch sử thi Quiz" });
+        break;
+
+      default:
+        res.status(400).json({ error: "Invalid action" });
+    }
   })
 );
 

@@ -118,7 +118,7 @@ export function BeginnerSkills() {
   // Determine user level string
   const targetLang = user?.targetLanguage || "en";
   const langLevels = LANGUAGE_LEVELS[targetLang] || LANGUAGE_LEVELS["en"];
-  const userLevelId = user?.languageLevels?.[targetLang] || langLevels[0].id;
+  const userLevelId = user?.languageLevel || langLevels[0].id;
   const levelObj = langLevels.find((l) => l.id === userLevelId) || langLevels[0];
   const userLevelStr = levelObj.name.split(" ")[0] || "A1";
 

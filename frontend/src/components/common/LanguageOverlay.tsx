@@ -9,10 +9,10 @@ import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { Button } from "@/src/components/ui/Button";
 
 const LANGUAGES = [
-  { code: "en", name: "Tiếng Anh" },
-  { code: "zh", name: "Tiếng Trung" },
-  { code: "ko", name: "Tiếng Hàn" },
-  { code: "ja", name: "Tiếng Nhật" },
+  { code: "en", name: "Tiếng Anh", hot: true, badge: "Hot - 65% lựa chọn" },
+  { code: "zh", name: "Tiếng Trung", hot: true, badge: "Hot - 20% lựa chọn" },
+  { code: "ko", name: "Tiếng Hàn", hot: true, badge: "Hot" },
+  { code: "ja", name: "Tiếng Nhật", hot: true, badge: "Hot" },
   { code: "de", name: "Tiếng Đức" },
   { code: "fr", name: "Tiếng Pháp" },
   { code: "es", name: "Tiếng TBN" },
@@ -31,6 +31,10 @@ type Step = "LANGUAGE" | "LEVEL_OR_TEST" | "TEST";
 export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOpen, canClose = false, onClose }) => {
   const [step, setStep] = useState<Step>("LANGUAGE");
   const [selectedLang, setSelectedLang] = useState<string | null>(null);
+  const [isConfirmingSwitch, setIsConfirmingSwitch] = useState(false);
+  const [showSwitchWarning, setShowSwitchWarning] = useState(false);
+  const [pendingLevelSelection, setPendingLevelSelection] = useState<string | null>(null);
+  const [isConfirmingExitTest, setIsConfirmingExitTest] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const { playAudio, stopAudio, isPlaying } = useTTSAudio();
@@ -49,11 +53,12 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
   const [evaluationResult, setEvaluationResult] = useState<any>(null);
   const [testError, setTestError] = useState<string>("");
 
-  const { updateUser } = useAuth();
+  const { user, updateUser } = useAuth();
 
   // Khôi phục state từ localStorage khi mở modal
   React.useEffect(() => {
     if (isOpen) {
+      setIsConfirmingSwitch(false);
       const savedState = localStorage.getItem("zentask_placement_test");
       if (savedState) {
         try {
@@ -102,19 +107,19 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
     setStep("LEVEL_OR_TEST");
   };
 
-  const handleSelectLevel = async (level: string) => {
+  const handleSelectLevel = async (level: string, skipTopics: boolean = false) => {
     if (!selectedLang) return;
     setIsLoading(true);
     try {
-      const res = await axiosInstance.put("/api/user/language-level", { languageCode: selectedLang, level });
+      const res = await axiosInstance.put("/api/user/language-level", { languageCode: selectedLang, level, skipTopics });
       if (res.data.status === "success") {
-        updateUser({ 
-          targetLanguage: res.data.targetLanguage, 
-          learningLanguages: res.data.learningLanguages,
-          languageLevels: res.data.languageLevels 
+        updateUser({
+          targetLanguage: res.data.targetLanguage,
+          languageLevel: res.data.languageLevel,
         });
         onSelect(res.data.targetLanguage);
         setStep("LANGUAGE");
+        setIsConfirmingSwitch(false);
         localStorage.removeItem("zentask_placement_test");
       }
     } catch (error) {
@@ -260,13 +265,12 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
     return passed;
   };
 
+  const hasSelectedLanguageAndLevel = !!(user?.targetLanguage && user?.languageLevel);
+  const isTakingTest = step === "TEST" && !evaluationResult;
+  const canDismissModal = canClose && !isLoading && !isTakingTest;
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={() => !isLoading && canClose && step === "LANGUAGE" && onClose && onClose()}
-      hideCloseButton={!canClose || isLoading || step === "TEST"}
-      className="max-w-3xl p-8 relative overflow-hidden bg-white"
-    >
+    <Modal isOpen={isOpen} onClose={() => canDismissModal && onClose && onClose()} hideCloseButton={!canDismissModal} className="max-w-3xl p-8 relative overflow-hidden bg-white">
       {isLoading && (
         <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center">
           <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
@@ -277,25 +281,79 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
       {/* STEP 1: CHỌN NGÔN NGỮ */}
       {step === "LANGUAGE" && (
         <>
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold text-slate-800 mb-3">Bạn muốn học ngôn ngữ nào?</h2>
-            <p className="text-slate-500 text-lg">Chọn một ngôn ngữ để bắt đầu. Bạn có thể thay đổi sau.</p>
-          </div>
+          {hasSelectedLanguageAndLevel && !isConfirmingSwitch ? (
+            <div className="text-center mb-10 flex flex-col items-center animate-in fade-in zoom-in duration-300">
+              <h2 className="text-3xl font-extrabold text-slate-800 mb-6">Ngôn ngữ hiện hành</h2>
+              <div className="w-32 h-24 mb-6 rounded-xl overflow-hidden shadow-md border-4 border-slate-100">
+                <img src={`/flag/${user.targetLanguage}.svg`} alt="Current Language" className="w-full h-full object-cover" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-700 mb-2">{LANGUAGES.find((l) => l.code === user.targetLanguage)?.name || "Đang học"}</h3>
+              <p className="text-slate-500 font-medium mb-10">Trình độ: {user.languageLevel || "Chưa xác định"}</p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5">
-            {LANGUAGES.map((lang) => (
-              <Button
-                key={lang.code}
-                onClick={() => handleSelectLanguage(lang.code)}
-                className="flex flex-col items-center justify-center p-6 bg-slate-50 hover:bg-blue-50 border-2 border-transparent hover:border-blue-400 rounded-2xl transition-all hover:scale-105 hover:shadow-lg group"
-              >
-                <div className="w-16 h-12 mb-4 rounded overflow-hidden shadow-sm">
-                  <img src={`/flag/${lang.code}.svg`} alt={lang.name} className="w-full h-full object-cover" />
+              {showSwitchWarning ? (
+                <div className="bg-red-50 p-4 rounded-xl border border-red-100 mt-2 mb-6 flex flex-col items-center justify-center gap-4 animate-in fade-in max-w-sm w-full mx-auto text-center">
+                  <p className="text-red-700 font-medium">Thay đổi ngôn ngữ sẽ reset lại các cài đặt lộ trình và sở thích học tập cũ. Bạn có chắc chắn không?</p>
+                  <div className="flex gap-3 w-full">
+                    <Button onClick={() => setShowSwitchWarning(false)} className="flex-1 px-4 py-3 bg-white text-slate-600 hover:bg-slate-100 rounded-xl font-bold border border-slate-200">
+                      Hủy
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowSwitchWarning(false);
+                        setIsConfirmingSwitch(true);
+                      }}
+                      className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-sm shadow-red-600/20"
+                    >
+                      Chuyển ngay
+                    </Button>
+                  </div>
                 </div>
-                <span className="font-bold text-slate-700 group-hover:text-blue-600 transition-colors">{lang.name}</span>
-              </Button>
-            ))}
-          </div>
+              ) : (
+                <Button
+                  onClick={() => setShowSwitchWarning(true)}
+                  className="px-8 py-4 bg-red-50 hover:bg-red-100 text-red-600 border-2 border-red-200 hover:border-red-300 rounded-2xl font-bold transition-all shadow-sm flex items-center gap-2"
+                >
+                  Chuyển ngôn ngữ học mới
+                </Button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="text-center mb-10">
+                <h2 className="text-3xl font-extrabold text-slate-800 mb-3">Bạn muốn học ngôn ngữ nào?</h2>
+                <p className="text-slate-500 text-lg">Chọn một ngôn ngữ để bắt đầu lộ trình học của bạn.</p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5">
+                {LANGUAGES.map((lang) => (
+                  <Button
+                    key={lang.code}
+                    onClick={() => handleSelectLanguage(lang.code)}
+                    className={cn(
+                      "relative flex flex-col items-center justify-center p-6 bg-slate-50 hover:bg-blue-50 border-2 rounded-2xl transition-all hover:scale-105 hover:shadow-lg group",
+                      lang.hot ? "border-indigo-100 hover:border-indigo-400 bg-gradient-to-b from-white to-indigo-50/30" : "border-transparent hover:border-blue-400",
+                    )}
+                  >
+                    {lang.badge && (
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm whitespace-nowrap z-10">
+                        {lang.badge}
+                      </span>
+                    )}
+                    <div className="w-16 h-12 mb-4 rounded overflow-hidden shadow-sm">
+                      <img src={`/flag/${lang.code}.svg`} alt={lang.name} className="w-full h-full object-cover" />
+                    </div>
+                    <span className={cn("font-bold transition-colors", lang.hot ? "text-indigo-700" : "text-slate-700 group-hover:text-blue-600")}>{lang.name}</span>
+                  </Button>
+                ))}
+              </div>
+
+              {hasSelectedLanguageAndLevel && isConfirmingSwitch && (
+                <Button onClick={() => setIsConfirmingSwitch(false)} className="mx-auto mt-4 text-slate-500 hover:text-slate-800 font-medium flex items-center justify-center w-full">
+                  Hủy bỏ
+                </Button>
+              )}
+            </>
+          )}
         </>
       )}
 
@@ -313,7 +371,33 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
 
           {testError && <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-center font-medium">{testError}</div>}
 
-          {selectedLang === "en" ? (
+          {pendingLevelSelection ? (
+            <div className="flex flex-col items-center justify-center flex-1 animate-in zoom-in duration-300 text-center px-4 py-8">
+              <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6 border-4 border-blue-100 shadow-sm">
+                <span className="text-3xl font-black">{pendingLevelSelection}</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-4">Xác nhận chọn lộ trình</h3>
+              <p className="text-slate-600 mb-6 text-lg"></p>
+              <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 mb-8 max-w-md mx-auto shadow-sm">
+                <p className="text-sm font-semibold text-amber-700 ">
+                  <span className="mr-2 text-xl">⚠️</span>
+                  Lưu ý: Nếu bạn tự chọn trình độ, hệ thống sẽ <strong>không</strong> bỏ qua các bài học trước đó. Nếu bạn muốn bỏ qua bài học để tới đúng trình độ của mình, vui lòng quay lại và chọn{" "}
+                  <strong>Bắt đầu Test Năng lực</strong>.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm mx-auto">
+                <Button onClick={() => setPendingLevelSelection(null)} className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all">
+                  Quay về
+                </Button>
+                <Button
+                  onClick={() => handleSelectLevel(pendingLevelSelection)}
+                  className="flex-1 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all"
+                >
+                  Đồng ý
+                </Button>
+              </div>
+            </div>
+          ) : selectedLang === "en" ? (
             <div className="flex flex-col gap-4 max-w-md mx-auto w-full mb-8">
               <Button
                 onClick={handleStartTest}
@@ -329,7 +413,7 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
                   {levels.map((lvl) => (
                     <Button
                       key={lvl.id}
-                      onClick={() => handleSelectLevel(lvl.id)}
+                      onClick={() => setPendingLevelSelection(lvl.id)}
                       className="p-3 bg-white border-2 border-slate-200 hover:border-slate-400 hover:bg-slate-50 rounded-xl text-center transition-all group"
                     >
                       <span className="font-bold text-slate-700 block mb-1">{lvl.id}</span>
@@ -344,7 +428,7 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
               {levels.map((lvl) => (
                 <Button
                   key={lvl.id}
-                  onClick={() => handleSelectLevel(lvl.id)}
+                  onClick={() => setPendingLevelSelection(lvl.id)}
                   className="flex flex-col items-start p-4 bg-white border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50 rounded-xl text-left transition-all group"
                 >
                   <span className="font-bold text-slate-800 group-hover:text-blue-700 mb-1">{lvl.name}</span>
@@ -374,28 +458,60 @@ export const LanguageOverlay: React.FC<LanguageOverlayProps> = ({ onSelect, isOp
               <p className="text-lg font-medium text-slate-500 mb-3">
                 Bạn trả lời đúng: <span className="text-green-600 font-bold">{evaluationResult.score}/20</span> câu
               </p>
-              <p className="text-slate-600 italic mb-10 max-w-md mx-auto bg-slate-50 p-4 rounded-xl border border-slate-100">"{evaluationResult.feedback}"</p>
+              <p className="text-slate-600 italic mb-4 max-w-md mx-auto bg-slate-50 p-4 rounded-xl border border-slate-100">"{evaluationResult.feedback}"</p>
 
-              <Button
-                onClick={() => handleSelectLevel(evaluationResult.levelId)}
-                className="px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-xl shadow-indigo-600/30 transition-all active:scale-[0.98] text-lg border-b-4 border-indigo-800"
-              >
-                Bắt đầu học ngay ở mức {evaluationResult.levelId}
-              </Button>
+              <div className="bg-blue-50 text-blue-700 p-4 rounded-xl mb-10 max-w-md mx-auto text-sm font-medium border border-blue-100 text-left">
+                <span className="text-lg mr-2">🚀</span>
+                Hệ thống sẽ tự động bỏ qua các bài học cơ bản để tiến tới đúng với trình độ hiện tại của bạn.
+              </div>
+
+              <div className="flex flex-col gap-3 w-full max-w-md mx-auto">
+                <Button
+                  onClick={() => handleSelectLevel(evaluationResult.levelId, true)}
+                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-xl shadow-indigo-600/30 transition-all active:scale-[0.98] text-lg border-b-4 border-indigo-800"
+                >
+                  Bắt đầu học ngay ở mức {evaluationResult.levelId}
+                </Button>
+
+                <Button
+                  onClick={() => {
+                    setEvaluationResult(null);
+                    localStorage.removeItem("zentask_placement_test");
+                    handleStartTest();
+                  }}
+                  variant="ghost"
+                  className="w-full text-slate-500 hover:text-slate-800 font-medium transition-all"
+                >
+                  Làm lại bài test năng lực
+                </Button>
+              </div>
             </div>
           ) : activeQuestions.length > 0 ? (
             <div className="flex flex-col flex-1 animate-in slide-in-from-right-4 duration-300">
-              <Button
-                onClick={() => {
-                  if (window.confirm("Bạn có chắc chắn muốn thoát? Bài test sẽ bị hủy bỏ.")) {
-                    setStep("LEVEL_OR_TEST");
-                    localStorage.removeItem("zentask_placement_test");
-                  }
-                }}
-                className="self-start text-slate-500 hover:text-slate-800 font-medium mb-4 flex items-center text-sm"
-              >
-                <ArrowRight className="w-4 h-4 mr-1 rotate-180" /> Thoát bài test, tự chọn trình độ
-              </Button>
+              {isConfirmingExitTest ? (
+                <div className="bg-red-50 p-4 rounded-xl border border-red-100 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in">
+                  <p className="text-red-700 font-medium">Bạn có chắc chắn muốn thoát? Bài test sẽ bị hủy bỏ.</p>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Button onClick={() => setIsConfirmingExitTest(false)} className="flex-1 px-4 py-2 bg-white text-slate-600 hover:bg-slate-100 rounded-lg font-bold border border-slate-200">
+                      Không
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setStep("LEVEL_OR_TEST");
+                        localStorage.removeItem("zentask_placement_test");
+                        setIsConfirmingExitTest(false);
+                      }}
+                      className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold shadow-sm shadow-red-600/20"
+                    >
+                      Thoát bài test
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button onClick={() => setIsConfirmingExitTest(true)} className="self-start text-slate-500 hover:text-slate-800 font-medium mb-4 flex items-center text-sm">
+                  <ArrowRight className="w-4 h-4 mr-1 rotate-180" /> Thoát bài test, tự chọn trình độ
+                </Button>
+              )}
 
               <div className="flex items-center justify-between mb-6">
                 <span className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center">

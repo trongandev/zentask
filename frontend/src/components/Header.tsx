@@ -307,8 +307,8 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
       </header>
       {user && (
         <LanguageOverlay 
-          isOpen={isLanguageOpen || !user.targetLanguage || !user.languageLevels || Object.keys(user.languageLevels).length === 0} 
-          canClose={!!user.targetLanguage && !!user.languageLevels && Object.keys(user.languageLevels).length > 0} 
+          isOpen={isLanguageOpen || !user.targetLanguage || !user.languageLevel} 
+          canClose={!!user.targetLanguage && !!user.languageLevel} 
           onClose={() => setIsLanguageOpen(false)} 
           onSelect={(code) => setIsLanguageOpen(false)} 
         />

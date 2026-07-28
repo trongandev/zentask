@@ -41,8 +41,7 @@ interface UserProfile {
     appSettings?: AppSettings;
     onboarding?: OnboardingState;
     targetLanguage?: string | null;
-    learningLanguages?: string[];
-    languageLevels?: Record<string, string>;
+    languageLevel?: string;
     learningPreferences?: string[];
     dailyLearningOptIn?: boolean;
 }
@@ -95,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkAuth = async () => {
         try {
             setLoading(true);
+            console.log("[AUTH WORKFLOW FRONTEND] [/ME] Calling /api/auth/me to verify session & rankId...");
             // Fetch session and unified payload from backend
             const res = await axiosInstance.get(`/api/auth/me`);
 
@@ -114,23 +114,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
-            if (res.status === 403) {
-                try {
-                    const errorData = res.data;
-                    if (errorData.error === "IP_BANNED_HONEYPOT" || errorData.error === "IP_BANNED") {
-                        setIsIpBanned(true);
-                    }
-                } catch (e) {
-                    console.error("Failed to parse 403 response", e);
-                }
-                setUser(null);
-                applyAppAppearance(null);
-                setLoading(false);
-                return;
-            }
-
             const data = res.data;
-            setUser(data.user as UserProfile);
+            const userProfile = data.user as UserProfile;
+            console.log(`[AUTH WORKFLOW FRONTEND] [/ME] Successfully loaded profile for: ${userProfile?.email} | Current rankId: ${userProfile?.rankId} | tier: ${userProfile?.tier} | xp: ${userProfile?.xp}`);
+            setUser(userProfile);
             applyAppAppearance(data.user?.appSettings);
             setInitialNotifications(data.notifications || []);
             // Phát sự kiện postMessage để content script của extension có thể tự bắt (không phụ thuộc ID)

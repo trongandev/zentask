@@ -75,6 +75,9 @@ router.get("/google/callback", async (req, res) => {
         displayName: safeName || "Học viên",
         photoURL: picture || "https://phukiennillkin.com/wp-content/uploads/2026/03/meme-hai-huoc-7.jpg",
       });
+      console.log(`[AUTH WORKFLOW] [GOOGLE REGISTER] New Google user created -> UID: ${user._id} | Email: ${email} | Initial rankId: ${user.rankId} | tier: ${user.tier}`);
+    } else {
+      console.log(`[AUTH WORKFLOW] [GOOGLE LOGIN] Existing Google user logged in -> UID: ${user._id} | Current rankId: ${user.rankId} | tier: ${user.tier}`);
     }
 
     generateTokenAndSetCookie(res, user);
@@ -93,6 +96,42 @@ router.get("/google/callback", async (req, res) => {
   } catch (error) {
     console.error("Google auth callback error:", error);
     res.redirect(`${process.env.FRONTEND_URL}/auth?error=CallbackFailed`);
+  }
+});
+
+// Change password
+router.put("/change-password", verifyToken, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const uid = req.user.uid;
+
+    if (!newPassword) {
+      return res.status(400).json({ error: "Vui lòng nhập mật khẩu mới." });
+    }
+
+    const user = await User.findById(uid);
+    if (!user) {
+      return res.status(404).json({ error: "Không tìm thấy người dùng." });
+    }
+
+    if (user.password) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: "Vui lòng nhập mật khẩu hiện tại." });
+      }
+      const isMatch = await user.comparePassword(currentPassword);
+      if (!isMatch) {
+        return res.status(400).json({ error: "Mật khẩu hiện tại không đúng." });
+      }
+    }
+
+    // Update password (pre-save hook will hash it)
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: "Đổi mật khẩu thành công." });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({ error: "Đã xảy ra lỗi khi đổi mật khẩu." });
   }
 });
 
@@ -117,6 +156,7 @@ router.post("/login", async (req, res) => {
     }
 
     generateTokenAndSetCookie(res, user);
+    console.log(`[AUTH WORKFLOW] [LOGIN] Email login success -> UID: ${user._id} | Current rankId: ${user.rankId} | tier: ${user.tier}`);
     res.status(200).json({ status: "success", uid: user._id });
   } catch (error) {
     console.error(error);
@@ -142,7 +182,9 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Email already exists" });
     }
 
+    console.log(`[AUTH WORKFLOW] [REGISTER] Attempting registration for email: ${normalizedEmail}`);
     const user = await User.create({ email: normalizedEmail, password });
+    console.log(`[AUTH WORKFLOW] [REGISTER] User created successfully -> UID: ${user._id} | Initial rankId: ${user.rankId} | tier: ${user.tier}`);
 
     generateTokenAndSetCookie(res, user);
     res.status(200).json({ status: "success", uid: user._id });
@@ -166,12 +208,9 @@ router.get("/me", verifyToken, async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
     const userProfile = userProfileDoc.toJSON();
+    console.log(`[AUTH WORKFLOW] [/ME] Syncing profile -> UID: ${uid} | Email: ${userProfile.email} | rankId: ${userProfile.rankId} | tier: ${userProfile.tier} | xp: ${userProfile.xp}`);
 
-    if (userProfile.languageLevels instanceof Map) {
-      userProfile.languageLevels = Object.fromEntries(userProfile.languageLevels);
-    } else if (userProfileDoc.languageLevels && typeof userProfileDoc.languageLevels.get === 'function') {
-      userProfile.languageLevels = Object.fromEntries(userProfileDoc.languageLevels);
-    }
+
 
     // Fetch custom grammar tests
     try {
@@ -258,7 +297,7 @@ router.get("/me", verifyToken, async (req, res) => {
 
     // Fetch weekly leaderboard
     const weekString = getWeekString();
-    const leaderboardDocs = await LeaderboardWeekly.find({ period: weekString }).sort({ xp: -1 }).limit(100).lean();
+    const leaderboardDocs = await LeaderboardWeekly.find({ period: weekString }).sort({ xp: -1, _id: 1 }).limit(100).lean();
 
     const uidsToFetch = leaderboardDocs.map((doc) => doc.uid);
     let usersMap = {};
