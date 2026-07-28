@@ -30,7 +30,7 @@ export function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClic
               data-flashcard-dropzone={`folder-${folder.id}`}
               className={`col-span-full flex min-h-[120px] items-center justify-center rounded-2xl border-2 border-dashed font-medium transition-all ${activeOver ? "border-blue-400 bg-white text-blue-700" : "border-gray-300 text-gray-400"}`}
             >
-              Kéo thả bộ thẻ vào đây
+              Kéo thả bộ thẻ vào đây hoặc chuột phải vào đây để tạo bộ từ vựng mới
             </div>
           )}
           {setsInFolder.map((s: any) => (
