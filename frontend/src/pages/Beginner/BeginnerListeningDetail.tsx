@@ -4,6 +4,8 @@ import { ArrowLeft, Play, Pause, Rewind, FastForward, CheckCircle2, XCircle, Loa
 import { Button } from "@/src/components/ui/Button";
 import { cn } from "../../lib/utils";
 import toastService from "@/src/services/toastService";
+import { generateConversationAudio } from "@/src/hooks/useTTSAudio";
+import axiosInstance from "@/src/services/axiosConfig";
 
 const LISTENING_DATA: Record<string, { title: string; desc: string; conversation: any[]; questions: any[] }> = {
   "school-library": {
@@ -93,34 +95,34 @@ export function BeginnerListeningDetail() {
     if (!id) return;
     if (id.length === 24) {
       // MongoDB ObjectId -> Fetch AI generated task
-      import("@/src/services/axiosConfig").then(({ default: axiosInstance }) => {
-        axiosInstance.get(`/api/beginner/skill-task/${id}`)
-          .then(res => {
-            const taskData = res.data.task;
-            const mappedData = {
-              title: taskData.content.topic?.en || taskData.topic,
-              desc: `Chủ đề: ${taskData.content.topic?.vi || taskData.topic}. Lắng nghe và trả lời câu hỏi bên dưới.`,
-              conversation: taskData.content.dialogues.map((d: any, idx: number) => ({
-                id: idx + 1,
-                speaker: d.speaker,
-                text: d.text,
-                voice: d.voice
-              })),
-              questions: taskData.content.questions.map((q: any, idx: number) => ({
-                id: idx + 1,
-                question: q.question,
-                options: q.options,
-                correctAnswer: q.correctAnswer,
-                explanation: q.explanation
-              }))
-            };
-            setData(mappedData);
-          })
-          .catch(err => {
-            console.error(err);
-            toastService.error("Không tìm thấy bài tập");
-          });
-      });
+
+      axiosInstance
+        .get(`/api/beginner/skill-task/${id}`)
+        .then((res) => {
+          const taskData = res.data.task;
+          const mappedData = {
+            title: taskData.content.topic?.en || taskData.topic,
+            desc: `Chủ đề: ${taskData.content.topic?.vi || taskData.topic}. Lắng nghe và trả lời câu hỏi bên dưới.`,
+            conversation: taskData.content.dialogues.map((d: any, idx: number) => ({
+              id: idx + 1,
+              speaker: d.speaker,
+              text: d.text,
+              voice: d.voice,
+            })),
+            questions: taskData.content.questions.map((q: any, idx: number) => ({
+              id: idx + 1,
+              question: q.question,
+              options: q.options,
+              correctAnswer: q.correctAnswer,
+              explanation: q.explanation,
+            })),
+          };
+          setData(mappedData);
+        })
+        .catch((err) => {
+          console.error(err);
+          toastService.error("Không tìm thấy bài tập");
+        });
     } else {
       setData(LISTENING_DATA[id] || null);
     }
@@ -133,10 +135,9 @@ export function BeginnerListeningDetail() {
     const loadAudio = async () => {
       setIsLoadingAudio(true);
       try {
-        const { generateConversationAudio } = await import("../../hooks/useTTSAudio");
         const url = await generateConversationAudio(data.conversation);
         if (!isActive) return;
-        
+
         setAudioUrl(url);
         if (audioRef.current) {
           audioRef.current.load();
@@ -154,7 +155,7 @@ export function BeginnerListeningDetail() {
       isActive = false;
       if (audioUrl) URL.revokeObjectURL(audioUrl);
     };
-  }, [id]);
+  }, [id, data]);
 
   if (!data) {
     return <div className="p-8 text-center">Không tìm thấy bài luyện tập.</div>;
@@ -269,14 +270,11 @@ export function BeginnerListeningDetail() {
         <div className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-slate-800">Nội dung (Transcript)</h2>
-            <Button
-              onClick={() => setShowTranscript(!showTranscript)}
-              className="text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl"
-            >
+            <Button onClick={() => setShowTranscript(!showTranscript)} className="text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl">
               {showTranscript ? "Ẩn nội dung" : "Hiện nội dung"}
             </Button>
           </div>
-          
+
           {showTranscript && (
             <div className="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100/50 space-y-3 max-h-60 overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200">
               {data.conversation.map((line: any) => (

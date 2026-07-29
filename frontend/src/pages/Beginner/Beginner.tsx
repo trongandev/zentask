@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Star, Lock, BookOpen, X } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -33,8 +33,18 @@ export function Beginner() {
     const [nodes, setNodes] = useState<LessonNode[]>([]);
     const [selectedNode, setSelectedNode] = useState<LessonNode | null>(null);
 
+    const currentNodeRef = useRef<HTMLDivElement>(null);
+
     const [rankConfig, setRankConfig] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        if (!isLoading && nodes.length > 0 && currentNodeRef.current) {
+            setTimeout(() => {
+                currentNodeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
+        }
+    }, [nodes, isLoading]);
 
     useEffect(() => {
         const fetchRanks = async () => {
@@ -235,7 +245,10 @@ export function Beginner() {
                                 )}
 
                                 {/* Node Button */}
-                                <div className={`w-full flex flex-col items-center relative z-10 ${index === 0 ? "mt-20" : ""}`}>
+                                <div 
+                                    ref={isCurrent ? currentNodeRef : null}
+                                    className={`w-full flex flex-col items-center relative z-10 ${showHeader ? "mt-20" : ""}`}
+                                >
                                     <div className="relative my-4 " style={{ transform: `translateX(${offset}px)` }}>
                                         {/* Tooltip khi đang học */}
                                         {isCurrent && (

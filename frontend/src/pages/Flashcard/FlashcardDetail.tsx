@@ -1,6 +1,26 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Search, Plus, Play, Volume2, Trash2, Pencil, Star, Info, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X, ArrowLeft, Brain, BookOpen, LayoutGrid, List, Loader2 } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Play,
+  Volume2,
+  Trash2,
+  Pencil,
+  Star,
+  Info,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  X,
+  ArrowLeft,
+  Brain,
+  BookOpen,
+  LayoutGrid,
+  List,
+  Loader2,
+} from "lucide-react";
 import { useFlashcardStore, getMemoryLevel, type MemoryLevel } from "../../services/flashcardService";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { getVoiceForLanguage } from "../../lib/ttsVoiceStorage";
@@ -10,7 +30,7 @@ import { Input } from "@/src/components/ui/Input";
 import { Textarea } from "@/src/components/ui/Textarea";
 import toastService from "@/src/services/toastService";
 import { cn } from "../../lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion";
 
 export function FlashcardDetail() {
   const { id } = useParams();
@@ -55,8 +75,15 @@ export function FlashcardDetail() {
   const [searchTerm, setSearchTerm] = useState("");
   const [direction, setDirection] = useState(1);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" && window.innerWidth < 768);
 
-  const itemsPerPage = viewMode === "list" ? 6 : 12;
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const itemsPerPage = isMobile ? (viewMode === "list" ? 3 : 6) : viewMode === "list" ? 6 : 12;
   const filterCounts = useMemo(() => {
     let all = cards.length;
     let relearn = 0;
@@ -112,6 +139,40 @@ export function FlashcardDetail() {
     playAudio(text, currentVoiceId);
   };
 
+  // --- SWIPE GESTURES ---
+  const dragX = useMotionValue(0);
+  const dragRotate = useTransform(dragX, [-200, 200], [-10, 10]);
+
+  const handleDragEnd = (e: any, info: any) => {
+    const offset = info.offset.x;
+    const velocity = info.velocity.x;
+
+    const minSwipeOffset = 50;
+    const minVelocity = 300;
+
+    const isLeftSwipe = offset < -minSwipeOffset || velocity < -minVelocity;
+    const isRightSwipe = offset > minSwipeOffset || velocity > minVelocity;
+
+    if (isLeftSwipe || isRightSwipe) {
+      const currentIndex = filteredCards.findIndex((c) => c.id === activeCard?.id);
+      if (currentIndex === -1) return;
+
+      let newIndex = currentIndex;
+      if (isLeftSwipe && currentIndex < filteredCards.length - 1) {
+        newIndex++; // Next card
+      } else if (isRightSwipe && currentIndex > 0) {
+        newIndex--; // Prev card
+      }
+
+      if (newIndex !== currentIndex) {
+        setActiveCardId(filteredCards[newIndex].id);
+        const newPage = Math.floor(newIndex / itemsPerPage);
+        if (newPage !== currentPage) {
+          handlePageChange(newPage);
+        }
+      }
+    }
+  };
   const isBuiltInSet = Boolean((currentSet as any)?.isBuiltIn || String(currentSet?.id || "").startsWith("builtin_"));
 
   // --- FORM LOGIC ---
@@ -219,7 +280,7 @@ export function FlashcardDetail() {
       {/* HEADER / NAVIGATION */}
       <div className="relative z-10 flex flex-col gap-4">
         {/* Top breadcrumb & Practice button */}
-        <div className="flex items-center justify-between text-gray-900 mb-2">
+        <div className="flex flex-wrap items-center justify-between text-gray-900 mb-2">
           <div className="flex items-center gap-3">
             <Button onClick={() => navigate("/flashcards")} className="bg-white hover:bg-gray-100 text-gray-600 border border-gray-200 rounded-full p-2 transition-colors">
               <ArrowLeft className="w-5 h-5" />
@@ -238,8 +299,8 @@ export function FlashcardDetail() {
         </div>
 
         {/* Filter Radio Buttons & Pagination */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white border border-gray-200 rounded-2xl p-3 shadow-sm">
-          <div className="flex items-center gap-6 text-sm font-semibold">
+        <div className="flex flex-col md:flex-row flex-wrap items-center justify-between gap-4 bg-white border border-gray-200 rounded-2xl p-3 shadow-sm">
+          <div className="flex flex-wrap items-center gap-6 text-sm font-semibold">
             <label className={cn("flex items-center gap-2 cursor-pointer transition-colors", filterMode === "all" ? "text-blue-700" : "text-gray-700 hover:text-blue-600")}>
               <input type="radio" checked={filterMode === "all"} onChange={() => setFilterMode("all")} className="w-4 h-4 accent-blue-600" /> Tất cả ({filterCounts.all})
             </label>
@@ -252,38 +313,6 @@ export function FlashcardDetail() {
             <label className={cn("flex items-center gap-2 cursor-pointer transition-colors", filterMode === "mastered" ? "text-green-700" : "text-gray-700 hover:text-green-600")}>
               <input type="radio" checked={filterMode === "mastered"} onChange={() => setFilterMode("mastered")} className="w-4 h-4 accent-green-600" /> Đã thuộc ({filterCounts.mastered})
             </label>
-          </div>
-          <div className="flex items-center gap-1 text-gray-600">
-            <Button variant="ghost" onClick={() => handlePageChange(0)} disabled={currentPage === 0} className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto">
-              <ChevronsLeft className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
-              disabled={currentPage === 0}
-              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <span className="text-sm font-bold px-2 text-gray-800">
-              {currentPage + 1} / {totalPages}
-            </span>
-            <Button
-              variant="ghost"
-              onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
-              disabled={currentPage >= totalPages - 1}
-              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => handlePageChange(totalPages - 1)}
-              disabled={currentPage >= totalPages - 1}
-              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
-            >
-              <ChevronsRight className="w-5 h-5" />
-            </Button>
           </div>
         </div>
 
@@ -339,7 +368,14 @@ export function FlashcardDetail() {
       {/* ─── MAIN BOOK SPLIT LAYOUT ─── */}
       <div className="relative z-10 flex-1 flex flex-col lg:flex-row gap-4 min-h-[500px]">
         {/* LEFT PANEL: Active Card Details (Notepad Style) */}
-        <div className="w-full lg:w-2/5 bg-white rounded-[2rem] shadow-sm border border-gray-200 flex flex-col relative overflow-hidden">
+        <motion.div
+          style={{ x: dragX, rotate: dragRotate }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.6}
+          onDragEnd={handleDragEnd}
+          className="w-full lg:w-2/5 bg-white rounded-[2rem] shadow-sm border border-gray-200 flex flex-col relative overflow-hidden"
+        >
           {/* Notepad rings decoration */}
           <div className="absolute top-0 left-0 right-0 h-4 flex justify-around px-8 mt-3 pointer-events-none opacity-40">
             {[1, 2, 3, 4].map((i) => (
@@ -389,11 +425,7 @@ export function FlashcardDetail() {
                     <div key={idx} className="group">
                       <p className="text-gray-800 text-base font-medium flex items-start gap-2">
                         <button onClick={() => handlePlayAudio(ex.en)} className="mt-0.5 text-gray-400 group-hover:text-blue-500 transition-colors">
-                          {isLoading && loadingText === ex.en ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                          ) : (
-                            <Volume2 className="w-4 h-4" />
-                          )}
+                          {isLoading && loadingText === ex.en ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" /> : <Volume2 className="w-4 h-4" />}
                         </button>
                         <span>{ex.en}</span>
                       </p>
@@ -439,7 +471,7 @@ export function FlashcardDetail() {
               <p className="text-sm">Hãy thử tìm kiếm từ khác hoặc thêm mới.</p>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* RIGHT PANEL: Grid of Cards (Book Page Flip) */}
         <div className="w-full lg:w-3/5 bg-gray-100/50 rounded-[2rem] p-4 sm:p-6 shadow-inner border border-gray-200 relative overflow-hidden flex flex-col">
@@ -467,13 +499,12 @@ export function FlashcardDetail() {
                           e.stopPropagation();
                           handlePlayAudio(card.term);
                         }}
-                        className={cn("p-2 rounded-full transition-all bg-gray-100 text-gray-500 hover:text-blue-600 hover:bg-blue-50", isLoading && loadingText === card.term && "text-blue-600 bg-blue-50")}
-                      >
-                        {isLoading && loadingText === card.term ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Volume2 className="w-4 h-4" />
+                        className={cn(
+                          "p-2 rounded-full transition-all bg-gray-100 text-gray-500 hover:text-blue-600 hover:bg-blue-50",
+                          isLoading && loadingText === card.term && "text-blue-600 bg-blue-50",
                         )}
+                      >
+                        {isLoading && loadingText === card.term ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
@@ -489,7 +520,7 @@ export function FlashcardDetail() {
                 animate={{ opacity: 1, x: 0, rotateY: 0 }}
                 exit={{ opacity: 0, x: direction * -50, rotateY: direction * -10, transition: { duration: 0.2 } }}
                 transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
-                className="grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-x-4 content-start flex-1 pb-10 pt-20"
+                className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-x-4 content-start flex-1 pb-10 pt-20"
               >
                 {currentCards.map((card, index) => {
                   const level = getMemoryLevel(cardProgress[card.id]);
@@ -504,7 +535,7 @@ export function FlashcardDetail() {
                       onClick={() => setActiveCardId(card.id)}
                       style={{ zIndex: index }}
                       className={cn(
-                        "relative p-4 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col h-[150px] border shadow-sm group hover:-translate-y-6  active:scale-[0.97]",
+                        "relative p-4 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col h-[150px] border shadow-sm group hover:-translate-y-6  active:scale-[0.97] select-none",
                         bgClass,
                         // Màn hình nhỏ (2 cột): Từ thẻ thứ 3 trở đi lùi lên
                         // Màn hình lớn (3 cột): Từ thẻ thứ 4 trở đi lùi lên
@@ -527,14 +558,10 @@ export function FlashcardDetail() {
                           }}
                           className={cn(
                             "p-2 rounded-full shrink-0 mt-2 transition-all bg-gray-100 text-gray-500 hover:text-blue-600 hover:bg-blue-50",
-                            isLoading && loadingText === card.term ? "opacity-100 text-blue-600 bg-blue-50" : "opacity-0 group-hover:opacity-100"
+                            isLoading && loadingText === card.term ? "opacity-100 text-blue-600 bg-blue-50" : "opacity-0 group-hover:opacity-100",
                           )}
                         >
-                          {isLoading && loadingText === card.term ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Volume2 className="w-4 h-4" />
-                          )}
+                          {isLoading && loadingText === card.term ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
                         </button>
                       </div>
                     </div>
@@ -545,6 +572,38 @@ export function FlashcardDetail() {
           )}
 
           {currentCards.length === 0 && <div className="absolute inset-0 flex items-center justify-center text-gray-400 font-medium text-lg">Trang này trống</div>}
+          <div className="flex items-center justify-end gap-1 text-gray-600 select-none">
+            <Button variant="ghost" onClick={() => handlePageChange(0)} disabled={currentPage === 0} className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto">
+              <ChevronsLeft className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
+              disabled={currentPage === 0}
+              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <span className="text-sm font-bold px-2 text-gray-800">
+              {currentPage + 1} / {totalPages}
+            </span>
+            <Button
+              variant="ghost"
+              onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
+              disabled={currentPage >= totalPages - 1}
+              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => handlePageChange(totalPages - 1)}
+              disabled={currentPage >= totalPages - 1}
+              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
+            >
+              <ChevronsRight className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
