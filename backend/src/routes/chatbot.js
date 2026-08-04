@@ -124,19 +124,19 @@ async function startZaloBot() {
       const contentString = typeof message.data.content === "string" ? message.data.content.toLowerCase() : "";
       const isCallingBot = isMentioningBot || contentString.includes("@lopy zentask");
 
-      if (isCallingBot && message.threadId === GROUP_ACTIVE_REPLY) {
-        const imagePath = path.resolve("./src/images/lopy-zentask-bot.png");
-        if (fs.existsSync(imagePath)) {
-          return api.sendMessage(
-            {
-              msg: "Dạ Mentor Lopy nghe đây! 🥰 Cần hỗ trợ gì bạn cứ nhắn riêng với mình nha!",
-              attachments: [imagePath],
-            },
-            message.threadId,
-            message.type,
-          );
-        }
-      }
+      // if (isCallingBot && message.threadId === GROUP_ACTIVE_REPLY) {
+      //   const imagePath = path.resolve("./src/images/lopy-zentask-bot.png");
+      //   if (fs.existsSync(imagePath)) {
+      //     return api.sendMessage(
+      //       {
+      //         msg: "Dạ Mentor Lopy nghe đây! 🥰 Cần hỗ trợ gì bạn cứ nhắn riêng với mình nha!",
+      //         attachments: [imagePath],
+      //       },
+      //       message.threadId,
+      //       message.type,
+      //     );
+      //   }
+      // }
 
       if (message.type !== 0 || typeof message.data.content !== "string") {
         return chatbotUtil.processMessage(message);
