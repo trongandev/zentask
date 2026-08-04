@@ -7,7 +7,7 @@ import fs from "fs";
 import path from "path";
 import sizeOf from "image-size";
 dotenv.config();
-const THREADID_NOT_REPLY = [, "4730750718637283891" /** Quizzet cộng đồng học từ vựng */];
+const THREADID_NOT_REPLY = ["4730750718637283891" /** Quizzet cộng đồng học từ vựng */];
 const ZALOID_BANNED = [];
 const GROUP_ACTIVE_REPLY = process.env.QUIZ_GROUP_THREAD_ID;
 
@@ -122,21 +122,17 @@ async function startZaloBot() {
       const botId = api.getCurrentUserId ? api.getCurrentUserId() : api.getOwnId ? api.getOwnId() : null;
       const isMentioningBot = message.data.mentions && message.data.mentions.some((m) => String(m.uid) === String(botId));
       const contentString = typeof message.data.content === "string" ? message.data.content.toLowerCase() : "";
-      const isCallingBot = isMentioningBot || contentString.includes("@lopy zentask");
+      const isCallingBot = isMentioningBot;
 
-      // if (isCallingBot && message.threadId === GROUP_ACTIVE_REPLY) {
-      //   const imagePath = path.resolve("./src/images/lopy-zentask-bot.png");
-      //   if (fs.existsSync(imagePath)) {
-      //     return api.sendMessage(
-      //       {
-      //         msg: "Dạ Mentor Lopy nghe đây! 🥰 Cần hỗ trợ gì bạn cứ nhắn riêng với mình nha!",
-      //         attachments: [imagePath],
-      //       },
-      //       message.threadId,
-      //       message.type,
-      //     );
-      //   }
-      // }
+      if (isCallingBot && message.threadId === GROUP_ACTIVE_REPLY) {
+        return api.sendMessage(
+          {
+            msg: "Dạ Mentor Lopy nghe đây! 🥰 Cần hỗ trợ gì bạn cứ nhắn riêng với mình nha!",
+          },
+          message.threadId,
+          message.type,
+        );
+      }
 
       if (message.type !== 0 || typeof message.data.content !== "string") {
         return chatbotUtil.processMessage(message);
