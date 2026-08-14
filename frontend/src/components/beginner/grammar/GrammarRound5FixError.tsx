@@ -17,7 +17,28 @@ export function GrammarRound5FixError({ topicId, isCorrect, setIsCorrect, data }
 
   const handleCheck = () => {
     if (isCorrect !== null) return;
-    setIsCorrect(inputText.toLowerCase().trim() === correctSentence.toLowerCase());
+    
+    const cleanStr = (s: string) => s.toLowerCase().replace(/[.,!?;]/g, "").replace(/\s+/g, " ").trim();
+    const userAns = cleanStr(inputText);
+    
+    let isMatch = false;
+    
+    // Xử lý trường hợp có chữ "(Hoặc...)" trong đáp án
+    if (correctSentence.includes("(Hoặc")) {
+      const parts = correctSentence.split("(Hoặc");
+      const ans1 = cleanStr(parts[0]);
+      const ans2 = cleanStr(parts[1].replace(")", ""));
+      isMatch = userAns === ans1 || userAns === ans2;
+    } else {
+      isMatch = userAns === cleanStr(correctSentence);
+    }
+    
+    // Hỗ trợ thêm mảng acceptedAnswers nếu có trong data
+    if (!isMatch && data.fixError.acceptedAnswers) {
+      isMatch = data.fixError.acceptedAnswers.some((ans: string) => cleanStr(ans) === userAns);
+    }
+
+    setIsCorrect(isMatch);
   };
 
   return (

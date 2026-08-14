@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AlertTriangle, CheckCircle, Loader2, Mic, MicOff, RotateCw, Volume2 } from "lucide-react";
+import { AlertTriangle, CheckCircle, Loader2, Mic, MicOff, Play, RotateCw, Volume2 } from "lucide-react";
 import toastService from "@/src/services/toastService";
 import { Flashcard } from "../../services/flashcardService";
 import { pronunciationService } from "../../services/pronunciationService";
@@ -213,6 +213,13 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
   const [mainScore, setMainScore] = useState<number | null>(null);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [wrongCardIds, setWrongCardIds] = useState<string[]>([]);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (audioUrl) {
+      return () => URL.revokeObjectURL(audioUrl);
+    }
+  }, [audioUrl]);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -237,6 +244,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
     setMainScore(null);
     setStatus("idle");
     setRecordingSeconds(0);
+    setAudioUrl(null);
   }, [currentIndex]);
 
   useEffect(() => {
@@ -264,6 +272,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
       setResult(null);
       setMainScore(null);
       setRecordingSeconds(0);
+      setAudioUrl(null);
       chunksRef.current = [];
 
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -331,6 +340,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
           const passed = (nextScore ?? 0) >= PASS_SCORE;
           setStatus(passed ? "correct" : "wrong");
           playSoundEffect(passed ? "correct" : "wrong");
+          setAudioUrl(URL.createObjectURL(blob));
         } catch (error: any) {
           console.error("Pronunciation check error:", error);
           setStatus("idle");
@@ -368,6 +378,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
     setResult(null);
     setMainScore(null);
     setRecordingSeconds(0);
+    setAudioUrl(null);
     setStatus("idle");
   };
 
@@ -411,6 +422,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
             wrongCardIdsRef.current = [];
             setResult(null);
             setMainScore(null);
+            setAudioUrl(null);
             setStatus("idle");
           }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
@@ -533,6 +545,18 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
             <Button onClick={retryCurrent} className="flex-1 rounded-2xl bg-gray-100 px-6 py-4 font-bold text-gray-700 transition hover:bg-gray-200">
               Ghi âm lại
             </Button>
+            {audioUrl && (
+              <Button
+                onClick={() => {
+                  const audio = new Audio(audioUrl);
+                  audio.play().catch(console.error);
+                }}
+                className="flex-1 rounded-2xl bg-indigo-50 px-6 py-4 font-bold text-indigo-600 transition hover:bg-indigo-100 flex items-center justify-center gap-2"
+              >
+                <Play className="h-5 w-5" />
+                Nghe lại
+              </Button>
+            )}
             <Button onClick={goNext} className="flex-1 rounded-2xl bg-blue-600 px-6 py-4 font-bold text-white transition hover:bg-blue-700">
               {currentIndex < cards.length - 1 ? "Câu tiếp theo" : "Hoàn thành"}
             </Button>
