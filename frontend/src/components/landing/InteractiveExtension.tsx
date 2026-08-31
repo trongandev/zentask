@@ -19,30 +19,31 @@ export function InteractiveExtension() {
   };
 
   return (
-    <div className="w-full bg-white rounded-3xl border border-slate-200 shadow-xl flex flex-col md:flex-row-reverse mt-12 mb-24">
+    <div className="w-full bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] flex flex-col md:flex-row-reverse mt-12 mb-24 overflow-hidden group transition-all hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]">
       {/* Lời giới thiệu */}
-      <div className="p-8 md:p-12 md:w-1/2 flex flex-col justify-center bg-purple-50/50">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-purple-100 text-purple-600">
+      <div className="p-10 md:p-16 md:w-1/2 flex flex-col justify-center relative overflow-hidden bg-[#fafcff]">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-purple-100/50 rounded-full blur-[80px] pointer-events-none" />
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-8 bg-purple-50 text-purple-600 border border-purple-100/50 shadow-sm transition-transform group-hover:scale-110 duration-500">
           <Puzzle className="w-7 h-7" />
         </div>
-        <h3 className="text-3xl font-black text-slate-900 mb-4">Extension Dịch Thuật Đa Năng</h3>
-        <p className="text-slate-600 font-medium text-lg mb-6 leading-relaxed">
+        <h3 className="text-3xl md:text-4xl font-black text-slate-900 mb-5 tracking-tight">Extension Dịch Thuật Đa Năng</h3>
+        <p className="text-slate-600 font-medium text-lg mb-8 leading-relaxed">
           Đọc báo, xem tài liệu tiếng Anh giờ đây dễ dàng hơn bao giờ hết. Bôi đen hoặc click đúp vào từ vựng bất kỳ trên trình duyệt để tra cứu và lưu ngay vào Flashcard.
         </p>
-        <div className="bg-white p-4 rounded-xl border border-purple-100 shadow-sm flex items-start gap-4">
-          <div className="bg-red-100 p-2 rounded-lg text-red-600 mt-1">
+        <div className="bg-white/80 backdrop-blur-md p-5 rounded-2xl border border-purple-100/50 shadow-sm flex items-start gap-4 transition-transform group-hover:translate-x-1 duration-500 relative z-10">
+          <div className="bg-red-50 p-2.5 rounded-xl text-red-600 border border-red-100/50 shrink-0">
             <Youtube className="w-6 h-6" />
           </div>
           <div>
-            <h5 className="font-bold text-slate-900">Tính năng Phụ đề kép YouTube</h5>
-            <p className="text-sm text-slate-500 mt-1 leading-relaxed">Hiển thị song song 2 ngôn ngữ và hỗ trợ click vào từng từ ngay trên video YouTube để học từ vựng trực quan.</p>
+            <h5 className="font-bold text-slate-900 mb-1">Tính năng Phụ đề kép YouTube</h5>
+            <p className="text-sm text-slate-500 leading-relaxed">Hiển thị song song 2 ngôn ngữ và hỗ trợ click vào từng từ ngay trên video YouTube để học từ vựng trực quan.</p>
           </div>
         </div>
       </div>
 
       {/* Interactive UI */}
-      <div className="p-8 md:p-12 md:w-1/2 flex flex-col items-center justify-center bg-slate-50 relative min-h-[400px]" onClick={() => setShowPopover(false)}>
-        <div className="max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative">
+      <div className="p-10 md:p-16 md:w-1/2 flex flex-col items-center justify-center bg-slate-50/50 border-t md:border-t-0 md:border-l border-slate-100 relative min-h-[450px]" onClick={() => setShowPopover(false)}>
+        <div className="max-w-md bg-white p-8 md:p-10 rounded-2xl border border-slate-100 shadow-sm relative transition-transform duration-500 group-hover:-translate-y-1">
           <h4 className="text-slate-400 font-bold uppercase tracking-wider text-xs mb-4">Bài báo mẫu</h4>
           <p className="text-xl md:text-2xl text-slate-800 font-serif leading-relaxed">
             "Success is not final, failure is not fatal: it is the{" "}
@@ -111,7 +112,7 @@ export function InteractiveExtension() {
           href="https://chromewebstore.google.com/detail/lkhjgkjabnfbfblflgkcapamidmfkjnc?utm_source=item-share-cb"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-8 bg-slate-900 text-white hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 px-8 py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md"
+          className="mt-10 bg-slate-900 text-white hover:bg-slate-800 hover:shadow-lg hover:-translate-y-1 px-8 py-4 rounded-full font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md relative z-10"
         >
           <Puzzle className="w-5 h-5" /> Tìm hiểu thêm
         </a>

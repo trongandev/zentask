@@ -280,72 +280,84 @@ export function FlashcardDetail() {
       {/* HEADER / NAVIGATION */}
       <div className="relative z-10 flex flex-col gap-4">
         {/* Top breadcrumb & Practice button */}
-        <div className="flex flex-wrap items-center justify-between text-gray-900 mb-2">
+        <div className="flex flex-wrap items-center justify-between text-slate-900 mb-2 gap-4">
           <div className="flex items-center gap-3">
-            <Button onClick={() => navigate("/flashcards")} className="bg-white hover:bg-gray-100 text-gray-600 border border-gray-200 rounded-full p-2 transition-colors">
+            <Button onClick={() => navigate("/flashcards")} className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-full p-2.5 transition-all shadow-sm hover:shadow-md active:scale-95">
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl font-black flex items-center gap-2 tracking-tight">
               <BookOpen className="w-6 h-6 text-blue-600" /> {currentSet.title}
             </h1>
           </div>
           <Button
             onClick={() => navigate(`/flashcard/${id}/practice`)}
             disabled={currentSet.cardCount === 0}
-            className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold shadow-sm hover:shadow-md hover:bg-blue-700 transition-all flex items-center gap-2 disabled:opacity-50"
+            className="bg-slate-900 text-white px-6 py-2.5 rounded-full font-bold shadow-sm hover:shadow-md hover:bg-slate-800 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95"
           >
             <Play className="w-4 h-4 fill-current" /> Học bộ thẻ ({currentSet.cardCount})
           </Button>
         </div>
 
-        {/* Filter Radio Buttons & Pagination */}
-        <div className="flex flex-col md:flex-row flex-wrap items-center justify-between gap-4 bg-white border border-gray-200 rounded-2xl p-3 shadow-sm">
-          <div className="flex flex-wrap items-center gap-6 text-sm font-semibold">
-            <label className={cn("flex items-center gap-2 cursor-pointer transition-colors", filterMode === "all" ? "text-blue-700" : "text-gray-700 hover:text-blue-600")}>
-              <input type="radio" checked={filterMode === "all"} onChange={() => setFilterMode("all")} className="w-4 h-4 accent-blue-600" /> Tất cả ({filterCounts.all})
-            </label>
-            <label className={cn("flex items-center gap-2 cursor-pointer transition-colors", filterMode === "unknown" ? "text-gray-900" : "text-gray-700 hover:text-gray-900")}>
-              <input type="radio" checked={filterMode === "unknown"} onChange={() => setFilterMode("unknown")} className="w-4 h-4 accent-gray-500" /> Chưa học ({filterCounts.unknown})
-            </label>
-            <label className={cn("flex items-center gap-2 cursor-pointer transition-colors", filterMode === "relearn" ? "text-yellow-700" : "text-gray-700 hover:text-yellow-600")}>
-              <input type="radio" checked={filterMode === "relearn"} onChange={() => setFilterMode("relearn")} className="w-4 h-4 accent-yellow-500" /> Cần ôn tập ({filterCounts.relearn})
-            </label>
-            <label className={cn("flex items-center gap-2 cursor-pointer transition-colors", filterMode === "mastered" ? "text-green-700" : "text-gray-700 hover:text-green-600")}>
-              <input type="radio" checked={filterMode === "mastered"} onChange={() => setFilterMode("mastered")} className="w-4 h-4 accent-green-600" /> Đã thuộc ({filterCounts.mastered})
-            </label>
+        {/* Filter Buttons */}
+        <div className="flex flex-col md:flex-row flex-wrap items-center justify-between gap-4 bg-slate-100/80 backdrop-blur rounded-[2rem] p-1.5 shadow-sm">
+          <div className="flex flex-wrap items-center gap-1 text-sm font-bold w-full md:w-auto">
+            <Button
+              onClick={() => setFilterMode("all")}
+              className={cn("px-4 py-2 rounded-full transition-all duration-300 flex-1 md:flex-none", filterMode === "all" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+            >
+              Tất cả <span className="ml-1 opacity-70">({filterCounts.all})</span>
+            </Button>
+            <Button
+              onClick={() => setFilterMode("unknown")}
+              className={cn("px-4 py-2 rounded-full transition-all duration-300 flex-1 md:flex-none", filterMode === "unknown" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+            >
+              Chưa học <span className="ml-1 opacity-70">({filterCounts.unknown})</span>
+            </Button>
+            <Button
+              onClick={() => setFilterMode("relearn")}
+              className={cn("px-4 py-2 rounded-full transition-all duration-300 flex-1 md:flex-none", filterMode === "relearn" ? "bg-white text-yellow-600 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+            >
+              Cần ôn <span className="ml-1 opacity-70">({filterCounts.relearn})</span>
+            </Button>
+            <Button
+              onClick={() => setFilterMode("mastered")}
+              className={cn("px-4 py-2 rounded-full transition-all duration-300 flex-1 md:flex-none", filterMode === "mastered" ? "bg-white text-green-600 shadow-sm" : "text-slate-500 hover:text-slate-700")}
+            >
+              Đã thuộc <span className="ml-1 opacity-70">({filterCounts.mastered})</span>
+            </Button>
           </div>
         </div>
 
         {/* Action Row: Search & Create */}
         <div className="flex flex-col md:flex-row items-center gap-3">
-          <div className="flex bg-white border border-gray-200 p-1 rounded-full shadow-sm shrink-0">
+          <div className="flex bg-slate-100 p-1 rounded-full shadow-sm shrink-0 border border-slate-200/50">
             <button
               onClick={() => setViewMode("grid")}
-              className={cn("p-2 rounded-full transition-all", viewMode === "grid" ? "bg-gray-100 text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600")}
+              className={cn("p-2 rounded-full transition-all duration-300", viewMode === "grid" ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600")}
               title="Grid View"
             >
               <LayoutGrid className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={cn("p-2 rounded-full transition-all", viewMode === "list" ? "bg-gray-100 text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600")}
+              className={cn("p-2 rounded-full transition-all duration-300", viewMode === "list" ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600")}
               title="List View"
             >
               <List className="w-5 h-5" />
             </button>
           </div>
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white text-gray-800 border border-gray-200 rounded-full pl-11 pr-10 py-3 font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-gray-400 shadow-sm transition-all"
+              className="w-full bg-white text-slate-800 border border-slate-200 rounded-full pl-11 pr-10 py-3 font-medium outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 placeholder:text-slate-400 shadow-sm transition-all"
               placeholder="Tìm kiếm từ vựng..."
             />
             {searchTerm && (
-              <button onClick={() => setSearchTerm("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
+              <button onClick={() => setSearchTerm("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full p-1 transition-colors">
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -357,7 +369,7 @@ export function FlashcardDetail() {
                 setIsModalOpen(true);
                 resetForm();
               }}
-              className="bg-gray-900 text-white hover:bg-gray-800 px-5 py-3 rounded-full font-bold shadow-sm transition-all flex items-center gap-2 whitespace-nowrap"
+              className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-full font-bold shadow-sm hover:shadow-md transition-all flex items-center gap-2 whitespace-nowrap active:scale-95"
             >
               <Plus className="w-5 h-5" /> Thêm từ mới
             </Button>
@@ -484,7 +496,7 @@ export function FlashcardDetail() {
                   <div
                     key={card.id}
                     onClick={() => setActiveCardId(card.id)}
-                    className={cn("p-4 m-2 rounded-xl cursor-pointer flex gap-4 items-center transition-all border shadow-sm active:scale-[0.97]", "bg-white border-gray-200 hover:bg-gray-50")}
+                    className={cn("p-4 m-2 rounded-[1.5rem] cursor-pointer flex gap-4 items-center transition-all duration-300 border shadow-sm hover:shadow-md active:scale-[0.98]", "bg-white border-slate-200 hover:bg-slate-50")}
                   >
                     <div className="flex-1 min-w-0">
                       <h3 className={cn("font-medium text-lg leading-tight truncate", "text-gray-900")}>
@@ -535,10 +547,8 @@ export function FlashcardDetail() {
                       onClick={() => setActiveCardId(card.id)}
                       style={{ zIndex: index }}
                       className={cn(
-                        "relative p-4 rounded-2xl cursor-pointer transition-all duration-300 flex flex-col h-[150px] border shadow-sm group hover:-translate-y-6  active:scale-[0.97] select-none",
+                        "relative p-5 rounded-[1.5rem] cursor-pointer transition-all duration-300 flex flex-col h-[150px] border shadow-sm group hover:shadow-xl hover:-translate-y-4 active:scale-[0.98] select-none",
                         bgClass,
-                        // Màn hình nhỏ (2 cột): Từ thẻ thứ 3 trở đi lùi lên
-                        // Màn hình lớn (3 cột): Từ thẻ thứ 4 trở đi lùi lên
                         "max-xl:[&:nth-child(n+3)]:-mt-16 xl:[&:nth-child(n+4)]:-mt-16",
                       )}
                     >
@@ -572,36 +582,36 @@ export function FlashcardDetail() {
           )}
 
           {currentCards.length === 0 && <div className="absolute inset-0 flex items-center justify-center text-gray-400 font-medium text-lg">Trang này trống</div>}
-          <div className="flex items-center justify-end gap-1 text-gray-600 select-none">
-            <Button variant="ghost" onClick={() => handlePageChange(0)} disabled={currentPage === 0} className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto">
-              <ChevronsLeft className="w-5 h-5" />
+          <div className="flex items-center justify-end gap-1 text-slate-600 select-none bg-white p-2 rounded-full shadow-sm w-max ml-auto border border-slate-100 mt-2">
+            <Button variant="ghost" onClick={() => handlePageChange(0)} disabled={currentPage === 0} className="hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 rounded-full p-2 h-auto">
+              <ChevronsLeft className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
               onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
               disabled={currentPage === 0}
-              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
+              className="hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 rounded-full p-2 h-auto"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </Button>
-            <span className="text-sm font-bold px-2 text-gray-800">
+            <span className="text-sm font-bold px-3 text-slate-800">
               {currentPage + 1} / {totalPages}
             </span>
             <Button
               variant="ghost"
               onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
               disabled={currentPage >= totalPages - 1}
-              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
+              className="hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 rounded-full p-2 h-auto"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
               onClick={() => handlePageChange(totalPages - 1)}
               disabled={currentPage >= totalPages - 1}
-              className="hover:bg-gray-100 hover:text-gray-900 disabled:opacity-30 rounded-full p-1.5 h-auto"
+              className="hover:bg-slate-100 hover:text-slate-900 disabled:opacity-30 rounded-full p-2 h-auto"
             >
-              <ChevronsRight className="w-5 h-5" />
+              <ChevronsRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
@@ -609,18 +619,18 @@ export function FlashcardDetail() {
 
       {/* ── Add/Edit Word Modal ── */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCardId ? "Chỉnh sửa thẻ" : "Thêm từ mới"} className="max-w-2xl">
-        <div className="flex border-b border-gray-100">
+        <div className="flex p-2 bg-slate-50 border-b border-slate-100">
           {!editingCardId && (
             <Button
               onClick={() => setActiveTab("ai")}
-              className={cn("flex-1 py-3 font-bold text-sm transition-colors", activeTab === "ai" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50" : "text-gray-500 hover:bg-gray-50")}
+              className={cn("flex-1 py-2.5 rounded-xl font-bold text-sm transition-all", activeTab === "ai" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50")}
             >
               Tạo bằng AI
             </Button>
           )}
           <Button
             onClick={() => setActiveTab("manual")}
-            className={cn("flex-1 py-3 font-bold text-sm transition-colors", activeTab === "manual" ? "text-blue-600 border-b-2 border-blue-600 bg-blue-50" : "text-gray-500 hover:bg-gray-50")}
+            className={cn("flex-1 py-2.5 rounded-xl font-bold text-sm transition-all", activeTab === "manual" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50")}
           >
             {editingCardId ? "Chỉnh sửa thủ công" : "Tạo thủ công"}
           </Button>
@@ -716,14 +726,14 @@ export function FlashcardDetail() {
                   placeholder="Ghi chú thêm về từ này..."
                 />
               </div>
-              <div className="pt-4 flex justify-end gap-3">
-                <Button onClick={() => setIsModalOpen(false)} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-6 py-2.5 rounded-xl font-bold transition-colors">
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-100 mt-6 pt-6">
+                <Button onClick={() => setIsModalOpen(false)} className="bg-slate-100 text-slate-700 hover:bg-slate-200 px-6 py-2.5 rounded-xl font-bold transition-colors">
                   Hủy
                 </Button>
                 <Button
                   disabled={loading}
                   onClick={handleCreateManual}
-                  className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2.5 rounded-xl font-bold shadow-sm transition-colors disabled:opacity-50"
+                  className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2.5 rounded-xl font-bold shadow-sm transition-colors disabled:opacity-50 active:scale-95"
                 >
                   {loading ? "Đang xử lý..." : editingCardId ? "Lưu thay đổi" : "Lưu thẻ"}
                 </Button>
@@ -735,9 +745,9 @@ export function FlashcardDetail() {
       {/* ── Note Modal ── */}
       <Modal isOpen={isNoteModalOpen} onClose={() => setIsNoteModalOpen(false)} title="Ghi chú" className="max-w-md">
         <div className="p-6">
-          <div className="bg-blue-50/50 p-4 rounded-xl text-gray-700 whitespace-pre-wrap leading-relaxed border border-blue-100">{activeCard?.notes}</div>
+          <div className="bg-blue-50/80 p-5 rounded-2xl text-slate-700 whitespace-pre-wrap leading-relaxed border border-blue-100/50 shadow-inner">{activeCard?.notes}</div>
           <div className="mt-6 flex justify-end">
-            <Button onClick={() => setIsNoteModalOpen(false)} className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-6 py-2 rounded-xl font-bold transition-colors">
+            <Button onClick={() => setIsNoteModalOpen(false)} className="bg-slate-100 text-slate-700 hover:bg-slate-200 px-6 py-2.5 rounded-xl font-bold transition-colors">
               Đóng
             </Button>
           </div>

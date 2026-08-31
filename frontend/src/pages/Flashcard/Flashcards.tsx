@@ -445,18 +445,18 @@ export function Flashcards() {
                 setNewFolderColor(COLORS[Math.floor(Math.random() * COLORS.length)]);
                 setIsFolderModalOpen(true);
               }}
-              className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95"
+              className="bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 px-6 py-2.5 rounded-full font-bold flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md active:scale-95"
             >
-              <FolderIcon className="w-5 h-5" /> Tạo Folder
+              <FolderIcon className="w-4 h-4 text-slate-500" /> Tạo Folder
             </Button>
             <Button
               onClick={(e) => {
                 e.stopPropagation();
                 openCreateSetModal(null);
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 whitespace-nowrap"
+              className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full font-bold flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md active:scale-95 whitespace-nowrap"
             >
-              <Plus className="w-5 h-5" /> Tạo bộ thẻ
+              <Plus className="w-4 h-4" /> Tạo bộ thẻ
             </Button>
           </div>
         ) : (
@@ -467,7 +467,7 @@ export function Flashcards() {
       </div>
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 flex gap-2 w-full sm:w-max">
+        <div className="bg-slate-100/80 backdrop-blur rounded-[2rem] p-1.5 flex gap-1 w-full sm:w-max">
           <Button
             onClick={() => setActiveTab("mine")}
             className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "mine" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
@@ -651,54 +651,54 @@ export function Flashcards() {
       ) : (
         <>
           {activeTab === "mine" && user && (
-            <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm w-full">
-              <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-sm font-extrabold uppercase tracking-wide text-gray-700">Đề mục flashcard</h2>
-                  <p className="text-xs font-medium text-gray-400">Chia bộ thẻ theo mục như IELTS, TOEIC, Giao tiếp hoặc mục tự tạo.</p>
-                </div>
-                <div className="flex w-full gap-2 sm:w-auto">
+            <div className="mb-6">
+              <div className="flex flex-wrap items-center gap-2 pb-2">
+                <Button
+                  onClick={() => setActiveCategoryId("all")}
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2 text-sm font-bold transition-all ${activeCategoryId === "all" ? "bg-slate-800 text-white shadow-sm" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                >
+                  Tất cả
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>{sets.length}</span>
+                </Button>
+                {categories.map((category: any) => (
+                  <div key={category.id} className="group relative flex items-center">
+                    <Button
+                      onClick={() => setActiveCategoryId(category.id)}
+                      className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold transition-all ${activeCategoryId === category.id ? `${category.color || "bg-blue-600"} text-white shadow-sm` : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                    >
+                      <span>{category.name}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === category.id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
+                        {getCategoryCount(category.id)}
+                      </span>
+                    </Button>
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteCategory(category.id);
+                      }}
+                      title="Xóa đề mục"
+                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-red-500 opacity-0 transition-all hover:bg-red-500 hover:text-white group-hover:opacity-100 scale-90 group-hover:scale-100"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+
+                {/* Inline Add Category */}
+                <div className="flex items-center ml-2 border border-slate-200 rounded-full bg-white px-2 py-1 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
                   <Input
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleCreateCategory()}
-                    placeholder="Tạo đề mục mới..."
-                    className="w-full md:w-44 rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold outline-none focus:border-blue-500"
+                    placeholder="Tên đề mục mới..."
+                    className="w-32 border-none bg-transparent px-2 py-1 text-sm font-medium outline-none shadow-none focus:ring-0"
                   />
-                  <Button onClick={handleCreateCategory} className="shrink-0 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800">
-                    Thêm
-                  </Button>
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <div className="flex flex-wrap gap-2  pb-1">
                   <Button
-                    onClick={() => setActiveCategoryId("all")}
-                    className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryId === "all" ? "bg-blue-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                    onClick={handleCreateCategory}
+                    className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors shrink-0"
                   >
-                    Tất cả
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === "all" ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{sets.length}</span>
+                    <Plus className="w-4 h-4" />
                   </Button>
-                  {categories.map((category: any) => (
-                    <div key={category.id} className="group flex items-center rounded-2xl bg-gray-100">
-                      <Button
-                        onClick={() => setActiveCategoryId(category.id)}
-                        className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-extrabold transition-all ${activeCategoryId === category.id ? `${category.color || "bg-blue-600"} text-white shadow-sm` : "text-gray-600 hover:bg-gray-200"}`}
-                      >
-                        <span>{category.name}</span>
-                        <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === category.id ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>
-                          {getCategoryCount(category.id)}
-                        </span>
-                      </Button>
-                      <Button
-                        onClick={() => deleteCategory(category.id)}
-                        title="Xóa đề mục"
-                        className="px-2 py-2 text-gray-400 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
-                      >
-                        ×
-                      </Button>
-                    </div>
-                  ))}
                 </div>
               </div>
             </div>
@@ -716,105 +716,94 @@ export function Flashcards() {
               <span className="font-bold text-lg">Kéo thả vào đây để đưa ra ngoài thư mục</span>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-3 space-y-8">
-                {/* Folders */}
-                {folders.map((folder) => (
-                  <FolderDroppable
-                    key={folder.id}
-                    folder={folder}
-                    setsInFolder={searchedSets.filter((s) => s.folderId === folder.id)}
-                    onContextMenu={handleContextMenu}
-                    onSetClick={(s: any) => navigate(`/flashcard/${s.id}`)}
-                    popoverId={popoverId}
-                    setPopoverId={setPopoverId}
-                    onEditSet={(s: any) => {
-                      setEditingSet(s);
-                      setNewTitle(s.title);
-                      setNewDesc(s.description || "");
-                      setSelectedColor(s.color || "bg-blue-500");
-                      setSetIsPublic(s.isPublic !== false);
-                      setSelectedCategoryId(s.categoryId || "");
-                      setSelectedLanguage(s.language || "en");
-                      setIsModalOpen(true);
-                    }}
-                    onDeleteSet={(s: any) => setSetToDelete(s)}
-                    forceOver={coordinateOverId === `folder-${folder.id}`}
-                  />
-                ))}
+            <div className="w-full space-y-8">
+              {/* Folders */}
+              {folders.map((folder) => (
+                <FolderDroppable
+                  key={folder.id}
+                  folder={folder}
+                  setsInFolder={searchedSets.filter((s) => s.folderId === folder.id)}
+                  onContextMenu={handleContextMenu}
+                  onSetClick={(s: any) => navigate(`/flashcard/${s.id}`)}
+                  popoverId={popoverId}
+                  setPopoverId={setPopoverId}
+                  onEditSet={(s: any) => {
+                    setEditingSet(s);
+                    setNewTitle(s.title);
+                    setNewDesc(s.description || "");
+                    setSelectedColor(s.color || "bg-blue-500");
+                    setSetIsPublic(s.isPublic !== false);
+                    setSelectedCategoryId(s.categoryId || "");
+                    setSelectedLanguage(s.language || "en");
+                    setIsModalOpen(true);
+                  }}
+                  onDeleteSet={(s: any) => setSetToDelete(s)}
+                  forceOver={coordinateOverId === `folder-${folder.id}`}
+                />
+              ))}
 
-                {/* Unassigned Sets (Root) */}
-                <div
-                  ref={rootDropRef}
-                  data-flashcard-dropzone="root"
-                  className={`space-y-4 min-h-[240px] p-4 rounded-3xl transition-all duration-200 border ${isRootDropActive ? "border-blue-500 shadow-md ring-4 ring-blue-500/20 bg-blue-50/50" : "border-transparent"}`}
-                >
-                  <h2 className="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2">Bộ thẻ chưa phân loại</h2>
+              {/* Unassigned Sets (Root) */}
+              <div
+                ref={rootDropRef}
+                data-flashcard-dropzone="root"
+                className={`space-y-4 min-h-[240px] p-6 rounded-[2.5rem] transition-all duration-300 border ${isRootDropActive ? "border-blue-400 shadow-lg ring-4 ring-blue-400/20 bg-blue-50/50" : "border-transparent"}`}
+              >
+                <h2 className="text-xl font-bold text-slate-800 mb-6">Bộ thẻ chung</h2>
 
-                  {loading && sets.length === 0 ? (
-                    <div className="flex justify-center p-12">
-                      <div className="w-8 h-8 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
-                    </div>
-                  ) : (
-                    <SortableContext items={unassignedSets.map((s) => s.id)} strategy={rectSortingStrategy}>
-                      <div
-                        data-flashcard-dropzone="root"
-                        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[200px] p-4 rounded-3xl border transition-all ${isRootDropActive ? "bg-blue-50 border-blue-300 ring-4 ring-blue-500/10" : "bg-gray-50/50 border-gray-100"}`}
-                      >
-                        {unassignedSets.length === 0 && (
-                          <div
-                            data-flashcard-dropzone="root"
-                            className={`col-span-full flex min-h-[150px] flex-col items-center justify-center p-12 text-center border-2 border-dashed rounded-2xl transition-all ${isRootDropActive ? "border-blue-400 bg-white text-blue-700" : "border-gray-300 text-gray-500"}`}
-                          >
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">
-                              {searchQuery.trim() ? "Không tìm thấy bộ thẻ phù hợp" : folders.length === 0 ? "Chưa có bộ thẻ nào" : "Chưa có bộ thẻ chưa phân loại"}
-                            </h3>
-                            <p className="text-gray-500 mb-6">
-                              {searchQuery.trim()
-                                ? "Thử đổi từ khóa hoặc chuyển sang tab Công khai."
-                                : folders.length === 0
-                                  ? "Hãy tạo bộ thẻ đầu tiên hoặc thư mục để bắt đầu."
-                                  : "Kéo bộ thẻ từ thư mục vào vùng này để đưa ra ngoài."}
-                            </p>
-                          </div>
-                        )}
-                        {unassignedSets.map((set) => (
-                          <SortableSetItem
-                            key={set.id}
-                            set={set}
-                            onClick={() => navigate(`/flashcard/${set.id}`)}
-                            onContextMenu={handleContextMenu}
-                            popoverId={popoverId}
-                            setPopoverId={setPopoverId}
-                            onEdit={(s: any) => {
-                              setEditingSet(s);
-                              setNewTitle(s.title);
-                              setNewDesc(s.description || "");
-                              setSelectedColor(s.color || "bg-blue-500");
-                              setSetIsPublic(s.isPublic !== false);
-                              setSelectedCategoryId(s.categoryId || "");
-                              setSelectedLanguage(s.language || "en");
-                              setIsModalOpen(true);
-                            }}
-                            onDelete={(s: any) => setSetToDelete(s)}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  )}
-                </div>
-              </div>
-
-              {/* Rank Sidebar */}
-              <div className="lg:col-span-1 space-y-6">
-                {/* Current Rank Card */}
-                <div className="bg-gradient-to-b from-blue-900 to-indigo-950 rounded-2xl p-5 text-white shadow-sm relative overflow-hidden transition-all">
-                  <div className="absolute top-1/2 -translate-y-1/2 right-0 opacity-20 pointer-events-none scale-150">
-                    <img src={`/rank/${currentRank.rankId}.png`} alt="Rank Background" className="w-40 h-40 object-contain drop-shadow-2xl" />
+                {loading && sets.length === 0 ? (
+                  <div className="flex justify-center p-12">
+                    <div className="w-8 h-8 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
                   </div>
-
-                  <RankCard showButton={true} buttonText="Tham gia Rank" />
-                </div>
+                ) : (
+                  <SortableContext items={unassignedSets.map((s) => s.id)} strategy={rectSortingStrategy}>
+                    <div
+                      data-flashcard-dropzone="root"
+                      className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 min-h-[200px] transition-all ${isRootDropActive ? "bg-blue-50/50 rounded-[2rem] p-4 -m-4" : ""}`}
+                    >
+                      {unassignedSets.length === 0 && (
+                        <div
+                          data-flashcard-dropzone="root"
+                          className={`col-span-full flex min-h-[200px] flex-col items-center justify-center p-12 text-center border-2 border-dashed rounded-[2rem] transition-all ${isRootDropActive ? "border-blue-400 bg-white text-blue-700 shadow-sm" : "border-slate-200 text-slate-400 bg-slate-50/50"}`}
+                        >
+                          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                            <BookOpen className="w-8 h-8 text-slate-300" />
+                          </div>
+                          <h3 className="text-lg font-bold text-slate-700 mb-2">
+                            {searchQuery.trim() ? "Không tìm thấy bộ thẻ phù hợp" : folders.length === 0 ? "Chưa có bộ thẻ nào" : "Chưa có bộ thẻ chưa phân loại"}
+                          </h3>
+                          <p className="text-slate-500 max-w-sm">
+                            {searchQuery.trim()
+                              ? "Thử đổi từ khóa hoặc chuyển sang tab Công khai."
+                              : folders.length === 0
+                                ? "Hãy tạo bộ thẻ đầu tiên hoặc thư mục để bắt đầu hành trình học tập."
+                                : "Kéo bộ thẻ từ thư mục vào vùng này để đưa ra ngoài."}
+                          </p>
+                        </div>
+                      )}
+                      {unassignedSets.map((set) => (
+                        <SortableSetItem
+                          key={set.id}
+                          set={set}
+                          onClick={() => navigate(`/flashcard/${set.id}`)}
+                          onContextMenu={handleContextMenu}
+                          popoverId={popoverId}
+                          setPopoverId={setPopoverId}
+                          onEdit={(s: any) => {
+                            setEditingSet(s);
+                            setNewTitle(s.title);
+                            setNewDesc(s.description || "");
+                            setSelectedColor(s.color || "bg-blue-500");
+                            setSetIsPublic(s.isPublic !== false);
+                            setSelectedCategoryId(s.categoryId || "");
+                            setSelectedLanguage(s.language || "en");
+                            setIsModalOpen(true);
+                          }}
+                          onDelete={(s: any) => setSetToDelete(s)}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                )}
               </div>
             </div>
 

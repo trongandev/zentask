@@ -18,11 +18,14 @@ export function FolderDroppable({ folder, setsInFolder, onContextMenu, onSetClic
       ref={setNodeRef}
       data-flashcard-dropzone={`folder-${folder.id}`}
       onContextMenu={(e) => onContextMenu(e, "folder", folder)}
-      className={`${theme.bg} p-6 rounded-3xl border transition-all duration-200 ${activeOver ? "border-blue-500 shadow-lg ring-4 ring-blue-500/20 scale-[1.02]" : "border-gray-200"}`}
+      className={`${theme.bg} p-8 rounded-[2.5rem] border border-white/50 shadow-sm transition-all duration-300 ${activeOver ? "border-blue-400 shadow-xl ring-4 ring-blue-400/20 scale-[1.01] bg-blue-50/80" : "hover:shadow-md"}`}
     >
-      <h2 className={`text-xl font-bold mb-4 flex items-center gap-2 ${theme.text}`}>
-        <FolderIcon className={`${theme.text} ${theme.fill}`} /> {folder.name}
-      </h2>
+      <div className="flex items-center gap-3 mb-6">
+        <div className={`w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-sm ${theme.text}`}>
+          <FolderIcon className={`w-6 h-6 ${theme.text} ${theme.fill}`} />
+        </div>
+        <h2 className={`text-2xl font-black tracking-tight ${theme.text}`}>{folder.name}</h2>
+      </div>
       <SortableContext items={setsInFolder.map((s: any) => s.id)} strategy={rectSortingStrategy}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[150px]">
           {setsInFolder.length === 0 && (

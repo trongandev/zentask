@@ -7,7 +7,7 @@ import scipy.stats as stats
 import numpy as np
 
 # Setup
-MONGO_URI = "mongodb+srv://root:root@project-exam-opic.cop5l6v.mongodb.net/zentask?retryWrites=true&w=majority&appName=project-exam-opic"
+MONGO_URI = "Vui lòng liện hệ chủ source code để lấy URI"
 DB_NAME = "zentask"
 OUTPUT_DIR = r"f:\trongan\zentask\python\chart_output"
 

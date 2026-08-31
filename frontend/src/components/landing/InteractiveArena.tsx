@@ -30,34 +30,36 @@ export function InteractiveArena() {
   };
 
   return (
-    <div className="w-full bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col md:flex-row-reverse mt-12">
+    <div className="w-full bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col md:flex-row-reverse group transition-all hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] mt-12">
       {/* Lời giới thiệu */}
-      <div className="p-8 md:p-12 md:w-1/2 flex flex-col justify-center bg-orange-50/50">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-orange-100 text-orange-600">
+      <div className="p-10 md:p-16 md:w-1/2 flex flex-col justify-center relative overflow-hidden bg-[#fafcff]">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-orange-100/50 rounded-full blur-[80px] pointer-events-none" />
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-8 bg-orange-50 text-orange-600 border border-orange-100/50 shadow-sm transition-transform group-hover:scale-110 duration-500">
           <Swords className="w-7 h-7" />
         </div>
-        <h3 className="text-3xl font-black text-slate-900 mb-4">Đấu Trường Xếp Hạng</h3>
-        <p className="text-slate-600 font-medium text-lg mb-6 leading-relaxed">
-          Thách đấu với những người chơi khác trong các trận chiến trắc nghiệm nảy lửa. Mỗi câu trả lời đúng sẽ giúp bạn tích lũy điểm số, thăng hạng từ <strong>Đồng</strong> lên <strong>Thách Đấu</strong>. Rank càng cao, thử thách càng khó!
+        <h3 className="text-3xl md:text-4xl font-black text-slate-900 mb-5 tracking-tight">Đấu Trường Xếp Hạng</h3>
+        <p className="text-slate-600 font-medium text-lg leading-relaxed">
+          Thách đấu với những người chơi khác trong các trận chiến trắc nghiệm nảy lửa. Mỗi câu trả lời đúng sẽ giúp bạn tích lũy điểm số, thăng hạng từ <strong className="text-amber-700">Đồng</strong> lên <strong className="text-amber-700">Thách Đấu</strong>. Rank càng cao, thử thách càng khó!
         </p>
       </div>
 
       {/* Interactive UI */}
-      <div className="p-8 md:p-12 md:w-1/2 flex flex-col items-center justify-center bg-slate-900 text-white relative min-h-[450px]">
+      <div className="p-10 md:p-16 md:w-1/2 flex flex-col items-center justify-center bg-slate-900 text-white relative min-h-[450px]">
         {/* Background glow */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(249,115,22,0.15),transparent_60%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(249,115,22,0.12),transparent_65%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay pointer-events-none" />
 
         {step === "intro" && (
           <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500 z-10 w-full max-w-sm">
-            <div className="mb-6 relative inline-block">
-              <img src="/rank/1.png" alt="Rank Bạc" className="w-28 h-28 object-contain drop-shadow-xl" />
-              <div className="absolute -bottom-2 -right-2 bg-slate-800 text-xs font-bold px-2 py-1 rounded border border-slate-700 shadow">Rank Hiện Tại</div>
+            <div className="mb-8 relative inline-block">
+              <img src="/rank/1.png" alt="Rank Bạc" className="w-28 h-28 object-contain drop-shadow-2xl animate-float-slow" />
+              <div className="absolute -bottom-2 -right-2 bg-slate-800 text-xs font-bold px-3 py-1.5 rounded-full border border-slate-700 shadow-md">Rank Hiện Tại</div>
             </div>
-            <h4 className="text-2xl font-black mb-2">Sẵn sàng thi đấu?</h4>
-            <p className="text-slate-400 mb-8 text-sm">Cố gắng trả lời thật nhanh và chính xác để nhận thêm điểm XP và thăng hạng nhé!</p>
+            <h4 className="text-2xl font-black mb-3 tracking-tight">Sẵn sàng thi đấu?</h4>
+            <p className="text-slate-400 mb-8 text-sm leading-relaxed">Cố gắng trả lời thật nhanh và chính xác để nhận thêm điểm XP và thăng hạng nhé!</p>
             <Button 
               onClick={handleStart}
-              className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-lg py-3.5 rounded-xl shadow-lg shadow-orange-500/30 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-lg py-4 rounded-xl shadow-lg shadow-orange-500/20 transition-all hover:-translate-y-1 flex items-center justify-center gap-2"
             >
               <Swords className="w-5 h-5" /> Bắt Đầu Ngay
             </Button>

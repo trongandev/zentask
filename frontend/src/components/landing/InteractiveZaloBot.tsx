@@ -41,23 +41,24 @@ export function InteractiveZaloBot() {
   };
 
   return (
-    <div className="w-full bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col md:flex-row mt-12">
+    <div className="w-full bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col md:flex-row group transition-all hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] mt-12">
       {/* Lời giới thiệu */}
-      <div className="p-8 md:p-12 md:w-1/2 flex flex-col justify-center bg-emerald-50/50">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-emerald-100 text-emerald-600">
+      <div className="p-10 md:p-16 md:w-1/2 flex flex-col justify-center relative overflow-hidden bg-[#fafcff]">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-100/50 rounded-full blur-[80px] pointer-events-none" />
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-8 bg-emerald-50 text-emerald-600 border border-emerald-100/50 shadow-sm transition-transform group-hover:scale-110 duration-500">
           <Bot className="w-7 h-7" />
         </div>
-        <h3 className="text-3xl font-black text-slate-900 mb-4">Trợ Lý AI Trực Tiếp Trên Zalo</h3>
-        <p className="text-slate-600 font-medium text-lg mb-6 leading-relaxed">
-          Không cần cài thêm app, mọi thao tác học tập, tra từ, thêm từ mới vào bộ thẻ đều có thể thực hiện siêu nhanh thông qua tin nhắn Zalo. ZenBot luôn túc trực 24/7 để phục vụ bạn!
+        <h3 className="text-3xl md:text-4xl font-black text-slate-900 mb-5 tracking-tight">Trợ Lý AI Trực Tiếp Trên Zalo</h3>
+        <p className="text-slate-600 font-medium text-lg leading-relaxed">
+          Không cần cài thêm app, mọi thao tác học tập, tra từ, thêm từ mới vào bộ thẻ đều có thể thực hiện siêu nhanh thông qua tin nhắn Zalo. ZenBot luôn túc trực <strong className="text-emerald-600">24/7</strong> để phục vụ bạn!
         </p>
       </div>
 
       {/* Interactive UI */}
-      <div className="p-8 md:w-1/2 flex items-center justify-center bg-slate-100/50 border-t md:border-t-0 md:border-l border-slate-100 min-h-[400px]">
+      <div className="p-10 md:p-16 md:w-1/2 flex items-center justify-center bg-slate-50/50 border-t md:border-t-0 md:border-l border-slate-100 min-h-[450px]">
         
         {/* Phone Mockup */}
-        <div className="w-full max-w-[320px] bg-white rounded-[2rem] border-[6px] border-slate-800 shadow-2xl overflow-hidden flex flex-col relative h-[500px]">
+        <div className="w-full max-w-[320px] bg-white rounded-[2rem] border-[6px] border-slate-800 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.2)] overflow-hidden flex flex-col relative h-[500px] transition-transform duration-500 group-hover:-translate-y-2">
           {/* Header */}
           <div className="bg-blue-600 text-white px-4 py-3 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center p-1">
