@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
-import { CheckCircle, RotateCw } from "lucide-react";
+import { CheckCircle, RotateCw, ArrowLeft } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
 import { Button } from "@/src/components/ui/Button";
+import { useNavigate } from "react-router-dom";
 
 interface ModeBubbleProps {
   cards: Flashcard[];
@@ -13,7 +14,6 @@ interface ModeBubbleProps {
   completionActions?: React.ReactNode;
 }
 
-
 export function ModeBubble({ cards, setId, onComplete, completionActions }: ModeBubbleProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
@@ -21,6 +21,7 @@ export function ModeBubble({ cards, setId, onComplete, completionActions }: Mode
   const wrongCardIdsRef = React.useRef<string[]>([]);
   const [bubbles, setBubbles] = useState<any[]>([]);
   const [animatingSuccess, setAnimatingSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bubblesData = useRef<any[]>([]);
@@ -28,7 +29,6 @@ export function ModeBubble({ cards, setId, onComplete, completionActions }: Mode
 
   const { playAudio, playSoundEffect } = useTTSAudio();
   const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
-
 
   const currentCard = cards[currentIndex];
 
@@ -46,7 +46,7 @@ export function ModeBubble({ cards, setId, onComplete, completionActions }: Mode
     const containerHeight = containerRef.current ? containerRef.current.clientHeight : 600;
 
     const newBubbles = options.map((opt, i) => {
-      const size = 100 + Math.random() * 40;
+      const size = 110 + Math.random() * 40; // slightly larger for bento style text
 
       // Random starting positions within bounds
       const x = Math.random() * (containerWidth - size);
@@ -155,38 +155,46 @@ export function ModeBubble({ cards, setId, onComplete, completionActions }: Mode
     }
   };
 
-
   if (cards.length < 5) {
-    return <div className="text-gray-500">Bộ thẻ cần ít nhất 5 từ vựng để chơi Bắn bong bóng.</div>;
+    return <div className="text-slate-500 font-bold bg-white p-6 rounded-2xl shadow-sm">Bộ thẻ cần ít nhất 5 từ vựng để chơi Bắn bong bóng.</div>;
   }
 
   if (completed) {
     return (
-      <div className="flex flex-col items-center justify-center text-center animate-in zoom-in duration-500">
-        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle className="w-12 h-12 text-green-500" />
+      <div className="flex flex-col items-center justify-center text-center animate-in zoom-in duration-500 w-full">
+        <div className="bg-white p-8 md:p-12 rounded-[2rem] border-2 border-slate-200/60 shadow-xl shadow-slate-200/50 flex flex-col items-center max-w-lg w-full">
+          <div className="w-24 h-24 bg-green-100 rounded-[2rem] flex items-center justify-center mb-6 rotate-3 border-2 border-green-200">
+            <CheckCircle className="w-12 h-12 text-green-600" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-800 mb-2 tracking-tight">Chiến thắng!</h2>
+          <p className="text-slate-500 mb-8 font-bold">Bạn có phản xạ rất tuyệt vời.</p>
+          <Button
+            onClick={() => {
+              setCompleted(false);
+              setCurrentIndex(0);
+              setWrongCardIds([]);
+              wrongCardIdsRef.current = [];
+            }}
+            className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl border-2 border-blue-600 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex items-center justify-center gap-2 mb-3"
+          >
+            <RotateCw className="w-5 h-5" />
+            Chơi lại
+          </Button>
+          <Button 
+            onClick={() => navigate(-1)}
+            className="w-full py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex items-center justify-center gap-2"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Quay về
+          </Button>
+          {completionActions && <div className="mt-4 w-full">{completionActions}</div>}
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Chiến thắng!</h2>
-        <p className="text-gray-500 mb-8">Bạn có phản xạ rất tuyệt vời.</p>
-        <Button
-          onClick={() => {
-            setCompleted(false);
-            setCurrentIndex(0);
-            setWrongCardIds([]);
-            wrongCardIdsRef.current = [];
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
-        >
-          <RotateCw className="w-5 h-5" />
-          Chơi lại
-        </Button>
-        {completionActions}
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="w-full h-full rounded-3xl shadow-sm border border-gray-100 flex flex-col relative overflow-hidden bg-gradient-to-b from-blue-50 to-white">
+    <div ref={containerRef} className="w-full h-full rounded-[2rem] shadow-sm border-2 border-slate-200/60 flex flex-col relative overflow-hidden bg-gradient-to-b from-blue-50/50 to-white">
       <style>{`
         @keyframes pop {
           0% { transform: scale(1) translateY(0); opacity: 1; }
@@ -210,16 +218,16 @@ export function ModeBubble({ cards, setId, onComplete, completionActions }: Mode
       `}</style>
 
       {/* Target Word */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 z-20 w-full px-4 flex justify-center">
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 z-20 w-full px-4 flex justify-center pointer-events-none">
         <div
           className={cn(
-            "bg-white px-8 py-4 rounded-3xl shadow-xl border border-gray-100 text-center transition-all duration-300",
-            animatingSuccess ? "bg-green-500 text-white border-green-600 scale-110 shadow-green-500/50" : "",
+            "bg-white px-8 py-5 rounded-[2rem] shadow-xl shadow-slate-200/50 border-2 text-center transition-all duration-300",
+            animatingSuccess ? "bg-green-500 text-white border-green-600 scale-110 shadow-green-500/30" : "border-slate-200/60",
           )}
         >
-          <p className="text-sm font-bold opacity-60 uppercase tracking-widest mb-1">Tìm từ có nghĩa:</p>
-          <h2 className="text-4xl font-extrabold">{currentCard.translation}</h2>
-          <div className="mt-2 text-sm font-bold opacity-50">
+          <p className="text-sm font-bold uppercase tracking-widest mb-2 opacity-60">Tìm từ có nghĩa:</p>
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight">{currentCard.translation}</h2>
+          <div className="mt-3 text-sm font-bold opacity-50 bg-black/5 rounded-full inline-block px-3 py-1">
             {currentIndex + 1} / {cards.length}
           </div>
         </div>
@@ -247,16 +255,16 @@ export function ModeBubble({ cards, setId, onComplete, completionActions }: Mode
                 onClick={() => handleBubbleClick(bubble.cardId)}
                 disabled={animatingSuccess}
                 className={cn(
-                  "w-full h-full rounded-full flex items-center justify-center font-bold text-center p-4 cursor-pointer pointer-events-auto shadow-[inset_0_-10px_20px_rgba(0,0,0,0.1),0_5px_15px_rgba(0,0,0,0.1)] transition-colors active:scale-95 origin-center",
-                  "bg-gradient-to-br from-blue-100 to-blue-300 border-2 border-blue-400 text-blue-900 text-lg",
+                  "w-full h-full rounded-full flex items-center justify-center font-bold text-center p-4 cursor-pointer pointer-events-auto shadow-[0_8px_16px_rgba(59,130,246,0.2),inset_0_-8px_12px_rgba(0,0,0,0.1),inset_0_4px_8px_rgba(255,255,255,0.7)] transition-transform active:scale-95 origin-center",
+                  "bg-gradient-to-b from-blue-300 to-blue-500 border-2 border-blue-400/50 text-white text-xl md:text-2xl",
                   isError ? "bubble-error" : "",
                   animatingSuccess && bubble.cardId === currentCard.id ? "bubble-pop" : "",
                   animatingSuccess && bubble.cardId !== currentCard.id ? "opacity-20" : "",
                 )}
               >
                 {/* Glossy reflection effect */}
-                <div className="absolute top-[15%] left-[15%] w-[30%] h-[30%] bg-white rounded-full opacity-60"></div>
-                <span className="relative z-10 leading-tight break-words pointer-events-none drop-shadow-sm">{bubble.term}</span>
+                <div className="absolute top-[10%] left-[20%] w-[40%] h-[20%] bg-white rounded-full opacity-40 -rotate-12"></div>
+                <span className="relative z-10 font-black tracking-tight leading-tight break-words pointer-events-none drop-shadow-md">{bubble.term}</span>
               </Button>
             </div>
           );

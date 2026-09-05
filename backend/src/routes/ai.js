@@ -4,6 +4,7 @@ import { GoogleGenAI } from "@google/genai";
 import { verifyToken } from "../middleware/auth.js";
 import { consumeDailyLimit } from "../../utils/usageLimits.js";
 import { cleanAndValidatePublicText } from "../../utils/moderation.js";
+import { DEFAULT_GEMINI_MODEL, readGeminiKeys, buildGeminiContents, callGeminiWithFailover, unique } from "../../utils/aiHelpers.js";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -23,25 +24,8 @@ const upload = multer({
   },
 });
 
-const DEFAULT_GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const DEFAULT_HF_IMAGE_MODEL = process.env.HF_IMAGE_MODEL || "black-forest-labs/FLUX.1-dev";
 const DEFAULT_HF_PROVIDER = process.env.HF_PROVIDER || "auto";
-
-function unique(values) {
-  return [
-    ...new Set(
-      values
-        .filter(Boolean)
-        .map((item) => String(item).trim())
-        .filter(Boolean),
-    ),
-  ];
-}
-
-function readGeminiKeys() {
-  const numberedKeys = Array.from({ length: 20 }, (_, index) => process.env[`API_KEY_AI_${index + 1}`]);
-  return unique([process.env.GEMINI_API_KEY, ...(process.env.GEMINI_API_KEYS || "").split(/[\n,;|]+/), ...numberedKeys]);
-}
 
 function readHfTokens() {
   return unique([process.env.HF_TOKEN, process.env.HUGGINGFACE_API_KEY, ...(process.env.HF_TOKENS || "").split(/[\n,;|]+/)]);
@@ -49,114 +33,6 @@ function readHfTokens() {
 
 function keyLabel(index) {
   return `key_${index + 1}`;
-}
-
-function normalizeMessages(raw) {
-  if (!Array.isArray(raw)) return [];
-
-  return raw
-    .map((message) => ({
-      role: message?.role === "assistant" || message?.role === "model" ? "model" : "user",
-      content: String(message?.content || "").trim(),
-    }))
-    .filter((message) => message.content);
-}
-
-function buildGeminiContents(messages, files, fallbackPrompt) {
-  const normalized = normalizeMessages(messages);
-  if (!normalized.length && fallbackPrompt) {
-    normalized.push({ role: "user", content: String(fallbackPrompt) });
-  }
-
-  const contents = normalized.map((message) => ({
-    role: message.role,
-    parts: [{ text: message.content }],
-  }));
-
-  if (files?.length) {
-    if (!contents.length || contents[contents.length - 1].role !== "user") {
-      contents.push({ role: "user", parts: [{ text: fallbackPrompt || "Hãy phân tích hình ảnh này." }] });
-    }
-
-    const last = contents[contents.length - 1];
-    for (const file of files) {
-      last.parts.push({
-        inlineData: {
-          mimeType: file.mimetype || "image/jpeg",
-          data: file.buffer.toString("base64"),
-        },
-      });
-    }
-  }
-
-  return contents;
-}
-
-function extractGeminiText(response) {
-  if (typeof response?.text === "string") return response.text;
-  if (typeof response?.text === "function") return response.text();
-
-  const candidates = response?.candidates || response?.response?.candidates || [];
-  const text = candidates
-    .flatMap((candidate) => candidate?.content?.parts || [])
-    .map((part) => part?.text || "")
-    .filter(Boolean)
-    .join("\n")
-    .trim();
-
-  return text;
-}
-
-function shouldTryNextGeminiKey(error) {
-  const status = Number(error?.status || error?.statusCode || error?.response?.status || 0);
-  const message = String(error?.message || error || "").toLowerCase();
-
-  if ([401, 403, 429, 500, 502, 503, 504].includes(status)) return true;
-  return message.includes("api key") || message.includes("quota") || message.includes("permission") || message.includes("rate") || message.includes("overloaded") || message.includes("unavailable");
-}
-
-async function callGeminiWithFailover({ contents, systemInstruction, model, temperature, maxOutputTokens }) {
-  const keys = readGeminiKeys();
-  if (!keys.length) {
-    const error = new Error("Thiếu Gemini API key. Hãy thêm GEMINI_API_KEY/GEMINI_API_KEYS hoặc API_KEY_AI_1.. vào .env backend.");
-    error.status = 500;
-    throw error;
-  }
-
-  const errors = [];
-
-  for (let i = 0; i < keys.length; i += 1) {
-    const apiKey = keys[i];
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: model || DEFAULT_GEMINI_MODEL,
-        contents,
-        config: {
-          temperature: Number.isFinite(Number(temperature)) ? Number(temperature) : 0.7,
-          maxOutputTokens: Number(maxOutputTokens || 4096),
-          ...(systemInstruction ? { systemInstruction } : {}),
-        },
-      });
-
-      const text = extractGeminiText(response);
-      if (!text) throw new Error("Gemini không trả về nội dung text.");
-
-      return {
-        text,
-        model: model || DEFAULT_GEMINI_MODEL,
-        usedKey: keyLabel(i),
-      };
-    } catch (error) {
-      errors.push({ key: keyLabel(i), message: error?.message || String(error), status: error?.status || error?.statusCode });
-      if (!shouldTryNextGeminiKey(error)) break;
-    }
-  }
-
-  const finalError = new Error(`Gemini thất bại với tất cả key. ${errors.map((item) => `${item.key}: ${item.message}`).join(" | ")}`);
-  finalError.status = 502;
-  finalError.details = errors;
-  throw finalError;
 }
 
 function clampNumber(value, min, max, fallback) {
@@ -214,7 +90,6 @@ async function translatePromptToEnglish({ text, label = "image prompt" }) {
     systemInstruction: "You are a professional image-prompt translator. Output English only. No markdown, no labels, no explanations.",
     model: process.env.GEMINI_TRANSLATE_MODEL || DEFAULT_GEMINI_MODEL,
     temperature: 0.2,
-    maxOutputTokens: 900,
   });
 
   return cleanTranslatedPrompt(result.text, original);
@@ -387,7 +262,6 @@ router.post("/chat", upload.array("images", 6), async (req, res) => {
       systemInstruction: req.body.systemInstruction || "Bạn là trợ lý AI trong ứng dụng ZenTask. Trả lời rõ ràng, ngắn gọn, ưu tiên tiếng Việt khi người dùng dùng tiếng Việt.",
       model: req.body.model || DEFAULT_GEMINI_MODEL,
       temperature: req.body.temperature,
-      maxOutputTokens: req.body.maxOutputTokens,
     });
 
     res.json({
@@ -468,10 +342,10 @@ router.post("/translate", async (req, res) => {
         role: "user",
         parts: [
           {
-            text: `Dịch nội dung sau sang ${targetLang}. Chỉ trả về kết quả dịch, không giải thích hay phân tích thêm:\n\n${word}`
-          }
-        ]
-      }
+            text: `Dịch nội dung sau sang ${targetLang}. Chỉ trả về kết quả dịch, không giải thích hay phân tích thêm:\n\n${word}`,
+          },
+        ],
+      },
     ];
 
     const result = await callGeminiWithFailover({
@@ -479,13 +353,12 @@ router.post("/translate", async (req, res) => {
       systemInstruction: "Bạn là một từ điển và máy dịch thuật chuyên nghiệp. Chỉ trả kết quả dịch, không nói các câu như 'Dưới đây là...', không định dạng markdown.",
       model: DEFAULT_GEMINI_MODEL,
       temperature: 0.2,
-      maxOutputTokens: 500,
     });
 
     res.json({
       ok: true,
       parse: result.text,
-      message: "Dịch thuật thành công!"
+      message: "Dịch thuật thành công!",
     });
   } catch (error) {
     console.error("AI translate error:", error);

@@ -39,6 +39,7 @@ import publicRoutes from "./routes/public.js";
 import chatbotRoutes from "./routes/chatbot.js";
 import beginnerRoutes from "./routes/beginner.js";
 import chatbotAuthRoutes from "./routes/chatbotAuth.js";
+import roadmapRoutes from "./routes/roadmap.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 
@@ -225,6 +226,7 @@ app.use("/api/skill-practice", skillPracticeRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/chatbot-auth", chatbotAuthRoutes);
 app.use("/api/beginner", beginnerRoutes);
+app.use("/api/roadmap", roadmapRoutes);
 
 app.use(errorHandler);
 

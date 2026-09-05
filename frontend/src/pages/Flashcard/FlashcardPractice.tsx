@@ -158,14 +158,14 @@ export function FlashcardPractice() {
       <Button
         onClick={reviewBeginnerWrong}
         disabled={beginnerWrongIds.length === 0}
-        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-orange-50 px-5 py-3 font-bold text-orange-600 transition-colors hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex-1 py-4 bg-orange-100 hover:bg-orange-200 text-orange-700 font-bold rounded-2xl border-2 border-orange-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <AlertTriangle className="h-5 w-5" />
-        Ôn tập lại câu sai ({beginnerWrongIds.length})
+        <AlertTriangle className="h-5 w-5 mr-2" />
+        Ôn tập câu sai ({beginnerWrongIds.length})
       </Button>
-      <Button onClick={reviewBeginnerAll} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-50 px-5 py-3 font-bold text-blue-600 transition-colors hover:bg-blue-100">
-        <RotateCw className="h-5 w-5" />
-        Ôn tập lại toàn bộ câu
+      <Button onClick={reviewBeginnerAll} className="flex-1 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl border-2 border-blue-600 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex justify-center items-center gap-2">
+        <RotateCw className="h-5 w-5 mr-2" />
+        Ôn tập toàn bộ
       </Button>
     </div>
   ) : null;
@@ -191,26 +191,28 @@ export function FlashcardPractice() {
 
   if (!isBeginner && !loading && !isReviewAll && dueCards.length === 0 && allCards.length > 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-slate-50 px-4 animate-in zoom-in duration-500">
-        <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mb-6 ring-8 ring-green-50/50">
-          <Check className="w-12 h-12 text-green-500" />
-        </div>
-        <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Tuyệt vời!</h2>
-        <p className="text-slate-500 mb-8 text-center max-w-md font-medium">Bạn đã hoàn thành mục tiêu ôn tập thẻ hôm nay.</p>
-        <div className="flex w-full max-w-sm flex-col gap-3">
-          <Button
-            onClick={() => {
-              setIsReviewAll(true);
-              setPracticeSessionKey((k) => k + 1);
-            }}
-            className="w-full rounded-full bg-slate-900 px-6 py-3.5 font-bold text-white transition-all hover:bg-slate-800 hover:shadow-lg flex justify-center items-center gap-2 active:scale-95"
-          >
-            <RotateCw className="w-5 h-5" />
-            Ôn tập lại tất cả
-          </Button>
-          <Button onClick={() => navigate(-1)} className="w-full rounded-full bg-white border border-slate-200 px-6 py-3.5 font-bold text-slate-700 transition-all hover:bg-slate-50 active:scale-95">
-            Quay lại danh sách
-          </Button>
+      <div className="flex flex-col items-center justify-center h-[100dvh] bg-slate-50 px-4">
+        <div className="bg-white p-8 md:p-12 rounded-[2rem] border-2 border-slate-200/60 shadow-xl shadow-slate-200/50 flex flex-col items-center animate-in zoom-in duration-500 max-w-lg w-full">
+          <div className="w-24 h-24 bg-green-100 rounded-[2rem] flex items-center justify-center mb-6 rotate-3 border-2 border-green-200">
+            <Check className="w-12 h-12 text-green-600" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-800 mb-2 tracking-tight text-center">Tuyệt vời!</h2>
+          <p className="text-slate-500 mb-8 text-center font-bold">Bạn đã hoàn thành mục tiêu ôn tập thẻ hôm nay.</p>
+          <div className="flex w-full flex-col gap-3">
+            <Button
+              onClick={() => {
+                setIsReviewAll(true);
+                setPracticeSessionKey((k) => k + 1);
+              }}
+              className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl border-2 border-blue-600 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex justify-center items-center gap-2"
+            >
+              <RotateCw className="w-5 h-5" />
+              Ôn tập lại tất cả
+            </Button>
+            <Button onClick={() => navigate(-1)} className="w-full py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all">
+              Quay lại danh sách
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -218,31 +220,31 @@ export function FlashcardPractice() {
 
   if (isBeginner && beginnerCards.length === 0 && beginnerSet) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-slate-50 px-4 animate-in zoom-in duration-500">
-        <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mb-6 ring-8 ring-green-50/50">
-          <Check className="w-12 h-12 text-green-500" />
+      <div className="flex flex-col items-center justify-center h-[100dvh] bg-slate-50 px-4">
+        <div className="bg-white p-8 md:p-12 rounded-[2rem] border-2 border-slate-200/60 shadow-xl shadow-slate-200/50 flex flex-col items-center animate-in zoom-in duration-500 max-w-lg w-full">
+          <div className="w-24 h-24 bg-yellow-100 rounded-[2rem] flex items-center justify-center mb-6 -rotate-3 border-2 border-yellow-200">
+            <Trophy className="w-12 h-12 text-yellow-600" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-800 mb-2 tracking-tight text-center">Xin chúc mừng!</h2>
+          <p className="text-slate-500 mb-6 text-center font-bold">Bạn đã học xong toàn bộ từ vựng trong chủ đề này.</p>
+          
+          <div className="flex w-full flex-col gap-3">
+            <Button
+              onClick={reviewBeginnerWrong}
+              disabled={beginnerWrongIds.length === 0}
+              className="w-full py-4 bg-orange-100 hover:bg-orange-200 text-orange-700 font-bold rounded-2xl border-2 border-orange-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Ôn tập câu sai ({beginnerWrongIds.length})
+            </Button>
+            <Button onClick={reviewBeginnerAll} className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl border-2 border-blue-600 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex justify-center items-center gap-2">
+              <RotateCw className="w-5 h-5 mr-2" />
+              Ôn tập toàn bộ
+            </Button>
+            <Button onClick={() => navigate(-1)} className="w-full py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all mt-2">
+              Quay lại danh sách
+            </Button>
+          </div>
         </div>
-        <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Xin chúc mừng!</h2>
-        <p className="text-slate-500 mb-3 text-center max-w-md font-medium">Bạn đã học xong toàn bộ từ vựng trong chủ đề này.</p>
-        <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-yellow-50 px-4 py-2 text-sm font-bold text-yellow-700">
-          <Trophy className="h-4 w-4" />
-          Chủ đề đã hoàn thành
-        </div>
-        <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row">
-          <Button
-            onClick={reviewBeginnerWrong}
-            disabled={beginnerWrongIds.length === 0}
-            className="flex-1 rounded-full bg-orange-50 px-6 py-3.5 font-bold text-orange-600 transition-all hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
-          >
-            Ôn tập câu sai ({beginnerWrongIds.length})
-          </Button>
-          <Button onClick={reviewBeginnerAll} className="flex-1 rounded-full bg-slate-900 px-6 py-3.5 font-bold text-white transition-all hover:bg-slate-800 hover:shadow-lg active:scale-95">
-            Ôn tập toàn bộ
-          </Button>
-        </div>
-        <Button onClick={() => navigate(-1)} className="mt-6 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 px-4 py-2 rounded-full transition-colors">
-          Quay lại
-        </Button>
       </div>
     );
   }
@@ -266,27 +268,27 @@ export function FlashcardPractice() {
   return (
     <div className="h-[100dvh] w-full flex flex-col bg-[#F4F7FE] fixed inset-0 z-50 overflow-hidden">
       {/* Top Navigation */}
-      <div className="bg-white/80 backdrop-blur px-6 py-4 flex items-center justify-between shadow-sm flex-shrink-0 z-10 border-b border-slate-100">
-        <div className="flex items-center gap-4">
-          <Button onClick={() => navigate(-1)} className="p-2.5 hover:bg-slate-100 rounded-full transition-colors active:scale-95 text-slate-600">
+      <div className="bg-white/90 backdrop-blur-md px-4 md:px-6 py-3 md:py-4 flex items-center justify-between z-10 border-b-2 border-slate-200/60 shadow-sm flex-shrink-0">
+        <div className="flex items-center gap-3 md:gap-4">
+          <Button onClick={() => navigate(-1)} className="p-2.5 md:p-3 bg-white border-2 border-slate-200 border-b-4 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-300 active:border-b-2 active:translate-y-[2px] transition-all flex-shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight leading-tight">{currentSet.title}</h1>
-            <p className="text-sm font-medium text-slate-500">Đang luyện tập...</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg md:text-xl font-black text-slate-800 tracking-tight leading-tight truncate">{currentSet.title}</h1>
+            <p className="text-xs md:text-sm font-bold text-slate-400">Đang luyện tập...</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0 ml-2">
           {!isBeginner &&
             (isReviewAll ? (
-              <span className="hidden sm:inline-flex px-4 py-2 bg-purple-50 text-purple-600 font-bold rounded-full text-sm items-center gap-2">Đang ôn tất cả</span>
+              <span className="hidden sm:inline-flex px-4 py-2 bg-purple-100 text-purple-700 font-bold rounded-xl text-sm items-center gap-2 border-2 border-purple-200">Đang ôn tất cả</span>
             ) : allCards.length > dueCards.length ? (
               <Button
                 onClick={() => {
                   setIsReviewAll(true);
                   setPracticeSessionKey((k) => k + 1);
                 }}
-                className="hidden sm:inline-flex px-4 py-2 bg-purple-50 text-purple-600 font-bold rounded-full hover:bg-purple-100 transition-colors text-sm items-center gap-2 active:scale-95"
+                className="hidden sm:inline-flex px-4 py-2 bg-white border-2 border-purple-200 border-b-4 rounded-xl text-purple-600 font-bold hover:bg-purple-50 hover:border-purple-300 active:border-b-2 active:translate-y-[2px] transition-all text-sm items-center gap-2"
               >
                 <RotateCw className="w-4 h-4" />
                 Ôn tất cả ({allCards.length})
@@ -294,12 +296,12 @@ export function FlashcardPractice() {
             ) : null)}
           <Button
             onClick={() => setIsVoiceModalOpen(true)}
-            className="px-4 py-2 md:px-5 md:py-2.5 bg-slate-100 text-slate-700 font-bold rounded-full hover:bg-slate-200 transition-colors text-sm active:scale-95"
+            className="px-4 py-2 md:px-5 md:py-2.5 bg-white border-2 border-slate-200 border-b-4 rounded-xl text-slate-600 font-bold hover:bg-slate-50 hover:border-slate-300 active:border-b-2 active:translate-y-[2px] transition-all text-sm whitespace-nowrap"
           >
             Giọng đọc
           </Button>
-          <Button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2.5 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors active:scale-95">
-            <Menu className="w-5 h-5 text-slate-700" />
+          <Button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2.5 bg-white border-2 border-slate-200 border-b-4 rounded-xl text-slate-600 font-bold hover:bg-slate-50 hover:border-slate-300 active:border-b-2 active:translate-y-[2px] transition-all">
+            <Menu className="w-5 h-5" />
           </Button>
         </div>
       </div>
@@ -307,7 +309,7 @@ export function FlashcardPractice() {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden relative">
         {/* Play Area (75%) */}
-        <div className="flex-1 bg-gray-50/50 p-4 md:p-6 overflow-y-auto relative h-full flex flex-col">
+        <div className="flex-1 bg-slate-50/50 p-4 md:p-6 overflow-y-auto relative h-full flex flex-col">
           <div className={cn("m-auto w-full flex flex-col items-center justify-center", activeMode === "bubble" ? "h-full py-0" : "min-h-full py-4")}>
             {activeMode === "flashcard" && (
               <ModeFlashcard key={`${activeMode}-${practiceSessionKey}`} cards={cards} setId={id!} onComplete={handleBeginnerComplete} completionActions={beginnerCompletionActions} />
@@ -348,14 +350,14 @@ export function FlashcardPractice() {
         {/* Sidebar */}
         <div
           className={cn(
-            "fixed inset-y-0 right-0 z-50 transform transition-transform duration-300 lg:relative lg:translate-x-0 bg-white border-l border-slate-100 flex-shrink-0 flex flex-col w-[300px] xl:w-[350px] shadow-2xl lg:shadow-none overflow-y-auto",
+            "fixed inset-y-0 right-0 z-50 transform transition-transform duration-300 lg:relative lg:translate-x-0 bg-white border-l-2 border-slate-200/60 flex-shrink-0 flex flex-col w-[300px] xl:w-[350px] shadow-2xl lg:shadow-none overflow-y-auto",
             isSidebarOpen ? "translate-x-0" : "translate-x-full",
           )}
         >
-          <div className="flex items-center justify-between p-4 lg:hidden border-b border-slate-100">
-            <span className="font-bold text-slate-800">Chế độ luyện tập</span>
-            <Button onClick={() => setIsSidebarOpen(false)} className="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors">
-              <X className="w-5 h-5 text-slate-600" />
+          <div className="flex items-center justify-between p-4 lg:hidden border-b-2 border-slate-100">
+            <span className="font-black text-slate-800">Chế độ luyện tập</span>
+            <Button onClick={() => setIsSidebarOpen(false)} className="p-2 bg-white border-2 border-slate-200 border-b-4 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-300 active:border-b-2 active:translate-y-[2px] transition-all">
+              <X className="w-5 h-5" />
             </Button>
           </div>
           <PracticeSidebar

@@ -110,6 +110,16 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    preferences: {
+      language: { type: String },
+      interests: [{ type: String }],
+      goal: { type: String },
+      wordsPerDay: { type: Number, default: 10 }
+    },
+    diamonds: {
+      type: Number,
+      default: 0
+    },
     dailyLearningOptIn: {
       type: Boolean,
       default: false,

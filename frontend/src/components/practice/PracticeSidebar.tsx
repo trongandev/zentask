@@ -27,9 +27,9 @@ export function PracticeSidebar({ activeMode, onChangeMode, cardCount, language 
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-6 border-b border-gray-100">
-        <h2 className="text-lg font-bold text-gray-900 font-heading">Chế độ luyện tập</h2>
-        <p className="text-sm text-gray-500 mt-1">Chọn một chế độ để bắt đầu học</p>
+      <div className="p-6 border-b-2 border-slate-200/60 bg-slate-50/50">
+        <h2 className="text-lg font-black text-slate-800 tracking-tight">Chế độ luyện tập</h2>
+        <p className="text-sm font-bold text-slate-400 mt-1">Chọn một chế độ để bắt đầu học</p>
       </div>
 
       <div className="p-4 flex-1 overflow-y-auto space-y-3">
@@ -51,30 +51,31 @@ export function PracticeSidebar({ activeMode, onChangeMode, cardCount, language 
                 disabled={isLocked}
                 onClick={() => onChangeMode(mode.id as PracticeMode)}
                 className={cn(
-                  "w-full text-left p-4 rounded-2xl transition-all border-2 relative overflow-hidden group",
+                  "w-full text-left p-4 rounded-2xl transition-all border-2 border-b-4 relative overflow-hidden group",
+                  !isLocked && "active:border-b-2 active:translate-y-[2px]",
                   isActive
-                    ? "bg-blue-50 border-blue-500 shadow-sm"
+                    ? "bg-blue-50 border-blue-500"
                     : isLocked
-                      ? "bg-gray-50 border-transparent opacity-60 cursor-not-allowed"
-                      : "bg-white border-transparent hover:border-blue-200 hover:bg-gray-50 hover:shadow-sm",
+                      ? "bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed"
+                      : "bg-white border-slate-200 hover:border-blue-300 hover:bg-slate-50",
                 )}
               >
                 <div className="flex items-center gap-4">
                   <div
                     className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0 transition-colors",
+                      "w-10 h-10 rounded-xl flex items-center justify-center border-2 shrink-0 transition-colors",
                       isActive
-                        ? "bg-blue-600 text-white"
+                        ? "bg-blue-600 text-white border-blue-600"
                         : isLocked
-                          ? "bg-gray-200 text-gray-400"
-                          : "bg-white text-gray-600 border border-gray-200 group-hover:border-blue-300 group-hover:text-blue-600",
+                          ? "bg-slate-200 text-slate-400 border-slate-200"
+                          : "bg-white text-slate-500 border-slate-200 group-hover:border-blue-300 group-hover:text-blue-600",
                     )}
                   >
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className={cn("font-bold text-sm", isActive ? "text-blue-900" : isLocked ? "text-gray-500" : "text-gray-900")}>{mode.title}</h3>
-                    <p className={cn("text-xs mt-0.5 truncate", isActive ? "text-blue-600" : "text-gray-500")}>{mode.desc}</p>
+                    <h3 className={cn("font-black text-sm tracking-tight", isActive ? "text-blue-900" : isLocked ? "text-slate-500" : "text-slate-800")}>{mode.title}</h3>
+                    <p className={cn("text-xs mt-0.5 truncate font-medium", isActive ? "text-blue-600" : "text-slate-400")}>{mode.desc}</p>
                   </div>
 
                   {isLocked && (

@@ -8,7 +8,6 @@ import { useUserStore } from "../services/userService";
 import { useSocket } from "../contexts/SocketContext";
 import { timeAgo } from "../lib/utils";
 import { getNotificationStyles, getNotificationLink } from "../config/notificationConfig";
-import { LanguageOverlay } from "./common/LanguageOverlay";
 import axiosInstance from "@/src/services/axiosConfig";
 import { Button } from "@/src/components/ui/Button";
 
@@ -305,14 +304,6 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
           )}
         </div>
       </header>
-      {user && (
-        <LanguageOverlay 
-          isOpen={isLanguageOpen || !user.targetLanguage || !user.languageLevel} 
-          canClose={!!user.targetLanguage && !!user.languageLevel} 
-          onClose={() => setIsLanguageOpen(false)} 
-          onSelect={(code) => setIsLanguageOpen(false)} 
-        />
-      )}
     </div>
   );
 }

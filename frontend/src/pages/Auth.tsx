@@ -270,9 +270,8 @@ export function Auth() {
                     <span className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                   ) : (
                     <>
-                      {isLogin ? <LogIn className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
                       <span>{isLogin ? "Đăng nhập" : "Tạo tài khoản"}</span>
-                      <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5" />
+                      {isLogin ? <LogIn className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
                     </>
                   )}
                 </Button>

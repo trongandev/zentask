@@ -44,6 +44,12 @@ interface UserProfile {
     languageLevel?: string;
     learningPreferences?: string[];
     dailyLearningOptIn?: boolean;
+    isVip?: boolean;
+    vipUntil?: string | null;
+    subscription?: {
+        plan: string;
+        status: string;
+    };
 }
 
 interface AuthContextType {

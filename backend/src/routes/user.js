@@ -1,6 +1,6 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { DailyTask, UserDailyStat, LeaderboardWeekly, LeaderboardMonthly, UserFollow, FlashcardProgress, QuizResult, UserActivity, BeginnerProgress, UserLanguageProgress } from "../models/Schemas.js";
+import { DailyTask, UserDailyStat, LeaderboardWeekly, LeaderboardMonthly, UserFollow, FlashcardProgress, QuizResult, UserActivity, BeginnerProgress, UserLanguageProgress, WordPerformance, PendingMistakeQueue, FlashcardSet, Quiz } from "../models/Schemas.js";
 import { SYSTEM_LEVELS } from "../config/system.js";
 import { getWeekString, getMonthString } from "../../utils/dateUtils.js";
 import { createNotification } from "../../utils/notifications.js";
@@ -529,12 +529,14 @@ router.get(
       return res.status(404).json({ error: "User not found" });
     }
 
-    const [flashcardsCount, quizzesCount, studyStats, activities, languageProgressList] = await Promise.all([
+    const [flashcardsCount, quizzesCount, studyStats, activities, languageProgressList, flashcardSets, quizzes] = await Promise.all([
       FlashcardProgress.countDocuments({ userId: uid }),
       QuizResult.countDocuments({ uid: uid }),
       UserDailyStat.aggregate([{ $match: { userId: user._id } }, { $group: { _id: null, totalMinutes: { $sum: "$studyMinutes" } } }]),
       UserActivity.find({ uid: uid }).sort({ createdAt: -1 }).limit(10).lean(),
       UserLanguageProgress.find({ uid: uid }).lean(),
+      FlashcardSet.find({ creatorId: uid, ...(req.user.uid !== uid ? { isPublic: true } : {}) }).sort({ createdAt: -1 }).lean(),
+      Quiz.find({ creatorId: uid, ...(req.user.uid !== uid ? { isPublic: true } : {}) }).sort({ createdAt: -1 }).lean(),
     ]);
 
     const totalStudyHours = studyStats.length > 0 ? Math.round(studyStats[0].totalMinutes / 60) : 0;
@@ -570,6 +572,21 @@ router.get(
         time: a.createdAt ? a.createdAt.toISOString() : new Date().toISOString(),
         xpEarned: a.xpEarned,
       })),
+      flashcardSets: flashcardSets.map((f) => ({
+        id: f._id,
+        title: f.title,
+        description: f.description,
+        termCount: f.termCount || (f.flashcards ? f.flashcards.length : 0),
+        isPublic: f.isPublic
+      })),
+      quizzes: quizzes.map((q) => ({
+        id: q._id,
+        title: q.title,
+        description: q.description,
+        questionCount: q.questions ? q.questions.length : 0,
+        difficulty: q.difficulty,
+        isPublic: q.isPublic
+      }))
     });
   }),
 );
@@ -637,6 +654,49 @@ router.post(
 
     res.json({ status: "success", xpResult, newLessonAdded: true });
   }),
+);
+
+// Update Word Performance Analytics
+router.post(
+  "/word-performance",
+  asyncHandler(async (req, res) => {
+    const { analytics } = req.body;
+    if (!Array.isArray(analytics)) {
+      return res.status(400).json({ error: "Analytics must be an array" });
+    }
+
+    const uid = req.user.uid || req.user.id || req.user._id;
+    if (!uid) return res.status(401).json({ error: "User ID not found in token" });
+
+    const operations = analytics.map((stat) => ({
+      updateOne: {
+        filter: { userId: uid, word: stat.word },
+        update: {
+          $set: { meaning: stat.meaning || "", lastPracticed: new Date() },
+          $inc: { mistakesCount: stat.mistakesCount || 0, totalTimeMs: stat.totalTimeMs || 0 }
+        },
+        upsert: true
+      }
+    }));
+
+    if (operations.length > 0) {
+      await WordPerformance.bulkWrite(operations);
+    }
+
+    const mistakeDocs = analytics
+      .filter((stat) => (stat.mistakesCount || 0) > 0)
+      .map((stat) => ({
+        userId: uid,
+        word: stat.word,
+        mistakeDetail: stat.meaning || ""
+      }));
+
+    if (mistakeDocs.length > 0) {
+      await PendingMistakeQueue.insertMany(mistakeDocs);
+    }
+
+    res.json({ status: "success", message: "Word performance updated" });
+  })
 );
 
 // Follow / Unfollow User

@@ -1,8 +1,9 @@
-import { BeginnerProgress } from "../models/Schemas.js";
+import { BeginnerProgress, PersonalizedGrammar, PersonalizedSkillTask, PendingMistakeQueue } from "../models/Schemas.js";
 import { Course, CourseRank, CourseTier, CourseLesson } from "../models/Course.js";
 import User from "../models/User.js";
 import BeginnerSkill from "../models/beginnerSkill.js";
 import { generateTasksForUser } from '../services/beginnerSkillGenerator.js';
+import { generatePersonalizedContent } from '../services/personalizedGenerator.js';
 
 export const getBeginnerProgress = async (req, res) => {
   try {
@@ -333,6 +334,85 @@ export const devGenerateTasks = async (req, res) => {
     res.json({ message: "Đang tiến hành tạo bài tập mới ở background..." });
   } catch (error) {
     console.error("Error in devGenerateTasks:", error);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+export const getPersonalizedGrammar = async (req, res) => {
+  try {
+    const uid = req.user.uid || req.user.id || req.user._id;
+    const grammar = await PersonalizedGrammar.findOne({ userId: uid });
+    if (!grammar) {
+      return res.status(404).json({ message: "Chưa có lộ trình ngữ pháp cá nhân hoá" });
+    }
+    res.json(grammar);
+  } catch (error) {
+    console.error("Error fetching personalized grammar:", error);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+export const generatePersonalizedGrammarAndSkills = async (req, res) => {
+  try {
+    const uid = req.user.uid || req.user.id || req.user._id;
+    const user = await User.findById(uid);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const mistakes = await PendingMistakeQueue.find({ userId: uid });
+    if (mistakes.length === 0) {
+       return res.status(400).json({ message: "Không có lỗi sai nào để tạo lộ trình" });
+    }
+
+    const success = await generatePersonalizedContent(user, mistakes);
+    if (success) {
+       await PendingMistakeQueue.deleteMany({ userId: uid });
+       res.json({ message: "Tạo lộ trình thành công từ lỗi sai" });
+    } else {
+       res.status(500).json({ message: "Không thể tạo lộ trình" });
+    }
+  } catch (error) {
+    console.error("Error generating grammar/skills:", error);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+export const devGenerateGrammarMock = async (req, res) => {
+  try {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(403).json({ message: "Chức năng này chỉ dành cho môi trường phát triển." });
+    }
+    const uid = req.user.uid || req.user.id || req.user._id;
+    const user = await User.findById(uid);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Seed mock mistakes
+    await PendingMistakeQueue.deleteMany({ userId: uid });
+    await PendingMistakeQueue.insertMany([
+      { userId: uid, word: "She don't like apples", mistakeDetail: "Sử dụng sai trợ động từ với ngôi thứ 3 số ít" },
+      { userId: uid, word: "I have went to the store", mistakeDetail: "Sử dụng sai phân từ hai của go trong thì hiện tại hoàn thành" },
+      { userId: uid, word: "He is more taller than me", mistakeDetail: "Sử dụng sai cấu trúc so sánh hơn với tính từ ngắn" }
+    ]);
+
+    // Force background trigger
+    generatePersonalizedContent(user, await PendingMistakeQueue.find({ userId: uid })).catch(err => console.error(err));
+
+    res.json({ message: "Đang tạo lộ trình ngữ pháp từ mock data..." });
+  } catch (error) {
+    console.error("Error in devGenerateGrammarMock:", error);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+export const getPersonalizedSkillTasks = async (req, res) => {
+  try {
+    const uid = req.user.uid || req.user.id || req.user._id;
+    const skills = await PersonalizedSkillTask.findOne({ userId: uid }).sort({ createdAt: -1 });
+    if (!skills) {
+      return res.json({ tasks: [] });
+    }
+    res.json({ tasks: skills.tasks });
+  } catch (error) {
+    console.error("Error fetching personalized skills:", error);
     res.status(500).json({ message: "Lỗi server" });
   }
 };

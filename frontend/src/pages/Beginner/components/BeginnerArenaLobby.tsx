@@ -84,10 +84,12 @@ export function BeginnerArenaLobby({ user, startMatch }: BeginnerArenaLobbyProps
 
           <Button
             onClick={startMatch}
-            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-black py-4 px-8 rounded-2xl shadow-[0_8px_25px_-6px_rgba(99,102,241,0.5)] transition-all active:scale-95 hover:scale-[1.02] text-xl flex items-center justify-center gap-3 mt-4 group"
+            variant="secondary"
+            size="lg"
+            className="w-full mt-6"
           >
             <Swords className="w-7 h-7 group-hover:rotate-12 transition-transform" />
-            TÌM TRẬN NGAY
+            ĐẤU VỚI BOT
           </Button>
         </div>
       </div>
@@ -109,7 +111,7 @@ export function BeginnerArenaLobby({ user, startMatch }: BeginnerArenaLobbyProps
               const isWin = item.action.toLowerCase().includes("thắng");
               const isDraw = item.action.toLowerCase().includes("hòa");
               return (
-                <div key={item._id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+                <div key={item._id} className="bg-white rounded-3xl p-5 border-2 border-slate-100 shadow-sm flex items-center justify-between hover:border-slate-200 transition-colors">
                   <div className="flex items-center gap-4">
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center ${isWin ? "bg-emerald-100 text-emerald-600" : isDraw ? "bg-amber-100 text-amber-600" : "bg-rose-100 text-rose-600"}`}

@@ -1,40 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, BookOpen, Coffee, Sun, Moon } from "lucide-react";
+import { ArrowLeft, BookOpen } from "lucide-react";
 import { Button } from "@/src/components/ui/Button";
-
-const READING_TOPICS = [
-  {
-    id: "my-daily-routine",
-    title: "My Daily Routine",
-    description: "Bài đọc về thói quen sinh hoạt mỗi ngày.",
-    icon: <Sun className="w-8 h-8" />,
-    color: "bg-orange-500",
-    lightColor: "bg-orange-100",
-    textColor: "text-orange-500",
-    questionsCount: 3,
-  },
-  {
-    id: "favorite-weekend",
-    title: "My Favorite Weekend",
-    description: "Kể về một kỳ nghỉ cuối tuần tuyệt vời.",
-    icon: <Moon className="w-8 h-8" />,
-    color: "bg-indigo-500",
-    lightColor: "bg-indigo-100",
-    textColor: "text-indigo-500",
-    questionsCount: 3,
-  },
-  {
-    id: "the-coffee-shop",
-    title: "The Coffee Shop",
-    description: "Miêu tả một quán cà phê quen thuộc.",
-    icon: <Coffee className="w-8 h-8" />,
-    color: "bg-amber-500",
-    lightColor: "bg-amber-100",
-    textColor: "text-amber-500",
-    questionsCount: 3,
-  }
-];
 
 export function BeginnerReading() {
   const [dailyTasks, setDailyTasks] = useState<any[]>([]);
@@ -97,37 +64,12 @@ export function BeginnerReading() {
             </div>
           </div>
         ) : (
-          <div className="mb-12 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center">
-            <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-700 mb-2">Chưa có lộ trình cá nhân hóa</h2>
-            <p className="text-slate-500 mb-6">Bạn cần chọn sở thích ở trang Kỹ Năng để AI tạo bài tập cho bạn, hoặc nhấn sinh dữ liệu ngay.</p>
-            <Button onClick={() => navigate("/beginner/skills")} className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl">
-              Quay lại chọn sở thích
-            </Button>
+          <div className="bg-white rounded-3xl p-8 border-2 border-slate-100 shadow-sm text-center">
+            <BookOpen className="w-12 h-12 text-purple-300 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-slate-700 mb-2">Chưa có bài luyện đọc</h3>
+            <p className="text-slate-500">Chúng tôi dựa trên những lỗi sai ngữ pháp của bạn để đưa ra các bài luyện đọc phù hợp nhất. Hãy tiếp tục học từ vựng và ngữ pháp nhé!</p>
           </div>
         )}
-
-        <h2 className="text-xl font-bold text-slate-800 mb-6">Danh sách kỹ năng (Mẫu tham khảo)</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {READING_TOPICS.map((topic) => (
-            <div
-              key={topic.id}
-              onClick={() => navigate(`/beginner/reading/${topic.id}`)}
-              className="group bg-slate-50 rounded-2xl p-6 border-2 border-slate-100 hover:border-purple-300 hover:shadow-lg transition-all cursor-pointer flex flex-col"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${topic.lightColor} ${topic.textColor}`}>
-                  {topic.icon}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors">{topic.title}</h3>
-                  <p className="text-sm font-medium text-slate-400">{topic.questionsCount} câu hỏi</p>
-                </div>
-              </div>
-              <p className="text-slate-600 flex-1 text-sm">{topic.description}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

@@ -38,6 +38,8 @@ export function AdminUsers() {
   const columns = [
     {
       header: "Người dùng",
+      accessor: "displayName" as any,
+      sortable: true,
       render: (u: any) => (
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -63,6 +65,8 @@ export function AdminUsers() {
     },
     {
       header: "Vai trò",
+      accessor: "role" as any,
+      sortable: true,
       render: (u: any) => (
         <Select
           className={`border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold uppercase tracking-wider focus:outline-none focus:border-red-500 transition-colors cursor-pointer ${
@@ -79,10 +83,14 @@ export function AdminUsers() {
     },
     {
       header: "Cấp độ",
+      accessor: "level" as any,
+      sortable: true,
       render: (u: any) => <UserLevelBadge level={u.level || 1} size="md" />,
     },
     {
       header: "Trạng thái",
+      accessor: "isBanned" as any,
+      sortable: true,
       render: (u: any) =>
         u.isBanned ? (
           <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-lg uppercase">Bị khoá</span>
@@ -92,6 +100,8 @@ export function AdminUsers() {
     },
     {
       header: "Ngày tham gia",
+      accessor: "createdAt" as any,
+      sortable: true,
       align: "right" as const,
       render: (u: any) => <span className="text-sm text-gray-500">{u.createdAt ? new Date(u.createdAt).toLocaleDateString("vi-VN") : "Không rõ"}</span>,
     },
@@ -154,7 +164,16 @@ export function AdminUsers() {
       <AdminStatCards stats={stats} />
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
-        <DataTable columns={columns} data={pageData.items} loading={users.loading} currentPage={page} totalPages={pageData.totalPages} onPageChange={(p) => fetchUsers(p)} />
+        <DataTable
+          columns={columns}
+          data={pageData.items}
+          loading={users.loading}
+          currentPage={page}
+          totalPages={pageData.totalPages}
+          onPageChange={(p) => fetchUsers(p)}
+          searchable
+          searchFields={["displayName", "email"]}
+        />
       </div>
 
       <AdminUserDetailsModal

@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { userSockets, activeQuizRooms } from "./state.js";
 import { registerQuizHandlers } from "./quizHandler.js";
-import { registerArenaHandlers, removeArenaSocketFromQueue, leaveArenaRoom, removeSocketFromTournamentLobbies } from "./arenaHandler.js";
+import { registerArenaHandlers, leaveArenaRoom } from "./arenaHandler.js";
 
 export function initializeSocket(server, app) {
   const io = new Server(server, {
@@ -69,9 +69,7 @@ export function initializeSocket(server, app) {
       }
 
       // Remove stale Arena state
-      removeArenaSocketFromQueue(socket);
       leaveArenaRoom(socket, socket.currentArenaRoom, "disconnect", io);
-      removeSocketFromTournamentLobbies(socket, io);
     });
 
     // Register all external handlers

@@ -1,42 +1,49 @@
 import cron from 'node-cron';
 import User from '../models/User.js';
 import { generateTasksForUser } from './beginnerSkillGenerator.js';
+import { PendingMistakeQueue } from '../models/Schemas.js';
+import { generatePersonalizedContent } from './personalizedGenerator.js';
 
 export const initCronJobs = () => {
-  // Run everyday at 2:00 AM
-  cron.schedule('0 2 * * *', async () => {
-    console.log('[CRON] Bắt đầu tiến trình tạo lộ trình hằng ngày bằng AI...');
+  // Run everyday at 0:00 (Midnight)
+  cron.schedule('0 0 * * *', async () => {
+    console.log('[CRON] Bắt đầu tiến trình tạo ngữ pháp và kỹ năng từ lỗi sai...');
     try {
-      // Find active users (active within the last 3 days) who opted in
-      const threeDaysAgo = new Date();
-      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      // Find all distinct users in the mistake queue
+      const userIds = await PendingMistakeQueue.distinct('userId');
+      console.log(`[CRON] Tìm thấy ${userIds.length} users có lỗi sai cần xử lý.`);
 
-      const activeUsers = await User.find({
-        dailyLearningOptIn: true,
-        lastActiveDate: { $gte: threeDaysAgo }
-      });
-
-      console.log(`[CRON] Tìm thấy ${activeUsers.length} users active. Bắt đầu xử lý batch...`);
-
-      // Batch processing (Process 10 users at a time to avoid rate limits)
       const batchSize = 10;
-      for (let i = 0; i < activeUsers.length; i += batchSize) {
-        const batch = activeUsers.slice(i, i + batchSize);
-        const promises = batch.map(user => {
-          return generateTasksForUser(user).catch(err => {
-            console.error(`[CRON] Error generating tasks for user ${user._id}:`, err);
-          });
+      for (let i = 0; i < userIds.length; i += batchSize) {
+        const batchIds = userIds.slice(i, i + batchSize);
+        
+        const promises = batchIds.map(async (uid) => {
+          try {
+            const user = await User.findById(uid);
+            if (!user) return;
+            
+            // Get mistakes for this user
+            const mistakes = await PendingMistakeQueue.find({ userId: uid });
+            if (mistakes.length === 0) return;
+
+            // Generate content
+            const success = await generatePersonalizedContent(user, mistakes);
+            
+            if (success) {
+              // Delete processed mistakes
+              await PendingMistakeQueue.deleteMany({ userId: uid });
+            }
+          } catch (err) {
+            console.error(`[CRON] Lỗi xử lý cho user ${uid}:`, err);
+          }
         });
         
         await Promise.all(promises);
-        
-        // Optional: Add a delay between batches if necessary
-        // await new Promise(res => setTimeout(res, 2000));
       }
 
-      console.log('[CRON] Hoàn thành tạo lộ trình AI hằng ngày.');
+      console.log('[CRON] Hoàn thành xử lý lỗi sai.');
     } catch (error) {
-      console.error('[CRON] Lỗi nghiêm trọng khi chạy cron tạo lộ trình:', error);
+      console.error('[CRON] Lỗi nghiêm trọng khi chạy cron:', error);
     }
   }, {
     timezone: "Asia/Ho_Chi_Minh"

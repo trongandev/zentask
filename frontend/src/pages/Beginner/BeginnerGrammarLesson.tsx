@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowRight, Check, X } from "lucide-react";
 import { cn } from "../../lib/utils";
@@ -26,11 +26,34 @@ export function BeginnerGrammarLesson() {
 
   const [currentRound, setCurrentRound] = useState<GrammarRoundType>(initialRound);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const data = topicId ? BEGINNER_GRAMMAR_DATA[topicId] : null;
+  useEffect(() => {
+    if (!topicId) return;
+
+    if (BEGINNER_GRAMMAR_DATA[topicId]) {
+      setData(BEGINNER_GRAMMAR_DATA[topicId]);
+      setLoading(false);
+      return;
+    }
+
+    axiosInstance.get("/api/beginner/grammar/me")
+      .then((res) => {
+        if (res.data && res.data.lessons && res.data.lessons[topicId]) {
+          setData(res.data.lessons[topicId]);
+        }
+      })
+      .catch((err) => console.error("Error fetching personalized grammar:", err))
+      .finally(() => setLoading(false));
+  }, [topicId]);
+
+  if (loading) {
+    return <div className="p-8 text-center animate-pulse font-bold text-slate-500">Đang tải dữ liệu bài học...</div>;
+  }
 
   if (!data) {
-    return <div className="p-8 text-center">Không tìm thấy dữ liệu bài học này.</div>;
+    return <div className="p-8 text-center font-bold text-slate-500">Không tìm thấy dữ liệu bài học này.</div>;
   }
 
   // Helper to move to next round

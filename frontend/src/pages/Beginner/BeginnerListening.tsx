@@ -1,41 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Headphones, Library, Coffee, Book, PlayCircle } from "lucide-react";
+import { ArrowLeft, Headphones, PlayCircle } from "lucide-react";
 import { Button } from "@/src/components/ui/Button";
-import { cn } from "../../lib/utils";
-
-const LISTENING_TOPICS = [
-  {
-    id: "school-library",
-    title: "At the School Library",
-    description: "Nghe đoạn hội thoại đăng ký mượn sách ở thư viện.",
-    icon: <Library className="w-8 h-8" />,
-    color: "bg-blue-500",
-    lightColor: "bg-blue-100",
-    textColor: "text-blue-500",
-    questionsCount: 3,
-  },
-  {
-    id: "cafe-order",
-    title: "Ordering Coffee",
-    description: "Cách gọi đồ uống và thanh toán tại quán cà phê.",
-    icon: <Coffee className="w-8 h-8" />,
-    color: "bg-amber-500",
-    lightColor: "bg-amber-100",
-    textColor: "text-amber-500",
-    questionsCount: 3,
-  },
-  {
-    id: "new-student",
-    title: "The New Student",
-    description: "Hội thoại làm quen với học sinh mới trong lớp.",
-    icon: <Book className="w-8 h-8" />,
-    color: "bg-indigo-500",
-    lightColor: "bg-indigo-100",
-    textColor: "text-indigo-500",
-    questionsCount: 3,
-  }
-];
 
 export function BeginnerListening() {
   const navigate = useNavigate();
@@ -66,7 +32,7 @@ export function BeginnerListening() {
         </div>
         <p className="text-slate-500 mb-8">Lắng nghe các đoạn hội thoại thực tế và trả lời câu hỏi trắc nghiệm.</p>
 
-        {dailyTasks.length > 0 && (
+        {dailyTasks.length > 0 ? (
           <div className="mb-10">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-slate-800">Lộ trình cá nhân hóa hôm nay</h2>
@@ -103,29 +69,13 @@ export function BeginnerListening() {
               ))}
             </div>
           </div>
+        ) : (
+          <div className="bg-white rounded-3xl p-8 border-2 border-slate-100 shadow-sm text-center">
+            <Headphones className="w-12 h-12 text-blue-300 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-slate-700 mb-2">Chưa có bài luyện nghe</h3>
+            <p className="text-slate-500">Chúng tôi dựa trên những lỗi sai ngữ pháp của bạn để đưa ra các bài luyện nghe phù hợp nhất. Hãy tiếp tục học từ vựng và ngữ pháp nhé!</p>
+          </div>
         )}
-
-        <h2 className="text-xl font-bold text-slate-700 mb-6">Danh sách kỹ năng (Mẫu tham khảo)</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {LISTENING_TOPICS.map((topic) => (
-            <div
-              key={topic.id}
-              onClick={() => navigate(`/beginner/listening/${topic.id}`)}
-              className="group bg-slate-50 rounded-2xl p-6 border-2 border-slate-100 hover:border-blue-300 hover:shadow-lg transition-all cursor-pointer flex flex-col"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${topic.lightColor} ${topic.textColor}`}>
-                  {topic.icon}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{topic.title}</h3>
-                  <p className="text-sm font-medium text-slate-400">{topic.questionsCount} câu hỏi</p>
-                </div>
-              </div>
-              <p className="text-slate-600 flex-1">{topic.description}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

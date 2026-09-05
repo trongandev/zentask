@@ -34,10 +34,10 @@ export function Round6ReverseQuiz({ topicId, currentWord, allLessonWords, isCorr
   return (
     <div className="space-y-6 animate-in slide-in-from-right text-center flex flex-col items-center">
       <h2 className="text-2xl font-bold text-slate-800 mb-8">Từ vựng tiếng Anh là gì?</h2>
-      
+
       <div className="text-center mb-12">
-        <p className="font-bold text-4xl text-slate-700 mb-4 px-4">{currentWord?.translation}</p>
-        <p className="text-lg text-slate-500 italic mt-4">"{currentWord?.examples?.[0]?.vi || 'Nghĩa của từ này trong tiếng Anh'}"</p>
+        <p className="font-bold text-4xl text-slate-700 mb-4 px-4">{currentWord?.meaning}</p>
+        <p className="text-lg text-slate-500 italic mt-4">"{currentWord?.example?.[0]?.vi || "Nghĩa của từ này trong tiếng Anh"}"</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 w-full max-w-lg">
@@ -57,10 +57,7 @@ export function Round6ReverseQuiz({ topicId, currentWord, allLessonWords, isCorr
               key={opt.id}
               onClick={() => handleSelect(opt.term)}
               disabled={isCorrect !== null}
-              className={cn(
-                "p-6 rounded-2xl border-2 font-bold text-2xl transition-all duration-300 shadow-sm flex flex-col items-center justify-center gap-2 relative overflow-hidden",
-                stateClass
-              )}
+              className={cn("p-6 rounded-2xl border-2 font-bold text-2xl transition-all duration-300 shadow-sm flex flex-col items-center justify-center gap-2 relative overflow-hidden", stateClass)}
             >
               {opt.term}
               {isCorrect !== null && opt.term === currentWord.term && (

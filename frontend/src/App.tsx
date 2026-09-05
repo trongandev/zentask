@@ -7,127 +7,83 @@ import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation, Link } from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
-
-
-
-
-
-
-
-
-
-
-
-
-
+import { Home, MountainSnow, Copy, Globe, User } from "lucide-react";
 
 import { AdminLayout } from "./components/AdminLayout";
 import { BeginnerLayout } from "./components/BeginnerLayout";
 
-
-
-
-
-
-
-
-
 import { Honeypot } from "./components/Honeypot";
-
 
 import { useAuth } from "./contexts/AuthContext";
 import { SocketProvider } from "./contexts/SocketContext";
-
-
-
-
-
 
 import { RightSidebar } from "./components/RightSidebar";
 import { LevelUpModal } from "./components/LevelUpModal";
 import { useUserStore } from "./services/userService";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
 
-
-
-const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
-const Flashcards = lazy(() => import('./pages/Flashcard/Flashcards').then(m => ({ default: m.Flashcards })));
-const FlashcardDetail = lazy(() => import('./pages/Flashcard/FlashcardDetail').then(m => ({ default: m.FlashcardDetail })));
-const FlashcardPractice = lazy(() => import('./pages/Flashcard/FlashcardPractice').then(m => ({ default: m.FlashcardPractice })));
-const Quiz = lazy(() => import('./pages/Quiz/Quiz').then(m => ({ default: m.Quiz })));
-const QuizDetail = lazy(() => import('./pages/Quiz/QuizDetail').then(m => ({ default: m.QuizDetail })));
-const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
-const Leaderboard = lazy(() => import('./pages/Leaderboard').then(m => ({ default: m.Leaderboard })));
-const Community = lazy(() => import('./pages/Community').then(m => ({ default: m.Community })));
-const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
-const Notifications = lazy(() => import('./pages/Notifications').then(m => ({ default: m.Notifications })));
-const Auth = lazy(() => import('./pages/Auth').then(m => ({ default: m.Auth })));
-const Arena = lazy(() => import('./pages/Arena/Arena').then(m => ({ default: m.Arena })));
-const AdminDashboard = lazy(() => import('./pages/Admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
-const AdminTasks = lazy(() => import('./pages/Admin/AdminTasks').then(m => ({ default: m.AdminTasks })));
-const AdminUsers = lazy(() => import('./pages/Admin/AdminUsers').then(m => ({ default: m.AdminUsers })));
-const AdminVocabSets = lazy(() => import('./pages/Admin/AdminVocabSets').then(m => ({ default: m.AdminVocabSets })));
-const AdminVocab = lazy(() => import('./pages/Admin/AdminVocab').then(m => ({ default: m.AdminVocab })));
-const AdminQuizzes = lazy(() => import('./pages/Admin/AdminQuizzes').then(m => ({ default: m.AdminQuizzes })));
-const AdminQuizHistory = lazy(() => import('./pages/Admin/AdminQuizHistory').then(m => ({ default: m.AdminQuizHistory })));
-const AdminCommunityPosts = lazy(() => import('./pages/Admin/AdminCommunityPosts').then(m => ({ default: m.AdminCommunityPosts })));
-const AdminBannedIPs = lazy(() => import('./pages/Admin/AdminBannedIPs').then(m => ({ default: m.AdminBannedIPs })));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
-const TermsOfService = lazy(() => import('./pages/TermsOfService').then(m => ({ default: m.TermsOfService })));
-const Posts = lazy(() => import('./pages/Posts').then(m => ({ default: m.Posts })));
-const PostDetail = lazy(() => import('./pages/PostDetail').then(m => ({ default: m.PostDetail })));
-const Beginner = lazy(() => import('./pages/Beginner/Beginner').then(m => ({ default: m.Beginner })));
-const BeginnerGrammar = lazy(() => import('./pages/Beginner/BeginnerGrammar').then(m => ({ default: m.BeginnerGrammar })));
-const BeginnerGrammarLesson = lazy(() => import('./pages/Beginner/BeginnerGrammarLesson').then(m => ({ default: m.BeginnerGrammarLesson })));
-const BeginnerSkills = lazy(() => import('./pages/Beginner/BeginnerSkills').then(m => ({ default: m.BeginnerSkills })));
-const BeginnerSkillComingSoon = lazy(() => import('./pages/Beginner/BeginnerSkillComingSoon').then(m => ({ default: m.BeginnerSkillComingSoon })));
-const BeginnerListening = lazy(() => import('./pages/Beginner/BeginnerListening').then(m => ({ default: m.BeginnerListening })));
-const BeginnerListeningDetail = lazy(() => import('./pages/Beginner/BeginnerListeningDetail').then(m => ({ default: m.BeginnerListeningDetail })));
-const BeginnerSpeaking = lazy(() => import('./pages/Beginner/BeginnerSpeaking').then(m => ({ default: m.BeginnerSpeaking })));
-const BeginnerSpeakingDetail = lazy(() => import('./pages/Beginner/BeginnerSpeakingDetail').then(m => ({ default: m.BeginnerSpeakingDetail })));
-const BeginnerReading = lazy(() => import('./pages/Beginner/BeginnerReading').then(m => ({ default: m.BeginnerReading })));
-const BeginnerReadingDetail = lazy(() => import('./pages/Beginner/BeginnerReadingDetail').then(m => ({ default: m.BeginnerReadingDetail })));
-const BeginnerWriting = lazy(() => import('./pages/Beginner/BeginnerWriting').then(m => ({ default: m.BeginnerWriting })));
-const BeginnerWritingDetail = lazy(() => import('./pages/Beginner/BeginnerWritingDetail').then(m => ({ default: m.BeginnerWritingDetail })));
-const BeginnerRank = lazy(() => import('./pages/Beginner/BeginnerRank').then(m => ({ default: m.BeginnerRank })));
-const BeginnerArena = lazy(() => import('./pages/Beginner/BeginnerArena').then(m => ({ default: m.BeginnerArena })));
-const BeginnerFlashcardDetail = lazy(() => import('./pages/Flashcard/BeginnerFlashcardDetail').then(m => ({ default: m.BeginnerFlashcardDetail })));
-const QuizCreate = lazy(() => import('./pages/Quiz/QuizCreate').then(m => ({ default: m.QuizCreate })));
-const QuizRoom = lazy(() => import('./pages/Quiz/QuizRoom').then(m => ({ default: m.QuizRoom })));
-const QuizPlay = lazy(() => import('./pages/Quiz/QuizPlay').then(m => ({ default: m.QuizPlay })));
-const QuizResult = lazy(() => import('./pages/Quiz/QuizResult').then(m => ({ default: m.QuizResult })));
-const SystemLogs = lazy(() => import('./pages/Admin/SystemLogs').then(m => ({ default: m.SystemLogs })));
-const AdminAIUsage = lazy(() => import('./pages/Admin/AdminAIUsage').then(m => ({ default: m.AdminAIUsage })));
-const AdminBotJobs = lazy(() => import('./pages/Admin/AdminBotJobs').then(m => ({ default: m.AdminBotJobs })));
-const ZaloGo = lazy(() => import('./pages/ZaloAuth/ZaloGo').then(m => ({ default: m.ZaloGo })));
-const ZaloAuthorize = lazy(() => import('./pages/ZaloAuth/ZaloAuthorize').then(m => ({ default: m.ZaloAuthorize })));
-const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
-const BeginnerLessonPractice = lazy(() => import('./pages/Beginner/BeginnerLessonPractice').then(m => ({ default: m.BeginnerLessonPractice })));
-const AdminCourses = lazy(() => import('./pages/Admin/AdminCourses').then(m => ({ default: m.AdminCourses })));
-const AIChat = lazy(() => import('./pages/AIChat'));
-const Notebook = lazy(() => import('./pages/Notebook'));
-const Utilities = lazy(() => import('./pages/Utilities'));
-const Friends = lazy(() => import('./pages/Friends'));
-const SkillPracticeRoom = lazy(() => import('./pages/SkillPracticeRoom'));
-const BotConfigPage = lazy(() => import('./pages/Admin/BotConfigPage'));
+const Dashboard = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })));
+const Flashcards = lazy(() => import("./pages/Flashcard/Flashcards").then((m) => ({ default: m.Flashcards })));
+const FlashcardDetail = lazy(() => import("./pages/Flashcard/FlashcardDetail").then((m) => ({ default: m.FlashcardDetail })));
+const FlashcardPractice = lazy(() => import("./pages/Flashcard/FlashcardPractice").then((m) => ({ default: m.FlashcardPractice })));
+const Quiz = lazy(() => import("./pages/Quiz/Quiz").then((m) => ({ default: m.Quiz })));
+const QuizDetail = lazy(() => import("./pages/Quiz/QuizDetail").then((m) => ({ default: m.QuizDetail })));
+const Profile = lazy(() => import("./pages/Profile").then((m) => ({ default: m.Profile })));
+const Leaderboard = lazy(() => import("./pages/Leaderboard").then((m) => ({ default: m.Leaderboard })));
+const Community = lazy(() => import("./pages/Community").then((m) => ({ default: m.Community })));
+const Settings = lazy(() => import("./pages/Settings").then((m) => ({ default: m.Settings })));
+const Notifications = lazy(() => import("./pages/Notifications").then((m) => ({ default: m.Notifications })));
+const Auth = lazy(() => import("./pages/Auth").then((m) => ({ default: m.Auth })));
+const Arena = lazy(() => import("./pages/Arena/Arena").then((m) => ({ default: m.Arena })));
+const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard").then((m) => ({ default: m.AdminDashboard })));
+const AdminTasks = lazy(() => import("./pages/Admin/AdminTasks").then((m) => ({ default: m.AdminTasks })));
+const AdminUsers = lazy(() => import("./pages/Admin/AdminUsers").then((m) => ({ default: m.AdminUsers })));
+const AdminVocabSets = lazy(() => import("./pages/Admin/AdminVocabSets").then((m) => ({ default: m.AdminVocabSets })));
+const AdminVocab = lazy(() => import("./pages/Admin/AdminVocab").then((m) => ({ default: m.AdminVocab })));
+const AdminQuizzes = lazy(() => import("./pages/Admin/AdminQuizzes").then((m) => ({ default: m.AdminQuizzes })));
+const AdminQuizHistory = lazy(() => import("./pages/Admin/AdminQuizHistory").then((m) => ({ default: m.AdminQuizHistory })));
+const AdminCommunityPosts = lazy(() => import("./pages/Admin/AdminCommunityPosts").then((m) => ({ default: m.AdminCommunityPosts })));
+const AdminBannedIPs = lazy(() => import("./pages/Admin/AdminBannedIPs").then((m) => ({ default: m.AdminBannedIPs })));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy").then((m) => ({ default: m.PrivacyPolicy })));
+const TermsOfService = lazy(() => import("./pages/TermsOfService").then((m) => ({ default: m.TermsOfService })));
+const Posts = lazy(() => import("./pages/Posts").then((m) => ({ default: m.Posts })));
+const PostDetail = lazy(() => import("./pages/PostDetail").then((m) => ({ default: m.PostDetail })));
+const Beginner = lazy(() => import("./pages/Beginner/Beginner").then((m) => ({ default: m.Beginner })));
+const BeginnerGrammar = lazy(() => import("./pages/Beginner/BeginnerGrammar").then((m) => ({ default: m.BeginnerGrammar })));
+const BeginnerGrammarLesson = lazy(() => import("./pages/Beginner/BeginnerGrammarLesson").then((m) => ({ default: m.BeginnerGrammarLesson })));
+const BeginnerSkills = lazy(() => import("./pages/Beginner/BeginnerSkills").then((m) => ({ default: m.BeginnerSkills })));
+const BeginnerSkillComingSoon = lazy(() => import("./pages/Beginner/BeginnerSkillComingSoon").then((m) => ({ default: m.BeginnerSkillComingSoon })));
+const BeginnerListening = lazy(() => import("./pages/Beginner/BeginnerListening").then((m) => ({ default: m.BeginnerListening })));
+const BeginnerListeningDetail = lazy(() => import("./pages/Beginner/BeginnerListeningDetail").then((m) => ({ default: m.BeginnerListeningDetail })));
+const BeginnerSpeaking = lazy(() => import("./pages/Beginner/BeginnerSpeaking").then((m) => ({ default: m.BeginnerSpeaking })));
+const BeginnerSpeakingDetail = lazy(() => import("./pages/Beginner/BeginnerSpeakingDetail").then((m) => ({ default: m.BeginnerSpeakingDetail })));
+const BeginnerReading = lazy(() => import("./pages/Beginner/BeginnerReading").then((m) => ({ default: m.BeginnerReading })));
+const BeginnerReadingDetail = lazy(() => import("./pages/Beginner/BeginnerReadingDetail").then((m) => ({ default: m.BeginnerReadingDetail })));
+const BeginnerWriting = lazy(() => import("./pages/Beginner/BeginnerWriting").then((m) => ({ default: m.BeginnerWriting })));
+const BeginnerWritingDetail = lazy(() => import("./pages/Beginner/BeginnerWritingDetail").then((m) => ({ default: m.BeginnerWritingDetail })));
+const BeginnerRank = lazy(() => import("./pages/Beginner/BeginnerRank").then((m) => ({ default: m.BeginnerRank })));
+const BeginnerArena = lazy(() => import("./pages/Beginner/BeginnerArena").then((m) => ({ default: m.BeginnerArena })));
+const BeginnerFlashcardDetail = lazy(() => import("./pages/Flashcard/BeginnerFlashcardDetail").then((m) => ({ default: m.BeginnerFlashcardDetail })));
+const QuizCreate = lazy(() => import("./pages/Quiz/QuizCreate").then((m) => ({ default: m.QuizCreate })));
+const QuizRoom = lazy(() => import("./pages/Quiz/QuizRoom").then((m) => ({ default: m.QuizRoom })));
+const QuizPlay = lazy(() => import("./pages/Quiz/QuizPlay").then((m) => ({ default: m.QuizPlay })));
+const QuizResult = lazy(() => import("./pages/Quiz/QuizResult").then((m) => ({ default: m.QuizResult })));
+const SystemLogs = lazy(() => import("./pages/Admin/SystemLogs").then((m) => ({ default: m.SystemLogs })));
+const AdminAIUsage = lazy(() => import("./pages/Admin/AdminAIUsage").then((m) => ({ default: m.AdminAIUsage })));
+const AdminBotJobs = lazy(() => import("./pages/Admin/AdminBotJobs").then((m) => ({ default: m.AdminBotJobs })));
+const ZaloGo = lazy(() => import("./pages/ZaloAuth/ZaloGo").then((m) => ({ default: m.ZaloGo })));
+const ZaloAuthorize = lazy(() => import("./pages/ZaloAuth/ZaloAuthorize").then((m) => ({ default: m.ZaloAuthorize })));
+const LandingPage = lazy(() => import("./pages/LandingPage").then((m) => ({ default: m.LandingPage })));
+const Onboarding = lazy(() => import("./pages/Onboarding").then((m) => ({ default: m.Onboarding })));
+const BeginnerLessonPractice = lazy(() => import("./pages/Beginner/BeginnerLessonPractice").then((m) => ({ default: m.BeginnerLessonPractice })));
+const AdminCourses = lazy(() => import("./pages/Admin/AdminCourses").then((m) => ({ default: m.AdminCourses })));
+const AIChat = lazy(() => import("./pages/AIChat"));
+const Notebook = lazy(() => import("./pages/Notebook"));
+const Utilities = lazy(() => import("./pages/Utilities"));
+const Friends = lazy(() => import("./pages/Friends"));
+const SkillPracticeRoom = lazy(() => import("./pages/SkillPracticeRoom"));
+const BotConfigPage = lazy(() => import("./pages/Admin/BotConfigPage"));
 
 function ProtectedRouteLayout() {
   const { user, loading } = useAuth();
@@ -242,7 +198,7 @@ function MainLayout() {
             <Header isLeftSidebarOpen={isLeftSidebarOpen} onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)} onToggleMobileMenu={() => setIsMobileMenuOpen(true)} />
           </div>
 
-          <div className="flex-1 p-4 md:p-8 flex flex-col">
+          <div className="flex-1 p-4 md:p-8 pb-28 lg:pb-8 flex flex-col">
             <Outlet />
           </div>
           <footer className="mt-8 text-center text-sm text-gray-500 pb-2 border-t border-gray-200 pt-5 ">
@@ -284,25 +240,49 @@ function MainLayout() {
         </div>
       )}
 
-      {/* Mobile Floating Button to open Right Sidebar */}
+      {/* Mobile Floating Bottom Dock (Replaces the side pill) */}
       {!isPracticePage && !isRightMobileMenuOpen && (
-        <Button
-          onClick={() => setIsRightMobileMenuOpen(true)}
-          className="fixed right-0 top-1/2 -translate-y-1/2 z-[55] lg:hidden bg-white p-2.5 rounded-l-2xl shadow-lg border border-r-0 border-gray-200 text-blue-600 flex flex-col items-center gap-1 opacity-90 hover:opacity-100 transition-opacity"
-        >
-          <div className="w-1 h-8 bg-blue-100 rounded-full flex flex-col justify-center items-center overflow-hidden">
-            <div className="w-full h-1/3 bg-blue-500 rounded-full"></div>
+        <nav className="lg:hidden fixed bottom-6 left-4 right-4 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white/90 backdrop-blur-xl border border-slate-200/50 shadow-2xl rounded-3xl flex justify-around items-center p-2 mx-auto max-w-[90%]">
+            {[
+              { path: "/dashboard", label: "Tổng quan", icon: <Home className="w-6 h-6" /> },
+              { path: "/beginner", label: "Lộ trình", icon: <MountainSnow className="w-6 h-6" /> },
+              { path: "/flashcards", label: "Thẻ lật", icon: <Copy className="w-6 h-6" /> },
+              { path: "/community", label: "Cộng đồng", icon: <Globe className="w-6 h-6" /> },
+            ].map((item) => {
+              const isActive = location.pathname.startsWith(item.path) && (item.path !== "/dashboard" || location.pathname === "/dashboard");
+              return (
+                <Button
+                  key={item.path}
+                  variant="custom"
+                  onClick={() => (window.location.href = item.path)}
+                  className={cn("flex flex-col items-center gap-1 p-2 rounded-2xl transition-all min-w-[60px]", isActive ? "text-blue-600" : "text-slate-400 hover:text-slate-600")}
+                >
+                  <div className={cn("p-1.5 rounded-xl transition-all duration-300", isActive ? "bg-blue-100 -translate-y-1" : "")}>{item.icon}</div>
+                  <span className={cn("text-[9px] font-black uppercase tracking-wider transition-all", isActive ? "opacity-100" : "opacity-0 h-0 overflow-hidden")}>{item.label}</span>
+                </Button>
+              );
+            })}
+            {/* User Profile Button to open Right Sidebar */}
+            <Button
+              variant="custom"
+              onClick={() => setIsRightMobileMenuOpen(true)}
+              className={cn("flex flex-col items-center gap-1 p-2 rounded-2xl transition-all min-w-[60px]", isRightMobileMenuOpen ? "text-blue-600" : "text-slate-400 hover:text-slate-600")}
+            >
+              <div className={cn("p-1.5 rounded-xl transition-all duration-300")}>
+                <User className="w-6 h-6" />
+              </div>
+              <span className="text-[9px] font-black uppercase tracking-wider transition-all opacity-0 h-0 overflow-hidden">Hồ sơ</span>
+            </Button>
           </div>
-        </Button>
+        </nav>
       )}
     </div>
   );
 }
 
-
-
-
 import { Button } from "@/src/components/ui/Button";
+import { cn } from "./lib/utils";
 
 function AppContent() {
   const { user, loading, isIpBanned } = useAuth();
@@ -322,97 +302,104 @@ function AppContent() {
 
   return (
     <>
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#F4F7FE]"><div className="w-10 h-10 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div></div>}>
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center bg-[#F4F7FE]">
+            <div className="w-10 h-10 border-4 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></div>
+          </div>
+        }
+      >
+        <Routes>
+          <Route path="/auth" element={<Auth />} />
 
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="courses" element={<AdminCourses />} />
-          <Route path="daily-task" element={<AdminTasks />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="vocab-sets" element={<AdminVocabSets />} />
-          <Route path="vocab" element={<AdminVocab />} />
-          <Route path="quizzes" element={<AdminQuizzes />} />
-          <Route path="quiz-history" element={<AdminQuizHistory />} />
-          <Route path="bot-config" element={<BotConfigPage />} />
-          <Route path="system-logs" element={<SystemLogs />} />
-          <Route path="ai-usage" element={<AdminAIUsage />} />
-          <Route path="bot-jobs" element={<AdminBotJobs />} />
-          <Route path="community-posts" element={<AdminCommunityPosts />} />
-          <Route path="banned-ips" element={<AdminBannedIPs />} />
-        </Route>
-        <Route path="arena" element={<Arena />} />
-
-        {/* Zalo Auth Flow */}
-        <Route path="/go/:id" element={<ZaloGo />} />
-        <Route path="/authorize/:id" element={<ZaloAuthorize />} />
-
-        {/* Landing Page */}
-        <Route path="/" element={<LandingPage />} />
-
-        <Route element={<MainLayout />}>
-          {/* Main App Routes */}
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="flashcards" element={<Flashcards />} />
-          <Route path="flashcard/:id" element={<FlashcardDetail />} />
-          <Route path="quiz" element={<Quiz />} />
-          <Route path="quiz/:id" element={<QuizDetail />} />
-          <Route path="profile/:id" element={<Profile />} />
-          <Route path="leaderboard" element={<Leaderboard />} />
-          <Route path="community" element={<Community />} />
-          <Route path="utilities" element={<Utilities />} />
-          <Route path="posts" element={<Posts />} />
-          <Route path="posts/:id" element={<PostDetail />} />
-          <Route path="post" element={<Posts />} />
-          <Route path="privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="terms-of-service" element={<TermsOfService />} />
-
-          {/* Protected routes */}
-          <Route element={<ProtectedRouteLayout />}>
-            <Route path="flashcard/:id/practice" element={<FlashcardPractice />} />
-            <Route path="quiz/create" element={<QuizCreate />} />
-            <Route path="quiz/room/:code" element={<QuizRoom />} />
-            <Route path="quiz/play/:id" element={<QuizPlay />} />
-            <Route path="quiz/result/:resultId" element={<QuizResult />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="ai-chat" element={<AIChat />} />
-            <Route path="notebook" element={<Notebook />} />
-            <Route path="friends" element={<Friends />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="setting" element={<Settings />} />
-            <Route path="notifications" element={<Notifications />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="courses" element={<AdminCourses />} />
+            <Route path="daily-task" element={<AdminTasks />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="vocab-sets" element={<AdminVocabSets />} />
+            <Route path="vocab" element={<AdminVocab />} />
+            <Route path="quizzes" element={<AdminQuizzes />} />
+            <Route path="quiz-history" element={<AdminQuizHistory />} />
+            <Route path="bot-config" element={<BotConfigPage />} />
+            <Route path="system-logs" element={<SystemLogs />} />
+            <Route path="ai-usage" element={<AdminAIUsage />} />
+            <Route path="bot-jobs" element={<AdminBotJobs />} />
+            <Route path="community-posts" element={<AdminCommunityPosts />} />
+            <Route path="banned-ips" element={<AdminBannedIPs />} />
           </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
+          <Route path="arena" element={<Arena />} />
 
-        {/* Beginner Layout - No sidebars */}
-        <Route element={<BeginnerLayout />}>
-          <Route element={<ProtectedRouteLayout />}>
-            <Route path="beginner" element={<Beginner />} />
-            <Route path="beginner/grammar" element={<BeginnerGrammar />} />
-            <Route path="beginner/grammar/:topicId" element={<BeginnerGrammarLesson />} />
-            <Route path="beginner/skills" element={<BeginnerSkills />} />
-            <Route path="beginner/listening" element={<BeginnerListening />} />
-            <Route path="beginner/listening/:id" element={<BeginnerListeningDetail />} />
-            <Route path="beginner/speaking" element={<BeginnerSpeaking />} />
-            <Route path="beginner/speaking/:id" element={<BeginnerSpeakingDetail />} />
-            <Route path="beginner/reading" element={<BeginnerReading />} />
-            <Route path="beginner/reading/:id" element={<BeginnerReadingDetail />} />
-            <Route path="beginner/writing" element={<BeginnerWriting />} />
-            <Route path="beginner/writing/:id" element={<BeginnerWritingDetail />} />
-            <Route path="beginner/skill/:skillId" element={<BeginnerSkillComingSoon />} />
-            <Route path="beginner/rank" element={<BeginnerRank />} />
-            <Route path="beginner/arena" element={<BeginnerArena />} />
-            <Route path="beginner/lesson/:topicId/:lessonIndex" element={<BeginnerLessonPractice />} />
-            {/* Keeping old routes temporarily so it doesn't break */}
-            <Route path="beginner/flashcard/:id" element={<BeginnerFlashcardDetail />} />
-            <Route path="beginner/flashcard/:id/practice" element={<FlashcardPractice />} />
-            <Route path="beginner/skills/:mode" element={<SkillPracticeRoom />} />
+          {/* Zalo Auth Flow */}
+          <Route path="/go/:id" element={<ZaloGo />} />
+          <Route path="/authorize/:id" element={<ZaloAuthorize />} />
+
+          {/* Landing Page */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+
+          <Route element={<MainLayout />}>
+            {/* Main App Routes */}
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="flashcards" element={<Flashcards />} />
+            <Route path="flashcard/:id" element={<FlashcardDetail />} />
+            <Route path="quiz" element={<Quiz />} />
+            <Route path="quiz/:id" element={<QuizDetail />} />
+            <Route path="profile/:id" element={<Profile />} />
+            <Route path="leaderboard" element={<Leaderboard />} />
+            <Route path="community" element={<Community />} />
+            <Route path="utilities" element={<Utilities />} />
+            <Route path="posts" element={<Posts />} />
+            <Route path="posts/:id" element={<PostDetail />} />
+            <Route path="post" element={<Posts />} />
+            <Route path="privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="terms-of-service" element={<TermsOfService />} />
+
+            {/* Protected routes */}
+            <Route element={<ProtectedRouteLayout />}>
+              <Route path="flashcard/:id/practice" element={<FlashcardPractice />} />
+              <Route path="quiz/create" element={<QuizCreate />} />
+              <Route path="quiz/room/:code" element={<QuizRoom />} />
+              <Route path="quiz/play/:id" element={<QuizPlay />} />
+              <Route path="quiz/result/:resultId" element={<QuizResult />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="ai-chat" element={<AIChat />} />
+              <Route path="notebook" element={<Notebook />} />
+              <Route path="friends" element={<Friends />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="setting" element={<Settings />} />
+              <Route path="notifications" element={<Notifications />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
-        </Route>
-      </Routes>
+
+          {/* Beginner Layout - No sidebars */}
+          <Route element={<BeginnerLayout />}>
+            <Route element={<ProtectedRouteLayout />}>
+              <Route path="beginner" element={<Beginner />} />
+              <Route path="beginner/grammar" element={<BeginnerGrammar />} />
+              <Route path="beginner/grammar/:topicId" element={<BeginnerGrammarLesson />} />
+              <Route path="beginner/skills" element={<BeginnerSkills />} />
+              <Route path="beginner/listening" element={<BeginnerListening />} />
+              <Route path="beginner/listening/:id" element={<BeginnerListeningDetail />} />
+              <Route path="beginner/speaking" element={<BeginnerSpeaking />} />
+              <Route path="beginner/speaking/:id" element={<BeginnerSpeakingDetail />} />
+              <Route path="beginner/reading" element={<BeginnerReading />} />
+              <Route path="beginner/reading/:id" element={<BeginnerReadingDetail />} />
+              <Route path="beginner/writing" element={<BeginnerWriting />} />
+              <Route path="beginner/writing/:id" element={<BeginnerWritingDetail />} />
+              <Route path="beginner/skill/:skillId" element={<BeginnerSkillComingSoon />} />
+              <Route path="beginner/rank" element={<BeginnerRank />} />
+              <Route path="beginner/arena" element={<BeginnerArena />} />
+              <Route path="beginner/lesson/:topicId/:lessonIndex" element={<BeginnerLessonPractice />} />
+              {/* Keeping old routes temporarily so it doesn't break */}
+              <Route path="beginner/flashcard/:id" element={<BeginnerFlashcardDetail />} />
+              <Route path="beginner/flashcard/:id/practice" element={<FlashcardPractice />} />
+              <Route path="beginner/skills/:mode" element={<SkillPracticeRoom />} />
+            </Route>
+          </Route>
+        </Routes>
       </Suspense>
       {levelUpData && <LevelUpModal newLevel={levelUpData.newLevel} onClose={clearLevelUp} />}
     </>

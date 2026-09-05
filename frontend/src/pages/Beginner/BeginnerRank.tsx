@@ -39,7 +39,7 @@ export function BeginnerRank() {
   const podiumOrder = top3.length === 3 ? [top3[1], top3[0], top3[2]] : top3;
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 pb-24 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pt-8">
+    <div className="w-full max-w-5xl mx-auto px-4 pb-24 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pt-8">
       {/* Header */}
       <div className="text-center space-y-2 mb-12">
         <h1 className="text-3xl md:text-4xl font-black text-slate-800 flex items-center justify-center gap-3">

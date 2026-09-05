@@ -230,7 +230,7 @@ export function Quiz() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12">
+    <div className=" space-y-8 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <img src="/mascot/Lopy (12).png" className="w-20 h-20 object-contain drop-shadow-md" alt="Mascot" />

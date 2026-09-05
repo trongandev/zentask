@@ -42,7 +42,7 @@ export function LandingPage() {
                 onClick={() => navigate("/auth")}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 transition-all"
               >
-                Đăng nhập
+                Bắt đầu ngay
               </Button>
             )}
           </div>
@@ -91,12 +91,8 @@ export function LandingPage() {
               {/* Background Glow */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 lg:w-96 lg:h-96 bg-blue-500/20 rounded-full blur-[80px] -z-10 animate-pulse" />
               <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-400/20 rounded-full blur-[60px] -z-10" />
-              
-              <img 
-                src="/mascot/Lopy (12).png" 
-                alt="ZenTask AI Mascot" 
-                className="w-64 h-64 sm:w-80 sm:h-80 lg:w-[450px] lg:h-[450px] object-contain drop-shadow-2xl animate-float" 
-              />
+
+              <img src="/mascot/Lopy (12).png" alt="ZenTask AI Mascot" className="w-64 h-64 sm:w-80 sm:h-80 lg:w-[450px] lg:h-[450px] object-contain drop-shadow-2xl animate-float" />
             </div>
           </div>
         </section>
@@ -113,7 +109,7 @@ export function LandingPage() {
           <div className="flex flex-col gap-12 md:gap-24 relative">
             {/* Subtle connecting line for desktop */}
             <div className="hidden lg:block absolute top-10 bottom-10 left-1/2 -translate-x-1/2 w-[1px] bg-gradient-to-b from-transparent via-slate-200 to-transparent -z-10" />
-            
+
             <InteractiveFlashcard />
             <InteractiveArena />
             <InteractiveZaloBot />
@@ -133,9 +129,7 @@ export function LandingPage() {
               <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-8 border border-blue-400/30">
                 <Target className="w-8 h-8 text-blue-400" />
               </div>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight">
-                Sẵn sàng nâng trình tiếng Anh?
-              </h2>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight">Sẵn sàng nâng trình tiếng Anh?</h2>
               <p className="text-slate-300 font-medium text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
                 Gia nhập cộng đồng người học trên Zentask ngay hôm nay để trải nghiệm phương pháp học tập của tương lai.
               </p>
@@ -159,9 +153,7 @@ export function LandingPage() {
               Zen<span className="text-blue-600">Task</span>
             </span>
           </Link>
-          <p className="text-slate-500 font-medium mb-8 max-w-sm">
-            Nền tảng học tiếng Anh thông minh thế hệ mới, tối ưu hóa quá trình học tập bằng công nghệ.
-          </p>
+          <p className="text-slate-500 font-medium mb-8 max-w-sm">Nền tảng học tiếng Anh thông minh thế hệ mới, tối ưu hóa quá trình học tập bằng công nghệ.</p>
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 mb-12">
             <Link to="/privacy-policy" className="text-sm text-slate-500 font-bold hover:text-slate-900 transition-colors">
               Chính sách bảo mật

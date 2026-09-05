@@ -1,28 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, PenTool, Edit3, MessageSquare } from "lucide-react";
+import { ArrowLeft, Edit3 } from "lucide-react";
 import { Button } from "@/src/components/ui/Button";
-
-const WRITING_TOPICS = [
-  {
-    id: "introduce-yourself",
-    title: "Introduce Yourself",
-    description: "Viết một đoạn giới thiệu ngắn về bản thân.",
-    icon: <MessageSquare className="w-8 h-8" />,
-    color: "bg-blue-500",
-    lightColor: "bg-blue-100",
-    textColor: "text-blue-500",
-  },
-  {
-    id: "my-hobbies",
-    title: "My Hobbies",
-    description: "Kể về sở thích của bạn vào cuối tuần.",
-    icon: <PenTool className="w-8 h-8" />,
-    color: "bg-cyan-500",
-    lightColor: "bg-cyan-100",
-    textColor: "text-cyan-500",
-  }
-];
 
 export function BeginnerWriting() {
   const [dailyTasks, setDailyTasks] = useState<any[]>([]);
@@ -85,36 +64,12 @@ export function BeginnerWriting() {
             </div>
           </div>
         ) : (
-          <div className="mb-12 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center">
-            <Edit3 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-700 mb-2">Chưa có lộ trình cá nhân hóa</h2>
-            <p className="text-slate-500 mb-6">Bạn cần chọn sở thích ở trang Kỹ Năng để AI tạo bài tập cho bạn, hoặc nhấn sinh dữ liệu ngay.</p>
-            <Button onClick={() => navigate("/beginner/skills")} className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl">
-              Quay lại chọn sở thích
-            </Button>
+          <div className="bg-white rounded-3xl p-8 border-2 border-slate-100 shadow-sm text-center">
+            <Edit3 className="w-12 h-12 text-blue-300 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-slate-700 mb-2">Chưa có bài luyện viết</h3>
+            <p className="text-slate-500">Chúng tôi dựa trên những lỗi sai ngữ pháp của bạn để đưa ra các bài luyện viết phù hợp nhất. Hãy tiếp tục học từ vựng và ngữ pháp nhé!</p>
           </div>
         )}
-
-        <h2 className="text-xl font-bold text-slate-800 mb-6">Danh sách kỹ năng (Mẫu tham khảo)</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {WRITING_TOPICS.map((topic) => (
-            <div
-              key={topic.id}
-              onClick={() => navigate(`/beginner/writing/${topic.id}`)}
-              className="group bg-slate-50 rounded-2xl p-6 border-2 border-slate-100 hover:border-blue-300 hover:shadow-lg transition-all cursor-pointer flex flex-col"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${topic.lightColor} ${topic.textColor}`}>
-                  {topic.icon}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{topic.title}</h3>
-                </div>
-              </div>
-              <p className="text-slate-600 flex-1 text-sm">{topic.description}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

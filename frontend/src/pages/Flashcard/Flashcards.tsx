@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal, Trash2, Folder as FolderIcon, Edit2, Globe2, Lock, Crown, Copy, Search } from "lucide-react";
+import { Plus, MoreVertical, BookOpen, Clock, Play, Trophy, Star, Medal, Trash2, Folder as FolderIcon, Edit2, Globe2, Lock, Crown, Copy, Search, Filter } from "lucide-react";
 import { cn, RANK_CONFIG, TIER_NAMES, LANG_MAP } from "../../lib/utils";
 
 import { RankCard } from "../../components/ui/RankCard";
@@ -72,8 +72,9 @@ export function Flashcards() {
     });
   };
   const [searchQuery, setSearchQuery] = useState("");
+  const [showCategories, setShowCategories] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState<string>("all");
-  const activePublicCategoryName = searchParams.get("publicCategory") || "all";
+  const [activeBuiltinCategoryName, setActiveBuiltinCategoryName] = useState<string>("all");
   const setActivePublicCategoryName = (category: string) => {
     setSearchParams((prev) => {
       prev.set("publicCategory", category);
@@ -81,13 +82,8 @@ export function Flashcards() {
     });
   };
 
-  const activeBuiltinCategoryName = searchParams.get("builtinCategory") || "all";
-  const setActiveBuiltinCategoryName = (category: string) => {
-    setSearchParams((prev) => {
-      prev.set("builtinCategory", category);
-      return prev;
-    });
-  };
+  const activePublicCategoryName = searchParams.get("publicCategory") || "all";
+
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
   const [newCategoryName, setNewCategoryName] = useState("");
 
@@ -467,34 +463,44 @@ export function Flashcards() {
       </div>
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="bg-slate-100/80 backdrop-blur rounded-[2rem] p-1.5 flex gap-1 w-full sm:w-max">
+        <div className="bg-slate-100/80 backdrop-blur rounded-[2rem] p-1.5 flex gap-1 w-full sm:w-max overflow-x-auto hide-scrollbar shrink-0">
           <Button
             onClick={() => setActiveTab("mine")}
-            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "mine" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-[1.5rem] font-bold text-sm transition-all whitespace-nowrap ${activeTab === "mine" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50/50"}`}
           >
-            Của tôi
+            <BookOpen className="w-4 h-4" /> Của tôi
           </Button>
           <Button
             onClick={() => setActiveTab("builtin")}
-            className={` px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "builtin" ? "bg-indigo-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-[1.5rem] font-bold text-sm transition-all whitespace-nowrap ${activeTab === "builtin" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50/50"}`}
           >
-            Có sẵn
+            <Star className="w-4 h-4" /> Có sẵn
           </Button>
           <Button
             onClick={() => setActiveTab("public")}
-            className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl font-bold transition-all ${activeTab === "public" ? "bg-emerald-600 text-white shadow-sm" : "text-gray-600 hover:bg-gray-50"}`}
+            className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-[1.5rem] font-bold text-sm transition-all whitespace-nowrap ${activeTab === "public" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50/50"}`}
           >
-            Công khai
+            <Globe2 className="w-4 h-4" /> Công khai
           </Button>
         </div>
-        <div className="relative w-full lg:max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={activeTab === "public" ? "Tìm bộ thẻ công khai..." : activeTab === "builtin" ? "Tìm bộ thẻ có sẵn IELTS/TOEIC..." : "Tìm bộ thẻ của tôi..."}
-            className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-12 pr-4 text-sm font-semibold text-gray-700 shadow-sm outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-          />
+        
+        <div className="flex items-center gap-2 w-full lg:w-auto mt-4 lg:mt-0">
+          <Button
+            onClick={() => setShowCategories(!showCategories)}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-bold transition-all border shrink-0 ${showCategories ? "bg-blue-50 border-blue-200 text-blue-600" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+          >
+            <Filter className="w-4 h-4" />
+            <span className="hidden sm:inline">Đề mục</span>
+          </Button>
+          <div className="relative flex-1 lg:w-72">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={activeTab === "public" ? "Tìm bộ thẻ công khai..." : activeTab === "builtin" ? "Tìm bộ thẻ có sẵn..." : "Tìm bộ thẻ của tôi..."}
+              className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+            />
+          </div>
         </div>
       </div>
 
@@ -507,41 +513,46 @@ export function Flashcards() {
             <p className="mt-1 text-sm font-medium text-indigo-700/80">Học liệu IELTS và TOEIC được tách riêng khỏi bộ thẻ người dùng tạo. Đây là dữ liệu hệ thống nên không thể xóa.</p>
           </div>
 
-          <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
-            <div className="mb-3">
-              <h3 className="text-sm font-extrabold uppercase tracking-wide text-gray-700">Đề mục có sẵn</h3>
-              <p className="text-xs font-medium text-gray-400">Chọn IELTS hoặc TOEIC để học nhanh theo mục tiêu.</p>
+          {showCategories && (
+            <div className="rounded-[2rem] border-2 border-slate-100 bg-white p-5 shadow-sm mt-4 animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="mb-4">
+                <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-700">Đề mục bộ thẻ có sẵn</h3>
+                <p className="text-xs font-medium text-slate-400 mt-1">Lọc nhanh các bộ thẻ có sẵn của hệ thống.</p>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                <Button
+                  onClick={() => setActiveBuiltinCategoryName("all")}
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-extrabold transition-all ${activeBuiltinCategoryName === "all" ? "bg-indigo-600 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                >
+                  Tất cả
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeBuiltinCategoryName === "all" ? "bg-white/20 text-white" : "bg-white text-slate-500"}`}>{builtinSets.length}</span>
+                </Button>
+                {builtinCategoryOptions.map((category) => {
+                  const key = category.name.toLowerCase();
+                  return (
+                    <Button
+                      key={key}
+                      onClick={() => setActiveBuiltinCategoryName(key)}
+                      className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-extrabold transition-all ${activeBuiltinCategoryName === key ? `${category.color} text-white shadow-sm` : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                    >
+                      {category.name}
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeBuiltinCategoryName === key ? "bg-white/20 text-white" : "bg-white text-slate-500"}`}>{category.count}</span>
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              <Button
-                onClick={() => setActiveBuiltinCategoryName("all")}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activeBuiltinCategoryName === "all" ? "bg-indigo-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-              >
-                Tất cả
-                <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeBuiltinCategoryName === "all" ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{builtinSets.length}</span>
-              </Button>
-              {builtinCategoryOptions.map((category) => {
-                const key = category.name.toLowerCase();
-                return (
-                  <Button
-                    key={key}
-                    onClick={() => setActiveBuiltinCategoryName(key)}
-                    className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activeBuiltinCategoryName === key ? `${category.color} text-white shadow-sm` : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-                  >
-                    {category.name}
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeBuiltinCategoryName === key ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{category.count}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
+          )}
 
           {displayedBuiltinSets.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-gray-300 bg-white p-12 text-center text-gray-500 font-medium">Không tìm thấy bộ thẻ có sẵn phù hợp.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayedBuiltinSets.map((set: any) => (
-                <div key={set.id} className="bg-white rounded-3xl p-6 border border-indigo-100 shadow-sm hover:shadow-md transition-shadow flex flex-col relative overflow-hidden">
+                <div
+                  key={set.id}
+                  className="bg-white rounded-[2rem] p-6 border-2 border-indigo-100/50 shadow-sm hover:shadow-xl hover:-translate-y-2 hover:border-indigo-200 transition-all duration-300 flex flex-col relative overflow-hidden group"
+                >
                   <div className={`w-12 h-12 rounded-2xl ${set.color || "bg-indigo-500"} flex items-center justify-center text-white shadow-sm mb-4`}>
                     <BookOpen className="w-6 h-6" />
                   </div>
@@ -579,36 +590,38 @@ export function Flashcards() {
             <p className="mt-1 text-sm font-medium text-emerald-700/80">Tất cả bộ thẻ được người dùng đặt công khai sẽ xuất hiện tại đây.</p>
           </div>
 
-          <div className="rounded-3xl border border-gray-100 bg-white p-4 shadow-sm">
-            <div className="mb-3">
-              <h3 className="text-sm font-extrabold uppercase tracking-wide text-gray-700">Đề mục công khai</h3>
-              <p className="text-xs font-medium text-gray-400">Lọc nhanh các bộ thẻ công khai theo IELTS, TOEIC, Giao tiếp hoặc đề mục người chia sẻ đặt.</p>
+          {showCategories && (
+            <div className="rounded-[2rem] border-2 border-slate-100 bg-white p-5 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="mb-4">
+                <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-700">Đề mục công khai</h3>
+                <p className="text-xs font-medium text-slate-400 mt-1">Lọc nhanh các bộ thẻ công khai theo IELTS, TOEIC, Giao tiếp hoặc đề mục người chia sẻ đặt.</p>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                <Button
+                  onClick={() => setActivePublicCategoryName("all")}
+                  className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-extrabold transition-all ${activePublicCategoryName === "all" ? "bg-emerald-600 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                >
+                  Tất cả
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${activePublicCategoryName === "all" ? "bg-white/20 text-white" : "bg-white text-slate-500"}`}>
+                    {publicSets.filter((set: any) => set.isPublic).length}
+                  </span>
+                </Button>
+                {publicCategoryOptions.map((category) => {
+                  const key = category.name.toLowerCase();
+                  return (
+                    <Button
+                      key={key}
+                      onClick={() => setActivePublicCategoryName(key)}
+                      className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-extrabold transition-all ${activePublicCategoryName === key ? "bg-emerald-600 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                    >
+                      {category.name}
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] ${activePublicCategoryName === key ? "bg-white/20 text-white" : "bg-white text-slate-500"}`}>{category.count}</span>
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              <Button
-                onClick={() => setActivePublicCategoryName("all")}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activePublicCategoryName === "all" ? "bg-emerald-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-              >
-                Tất cả
-                <span className={`rounded-full px-2 py-0.5 text-[11px] ${activePublicCategoryName === "all" ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>
-                  {publicSets.filter((set: any) => set.isPublic).length}
-                </span>
-              </Button>
-              {publicCategoryOptions.map((category) => {
-                const key = category.name.toLowerCase();
-                return (
-                  <Button
-                    key={key}
-                    onClick={() => setActivePublicCategoryName(key)}
-                    className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-extrabold transition-all ${activePublicCategoryName === key ? "bg-emerald-600 text-white shadow-sm" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-                  >
-                    {category.name}
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] ${activePublicCategoryName === key ? "bg-white/20 text-white" : "bg-white text-gray-500"}`}>{category.count}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
+          )}
 
           {loading && displayedPublicSets.length === 0 ? (
             <div className="flex justify-center p-12">
@@ -621,7 +634,10 @@ export function Flashcards() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayedPublicSets.map((set: any) => (
-                <div key={set.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col relative overflow-hidden">
+                <div
+                  key={set.id}
+                  className="bg-white rounded-[2rem] p-6 border-2 border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-2 hover:border-slate-200 transition-all duration-300 flex flex-col relative overflow-hidden group"
+                >
                   <div className={`w-12 h-12 rounded-2xl ${set.color || "bg-blue-500"} flex items-center justify-center text-white shadow-sm mb-4`}>
                     <BookOpen className="w-6 h-6" />
                   </div>
@@ -652,55 +668,63 @@ export function Flashcards() {
         <>
           {activeTab === "mine" && user && (
             <div className="mb-6">
-              <div className="flex flex-wrap items-center gap-2 pb-2">
-                <Button
-                  onClick={() => setActiveCategoryId("all")}
-                  className={`inline-flex shrink-0 items-center gap-2 rounded-full px-5 py-2 text-sm font-bold transition-all ${activeCategoryId === "all" ? "bg-slate-800 text-white shadow-sm" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                >
-                  Tất cả
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>{sets.length}</span>
-                </Button>
-                {categories.map((category: any) => (
-                  <div key={category.id} className="group relative flex items-center">
+            {showCategories && (
+              <div className="animate-in fade-in slide-in-from-top-4 duration-300 rounded-[2rem] border-2 border-slate-100 bg-white p-5 shadow-sm mt-4">
+                <div className="mb-4">
+                  <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-700">Đề mục của tôi</h3>
+                  <p className="text-xs font-medium text-slate-400 mt-1">Lọc hoặc thêm mới các đề mục quản lý bộ thẻ.</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    onClick={() => setActiveCategoryId("all")}
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-bold transition-all ${activeCategoryId === "all" ? "bg-slate-800 text-white shadow-sm" : "bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200"}`}
+                  >
+                    Tất cả
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === "all" ? "bg-white/20 text-white" : "bg-white text-slate-500"}`}>{sets.length}</span>
+                  </Button>
+                  {categories.map((category: any) => (
+                    <div key={category.id} className="group relative flex items-center">
+                      <Button
+                        onClick={() => setActiveCategoryId(category.id)}
+                        className={`inline-flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-bold transition-all ${activeCategoryId === category.id ? `${category.color || "bg-blue-600"} text-white shadow-sm border-none` : "bg-white border-2 border-slate-100 text-slate-600 hover:border-slate-200"}`}
+                      >
+                        <span>{category.name}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === category.id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
+                          {getCategoryCount(category.id)}
+                        </span>
+                      </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteCategory(category.id);
+                        }}
+                        title="Xóa đề mục"
+                        className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-500 opacity-0 transition-all hover:bg-red-500 hover:text-white group-hover:opacity-100 scale-90 group-hover:scale-100 shadow-sm"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
+
+                  {/* Inline Add Category */}
+                  <div className="flex items-center ml-2 border-2 border-slate-100 rounded-2xl bg-white px-3 py-1.5 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+                    <Input
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleCreateCategory()}
+                      placeholder="Tên đề mục mới..."
+                      className="w-36 border-none bg-transparent px-2 py-1 text-sm font-medium outline-none shadow-none focus:ring-0"
+                    />
                     <Button
-                      onClick={() => setActiveCategoryId(category.id)}
-                      className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-bold transition-all ${activeCategoryId === category.id ? `${category.color || "bg-blue-600"} text-white shadow-sm` : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                      onClick={handleCreateCategory}
+                      className="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 hover:bg-blue-600 hover:text-white transition-colors shrink-0"
                     >
-                      <span>{category.name}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[11px] ${activeCategoryId === category.id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
-                        {getCategoryCount(category.id)}
-                      </span>
-                    </Button>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteCategory(category.id);
-                      }}
-                      title="Xóa đề mục"
-                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-red-500 opacity-0 transition-all hover:bg-red-500 hover:text-white group-hover:opacity-100 scale-90 group-hover:scale-100"
-                    >
-                      <Trash2 className="w-3 h-3" />
+                      <Plus className="w-4 h-4" />
                     </Button>
                   </div>
-                ))}
-
-                {/* Inline Add Category */}
-                <div className="flex items-center ml-2 border border-slate-200 rounded-full bg-white px-2 py-1 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-                  <Input
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleCreateCategory()}
-                    placeholder="Tên đề mục mới..."
-                    className="w-32 border-none bg-transparent px-2 py-1 text-sm font-medium outline-none shadow-none focus:ring-0"
-                  />
-                  <Button
-                    onClick={handleCreateCategory}
-                    className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors shrink-0"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
                 </div>
               </div>
+            )}
             </div>
           )}
           <DndContext sensors={sensors} collisionDetection={collisionDetectionStrategy} onDragStart={handleDragStart} onDragMove={handleDragMove} onDragEnd={handleDragEnd}>

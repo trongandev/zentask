@@ -688,11 +688,13 @@ router.get(
     const user = await User.findById(uid).lean();
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const [beginnerProgressCount, flashcardCount, quizCount, langProgress] = await Promise.all([
+    const [beginnerProgressCount, flashcardCount, quizCount, langProgress, flashcardSets, quizHistory] = await Promise.all([
       BeginnerProgress.countDocuments({ $or: [{ uid }, { userId: uid }] }),
       Flashcard.countDocuments({ userId: uid }),
       QuizResult.countDocuments({ uid }),
-      UserLanguageProgress.findOne({ uid, language: user.targetLanguage || "en" }).lean()
+      UserLanguageProgress.findOne({ uid, language: user.targetLanguage || "en" }).lean(),
+      FlashcardSet.find({ userId: uid }).sort({ createdAt: -1 }).lean(),
+      QuizResult.find({ uid }).populate("quizId", "title difficulty").sort({ createdAt: -1 }).lean()
     ]);
 
     res.json({
@@ -702,7 +704,9 @@ router.get(
         totalFlashcards: flashcardCount,
         totalQuizzesTaken: quizCount,
       },
-      rankProgress: langProgress || { rankId: 1, tier: 3 }
+      rankProgress: langProgress || { rankId: 1, tier: 3 },
+      flashcardSets: flashcardSets || [],
+      quizHistory: quizHistory || []
     });
   })
 );
@@ -716,6 +720,18 @@ router.put(
     if (!user) return res.status(404).json({ error: "User not found" });
 
     switch (action) {
+      case "UPDATE_VIP":
+        const { isVip, vipUntil, subscription } = payload;
+        await User.findByIdAndUpdate(uid, {
+          $set: {
+            isVip: Boolean(isVip),
+            vipUntil: vipUntil ? new Date(vipUntil) : null,
+            ...(subscription && { subscription })
+          }
+        });
+        res.json({ status: "success", message: "Đã cập nhật trạng thái VIP" });
+        break;
+
       case "UPDATE_RANK":
         // Update user's rank/tier in UserLanguageProgress and User
         const targetLang = user.targetLanguage || "en";

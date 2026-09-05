@@ -3,7 +3,7 @@ import { Modal } from "@/src/components/ui/Modal";
 import { Button } from "@/src/components/ui/Button";
 import { adminService } from "@/src/services/adminService";
 import toastService from "@/src/services/toastService";
-import { User, Activity, BrainCircuit, Library, Award, RefreshCw, AlertTriangle } from "lucide-react";
+import { User, Activity, BrainCircuit, Library, Award, RefreshCw, AlertTriangle, Crown } from "lucide-react";
 import { UserAvatar } from "@/src/components/ui/UserAvatar";
 import { UserLevelBadge } from "@/src/components/ui/UserLevelBadge";
 import { getRankName } from "@/src/config/rankTopicConfig";
@@ -99,6 +99,9 @@ export function AdminUserDetailsModal({ isOpen, onClose, uid }: AdminUserDetails
                 <Button variant={activeTab === "quiz" ? "default" : "outline"} size="default" className="justify-start gap-3 w-full" onClick={() => setActiveTab("quiz")}>
                   <BrainCircuit className="w-5 h-5" /> Quizzes
                 </Button>
+                <Button variant={activeTab === "vip" ? "default" : "outline"} size="default" className="justify-start gap-3 w-full" onClick={() => setActiveTab("vip")}>
+                  <Crown className="w-5 h-5" /> Quản lý VIP
+                </Button>
               </div>
 
               {/* Main Panel */}
@@ -184,6 +187,24 @@ export function AdminUserDetailsModal({ isOpen, onClose, uid }: AdminUserDetails
                         Xoá tất cả Flashcards
                       </Button>
                     </div>
+
+                    {data.flashcardSets && data.flashcardSets.length > 0 && (
+                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                        <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 font-semibold text-slate-700">
+                          Danh sách bộ Flashcard
+                        </div>
+                        <ul className="divide-y divide-slate-100 max-h-60 overflow-y-auto">
+                          {data.flashcardSets.map((set: any) => (
+                            <li key={set._id} className="p-4 flex justify-between items-center hover:bg-slate-50">
+                              <div>
+                                <h5 className="font-semibold text-slate-800">{set.title}</h5>
+                                <p className="text-xs text-slate-500">{set.cardCount || 0} thẻ • {new Date(set.createdAt).toLocaleDateString("vi-VN")}</p>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -207,6 +228,129 @@ export function AdminUserDetailsModal({ isOpen, onClose, uid }: AdminUserDetails
                         Xoá Lịch sử Quiz
                       </Button>
                     </div>
+
+                    {data.quizHistory && data.quizHistory.length > 0 && (
+                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                        <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 font-semibold text-slate-700">
+                          Lịch sử làm Quiz
+                        </div>
+                        <ul className="divide-y divide-slate-100 max-h-60 overflow-y-auto">
+                          {data.quizHistory.map((history: any) => (
+                            <li key={history._id} className="p-4 flex justify-between items-center hover:bg-slate-50">
+                              <div>
+                                <h5 className="font-semibold text-slate-800">{history.quizId?.title || "Quiz ẩn/xóa"}</h5>
+                                <p className="text-xs text-slate-500">
+                                  {new Date(history.createdAt).toLocaleDateString("vi-VN")} • Độ khó: <span className="uppercase">{history.quizId?.difficulty || "N/A"}</span>
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-bold text-slate-800">{history.score} điểm</span>
+                                <p className="text-xs text-slate-500">{history.totalCorrect}/{history.totalQuestions} câu</p>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === "vip" && (
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800 mb-2">Trạng thái VIP</h3>
+                      <p className="text-sm text-slate-500 mb-4">Quản lý đặc quyền VIP cho user này.</p>
+                    </div>
+
+                    <div className="flex items-center gap-4 bg-amber-50 p-4 rounded-xl border border-amber-100">
+                      <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
+                        <Crown className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-800">Trạng thái hiện tại</h4>
+                        {data.user?.isVip ? (
+                          <p className="text-amber-600 font-semibold">VIP {data.user?.vipUntil ? `đến ${new Date(data.user.vipUntil).toLocaleDateString("vi-VN")}` : "(Trọn đời)"}</p>
+                        ) : (
+                          <p className="text-slate-500 font-medium">Chưa đăng ký VIP</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      <Button
+                        variant="outline"
+                        size="default"
+                        onClick={() => {
+                          const date = new Date();
+                          date.setMonth(date.getMonth() + 1);
+                          handleManageAction("UPDATE_VIP", { isVip: true, vipUntil: date }, "Gia hạn VIP 1 tháng?");
+                        }}
+                      >
+                        +1 Tháng
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="default"
+                        onClick={() => {
+                          const date = new Date();
+                          date.setMonth(date.getMonth() + 3);
+                          handleManageAction("UPDATE_VIP", { isVip: true, vipUntil: date }, "Gia hạn VIP 3 tháng?");
+                        }}
+                      >
+                        +3 Tháng
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="default"
+                        onClick={() => {
+                          const date = new Date();
+                          date.setMonth(date.getMonth() + 6);
+                          handleManageAction("UPDATE_VIP", { isVip: true, vipUntil: date }, "Gia hạn VIP 6 tháng?");
+                        }}
+                      >
+                        +6 Tháng
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="default"
+                        onClick={() => {
+                          const date = new Date();
+                          date.setFullYear(date.getFullYear() + 1);
+                          handleManageAction("UPDATE_VIP", { isVip: true, vipUntil: date }, "Gia hạn VIP 1 năm?");
+                        }}
+                      >
+                        +1 Năm
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="default"
+                        onClick={() => {
+                          const date = new Date();
+                          date.setFullYear(date.getFullYear() + 2);
+                          handleManageAction("UPDATE_VIP", { isVip: true, vipUntil: date }, "Gia hạn VIP 2 năm?");
+                        }}
+                      >
+                        +2 Năm
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="default"
+                        className="border-amber-500 text-amber-600 hover:bg-amber-50"
+                        onClick={() => {
+                          handleManageAction("UPDATE_VIP", { isVip: true, vipUntil: null }, "Cấp VIP trọn đời?");
+                        }}
+                      >
+                        Trọn đời
+                      </Button>
+                    </div>
+
+                    {data.user?.isVip && (
+                      <div className="pt-4 border-t border-slate-100">
+                        <Button variant="destructive" size="default" onClick={() => handleManageAction("UPDATE_VIP", { isVip: false, vipUntil: null }, "Huỷ VIP của user này?")}>
+                          Huỷ VIP
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

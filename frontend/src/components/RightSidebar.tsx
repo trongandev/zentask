@@ -220,13 +220,13 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
 
         {/* Guest CTA Card */}
         {!user && isOpen && (
-          <div className="bg-white rounded-2xl border border-blue-100 p-6 shadow-sm flex flex-col items-center text-center bg-blue-50/30">
-            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+          <div className="bg-white rounded-3xl border-2 border-blue-100 p-6 shadow-sm flex flex-col items-center text-center bg-blue-50/30">
+            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-3 shadow-sm">
               <Target className="w-8 h-8 text-blue-600" />
             </div>
-            <h3 className="font-bold text-gray-900 mb-2">Trải nghiệm đầy đủ</h3>
-            <p className="text-xs text-gray-500 mb-4 px-2">Đăng nhập để nhận điểm danh hàng ngày, kết nối bạn bè và làm nhiệm vụ nhận XP!</p>
-            <Button onClick={() => (window.location.href = "/auth")} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition-colors text-sm">
+            <h3 className="font-black text-slate-800 mb-2">Trải nghiệm đầy đủ</h3>
+            <p className="text-xs text-slate-500 mb-4 px-2 font-medium">Đăng nhập để nhận điểm danh hàng ngày, kết nối bạn bè và làm nhiệm vụ nhận XP!</p>
+            <Button onClick={() => (window.location.href = "/auth")} variant="default" size="default" className="w-full">
               Đăng nhập ngay
             </Button>
           </div>
@@ -236,10 +236,10 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
         {user &&
           !isCheckedInToday &&
           (isOpen ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+            <div className="bg-white rounded-3xl border-2 border-slate-100 p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <Flame className="w-5 h-5 text-orange-500" />
-                <h3 className="font-bold text-gray-900">Chuỗi ngày học tập</h3>
+                <h3 className="font-black text-slate-800">Chuỗi ngày học tập</h3>
               </div>
 
               <div className="flex items-center gap-4 mb-6">
@@ -248,9 +248,9 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                 </div>
                 <div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-gray-900 tracking-tight">{user?.streak || 0}</span>
-                    <span className="text-gray-900 font-bold">ngày</span>
-                    <span className="text-gray-500 font-medium ml-1">liên tiếp</span>
+                    <span className="text-3xl font-black text-slate-800 tracking-tight">{user?.streak || 0}</span>
+                    <span className="text-slate-800 font-bold">ngày</span>
+                    <span className="text-slate-500 font-medium ml-1">liên tiếp</span>
                   </div>
                   <p className="text-xs text-gray-500 font-medium">Tuyệt vời! Hãy duy trì nhé!</p>
                 </div>
@@ -272,9 +272,10 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                       }
                     }}
                     disabled={isCheckedInToday || checkingIn}
+                    variant={isCheckedInToday ? "ghost" : "custom"}
                     className={cn(
-                      "w-full py-2.5 rounded-xl font-bold text-sm mb-4 transition-all flex items-center justify-center gap-2",
-                      isCheckedInToday ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600 text-white shadow-sm active:scale-95",
+                      "w-full h-12 rounded-2xl font-black text-sm mb-4 flex items-center justify-center gap-2 transition-all",
+                      !isCheckedInToday && "bg-orange-500 hover:bg-orange-600 text-white border-b-4 border-orange-700 active:border-b-0 active:border-t-4 border-t-transparent hover:-translate-y-1 active:translate-y-1 shadow-sm"
                     )}
                   >
                     {checkingIn ? "Đang điểm danh..." : isCheckedInToday ? "Đã điểm danh hôm nay" : "Điểm danh ngay"}
@@ -298,7 +299,7 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                 ))}
               </div>
 
-              <div className="bg-orange-50/50 rounded-xl p-3 flex items-center justify-between border border-orange-100 cursor-pointer hover:bg-orange-50 transition-colors">
+              <div className="bg-orange-50/50 rounded-2xl p-4 flex items-center justify-between border-2 border-orange-100 cursor-pointer hover:bg-orange-50 hover:-translate-y-0.5 transition-all">
                 <div className="flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-orange-500" />
                   <span className="text-sm font-medium text-orange-800">
@@ -323,11 +324,11 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
 
         {/* Online Friends */}
         {user && isOpen ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+          <div className="bg-white rounded-3xl border-2 border-slate-100 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-green-500" />
-                <h3 className="font-bold text-gray-900">Bạn bè trực tuyến</h3>
+                <h3 className="font-black text-slate-800">Bạn bè trực tuyến</h3>
               </div>
               <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{onlineFriends.length}</span>
             </div>
@@ -337,10 +338,10 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
                 <p className="text-xs text-gray-500 text-center py-2">Không có ai</p>
               ) : (
                 onlineFriends.map((friend) => (
-                  <div key={friend.friendId} onClick={() => handleOpenChat(friend)} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors">
+                  <div key={friend.friendId} onClick={() => handleOpenChat(friend)} className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-2xl cursor-pointer transition-colors border border-transparent hover:border-slate-100">
                     <div className="relative">
-                      <img src={friend.photoURL || "https://ui-avatars.com/api/?name=User"} className="w-8 h-8 rounded-full bg-white object-cover border border-gray-200" />
-                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
+                      <img src={friend.photoURL || "https://ui-avatars.com/api/?name=User"} className="w-10 h-10 rounded-full bg-white object-cover border-2 border-slate-200" />
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                     </div>
                     <span className="text-sm font-bold text-gray-800 truncate">{friend.displayName}</span>
                     {unreadCounts[friend.friendId] > 0 && <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{unreadCounts[friend.friendId]}</span>}
@@ -369,11 +370,11 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
 
         {/* Daily Tasks */}
         {user && isOpen ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+          <div className="bg-white rounded-3xl border-2 border-slate-100 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
                 <Target className="w-5 h-5 text-blue-600" />
-                <h3 className="font-bold text-gray-900">Nhiệm vụ</h3>
+                <h3 className="font-black text-slate-800">Nhiệm vụ</h3>
               </div>
               <div className="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-bold font-mono">{timeLeft}</div>
             </div>
@@ -504,11 +505,11 @@ export function RightSidebar({ isOpen = true, onClose, onOpen }: RightSidebarPro
 
         {/* Leaderboard */}
         {isOpen ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+          <div className="bg-white rounded-3xl border-2 border-slate-100 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-blue-600" />
-                <h3 className="font-bold text-gray-900">B. XH</h3>
+                <h3 className="font-black text-slate-800">B. XH</h3>
               </div>
               <Link to="/leaderboard" className="text-xs font-semibold text-blue-600 flex items-center gap-0.5 hover:text-blue-700">
                 Xem tất cả

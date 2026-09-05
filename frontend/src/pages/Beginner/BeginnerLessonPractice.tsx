@@ -21,6 +21,14 @@ import { Button } from "@/src/components/ui/Button";
 
 type RoundType = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
+interface WordAnalytics {
+  wordId: string;
+  word: string;
+  meaning: string;
+  mistakesCount: number;
+  totalTimeMs: number;
+}
+
 export function BeginnerLessonPractice() {
   const { topicId, lessonIndex } = useParams();
   const navigate = useNavigate();
@@ -41,6 +49,15 @@ export function BeginnerLessonPractice() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Tracking and Challenge Mode
+  const [challengeMode, setChallengeMode] = useState<{ active: boolean; round: RoundType }>({ active: false, round: 4 });
+  const [wordStartTime, setWordStartTime] = useState(Date.now());
+  const [analytics, setAnalytics] = useState<Record<string, WordAnalytics>>({});
+
+  useEffect(() => {
+    setWordStartTime(Date.now());
+  }, [currentWordIndex, currentRound, challengeMode.active, isReviewPhase]);
 
   useEffect(() => {
     const lessonId = `${topicId}_${lessonIndex}`;
@@ -64,13 +81,28 @@ export function BeginnerLessonPractice() {
 
     const fetchLessonData = async () => {
       try {
-        const res = await axiosInstance.get(`/api/beginner/lesson/${topicId}`);
+        let res;
+        if (topicId === "roadmap") {
+          // Lấy dữ liệu bài học từ AI Roadmap
+          res = await axiosInstance.get(`/api/roadmap/lesson/${lessonIndex}`);
+        } else {
+          // Bài học mặc định
+          res = await axiosInstance.get(`/api/beginner/lesson/${topicId}`);
+        }
+
         if (res.status === 200) {
           const set = res.data;
           if (set && set.words) {
-            const idx = Number(lessonIndex) || 0;
-            const startIndex = idx * 5;
-            const lessonWords = set.words.slice(startIndex, startIndex + 5);
+            let lessonWords = [];
+            if (topicId === "roadmap") {
+              // Roadmap trả về đúng words cho ngày đó
+              lessonWords = set.words;
+            } else {
+              // Standard lesson thì lấy 5 từ một
+              const idx = Number(lessonIndex) || 0;
+              const startIndex = idx * 5;
+              lessonWords = set.words.slice(startIndex, startIndex + 5);
+            }
 
             if (lessonWords.length === 0) {
               navigate("/beginner");
@@ -134,7 +166,7 @@ export function BeginnerLessonPractice() {
   }, [words]);
 
   const currentWord = isReviewPhase && mistakes.length > 0 ? mistakes[0].word : activeWords[currentWordIndex];
-  const activeRound = isReviewPhase && mistakes.length > 0 ? mistakes[0].round : currentRound;
+  const activeRound = challengeMode.active ? challengeMode.round : isReviewPhase && mistakes.length > 0 ? mistakes[0].round : currentRound;
 
   useEffect(() => {
     if (currentWord) {
@@ -144,6 +176,41 @@ export function BeginnerLessonPractice() {
 
   // Helper to move to next word or next round
   const proceedToNext = (isSkipped: boolean) => {
+    if (challengeMode.active) {
+      if (isCorrect === true) {
+        setKnownWordIds((prev) => [...prev, currentWord.id]);
+        toastService.success("Giỏi lắm! Đã đánh dấu từ này.");
+      } else {
+        toastService.error("Có vẻ bạn chưa thuộc từ này, hãy tiếp tục học nhé!");
+      }
+      setChallengeMode({ active: false, round: 4 });
+      setIsCorrect(null);
+      setSelectedAnswer(null);
+      setInputText("");
+
+      let willShrink = isCorrect === true;
+      
+      // Nếu mảng thu hẹp (willShrink), phần tử tiếp theo sẽ trượt về vị trí currentWordIndex.
+      // Do đó ta không tăng currentWordIndex.
+      const nextIndex = currentWordIndex + (willShrink ? 0 : 1);
+      const nextLength = activeWords.length - (willShrink ? 1 : 0);
+
+      // Move to next word in round 1
+      if (nextIndex < nextLength) {
+        setCurrentWordIndex(nextIndex);
+      } else {
+        const currentIndex = validRounds.indexOf(currentRound);
+        if (currentIndex !== -1 && currentIndex + 1 < validRounds.length) {
+          setCurrentRound(validRounds[currentIndex + 1]);
+          setCurrentWordIndex(0);
+          setWords((prev) => [...prev].sort(() => Math.random() - 0.5));
+        } else {
+          finishLesson();
+        }
+      }
+      return;
+    }
+
     let newMistakes = [...mistakes];
 
     if (!isSkipped) {
@@ -209,8 +276,22 @@ export function BeginnerLessonPractice() {
   const finishLesson = async () => {
     setIsSubmitting(true);
     try {
+      // Gửi Analytics API
+      const stats = Object.values(analytics);
+      if (stats.length > 0) {
+        await axiosInstance.post("/api/user/word-performance", { analytics: stats }).catch((err) => {
+          console.error("Failed to save word analytics", err);
+        });
+      }
+
       const lessonId = `${topicId}_${lessonIndex}`;
       await beginnerService.saveLessonProgress(lessonId);
+
+      // Update roadmap completion if it's an AI Roadmap lesson
+      if (topicId === "roadmap") {
+        await axiosInstance.post(`/api/roadmap/complete/${lessonIndex}`);
+      }
+
       // Delete progress from localStorage after success
       localStorage.removeItem(`beginner_lesson_progress_${lessonId}`);
       toastService.success("Chúc mừng bạn đã hoàn thành bài học! + 10XP");
@@ -224,12 +305,12 @@ export function BeginnerLessonPractice() {
 
   const handleKnowWord = () => {
     if (currentWord) {
-      setKnownWordIds((prev) => [...prev, currentWord.id]);
-      if (activeWords.length <= 1) {
-        // If they know all words, finish lesson early?
-        // For now just move to next step, it will auto-calculate
-      }
-      nextStep();
+      const testRound = Math.random() > 0.5 ? 4 : 5;
+      setChallengeMode({ active: true, round: testRound as RoundType });
+      setIsCorrect(null);
+      setSelectedAnswer(null);
+      setInputText("");
+      toastService.info("Hãy chứng minh bạn đã biết từ này!");
     }
   };
 
@@ -241,11 +322,15 @@ export function BeginnerLessonPractice() {
     }
     return currentWord.term;
   };
+  console.log(currentWord);
 
   if (!currentWord && activeWords.length > 0) {
+    // Tự động fix lỗi out of bounds (nếu cache bị kẹt)
+    if (currentWordIndex >= activeWords.length) {
+      setCurrentWordIndex(0);
+    }
     return <div className="p-8 text-center">Loading...</div>;
   }
-
   if (activeWords.length === 0 && words.length > 0) {
     // Knew all words
     return (
@@ -261,7 +346,24 @@ export function BeginnerLessonPractice() {
   const checkAnswer = (correct: boolean) => {
     if (isCorrect !== null) return;
     setIsCorrect(correct);
+
     if (currentWord) {
+      const timeTaken = Date.now() - wordStartTime;
+      setAnalytics((prev) => {
+        const current = prev[currentWord.id] || {
+          wordId: currentWord.id,
+          word: currentWord.term,
+          meaning: currentWord.translation || currentWord.meaning || "",
+          mistakesCount: 0,
+          totalTimeMs: 0,
+        };
+        current.totalTimeMs += timeTaken;
+        if (!correct) {
+          current.mistakesCount += 1;
+        }
+        return { ...prev, [currentWord.id]: current };
+      });
+
       let targetText = currentWord.term;
       if (activeRound === 7) {
         targetText = (currentWord.examples?.[0]?.en || currentWord.example?.[0]?.en || currentWord.term).trim();
@@ -269,6 +371,7 @@ export function BeginnerLessonPractice() {
       playAudio(targetText, undefined, correct ? "correct" : "wrong");
     }
   };
+  console.log(currentWord);
   return (
     <div className="max-w-xl mx-auto w-full pt-8 px-4 flex flex-col min-h-[80vh]">
       {/* Progress Bar */}
@@ -284,7 +387,9 @@ export function BeginnerLessonPractice() {
             }}
           />
         </div>
-        <div className="text-sm font-bold text-slate-500">{isReviewPhase ? `Ôn tập (${mistakes.length} câu)` : `Vòng ${validRounds.indexOf(currentRound) + 1}/${validRounds.length}`}</div>
+        <div className="text-sm font-bold text-slate-500">
+          {challengeMode.active ? "Challenge Mode 🔥" : isReviewPhase ? `Ôn tập (${mistakes.length} câu)` : `Vòng ${validRounds.indexOf(currentRound) + 1}/${validRounds.length}`}
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -351,9 +456,9 @@ export function BeginnerLessonPractice() {
       </div>
 
       {/* Footer Controls */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 z-10">
         <div className="max-w-xl mx-auto flex items-center justify-between">
-          {activeRound === 1 ? (
+          {activeRound === 1 && !challengeMode.active ? (
             <>
               <Button onClick={handleKnowWord} className="font-bold text-slate-500 px-6 py-3 hover:bg-slate-100 rounded-2xl">
                 Tôi đã biết từ này

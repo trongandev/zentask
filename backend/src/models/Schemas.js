@@ -296,6 +296,16 @@ export const UserLanguageProgressSchema = new Schema({
 }, { timestamps: true });
 UserLanguageProgressSchema.index({ uid: 1, language: 1 }, { unique: true });
 
+export const WordPerformanceSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  word: { type: String, required: true },
+  meaning: { type: String, default: "" },
+  mistakesCount: { type: Number, default: 0 },
+  totalTimeMs: { type: Number, default: 0 },
+  lastPracticed: { type: Date, default: Date.now }
+}, { timestamps: true });
+WordPerformanceSchema.index({ userId: 1, word: 1 }, { unique: true });
+
 export const UserActivitySchema = new Schema({
   uid: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   action: { type: String, required: true },
@@ -387,6 +397,27 @@ export const BotQuizSchema = new Schema({
   isUsed: { type: Boolean, default: false },
 }, { timestamps: true });
 
+export const PendingMistakeQueueSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  word: { type: String, required: true },
+  mistakeDetail: { type: String },
+  createdAt: { type: Date, default: Date.now, expires: 86400 }
+}, { timestamps: true });
+
+export const PersonalizedGrammarSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  categories: { type: Schema.Types.Mixed, default: [] },
+  lessons: { type: Schema.Types.Mixed, default: {} },
+  lastGeneratedAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+export const PersonalizedSkillTaskSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  tasks: { type: Schema.Types.Mixed, default: [] },
+  targetLanguage: { type: String, default: 'en' },
+  createdAt: { type: Date, default: Date.now, expires: 172800 }
+}, { timestamps: true });
+
 export const DailyUsage = mongoose.models.DailyUsage || mongoose.model('DailyUsage', DailyUsageSchema);
 export const IpSignupCounter = mongoose.models.IpSignupCounter || mongoose.model('IpSignupCounter', IpSignupCounterSchema);
 export const DailyTask = mongoose.models.DailyTask || mongoose.model('DailyTask', DailyTaskSchema);
@@ -432,3 +463,8 @@ export const AITokenUsage = mongoose.models.AITokenUsage || mongoose.model('AITo
 export const BotJobSchedule = mongoose.models.BotJobSchedule || mongoose.model('BotJobSchedule', BotJobScheduleSchema);
 export const BeginnerProgress = mongoose.models.BeginnerProgress || mongoose.model('BeginnerProgress', BeginnerProgressSchema);
 export const UserLanguageProgress = mongoose.models.UserLanguageProgress || mongoose.model('UserLanguageProgress', UserLanguageProgressSchema);
+export const WordPerformance = mongoose.models.WordPerformance || mongoose.model('WordPerformance', WordPerformanceSchema);
+export const PendingMistakeQueue = mongoose.models.PendingMistakeQueue || mongoose.model('PendingMistakeQueue', PendingMistakeQueueSchema);
+export const PersonalizedGrammar = mongoose.models.PersonalizedGrammar || mongoose.model('PersonalizedGrammar', PersonalizedGrammarSchema);
+export const PersonalizedSkillTask = mongoose.models.PersonalizedSkillTask || mongoose.model('PersonalizedSkillTask', PersonalizedSkillTaskSchema);
+

@@ -1,50 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Coffee, Sun, Users, BookOpen, PlayCircle } from "lucide-react";
+import { ArrowLeft, Mic, PlayCircle } from "lucide-react";
 import { Button } from "@/src/components/ui/Button";
-
-const SPEAKING_TOPICS = [
-  {
-    id: "coffee-shop",
-    title: "At the coffee shop",
-    description: "Luyện tập gọi đồ uống và trò chuyện với nhân viên.",
-    icon: <Coffee className="w-8 h-8" />,
-    color: "bg-amber-500",
-    lightColor: "bg-amber-100",
-    textColor: "text-amber-500",
-    questionsCount: 5,
-  },
-  {
-    id: "morning-routine",
-    title: "Morning Routine",
-    description: "Kể về thói quen buổi sáng của bạn.",
-    icon: <Sun className="w-8 h-8" />,
-    color: "bg-orange-500",
-    lightColor: "bg-orange-100",
-    textColor: "text-orange-500",
-    questionsCount: 4,
-  },
-  {
-    id: "meeting-friend",
-    title: "Meeting a new friend",
-    description: "Cách làm quen và giới thiệu bản thân.",
-    icon: <Users className="w-8 h-8" />,
-    color: "bg-blue-500",
-    lightColor: "bg-blue-100",
-    textColor: "text-blue-500",
-    questionsCount: 6,
-  },
-  {
-    id: "reading-books",
-    title: "Talking about hobbies",
-    description: "Chia sẻ sở thích cá nhân với người khác.",
-    icon: <BookOpen className="w-8 h-8" />,
-    color: "bg-purple-500",
-    lightColor: "bg-purple-100",
-    textColor: "text-purple-500",
-    questionsCount: 4,
-  },
-];
 
 export function BeginnerSpeaking() {
   const navigate = useNavigate();
@@ -75,7 +32,7 @@ export function BeginnerSpeaking() {
         </div>
         <p className="text-slate-500 mb-8">Chọn một chủ đề giao tiếp hàng ngày để bắt đầu luyện phát âm tiếng Anh.</p>
 
-        {dailyTasks.length > 0 && (
+        {dailyTasks.length > 0 ? (
           <div className="mb-10">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-slate-800">Lộ trình cá nhân hóa hôm nay</h2>
@@ -112,29 +69,13 @@ export function BeginnerSpeaking() {
               ))}
             </div>
           </div>
+        ) : (
+          <div className="bg-white rounded-3xl p-8 border-2 border-slate-100 shadow-sm text-center">
+            <Mic className="w-12 h-12 text-green-300 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-slate-700 mb-2">Chưa có bài luyện nói</h3>
+            <p className="text-slate-500">Chúng tôi dựa trên những lỗi sai ngữ pháp của bạn để đưa ra các bài luyện nói phù hợp nhất. Hãy tiếp tục học từ vựng và ngữ pháp nhé!</p>
+          </div>
         )}
-
-        <h2 className="text-xl font-bold text-slate-700 mb-6">Danh sách kỹ năng (Mẫu tham khảo)</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {SPEAKING_TOPICS.map((topic) => (
-            <div
-              key={topic.id}
-              onClick={() => navigate(`/beginner/speaking/${topic.id}`)}
-              className="group bg-slate-50 rounded-2xl p-6 border-2 border-slate-100 hover:border-green-300 hover:shadow-lg transition-all cursor-pointer flex flex-col"
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${topic.lightColor} ${topic.textColor}`}>
-                  {topic.icon}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-800 group-hover:text-green-600 transition-colors">{topic.title}</h3>
-                  <p className="text-sm font-medium text-slate-400">{topic.questionsCount} câu hỏi</p>
-                </div>
-              </div>
-              <p className="text-slate-600 flex-1">{topic.description}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

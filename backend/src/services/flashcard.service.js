@@ -142,15 +142,13 @@ class FlashcardService {
 
     if (cards.length < 5) {
       const limit = 5 - cards.length;
-      const newCards = await Flashcard.find({ userId, isLearned: false })
-        .limit(limit)
-        .lean();
-      
+      const newCards = await Flashcard.find({ userId, isLearned: false }).limit(limit).lean();
+
       for (const cardDoc of newCards) {
         cards.push({
           id: cardDoc._id,
           ...cardDoc,
-          progress: { setId: cardDoc.setId } // giả lập progress để giao diện có thể chuyển hướng đúng setId
+          progress: { setId: cardDoc.setId }, // giả lập progress để giao diện có thể chuyển hướng đúng setId
         });
       }
     }
@@ -189,6 +187,7 @@ class FlashcardService {
       const sets = await FlashcardSet.find({ folderId }).lean();
       for (const set of sets) {
         await Flashcard.deleteMany({ setId: set._id });
+        await FlashcardProgress.deleteMany({ setId: set._id });
         await FlashcardSet.findByIdAndDelete(set._id);
       }
     } else {
@@ -511,7 +510,8 @@ class FlashcardService {
   async deleteSet(userId, setId) {
     const set = await FlashcardSet.findById(setId);
     if (!set || set.userId.toString() !== userId) throw { statusCode: 404, message: "Flashcard set not found" };
-    await Flashcard.deleteMany({ setId });
+    await Flashcard.deleteMany({ setId: set._id });
+    await FlashcardProgress.deleteMany({ setId: set._id });
     await FlashcardSet.findByIdAndDelete(setId);
     return { success: true };
   }
@@ -522,6 +522,7 @@ class FlashcardService {
 
     const setId = card.setId;
     await Flashcard.findByIdAndDelete(cardId);
+    await FlashcardProgress.deleteMany({ cardId: card._id });
     await FlashcardSet.findByIdAndUpdate(setId, { $inc: { cardCount: -1 } });
     return { success: true };
   }
@@ -663,7 +664,7 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
 
   async generateAiFlashcardList(userId, { words, setId }) {
     if (!words || !Array.isArray(words)) throw { statusCode: 400, message: "Danh sách từ là bắt buộc và phải là một mảng" };
-    if (words.length > 10) throw { statusCode: 400, message: "Tối đa 10 từ mỗi lần" };
+    if (words.length > 30) throw { statusCode: 400, message: "Tối đa 30 từ mỗi lần" };
 
     const safeTerms = words.map((term) => normalizeLearningTerm(term)).filter(Boolean);
     if (safeTerms.length === 0) throw { statusCode: 400, message: "Không có từ hợp lệ" };
@@ -707,7 +708,6 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
 
     const results = [];
     const missingTerms = [];
-
     // Check cache
     for (const term of safeTerms) {
       const lowercaseTerm = term.trim().toLowerCase();
@@ -719,7 +719,6 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
         missingTerms.push(term);
       }
     }
-
     if (missingTerms.length > 0) {
       const LANGUAGE_PROMPTS = {
         en: {
@@ -753,36 +752,63 @@ Vui lòng trả về kết quả JSON với các thông tin sau:
       const langConfig = LANGUAGE_PROMPTS[targetLang] || LANGUAGE_PROMPTS.en;
       const termsString = missingTerms.map((t) => `"${t}"`).join(", ");
       const prompt = `Hãy đóng vai một từ điển ${langConfig.dict}. Các từ/cụm từ cần tra cứu là: [${termsString}].
-Vui lòng trả về kết quả là một mảng JSON các đối tượng (mỗi đối tượng cho một từ/cụm từ). Mỗi đối tượng cần có:
-- term: ${langConfig.termInstruction}
-- phonetic: ${langConfig.phoneticInstruction}
-- translation: Nghĩa tiếng Việt của từ này.
-- notes: ${langConfig.notesInstruction}
-- examples: ${langConfig.exampleInstruction}`;
+QUY TẮC ĐỊNH DẠNG TỐI CAO (BẮT BUỘC ĐỂ HỆ THỐNG PARSE KHÔNG BỊ LỖI):
+1. KHÔNG giải thích, KHÔNG viết lời chào/lời kết, KHÔNG bọc dữ liệu bằng khối mã Markdown. Chỉ xuất văn bản thuần (plain text).
+2. QUY TẮC DÒNG ĐƠN: Mỗi thẻ #WORD phải nằm trên MỘT HÀNG DUY NHẤT. Dù hàng đó dài bao nhiêu cũng phải viết liền mạch trên một hàng.
+3. CÂU VÍ DỤ: BẮT BUỘC cực ngắn, KHÔNG ĐƯỢC VƯỢT QUÁ 6 từ.
 
+CẤU TRÚC PHÂN TÁCH DỮ LIỆU:
+#WORD|Từ_vựng|Phiên_âm|Nghĩa_tiếng_Việt|Ghi_chú|Ví_dụ_1~Dịch_1|Ví_dụ_2~Dịch_2|Ví_dụ_3~Dịch_3
+
+- Từ_vựng: ${langConfig.termInstruction}
+- Phiên_âm: ${langConfig.phoneticInstruction}
+- Ghi_chú: ${langConfig.notesInstruction}
+
+HÃY COPIED CHÍNH XÁC KHUÔN MẪU XUẤT DỮ LIỆU SIÊU NÉN DƯỚI ĐÂY (dưới đây chỉ là ví dụ định dạng):
+#WORD|Hello|/həˈloʊ/|Xin chào|Câu chào hỏi thông dụng|Hello there!~Chào bạn!|Hello everyone~Chào mọi người|Say hello to him~Gửi lời chào anh ấy`;
+      console.log(prompt);
       let generatedData = null;
+      let generatedText = null;
       try {
-        generatedData = await generateAIContent({
+        generatedText = await generateAIContent({
           prompt,
           feature: "flashcard_generate",
           uid: userId,
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                term: { type: Type.STRING },
-                phonetic: { type: Type.STRING },
-                translation: { type: Type.STRING },
-                notes: { type: Type.STRING },
-                examples: { type: Type.ARRAY, items: { type: Type.OBJECT, properties: { en: { type: Type.STRING }, vi: { type: Type.STRING } }, required: ["en", "vi"] } },
-              },
-              required: ["term", "phonetic", "translation", "examples"],
-            },
-          },
         });
       } catch (err) {
         console.warn(`[AI Generation List] failed:`, err.message);
+      }
+
+      if (generatedText && typeof generatedText === "string") {
+        generatedData = [];
+        const lines = generatedText.split("\n");
+        for (const line of lines) {
+          const tLine = line.trim();
+          if (tLine.startsWith("#WORD|")) {
+            const parts = tLine.split("|");
+            // #WORD | term | phonetic | translation | notes | ex1 | ex2 | ex3
+            if (parts.length >= 5) {
+              const term = parts[1]?.trim() || "";
+              const phonetic = parts[2]?.trim() || "";
+              const translation = parts[3]?.trim() || "";
+              const notes = parts[4]?.trim() || "";
+
+              const examples = [];
+              for (let i = 5; i < parts.length; i++) {
+                if (parts[i]) {
+                  const exParts = parts[i].split("~");
+                  if (exParts.length >= 2) {
+                    examples.push({ en: exParts[0].trim(), vi: exParts[1].trim() });
+                  }
+                }
+              }
+
+              if (term && translation) {
+                generatedData.push({ term, phonetic, translation, notes, examples });
+              }
+            }
+          }
+        }
       }
 
       if (generatedData && Array.isArray(generatedData)) {

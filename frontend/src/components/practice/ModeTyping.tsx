@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
-import { CheckCircle, RotateCw, Keyboard, Settings as SettingsIcon } from "lucide-react";
+import { CheckCircle, RotateCw, Keyboard, Settings as SettingsIcon, ArrowLeft } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
 import { Button } from "@/src/components/ui/Button";
 import { Input } from "@/src/components/ui/Input";
+import { useNavigate } from "react-router-dom";
 
 interface ModeTypingProps {
   cards: Flashcard[];
@@ -33,6 +34,7 @@ export function ModeTyping({ cards, setId, onComplete, completionActions }: Mode
   const [meteorites, setMeteorites] = useState<Meteorite[]>([]);
   const [typedText, setTypedText] = useState("");
   const [lockedTargetId, setLockedTargetId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const [config, setConfig] = useState(() => {
     try {
@@ -289,84 +291,93 @@ export function ModeTyping({ cards, setId, onComplete, completionActions }: Mode
 
   if (completed) {
     return (
-      <div className="flex flex-col items-center justify-center text-center h-full animate-in zoom-in duration-500">
-        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle className="w-12 h-12 text-green-500" />
+      <div className="flex flex-col items-center justify-center text-center animate-in zoom-in duration-500 w-full h-full">
+        <div className="bg-white p-8 md:p-12 rounded-[2rem] border-2 border-slate-200/60 shadow-xl shadow-slate-200/50 flex flex-col items-center max-w-lg w-full">
+          <div className="w-24 h-24 bg-green-100 rounded-[2rem] flex items-center justify-center mb-6 rotate-3 border-2 border-green-200">
+            <CheckCircle className="w-12 h-12 text-green-600" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-800 mb-2 tracking-tight">Tuyệt vời!</h2>
+          <p className="text-slate-500 mb-8 font-bold">Bạn đã bảo vệ thành công căn cứ.</p>
+          <Button
+            onClick={() => {
+              unlearnedRef.current = [...cards];
+              learnedRef.current = [];
+              setCompleted(false);
+              setWrongCardIds([]); wrongCardIdsRef.current = [];
+            }}
+            className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl border-2 border-blue-600 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex items-center justify-center gap-2 mb-3"
+          >
+            <RotateCw className="w-5 h-5" />
+            Chơi lại
+          </Button>
+          <Button 
+            onClick={() => navigate(-1)}
+            className="w-full py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex items-center justify-center gap-2"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Quay về
+          </Button>
+          {completionActions && <div className="mt-4 w-full">{completionActions}</div>}
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Tuyệt vời!</h2>
-        <p className="text-gray-500 mb-8">Bạn đã bảo vệ thành công căn cứ.</p>
-        <Button
-          onClick={() => {
-            unlearnedRef.current = [...cards];
-            learnedRef.current = [];
-            setCompleted(false);
-            setWrongCardIds([]); wrongCardIdsRef.current = [];
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
-        >
-          <RotateCw className="w-5 h-5" />
-          Chơi lại
-        </Button>
-        {completionActions}
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col h-full relative overflow-hidden bg-gray-900 rounded-3xl border-4 border-gray-800 shadow-2xl">
+    <div className="w-full flex flex-col h-full relative overflow-hidden bg-slate-900 rounded-[2rem] border-4 border-slate-800 shadow-2xl">
       {/* Background stars */}
       <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
 
       {/* Top info */}
-      <div className="absolute top-4 left-4 z-20 flex gap-4">
-        <div className="bg-white/10 backdrop-blur text-white px-4 py-2 rounded-xl border border-white/20 flex items-center gap-2">
-          <Keyboard className="w-4 h-4 text-blue-400" />
-          <span className="font-bold font-mono">
+      <div className="absolute top-6 left-6 z-20 flex gap-4">
+        <div className="bg-slate-800/80 backdrop-blur text-white px-5 py-3 rounded-2xl border-2 border-slate-700 flex items-center gap-2 shadow-lg">
+          <Keyboard className="w-5 h-5 text-blue-400" />
+          <span className="font-bold font-mono tracking-wide">
             Từ cần học: {unlearnedRef.current.length + meteorites.filter((m: any) => !m.isDecoy && !m.isExploding).length} / {cards.length}
           </span>
         </div>
       </div>
 
       {/* Settings */}
-      <div className="absolute top-4 right-4 z-30 flex flex-col items-end gap-2">
-        <Button onClick={() => setShowSettings(!showSettings)} className="bg-white/10 hover:bg-white/20 backdrop-blur text-white p-3 rounded-xl border border-white/20 transition-colors">
-          <SettingsIcon className="w-5 h-5" />
+      <div className="absolute top-6 right-6 z-30 flex flex-col items-end gap-2">
+        <Button onClick={() => setShowSettings(!showSettings)} className="bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur text-white p-3 rounded-2xl border-2 border-slate-700 transition-all shadow-lg active:scale-95">
+          <SettingsIcon className="w-6 h-6" />
         </Button>
 
         {showSettings && (
-          <div className="bg-gray-800 border border-gray-700 p-4 rounded-2xl shadow-xl w-64 animate-in fade-in slide-in-from-top-2">
-            <h3 className="text-white font-bold mb-4">Cài đặt trò chơi</h3>
+          <div className="bg-slate-800 border-2 border-slate-700 p-6 rounded-[2rem] shadow-2xl w-72 animate-in fade-in slide-in-from-top-2">
+            <h3 className="text-white font-black mb-6 text-xl tracking-tight">Cài đặt trò chơi</h3>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="text-gray-400 text-sm flex justify-between mb-1">
+                <label className="text-slate-400 font-bold text-sm flex justify-between mb-3 uppercase tracking-wider">
                   <span>Tốc độ rơi</span>
-                  <span className="text-white font-bold">{Math.round(config.speedMultiplier * 100)}%</span>
+                  <span className="text-white">{Math.round(config.speedMultiplier * 100)}%</span>
                 </label>
-                <Input
+                <input
                   type="range"
                   min="0.5"
                   max="2.0"
                   step="0.1"
                   value={config.speedMultiplier}
                   onChange={(e) => setConfig({ ...config, speedMultiplier: parseFloat(e.target.value) })}
-                  className="w-full"
+                  className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
               </div>
 
               <div>
-                <label className="text-gray-400 text-sm flex justify-between mb-1">
-                  <span>Khoảng cách sinh ra</span>
-                  <span className="text-white font-bold">{config.spawnDelay / 1000}s</span>
+                <label className="text-slate-400 font-bold text-sm flex justify-between mb-3 uppercase tracking-wider">
+                  <span>Khoảng cách xuất hiện</span>
+                  <span className="text-white">{config.spawnDelay / 1000}s</span>
                 </label>
-                <Input
+                <input
                   type="range"
                   min="1"
                   max="6"
                   step="0.5"
                   value={config.spawnDelay / 1000}
                   onChange={(e) => setConfig({ ...config, spawnDelay: parseFloat(e.target.value) * 1000 })}
-                  className="w-full"
+                  className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
                 />
               </div>
             </div>
@@ -386,7 +397,7 @@ export function ModeTyping({ cards, setId, onComplete, completionActions }: Mode
             }}
           >
             {/* Meteorite Image or Explosion */}
-            <div className={cn("relative w-24 h-24 mb-2 flex items-center justify-center", !meteor.isExploding && "animate-[spin_13s_linear_infinite]")}>
+            <div className={cn("relative w-24 h-24 mb-3 flex items-center justify-center", !meteor.isExploding && "animate-[spin_13s_linear_infinite]")}>
               {meteor.isExploding ? (
                 <img src="/meteorite/explosion.gif" alt="Explosion" className="w-40 h-40 object-contain absolute z-10 scale-150" />
               ) : (
@@ -407,39 +418,39 @@ export function ModeTyping({ cards, setId, onComplete, completionActions }: Mode
             {/* Word Display */}
             <div
               className={cn(
-                "px-4 py-2 rounded-xl backdrop-blur-md border shadow-lg text-lg font-bold font-mono tracking-wider transition-opacity duration-300",
-                meteor.isExploding ? "opacity-0" : "bg-gray-900/80 border-orange-500/50 text-white",
+                "px-5 py-2 rounded-xl backdrop-blur-md border-2 shadow-lg text-xl font-black font-mono tracking-wider transition-opacity duration-300",
+                meteor.isExploding ? "opacity-0" : "bg-slate-900/90 border-orange-500/70 text-white",
               )}
             >
               {/* Highlight typed characters */}
               {lockedTargetId === meteor.id && !meteor.isExploding ? (
                 <>
-                  <span className="text-orange-400">{meteor.card.term.substring(0, typedText.length)}</span>
-                  <span className="opacity-70">{meteor.card.term.substring(typedText.length)}</span>
+                  <span className="text-orange-400 drop-shadow-[0_0_8px_rgba(251,146,60,0.8)]">{meteor.card.term.substring(0, typedText.length)}</span>
+                  <span className="opacity-60">{meteor.card.term.substring(typedText.length)}</span>
                 </>
               ) : (
-                <span className="text-white">{meteor.card.term}</span>
+                <span className="text-white drop-shadow-sm">{meteor.card.term}</span>
               )}
             </div>
 
             {/* Translation tooltip-like */}
-            <div className={cn("mt-2 text-xs font-medium text-orange-200/80 bg-black/40 px-2 py-1 rounded transition-opacity duration-300", meteor.isExploding ? "opacity-0" : "")}>
+            <div className={cn("mt-2 text-sm font-bold text-orange-200 bg-black/60 px-3 py-1 rounded-lg backdrop-blur-sm transition-opacity duration-300", meteor.isExploding ? "opacity-0" : "")}>
               {meteor.card.translation}
             </div>
           </div>
         ))}
 
         {/* Base / Ground */}
-        <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-blue-900/80 to-transparent border-t-2 border-blue-500/30 flex items-end justify-center pb-2">
-          <div className="text-blue-200/50 text-sm font-bold tracking-widest uppercase">Căn cứ ZENTASK</div>
+        <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-blue-900/90 to-transparent border-t-4 border-blue-500/40 flex items-end justify-center pb-3">
+          <div className="text-blue-200/60 text-sm font-black tracking-[0.3em] uppercase">Căn cứ Zentask</div>
         </div>
       </div>
 
       {/* Typing indicator (bottom center) */}
-      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20">
-        <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl px-8 py-3 text-2xl font-mono text-white min-w-[200px] h-[60px] flex items-center justify-center">
-          {typedText || <span className="text-white/30 text-sm tracking-widest">GÕ TỪ Ở ĐÂY...</span>}
-          <span className="animate-pulse ml-1 w-2 h-6 bg-orange-500 inline-block"></span>
+      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20">
+        <div className="bg-slate-900/80 backdrop-blur border-2 border-slate-700/80 rounded-2xl px-10 py-4 text-3xl font-black font-mono text-white min-w-[250px] h-[72px] flex items-center justify-center shadow-2xl">
+          {typedText || <span className="text-white/30 text-base font-bold tracking-widest font-sans">GÕ TỪ Ở ĐÂY...</span>}
+          <span className="animate-pulse ml-2 w-3 h-8 bg-orange-500 inline-block rounded-sm"></span>
         </div>
       </div>
     </div>

@@ -30,7 +30,7 @@ export function SortableSetItem({ set, onClick, onContextMenu, onMoreClick, popo
       {...listeners}
       onContextMenu={(e) => onContextMenu(e, "set", set)}
       onClick={onClick}
-      className="bg-white rounded-[2rem] p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col h-full group cursor-pointer relative overflow-hidden hover:-translate-y-1"
+      className="bg-white rounded-[2rem] p-5 md:p-6 border-2 border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-2 hover:border-slate-200 transition-all duration-300 flex flex-col h-full group cursor-pointer relative overflow-hidden"
     >
       <div className="flex items-start justify-between mb-4">
         <div className={`w-12 h-12 rounded-2xl ${set.color || "bg-blue-500"} flex items-center justify-center text-white shadow-sm`}>

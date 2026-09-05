@@ -22,6 +22,7 @@ import {
   Users,
   MessageSquare,
   UserMinus,
+  Copy,
 } from "lucide-react";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { UserLevelBadge } from "@/src/components/ui/UserLevelBadge";
@@ -184,6 +185,8 @@ export function Profile() {
         streak: profileData.streak,
         stats: profileData.stats || {},
         recentActivities: profileData.recentActivities || [],
+        flashcardSets: profileData.flashcardSets || [],
+        quizzes: profileData.quizzes || [],
       }
     : null;
 
@@ -234,10 +237,10 @@ export function Profile() {
     { id: "overview", label: "Tổng quan" },
     { id: "badges", label: "Danh hiệu" },
     { id: "activities", label: "Hoạt động gần đây" },
-    { id: "levels", label: "Cấp độ (Level)" },
+    { id: "levels", label: "Cấp độ" },
     { id: "friends", label: "Bạn bè" },
     { id: "frames", label: "Khung Avatar" },
-    { id: "ranks", label: "Cấp bậc (Ranks)" },
+    { id: "ranks", label: "Cấp bậc" },
   ];
 
   return (
@@ -453,6 +456,68 @@ export function Profile() {
                   )}
                 </div>
               </div>
+
+              {/* Created Flashcard Sets */}
+              {user.flashcardSets && user.flashcardSets.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-blue-500" />
+                      Bộ thẻ đã tạo ({user.flashcardSets.length})
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {user.flashcardSets.map((set: any) => (
+                      <div
+                        key={set.id}
+                        onClick={() => (window.location.href = `/flashcard/${set.id}`)}
+                        className="bg-white rounded-xl border border-gray-200 p-4 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-bold text-gray-900 line-clamp-1">{set.title}</h4>
+                          {!set.isPublic && <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-bold">Riêng tư</span>}
+                        </div>
+                        <p className="text-xs text-gray-500 line-clamp-2 mb-3 h-8">{set.description || "Không có mô tả"}</p>
+                        <div className="flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 w-max px-2 py-1 rounded-lg">
+                          <Copy className="w-3 h-3" />
+                          {set.termCount} thuật ngữ
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Created Quizzes */}
+              {user.quizzes && user.quizzes.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                      <Target className="w-5 h-5 text-green-500" />
+                      Bài Quiz đã tạo ({user.quizzes.length})
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {user.quizzes.map((quiz: any) => (
+                      <div
+                        key={quiz.id}
+                        onClick={() => (window.location.href = `/quiz/${quiz.id}`)}
+                        className="bg-white rounded-xl border border-gray-200 p-4 hover:border-green-300 hover:shadow-md transition-all cursor-pointer"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-bold text-gray-900 line-clamp-1">{quiz.title}</h4>
+                          {!quiz.isPublic && <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-bold">Riêng tư</span>}
+                        </div>
+                        <p className="text-xs text-gray-500 line-clamp-2 mb-3 h-8">{quiz.description || "Không có mô tả"}</p>
+                        <div className="flex items-center gap-2 text-xs font-bold text-green-600 bg-green-50 w-max px-2 py-1 rounded-lg">
+                          <Target className="w-3 h-3" />
+                          {quiz.questionCount} câu hỏi
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Side Info */}
@@ -539,7 +604,7 @@ export function Profile() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {SYSTEM_BADGES.filter((b) => user.achievedBadges.some(id => String(id) === String(b.id)))
+                  {SYSTEM_BADGES.filter((b) => user.achievedBadges.some((id) => String(id) === String(b.id)))
                     .slice(0, 5)
                     .map((badge) => (
                       <div key={badge.id} className="w-12 h-12 flex items-center justify-center drop-shadow-sm" title={badge.name}>
@@ -580,7 +645,7 @@ export function Profile() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {SYSTEM_BADGES.map((badge) => {
-                const isAchieved = user.achievedBadges.some(id => String(id) === String(badge.id));
+                const isAchieved = user.achievedBadges.some((id) => String(id) === String(badge.id));
                 return (
                   <div
                     key={badge.id}

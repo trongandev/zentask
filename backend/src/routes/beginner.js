@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middleware/auth.js";
-import { getBeginnerProgress, completeGrammarTopic, seedBeginnerData, getBeginnerRanks, getBeginnerLesson, getBeginnerStats, optInDailyLearning, devGenerateTasks, getDailyTasks, getSkillTaskById } from "../controllers/beginnerController.js";
+import { getBeginnerProgress, completeGrammarTopic, seedBeginnerData, getBeginnerRanks, getBeginnerLesson, getBeginnerStats, optInDailyLearning, devGenerateTasks, getDailyTasks, getSkillTaskById, getPersonalizedGrammar, generatePersonalizedGrammarAndSkills, getPersonalizedSkillTasks, devGenerateGrammarMock } from "../controllers/beginnerController.js";
 
 const router = express.Router();
 
@@ -16,10 +16,14 @@ router.use(verifyToken);
 
 router.post("/opt-in", optInDailyLearning);
 router.post("/dev-generate-tasks", devGenerateTasks);
+router.post("/dev-generate-grammar-mock", devGenerateGrammarMock);
 router.get("/daily-tasks", getDailyTasks);
 router.get("/skill-task/:id", getSkillTaskById);
 router.get("/progress", getBeginnerProgress);
 router.get("/stats", verifyToken, getBeginnerStats);
 router.post("/grammar/complete", verifyToken, completeGrammarTopic);
+router.get("/grammar/me", getPersonalizedGrammar);
+router.post("/grammar/generate", generatePersonalizedGrammarAndSkills);
+router.get("/skills/tasks", getPersonalizedSkillTasks);
 
 export default router;

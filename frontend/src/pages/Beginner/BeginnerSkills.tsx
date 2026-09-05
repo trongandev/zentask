@@ -160,7 +160,7 @@ export function BeginnerSkills() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 pb-24 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="w-full max-w-5xl mx-auto px-4 pb-24 space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between shadow-lg relative overflow-hidden mt-8">
         <div className="z-10 text-center md:text-left space-y-4 max-w-lg">
@@ -174,7 +174,7 @@ export function BeginnerSkills() {
               </span>
             </div>
             {import.meta.env.MODE === "development" && (
-              <Button onClick={handleDevGenerate} disabled={isGeneratingDev} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-xl shadow-lg border-2 border-orange-400">
+              <Button onClick={handleDevGenerate} disabled={isGeneratingDev} variant="secondary" size="sm">
                 {isGeneratingDev ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : null}
                 [DEV] Sinh dữ liệu ngay
               </Button>
@@ -215,9 +215,11 @@ export function BeginnerSkills() {
                     navigate(`/beginner/skill/${skill.id}`);
                   }
                 }}
-                className="w-full py-3 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors border border-slate-200"
+                variant="outline"
+                size="lg"
+                className="w-full mt-4"
               >
-                <PlayCircle className="w-5 h-5" /> Bắt đầu luyện
+                <PlayCircle className="w-5 h-5" /> BẮT ĐẦU LUYỆN
               </Button>
             </div>
           ))}

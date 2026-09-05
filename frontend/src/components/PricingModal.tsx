@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, Sparkles, Zap } from "lucide-react";
+import { Check, CheckCircle, Sparkles, Zap } from "lucide-react";
 import { Modal } from "./ui/Modal";
 import { Link } from "react-router-dom";
 import { Button } from "@/src/components/ui/Button";
@@ -7,9 +7,10 @@ import { Button } from "@/src/components/ui/Button";
 interface PricingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  isVip: boolean;
 }
 
-export function PricingModal({ isOpen, onClose }: PricingModalProps) {
+export function PricingModal({ isOpen, onClose, isVip }: PricingModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-4xl p-0 w-full" hideCloseButton>
       <div className="flex flex-col md:flex-row h-full">
@@ -29,10 +30,11 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
             <FeatureItem text="Tạo bài Các thì tối đa 2 lần/ngày" />
             <FeatureItem text="Đăng Community tối đa 2 bài/ngày" />
           </ul>
-
-          <Button onClick={onClose} className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-all">
-            Tiếp tục miễn phí
-          </Button>
+          {!isVip && (
+            <Button onClick={onClose} className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition-all">
+              Tiếp tục miễn phí
+            </Button>
+          )}
         </div>
 
         {/* Pro Plan */}
@@ -69,12 +71,17 @@ export function PricingModal({ isOpen, onClose }: PricingModalProps) {
               <FeatureItem text="Tạo bài cá nhân hóa Các thì tối đa 10 lần/ngày" pro />
               <FeatureItem text="Đăng Community tối đa 10 bài/ngày" pro />
             </ul>
-
-            <Link to={"https://zalo.me/g/vappqohaaewiockcc9zc"} target="_blank">
-              <Button className="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 cursor-pointer font-black text-lg rounded-2xl shadow-xl shadow-blue-900/40 transition-all active:scale-[0.98] transform hover:-translate-y-0.5">
-                Nâng cấp ngay
+            {isVip ? (
+              <Button className="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 cursor-pointer font-black text-lg rounded-2xl shadow-xl shadow-blue-900/40 transition-all active:scale-[0.98] transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                Bạn đã là VIP <CheckCircle />
               </Button>
-            </Link>
+            ) : (
+              <Link to={"https://zalo.me/g/vappqohaaewiockcc9zc"} target="_blank">
+                <Button className="w-full py-4 bg-white hover:bg-blue-50 text-blue-700 cursor-pointer font-black text-lg rounded-2xl shadow-xl shadow-blue-900/40 transition-all active:scale-[0.98] transform hover:-translate-y-0.5">
+                  Nâng cấp ngay
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Flashcard } from "../../services/flashcardService";
 import { cn } from "../../lib/utils";
-import { CheckCircle, RotateCw } from "lucide-react";
+import { CheckCircle, RotateCw, ArrowLeft } from "lucide-react";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
 import { Button } from "@/src/components/ui/Button";
+import { useNavigate } from "react-router-dom";
 
 interface ModeMatchProps {
   cards: Flashcard[];
@@ -12,7 +13,6 @@ interface ModeMatchProps {
   onComplete?: (wrongCardIds: string[]) => void;
   completionActions?: React.ReactNode;
 }
-
 
 type MatchItem = { id: string; text: string; type: 'en' | 'vi'; flashcardId: string; isMatched: boolean };
 
@@ -26,6 +26,7 @@ export function ModeMatch({ cards, setId, onComplete, completionActions }: ModeM
   const [matchedPairs, setMatchedPairs] = useState<string[]>([]);
   const [startTime, setStartTime] = useState<number>(0);
   const [timeElapsed, setTimeElapsed] = useState<number>(0);
+  const navigate = useNavigate();
 
   const { playAudio, playSoundEffect } = useTTSAudio();
   const { reportCorrect, reportWrong, flushProgress } = useSM2(setId);
@@ -111,43 +112,69 @@ export function ModeMatch({ cards, setId, onComplete, completionActions }: ModeM
   };
 
   if (cards.length < 5) {
-    return <div className="text-gray-500">Bộ thẻ cần ít nhất 5 từ vựng để chơi Nối từ.</div>;
+    return <div className="text-slate-500 font-bold bg-white p-6 rounded-2xl shadow-sm">Bộ thẻ cần ít nhất 5 từ vựng để chơi Nối từ.</div>;
   }
 
   if (completed) {
     return (
-      <div className="flex flex-col items-center justify-center text-center animate-in zoom-in duration-500">
-        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle className="w-12 h-12 text-green-500" />
+      <div className="flex flex-col items-center justify-center text-center animate-in zoom-in duration-500 w-full">
+        <div className="bg-white p-8 md:p-12 rounded-[2rem] border-2 border-slate-200/60 shadow-xl shadow-slate-200/50 flex flex-col items-center max-w-lg w-full">
+          <div className="w-24 h-24 bg-green-100 rounded-[2rem] flex items-center justify-center mb-6 rotate-3 border-2 border-green-200">
+            <CheckCircle className="w-12 h-12 text-green-600" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-800 mb-2 tracking-tight">Quá đỉnh!</h2>
+          <p className="text-slate-500 mb-2 font-bold">Bạn đã nối xong các từ.</p>
+          <div className="bg-blue-50 border-2 border-blue-100 rounded-2xl px-6 py-4 mb-8 flex items-center justify-center gap-2 w-full shadow-inner">
+             <span className="text-blue-500 font-bold">Thời gian hoàn thành:</span>
+             <span className="text-2xl font-black text-blue-700 tracking-tight">{timeElapsed}s</span>
+          </div>
+          <Button 
+            onClick={initGame}
+            className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl border-2 border-blue-600 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex items-center justify-center gap-2 mb-3"
+          >
+            <RotateCw className="w-5 h-5" />
+            Chơi lại
+          </Button>
+          <Button 
+            onClick={() => navigate(-1)}
+            className="w-full py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex items-center justify-center gap-2"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Quay về
+          </Button>
+          {completionActions && <div className="mt-4 w-full">{completionActions}</div>}
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Quá đỉnh!</h2>
-        <p className="text-gray-500 mb-2">Bạn đã nối xong các từ.</p>
-        <p className="text-xl font-bold text-blue-600 mb-8">Thời gian: {timeElapsed} giây</p>
-        <Button 
-          onClick={initGame}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
-        >
-          <RotateCw className="w-5 h-5" />
-          Chơi lại
-        </Button>
-        {completionActions}
       </div>
     );
   }
 
   return (
     <div className="w-full max-w-4xl flex flex-col items-center justify-center h-full py-8">
-      <div className="w-full flex justify-between items-center mb-8 px-4">
-        <span className="text-gray-500 font-bold bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100">
-          Thời gian: <span className="text-blue-600">{timeElapsed}s</span>
+      <div className="w-full flex justify-between items-center mb-10 px-4">
+        <span className="text-slate-500 font-bold bg-white px-5 py-3 rounded-2xl shadow-sm border-2 border-slate-100 flex items-center gap-2">
+          Thời gian: <span className="text-blue-600 text-lg font-black">{timeElapsed}s</span>
         </span>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full px-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5 w-full px-4">
         {items.map((item) => {
           const isSelected = selectedIds.includes(item.id);
           const isWrong = wrongPair.includes(item.id);
           const isMatched = matchedPairs.includes(item.id);
+
+          let stateClass = "bg-white border-slate-200 text-slate-700 hover:border-blue-300 hover:bg-slate-50";
+          let borderBClass = "border-b-4";
+
+          if (isMatched) {
+            stateClass = "opacity-0 scale-90 pointer-events-none"; // Disappear when matched
+            borderBClass = "";
+          } else if (isWrong) {
+            stateClass = "bg-red-500 border-red-600 text-white shadow-lg shadow-red-500/30";
+            borderBClass = "border-b-2 translate-y-[2px]";
+          } else if (isSelected) {
+            stateClass = "bg-blue-500 border-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105 z-10";
+            borderBClass = "border-b-2 translate-y-[2px]";
+          }
 
           return (
             <Button
@@ -155,19 +182,23 @@ export function ModeMatch({ cards, setId, onComplete, completionActions }: ModeM
               onClick={() => handleSelect(item.id)}
               disabled={isMatched || (selectedIds.length === 2 && !isSelected && !isWrong)}
               className={cn(
-                "p-4 rounded-2xl border-2 text-center font-bold transition-all duration-300 min-h-[100px] flex items-center justify-center shadow-sm",
-                isMatched 
-                  ? "opacity-0 scale-90 pointer-events-none" 
-                  : isWrong
-                    ? "bg-red-50 border-red-500 text-red-700 shadow-red-500/20"
-                    : isSelected
-                      ? "bg-blue-50 border-blue-500 text-blue-700 shadow-blue-500/20 scale-105"
-                      : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-gray-50 hover:shadow-md active:scale-95"
+                "p-4 rounded-2xl border-2 font-bold transition-all duration-300 min-h-[120px] flex items-center justify-center shadow-sm relative overflow-hidden group outline-none focus:outline-none",
+                stateClass,
+                !isMatched && !isSelected && !isWrong ? "active:border-b-2 active:translate-y-[2px]" : "",
+                borderBClass
               )}
             >
-              <span className={cn("text-lg", item.type === 'en' ? "font-extrabold text-xl" : "font-medium")}>
+              <span className={cn(
+                "text-center break-words px-2", 
+                item.type === 'en' ? "font-black text-xl md:text-2xl tracking-tight" : "font-bold text-base md:text-lg"
+              )}>
                 {item.text}
               </span>
+              
+              {/* Optional background icon hint or styling */}
+              {!isMatched && !isSelected && !isWrong && (
+                <div className="absolute inset-0 bg-slate-400 opacity-0 group-hover:opacity-[0.03] transition-opacity"></div>
+              )}
             </Button>
           );
         })}

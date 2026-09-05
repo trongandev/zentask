@@ -38,7 +38,8 @@ export function FlashcardDetail() {
   const { fetchCards, createCard, updateCard, deleteCard, fetchProgress, setManualProgress, cardProgress, currentSet, cards, loading } = useFlashcardStore();
   const { playAudio, isLoading, loadingText } = useTTSAudio();
 
-  const [activeTab, setActiveTab] = useState<"ai" | "manual">("ai");
+  const [activeTab, setActiveTab] = useState<"ai" | "manual" | "bulk_ai">("ai");
+  const [bulkTerms, setBulkTerms] = useState("");
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
@@ -242,6 +243,30 @@ export function FlashcardDetail() {
         setIsModalOpen(false);
         resetForm();
       }
+    }
+  };
+
+  const handleCreateBulkAI = async () => {
+    const words = bulkTerms
+      .split(";")
+      .map((w) => w.trim())
+      .filter((w) => w.length > 0);
+      
+    if (words.length === 0) {
+      toastService.error("Vui lòng nhập ít nhất 1 từ vựng");
+      return;
+    }
+    if (words.length > 30) {
+      toastService.error("Vui lòng chỉ nhập tối đa 30 từ mỗi lần tạo");
+      return;
+    }
+    if (!id) return;
+    
+    const res = await useFlashcardStore.getState().generateAIList(words, id);
+    if (res) {
+      setIsModalOpen(false);
+      setBulkTerms("");
+      fetchCards(id); // reload cards after bulk generate
     }
   };
 
@@ -619,18 +644,26 @@ export function FlashcardDetail() {
 
       {/* ── Add/Edit Word Modal ── */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCardId ? "Chỉnh sửa thẻ" : "Thêm từ mới"} className="max-w-2xl">
-        <div className="flex p-2 bg-slate-50 border-b border-slate-100">
+        <div className="flex p-2 bg-slate-50 border-b border-slate-100 overflow-x-auto hide-scrollbar">
           {!editingCardId && (
-            <Button
-              onClick={() => setActiveTab("ai")}
-              className={cn("flex-1 py-2.5 rounded-xl font-bold text-sm transition-all", activeTab === "ai" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50")}
-            >
-              Tạo bằng AI
-            </Button>
+            <>
+              <Button
+                onClick={() => setActiveTab("ai")}
+                className={cn("flex-1 whitespace-nowrap px-4 py-2.5 rounded-xl font-bold text-sm transition-all", activeTab === "ai" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50")}
+              >
+                Tạo bằng AI
+              </Button>
+              <Button
+                onClick={() => setActiveTab("bulk_ai")}
+                className={cn("flex-1 whitespace-nowrap px-4 py-2.5 rounded-xl font-bold text-sm transition-all", activeTab === "bulk_ai" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50")}
+              >
+                Tạo nhiều bằng AI
+              </Button>
+            </>
           )}
           <Button
             onClick={() => setActiveTab("manual")}
-            className={cn("flex-1 py-2.5 rounded-xl font-bold text-sm transition-all", activeTab === "manual" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50")}
+            className={cn("flex-1 whitespace-nowrap px-4 py-2.5 rounded-xl font-bold text-sm transition-all", activeTab === "manual" ? "bg-white text-blue-600 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50")}
           >
             {editingCardId ? "Chỉnh sửa thủ công" : "Tạo thủ công"}
           </Button>
@@ -657,6 +690,32 @@ export function FlashcardDetail() {
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {loading ? "Đang tạo..." : "Tạo bằng AI ✨"}
+              </Button>
+            </div>
+          ) : activeTab === "bulk_ai" ? (
+            <div className="space-y-4">
+              <p className="text-gray-600 text-sm">Nhập nhiều từ vựng cách nhau bằng dấu chấm phẩy (<b>;</b>). AI sẽ tạo hàng loạt thẻ lật.</p>
+              <div className="relative">
+                <Textarea
+                  value={bulkTerms}
+                  autoFocus
+                  onChange={(e) => setBulkTerms(e.target.value)}
+                  placeholder="Ví dụ: hello; world; apple; banana"
+                  className="w-full h-32 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-medium outline-none focus:border-blue-500 focus:bg-white transition-colors resize-none pb-8"
+                />
+                <div className="absolute bottom-3 right-4 text-xs font-bold text-slate-400">
+                  <span className={cn(bulkTerms.split(';').filter(w => w.trim()).length > 30 && "text-red-500")}>
+                    {bulkTerms.split(';').filter(w => w.trim()).length}
+                  </span>
+                  /30
+                </div>
+              </div>
+              <Button
+                disabled={loading || bulkTerms.split(';').filter(w => w.trim()).length > 30 || bulkTerms.split(';').filter(w => w.trim()).length === 0}
+                onClick={handleCreateBulkAI}
+                className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? <><Loader2 className="w-5 h-5 animate-spin"/> Đang xử lý...</> : "Tạo hàng loạt ✨"}
               </Button>
             </div>
           ) : (

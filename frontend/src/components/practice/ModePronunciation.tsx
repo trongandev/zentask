@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AlertTriangle, CheckCircle, Loader2, Mic, MicOff, Play, RotateCw, Volume2 } from "lucide-react";
+import { AlertTriangle, CheckCircle, Loader2, Mic, MicOff, Play, RotateCw, Volume2, ArrowLeft } from "lucide-react";
 import toastService from "@/src/services/toastService";
 import { Flashcard } from "../../services/flashcardService";
 import { pronunciationService } from "../../services/pronunciationService";
@@ -7,6 +7,7 @@ import { cn } from "../../lib/utils";
 import { useTTSAudio } from "../../hooks/useTTSAudio";
 import { useSM2 } from "../../hooks/useSM2";
 import { Button } from "@/src/components/ui/Button";
+import { useNavigate } from "react-router-dom";
 
 interface ModePronunciationProps {
   cards: Flashcard[];
@@ -188,10 +189,10 @@ function WordHighlight({ wordResult }: { wordResult: WordResult }) {
 
   return (
     <span className="inline-flex flex-col items-center gap-0.5">
-      <span className="text-xl font-black tracking-wide">
+      <span className="text-2xl font-black tracking-wide">
         {hasPhonemeData ? (
           wordResult.chars.map((c, i) => (
-            <span key={i} className={c.correct === true ? "text-green-500" : c.correct === false ? "text-red-500" : "text-gray-700"}>
+            <span key={i} className={c.correct === true ? "text-green-500" : c.correct === false ? "text-red-500" : "text-slate-700"}>
               {c.char}
             </span>
           ))
@@ -200,7 +201,7 @@ function WordHighlight({ wordResult }: { wordResult: WordResult }) {
         )}
       </span>
       {/* tiny underline bar for quick scan */}
-      <span className={`h-0.5 w-full rounded-full ${wordResult.correct ? "bg-green-400" : "bg-red-400"}`} />
+      <span className={`h-1 w-full rounded-full ${wordResult.correct ? "bg-green-400" : "bg-red-400"}`} />
     </span>
   );
 }
@@ -214,6 +215,7 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [wrongCardIds, setWrongCardIds] = useState<string[]>([]);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (audioUrl) {
@@ -408,29 +410,38 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
 
   if (completed) {
     return (
-      <div className="flex flex-col items-center justify-center text-center animate-in zoom-in duration-500">
-        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle className="w-12 h-12 text-green-500" />
+      <div className="flex flex-col items-center justify-center text-center animate-in zoom-in duration-500 w-full">
+        <div className="bg-white p-8 md:p-12 rounded-[2rem] border-2 border-slate-200/60 shadow-xl shadow-slate-200/50 flex flex-col items-center max-w-lg w-full">
+          <div className="w-24 h-24 bg-green-100 rounded-[2rem] flex items-center justify-center mb-6 rotate-3 border-2 border-green-200">
+            <CheckCircle className="w-12 h-12 text-green-600" />
+          </div>
+          <h2 className="text-3xl font-black text-slate-800 mb-2 tracking-tight">Phát âm rất tốt!</h2>
+          <p className="text-slate-500 mb-8 font-bold">Bạn đã hoàn thành bài luyện phát âm.</p>
+          <Button
+            onClick={() => {
+              setCompleted(false);
+              setCurrentIndex(0);
+              setWrongCardIds([]);
+              wrongCardIdsRef.current = [];
+              setResult(null);
+              setMainScore(null);
+              setAudioUrl(null);
+              setStatus("idle");
+            }}
+            className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-2xl border-2 border-blue-600 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex items-center justify-center gap-2 mb-3"
+          >
+            <RotateCw className="w-5 h-5" />
+            Luyện phát âm lại
+          </Button>
+          <Button 
+            onClick={() => navigate(-1)}
+            className="w-full py-4 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl border-2 border-slate-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all flex items-center justify-center gap-2"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Quay về
+          </Button>
+          {completionActions && <div className="mt-4 w-full">{completionActions}</div>}
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Phát âm rất tốt!</h2>
-        <p className="text-gray-500 mb-8">Bạn đã hoàn thành bài luyện phát âm.</p>
-        <Button
-          onClick={() => {
-            setCompleted(false);
-            setCurrentIndex(0);
-            setWrongCardIds([]);
-            wrongCardIdsRef.current = [];
-            setResult(null);
-            setMainScore(null);
-            setAudioUrl(null);
-            setStatus("idle");
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-all active:scale-95"
-        >
-          <RotateCw className="w-5 h-5" />
-          Luyện phát âm lại
-        </Button>
-        {completionActions}
       </div>
     );
   }
@@ -440,56 +451,59 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
   return (
     <div className="w-full max-w-3xl flex flex-col items-center justify-center">
       <div className="w-full flex justify-between items-center mb-8 px-4">
-        <span className="text-gray-500 font-bold bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-100">
+        <span className="text-slate-500 font-bold bg-white px-4 py-2 rounded-xl shadow-sm border-2 border-slate-100">
           Câu {currentIndex + 1} / {cards.length}
         </span>
-        <span className="rounded-xl bg-blue-50 px-4 py-2 text-sm font-bold text-blue-600">Đạt từ {PASS_SCORE} điểm</span>
+        <div className="flex-1 ml-6 mr-6 h-3 bg-slate-200 rounded-full overflow-hidden border border-slate-200/50">
+          <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${((currentIndex + 1) / cards.length) * 100}%` }}></div>
+        </div>
+        <span className="rounded-xl bg-blue-50 border-2 border-blue-100 px-4 py-2 text-sm font-bold text-blue-600 whitespace-nowrap">Đạt từ {PASS_SCORE} điểm</span>
       </div>
 
       <div
         className={cn(
-          "w-full bg-white rounded-3xl p-6 md:p-10 shadow-lg border-2 mb-8 relative transition-colors duration-300",
-          status === "correct" ? "border-green-500 bg-green-50/40" : status === "wrong" ? "border-red-500 bg-red-50/40" : "border-transparent",
+          "w-full bg-white rounded-[2rem] p-8 md:p-12 shadow-xl shadow-slate-200/50 border-2 mb-8 relative transition-colors duration-300",
+          status === "correct" ? "border-green-500 bg-green-50/50" : status === "wrong" ? "border-red-500 bg-red-50/50" : "border-slate-200/60",
         )}
       >
         <div className="text-center">
-          <p className="mb-2 text-sm font-bold uppercase tracking-widest text-gray-400">Hãy phát âm từ này</p>
-          <h2 className="break-words text-4xl md:text-5xl font-black text-gray-900">{currentCard.term}</h2>
-          {currentCard.phonetic && <p className="mt-2 text-lg font-semibold text-blue-500">{currentCard.phonetic}</p>}
-          <p className="mt-3 text-lg font-bold text-gray-500">{currentCard.translation}</p>
+          <p className="mb-2 text-sm font-bold uppercase tracking-widest text-slate-400">Hãy phát âm từ này</p>
+          <h2 className="break-words text-5xl md:text-6xl font-black text-slate-900 tracking-tight">{currentCard.term}</h2>
+          {currentCard.phonetic && <p className="mt-4 text-2xl font-mono font-bold text-blue-500">{currentCard.phonetic}</p>}
+          <p className="mt-4 text-xl font-bold text-slate-500">{currentCard.translation}</p>
 
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button
               onClick={() => playAudio(currentCard.term)}
               disabled={ttsLoading || status === "recording" || status === "checking"}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-50 px-5 py-3 font-bold text-blue-600 transition hover:bg-blue-100 disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-50 border-2 border-blue-100 border-b-4 active:border-b-2 active:translate-y-[2px] px-6 py-4 font-bold text-blue-600 transition-all hover:bg-blue-100 disabled:opacity-50"
             >
-              {ttsLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Volume2 className="h-5 w-5" />}
+              {ttsLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Volume2 className="h-6 w-6" />}
               {ttsLoading ? "Đang phát..." : "Nghe mẫu"}
             </Button>
 
             {status === "recording" ? (
               <Button
                 onClick={stopRecording}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-6 py-3 font-bold text-white shadow-lg shadow-red-500/20 transition hover:bg-red-700"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-500 border-2 border-red-600 border-b-4 active:border-b-2 active:translate-y-[2px] px-8 py-4 font-bold text-white transition-all hover:bg-red-600 animate-pulse shadow-lg shadow-red-500/30"
               >
-                <MicOff className="h-5 w-5" />
+                <MicOff className="h-6 w-6" />
                 Dừng & chấm điểm {recordingSeconds}s
               </Button>
             ) : (
               <Button
                 onClick={startRecording}
                 disabled={status === "checking"}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-3 font-bold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 border-2 border-blue-700 border-b-4 active:border-b-2 active:translate-y-[2px] px-8 py-4 font-bold text-white transition-all hover:bg-blue-700 disabled:opacity-50 shadow-lg shadow-blue-500/20"
               >
-                {status === "checking" ? <Loader2 className="h-5 w-5 animate-spin" /> : <Mic className="h-5 w-5" />}
+                {status === "checking" ? <Loader2 className="h-6 w-6 animate-spin" /> : <Mic className="h-6 w-6" />}
                 {status === "checking" ? "Đang chấm điểm..." : result ? "Ghi âm lại" : "Bắt đầu ghi âm"}
               </Button>
             )}
           </div>
 
-          <p className="mt-4 text-sm text-gray-400">
-            Nhấn <strong>Bắt đầu ghi âm</strong>, đọc to rõ ràng, rồi nhấn <strong>Dừng &amp; chấm điểm</strong>.
+          <p className="mt-6 text-sm text-slate-400 font-medium">
+            Nhấn <strong className="text-slate-600">Bắt đầu ghi âm</strong>, đọc to rõ ràng, rồi nhấn <strong className="text-slate-600">Dừng & chấm điểm</strong>.
           </p>
         </div>
 
@@ -497,41 +511,41 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
           (() => {
             const wordResults = pickWords(result);
             return (
-              <div className="mt-8 rounded-3xl border border-gray-100 bg-gray-50 p-4 md:p-6 text-left">
+              <div className="mt-10 rounded-3xl border-2 border-slate-100 bg-slate-50 p-6 md:p-8 text-left shadow-inner">
                 {/* Header: score badge + status */}
-                <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b-2 border-slate-200/50 pb-6">
                   <div>
-                    <h3 className="text-lg font-black text-gray-900">Kết quả phát âm</h3>
-                    <p className="text-sm text-gray-500">{status === "correct" ? "✅ Bạn phát âm đạt yêu cầu!" : "❌ Chưa đạt — hãy thử lại hoặc chuyển câu tiếp."}</p>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Kết quả phát âm</h3>
+                    <p className="text-sm font-bold mt-1 text-slate-500">{status === "correct" ? "✅ Bạn phát âm đạt yêu cầu!" : "❌ Chưa đạt — hãy thử lại hoặc chuyển câu tiếp."}</p>
                   </div>
-                  <div className={cn("rounded-2xl px-5 py-3 text-center font-black text-xl", status === "correct" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
-                    {mainScore != null ? `${Math.round(mainScore)}/100` : "—"}
+                  <div className={cn("rounded-2xl px-6 py-4 text-center font-black text-3xl border-2 shadow-sm", status === "correct" ? "bg-green-100 text-green-700 border-green-200" : "bg-red-100 text-red-700 border-red-200")}>
+                    {mainScore != null ? `${Math.round(mainScore)}` : "—"}<span className="text-lg opacity-70">/100</span>
                   </div>
                 </div>
 
                 {/* Character-level feedback */}
                 {wordResults.length > 0 ? (
                   <div>
-                    <p className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-400">Từng chữ cái</p>
-                    <div className="flex flex-wrap items-end gap-x-3 gap-y-4">
+                    <p className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-400">Đánh giá từng chữ cái</p>
+                    <div className="flex flex-wrap items-end gap-x-4 gap-y-6">
                       {wordResults.map((w, i) => (
                         <WordHighlight key={i} wordResult={w} />
                       ))}
                     </div>
-                    <div className="mt-4 flex gap-5 text-xs text-gray-400">
-                      <span className="flex items-center gap-1.5">
-                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-400" />
+                    <div className="mt-6 flex gap-6 text-sm font-bold text-slate-500 bg-white p-4 rounded-xl border-2 border-slate-100 inline-flex">
+                      <span className="flex items-center gap-2">
+                        <span className="inline-block w-3 h-3 rounded-full bg-green-500" />
                         Phát âm đúng
                       </span>
-                      <span className="flex items-center gap-1.5">
-                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-400" />
+                      <span className="flex items-center gap-2">
+                        <span className="inline-block w-3 h-3 rounded-full bg-red-500" />
                         Phát âm sai
                       </span>
                     </div>
                   </div>
                 ) : recognizedText ? (
-                  <div className="rounded-2xl bg-white p-4 text-sm text-gray-600">
-                    Máy nghe được: <span className="font-bold text-gray-900">{recognizedText}</span>
+                  <div className="rounded-2xl bg-white p-5 border-2 border-slate-200 font-medium text-slate-600 shadow-sm">
+                    Máy nghe được: <span className="font-black text-slate-900 text-lg ml-2">{recognizedText}</span>
                   </div>
                 ) : null}
               </div>
@@ -539,11 +553,11 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
           })()}
       </div>
 
-      <div className="flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:justify-center">
+      <div className="flex w-full max-w-2xl flex-col gap-4 sm:flex-row sm:justify-center px-4">
         {(status === "correct" || status === "wrong") && (
           <>
-            <Button onClick={retryCurrent} className="flex-1 rounded-2xl bg-gray-100 px-6 py-4 font-bold text-gray-700 transition hover:bg-gray-200">
-              Ghi âm lại
+            <Button onClick={retryCurrent} className="flex-1 rounded-2xl bg-white border-2 border-slate-200 border-b-4 active:border-b-2 active:translate-y-[2px] px-6 py-4 font-bold text-slate-600 transition-all hover:bg-slate-50">
+              Thử lại lần nữa
             </Button>
             {audioUrl && (
               <Button
@@ -551,13 +565,13 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
                   const audio = new Audio(audioUrl);
                   audio.play().catch(console.error);
                 }}
-                className="flex-1 rounded-2xl bg-indigo-50 px-6 py-4 font-bold text-indigo-600 transition hover:bg-indigo-100 flex items-center justify-center gap-2"
+                className="flex-1 rounded-2xl bg-blue-50 border-2 border-blue-200 border-b-4 active:border-b-2 active:translate-y-[2px] px-6 py-4 font-bold text-blue-700 transition-all hover:bg-blue-100 flex items-center justify-center gap-2"
               >
                 <Play className="h-5 w-5" />
-                Nghe lại
+                Nghe lại ghi âm
               </Button>
             )}
-            <Button onClick={goNext} className="flex-1 rounded-2xl bg-blue-600 px-6 py-4 font-bold text-white transition hover:bg-blue-700">
+            <Button onClick={goNext} className="flex-1 rounded-2xl bg-blue-600 border-2 border-blue-700 border-b-4 active:border-b-2 active:translate-y-[2px] px-6 py-4 font-bold text-white transition-all hover:bg-blue-700">
               {currentIndex < cards.length - 1 ? "Câu tiếp theo" : "Hoàn thành"}
             </Button>
           </>
@@ -565,8 +579,8 @@ export function ModePronunciation({ cards, setId, onComplete, completionActions 
       </div>
 
       {status === "wrong" && (
-        <div className="mt-4 flex items-center gap-2 rounded-2xl bg-orange-50 px-4 py-3 text-sm font-semibold text-orange-600">
-          <AlertTriangle className="h-4 w-4" />
+        <div className="mt-6 flex items-center gap-3 rounded-2xl bg-orange-50 border-2 border-orange-100 px-6 py-4 text-base font-bold text-orange-700 shadow-sm animate-in slide-in-from-bottom-2">
+          <AlertTriangle className="h-6 w-6 text-orange-500" />
           Điểm dưới {PASS_SCORE}. Bạn có thể ghi âm lại để cải thiện phát âm.
         </div>
       )}
