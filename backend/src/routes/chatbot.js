@@ -125,13 +125,15 @@ async function startZaloBot() {
       const isCallingBot = isMentioningBot;
 
       if (isCallingBot && message.threadId === GROUP_ACTIVE_REPLY) {
-        return api.sendMessage(
-          {
-            msg: "Dạ Mentor Lopy nghe đây! 🥰 Cần hỗ trợ gì bạn cứ nhắn riêng với mình nha!",
-          },
-          message.threadId,
-          message.type,
-        );
+        if (!activeGroupGames.has(message.threadId)) {
+          return api.sendMessage(
+            {
+              msg: "Dạ Mentor Lopy nghe đây! 🥰 Cần hỗ trợ gì bạn cứ nhắn riêng với mình nha!",
+            },
+            message.threadId,
+            message.type,
+          );
+        }
       }
 
       if (message.type !== 0 || typeof message.data.content !== "string") {
@@ -353,10 +355,10 @@ async function startZaloBot() {
   }
 }
 
-if (process.env.NODE_ENV === "production") {
-  startZaloBot();
-}
-
+// if (process.env.NODE_ENV === "production") {
+//   startZaloBot();
+// }
+startZaloBot();
 export const getApi = () => api;
 
 export async function announceFlashDropEnd(dropMsgId) {

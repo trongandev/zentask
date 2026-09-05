@@ -91,7 +91,18 @@ class ChatbotUtil {
     } else if (message.type === 1) {
       // Tin nhắn trong group (text)
       if (activeGroupGames.has(threadId)) {
-        const textLower = content.toLowerCase();
+        let textLower = content.toLowerCase();
+
+        // Remove bot mentions if any
+        if (message.data?.mentions) {
+          message.data.mentions.forEach((m) => {
+            if (m.dName) {
+              textLower = textLower.replace(new RegExp(`@${m.dName.toLowerCase()}`, "g"), "");
+            }
+          });
+        }
+        textLower = textLower.trim().replace("@Lopy Zentask ", "");
+
         const game = activeGroupGames.get(threadId);
 
         if (textLower === game.answer) {
@@ -130,6 +141,9 @@ class ChatbotUtil {
               0,
             );
           }
+        } else {
+          // Đoán sai
+          return this.api.sendMessage({ msg: "❌ Sai rồi, thử lại nhé!" }, threadId, 1);
         }
       }
       return; // Bỏ qua các tin nhắn text khác trong group
