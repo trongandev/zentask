@@ -2,8 +2,12 @@ import axiosInstance from "./axiosConfig";
 
 export const adminService = {
   // Users
-  getUsers: async (page = 1, limit = 10) => {
-    const res = await axiosInstance.get(`/api/admin/users?page=${page}&limit=${limit}`);
+  getUsers: async (page = 1, limit = 10, search = "", role = "", status = "") => {
+    let url = `/api/admin/users?page=${page}&limit=${limit}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (role) url += `&role=${role}`;
+    if (status) url += `&status=${status}`;
+    const res = await axiosInstance.get(url);
     return res.data;
   },
 

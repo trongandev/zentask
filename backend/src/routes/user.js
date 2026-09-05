@@ -1,6 +1,21 @@
 import { Router } from "express";
 import User from "../models/User.js";
-import { DailyTask, UserDailyStat, LeaderboardWeekly, LeaderboardMonthly, UserFollow, FlashcardProgress, QuizResult, UserActivity, BeginnerProgress, UserLanguageProgress, WordPerformance, PendingMistakeQueue, FlashcardSet, Quiz } from "../models/Schemas.js";
+import {
+  DailyTask,
+  UserDailyStat,
+  LeaderboardWeekly,
+  LeaderboardMonthly,
+  UserFollow,
+  FlashcardProgress,
+  QuizResult,
+  UserActivity,
+  BeginnerProgress,
+  UserLanguageProgress,
+  WordPerformance,
+  PendingMistakeQueue,
+  FlashcardSet,
+  Quiz,
+} from "../models/Schemas.js";
 import { SYSTEM_LEVELS } from "../config/system.js";
 import { getWeekString, getMonthString } from "../../utils/dateUtils.js";
 import { createNotification } from "../../utils/notifications.js";
@@ -319,10 +334,10 @@ router.put(
       user.learningPreferences = [];
     }
     user.targetLanguage = languageCode;
-    
+
     if (level) {
       user.languageLevel = level;
-      
+
       // Auto-complete previous topics if user skips to a higher level
       if (level !== "Beginner" && req.body.skipTopics) {
         const course = await Course.findOne({ languageCode });
@@ -330,24 +345,21 @@ router.put(
           const currentTier = await CourseTier.findOne({ courseId: course._id, cefr: level }).populate("rankId");
           if (currentTier && currentTier.rankId) {
             const currentRankNum = currentTier.rankId.rankId;
-            
+
             // Find all ranks that come before the current rank
             const previousRanks = await CourseRank.find({ rankId: { $lt: currentRankNum } });
-            const previousRankIds = previousRanks.map(r => r._id);
-            
+            const previousRankIds = previousRanks.map((r) => r._id);
+
             // Tiers from previous ranks OR same rank but earlier tierNum
             const previousTiers = await CourseTier.find({
               courseId: course._id,
-              $or: [
-                { rankId: { $in: previousRankIds } },
-                { rankId: currentTier.rankId._id, tierNum: { $lt: currentTier.tierNum } }
-              ]
+              $or: [{ rankId: { $in: previousRankIds } }, { rankId: currentTier.rankId._id, tierNum: { $lt: currentTier.tierNum } }],
             });
-            
+
             if (previousTiers.length > 0) {
-              const previousTierIds = previousTiers.map(t => t._id);
+              const previousTierIds = previousTiers.map((t) => t._id);
               const previousLessons = await CourseLesson.find({ tierId: { $in: previousTierIds } });
-              
+
               if (previousLessons.length > 0) {
                 const previousLessonIds = [];
                 for (const lesson of previousLessons) {
@@ -357,8 +369,8 @@ router.put(
                     previousLessonIds.push(`${lesson.lessonId}_${i}`);
                   }
                 }
-                
-                const progressOps = previousLessonIds.map(lId => ({
+
+                const progressOps = previousLessonIds.map((lId) => ({
                   updateOne: {
                     filter: { uid: user._id, lessonId: lId },
                     update: {
@@ -369,13 +381,13 @@ router.put(
                         score: 100,
                         completedGrammarTopics: [],
                         completedSkills: [],
-                        rewardClaimed: true // Pre-claim reward so they don't get free bonus for skipped topics
-                      }
+                        rewardClaimed: true, // Pre-claim reward so they don't get free bonus for skipped topics
+                      },
                     },
-                    upsert: true
-                  }
+                    upsert: true,
+                  },
                 }));
-                
+
                 if (progressOps.length > 0) {
                   await BeginnerProgress.bulkWrite(progressOps);
                 }
@@ -535,8 +547,12 @@ router.get(
       UserDailyStat.aggregate([{ $match: { userId: user._id } }, { $group: { _id: null, totalMinutes: { $sum: "$studyMinutes" } } }]),
       UserActivity.find({ uid: uid }).sort({ createdAt: -1 }).limit(10).lean(),
       UserLanguageProgress.find({ uid: uid }).lean(),
-      FlashcardSet.find({ creatorId: uid, ...(req.user.uid !== uid ? { isPublic: true } : {}) }).sort({ createdAt: -1 }).lean(),
-      Quiz.find({ creatorId: uid, ...(req.user.uid !== uid ? { isPublic: true } : {}) }).sort({ createdAt: -1 }).lean(),
+      FlashcardSet.find({ creatorId: uid, ...(req.user.uid !== uid ? { isPublic: true } : {}) })
+        .sort({ createdAt: -1 })
+        .lean(),
+      Quiz.find({ creatorId: uid, ...(req.user.uid !== uid ? { isPublic: true } : {}) })
+        .sort({ createdAt: -1 })
+        .lean(),
     ]);
 
     const totalStudyHours = studyStats.length > 0 ? Math.round(studyStats[0].totalMinutes / 60) : 0;
@@ -555,6 +571,7 @@ router.get(
       rankId: user.rankId || 1,
       tier: user.tier || 3,
       stars: user.stars || 0,
+      isVip: user.isVip,
       achievedBadges: user.achievedBadges || [],
       followers: user.followers || 0,
       following: user.following || 0,
@@ -577,7 +594,7 @@ router.get(
         title: f.title,
         description: f.description,
         termCount: f.termCount || (f.flashcards ? f.flashcards.length : 0),
-        isPublic: f.isPublic
+        isPublic: f.isPublic,
       })),
       quizzes: quizzes.map((q) => ({
         id: q._id,
@@ -585,8 +602,8 @@ router.get(
         description: q.description,
         questionCount: q.questions ? q.questions.length : 0,
         difficulty: q.difficulty,
-        isPublic: q.isPublic
-      }))
+        isPublic: q.isPublic,
+      })),
     });
   }),
 );
@@ -636,10 +653,10 @@ router.post(
         // Already received relearn bonus before — no more XP
         return res.json({ status: "success", xpResult: null, message: "Already relearned, no XP" });
       }
-      // First relearn: award x2 XP (20 XP) and mark as claimed
-      const xpResult = await addXpToUser(uid, 20);
+      // First relearn: award 10 XP
+      const xpResult = await addXpToUser(uid, 10);
       await BeginnerProgress.updateOne({ _id: existing._id }, { $set: { rewardClaimed: true } });
-      return res.json({ status: "success", xpResult, message: "Relearned, awarded 20 XP" });
+      return res.json({ status: "success", xpResult, message: "Relearned, awarded 10 XP" });
     }
 
     await BeginnerProgress.create({
@@ -649,8 +666,8 @@ router.post(
       score: 100, // default score
     });
 
-    // 10 XP for the first time learning
-    const xpResult = await addXpToUser(uid, 10);
+    // 20 XP for the first time learning
+    const xpResult = await addXpToUser(uid, 20);
 
     res.json({ status: "success", xpResult, newLessonAdded: true });
   }),
@@ -673,10 +690,10 @@ router.post(
         filter: { userId: uid, word: stat.word },
         update: {
           $set: { meaning: stat.meaning || "", lastPracticed: new Date() },
-          $inc: { mistakesCount: stat.mistakesCount || 0, totalTimeMs: stat.totalTimeMs || 0 }
+          $inc: { mistakesCount: stat.mistakesCount || 0, totalTimeMs: stat.totalTimeMs || 0 },
         },
-        upsert: true
-      }
+        upsert: true,
+      },
     }));
 
     if (operations.length > 0) {
@@ -688,7 +705,7 @@ router.post(
       .map((stat) => ({
         userId: uid,
         word: stat.word,
-        mistakeDetail: stat.meaning || ""
+        mistakeDetail: stat.meaning || "",
       }));
 
     if (mistakeDocs.length > 0) {
@@ -696,7 +713,7 @@ router.post(
     }
 
     res.json({ status: "success", message: "Word performance updated" });
-  })
+  }),
 );
 
 // Follow / Unfollow User

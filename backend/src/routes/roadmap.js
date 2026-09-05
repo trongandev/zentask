@@ -57,8 +57,8 @@ RULES:
 
 #DAY|1
 #TOPIC|Topic Name
-#WORD|word1|meaning1|pos1|example1|example_translation1
-#WORD|word2|meaning2|pos2|example2|example_translation2
+#WORD|word1|phonetic1|meaning1|pos1|example1|example_translation1
+#WORD|word2|phonetic2|meaning2|pos2|example2|example_translation2
 ...
 #DAY|2
 ...
@@ -95,13 +95,14 @@ RULES:
         currentDay.topic = parts[1] || "Topic";
       } else if (trimmed.startsWith("#WORD|") && currentDay) {
         const parts = trimmed.split("|");
-        if (parts.length >= 3) {
+        if (parts.length >= 4) {
           currentDay.words.push({
             word: parts[1],
-            meaning: parts[2],
-            pos: parts[3] || "",
-            example: parts[4] || "",
-            example_translation: parts[5] || "",
+            phonetic: parts[2],
+            meaning: parts[3],
+            pos: parts[4] || "",
+            example: parts[5] || "",
+            example_translation: parts[6] || "",
           });
         }
       }
@@ -158,6 +159,7 @@ router.get("/lesson/:day", async (req, res) => {
     const formattedWords = dayData.words.map((w, index) => ({
       id: `rm_${day}_${index}`,
       term: w.word,
+      phonetic: w.phonetic,
       meaning: w.meaning,
       pos: w.pos,
       example: w.example ? [{ en: w.example, vi: w.example_translation }] : [],
@@ -197,8 +199,8 @@ RULES:
 
 #DAY|${currentLength + 1}
 #TOPIC|Topic Name
-#WORD|word1|meaning1|pos1|example1|example_translation1
-#WORD|word2|meaning2|pos2|example2|example_translation2
+#WORD|word1|phonetic1|meaning1|pos1|example1|example_translation1
+#WORD|word2|phonetic2|meaning2|pos2|example2|example_translation2
 ...
 #DAY|${currentLength + 2}
 ...
@@ -232,13 +234,14 @@ RULES:
         currentDay.topic = trimmed.split("|")[1] || "Topic";
       } else if (trimmed.startsWith("#WORD|") && currentDay) {
         const parts = trimmed.split("|");
-        if (parts.length >= 3) {
+        if (parts.length >= 4) {
           currentDay.words.push({
             word: parts[1],
-            meaning: parts[2],
-            pos: parts[3] || "",
-            example: parts[4] || "",
-            example_translation: parts[5] || "",
+            phonetic: parts[2],
+            meaning: parts[3],
+            pos: parts[4] || "",
+            example: parts[5] || "",
+            example_translation: parts[6] || "",
           });
         }
       }

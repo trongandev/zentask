@@ -189,7 +189,7 @@ export function BeginnerLessonPractice() {
       setInputText("");
 
       let willShrink = isCorrect === true;
-      
+
       // Nếu mảng thu hẹp (willShrink), phần tử tiếp theo sẽ trượt về vị trí currentWordIndex.
       // Do đó ta không tăng currentWordIndex.
       const nextIndex = currentWordIndex + (willShrink ? 0 : 1);
@@ -285,7 +285,7 @@ export function BeginnerLessonPractice() {
       }
 
       const lessonId = `${topicId}_${lessonIndex}`;
-      await beginnerService.saveLessonProgress(lessonId);
+      const res = await beginnerService.saveLessonProgress(lessonId);
 
       // Update roadmap completion if it's an AI Roadmap lesson
       if (topicId === "roadmap") {
@@ -294,7 +294,9 @@ export function BeginnerLessonPractice() {
 
       // Delete progress from localStorage after success
       localStorage.removeItem(`beginner_lesson_progress_${lessonId}`);
-      toastService.success("Chúc mừng bạn đã hoàn thành bài học! + 10XP");
+
+      const xpGained = res?.xpResult?.xpAdded || 20;
+      toastService.success(`Chúc mừng bạn đã hoàn thành bài học! + ${xpGained}XP`);
       navigate("/beginner");
     } catch (err) {
       console.error(err);
@@ -322,7 +324,6 @@ export function BeginnerLessonPractice() {
     }
     return currentWord.term;
   };
-  console.log(currentWord);
 
   if (!currentWord && activeWords.length > 0) {
     // Tự động fix lỗi out of bounds (nếu cache bị kẹt)
@@ -371,7 +372,6 @@ export function BeginnerLessonPractice() {
       playAudio(targetText, undefined, correct ? "correct" : "wrong");
     }
   };
-  console.log(currentWord);
   return (
     <div className="max-w-xl mx-auto w-full pt-8 px-4 flex flex-col min-h-[80vh]">
       {/* Progress Bar */}

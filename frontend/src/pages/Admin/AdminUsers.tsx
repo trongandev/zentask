@@ -14,16 +14,34 @@ import { useState } from "react";
 export function AdminUsers() {
   const { users, fetchUsers } = useAdminStore();
   const page = users.currentPage;
-  const pageData = users.pages[page] || { items: [], totalPages: 1 };
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  
+  // Backend search and filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const hasFilters = debouncedSearchTerm || roleFilter || statusFilter;
+  const pageData = hasFilters 
+    ? { items: (users as any).filteredItems || [], totalPages: (users as any).filteredTotalPages || 1 }
+    : (users.pages[page] || { items: [], totalPages: 1 });
+
+  // Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   useEffect(() => {
-    fetchUsers(page);
-  }, [page, fetchUsers]);
+    fetchUsers(page, false, { search: debouncedSearchTerm, role: roleFilter, status: statusFilter });
+  }, [page, fetchUsers, debouncedSearchTerm, roleFilter, statusFilter]);
 
   const handleUpdateRole = async (uid: string, role: string) => {
     const success = await adminService.updateUserRole(uid, role);
-    if (success) fetchUsers(page, true);
+    if (success) fetchUsers(page, true, { search: debouncedSearchTerm, role: roleFilter, status: statusFilter });
   };
 
   const handleBanUser = async (uid: string, currentBanStatus: boolean) => {
@@ -31,7 +49,7 @@ export function AdminUsers() {
 
     if (window.confirm(confirmMessage)) {
       const success = await adminService.banUser(uid, !currentBanStatus);
-      if (success) fetchUsers(page, true);
+      if (success) fetchUsers(page, true, { search: debouncedSearchTerm, role: roleFilter, status: statusFilter });
     }
   };
 
@@ -163,6 +181,49 @@ export function AdminUsers() {
 
       <AdminStatCards stats={stats} />
 
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+          <div className="flex-1 w-full">
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo tên hoặc email..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                useAdminStore.setState((state) => ({ users: { ...state.users, currentPage: 1 } }));
+              }}
+              className="w-full max-w-md px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            />
+          </div>
+          <div className="flex gap-4 w-full md:w-auto">
+            <Select
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value);
+                useAdminStore.setState((state) => ({ users: { ...state.users, currentPage: 1 } }));
+              }}
+              className="border border-gray-200 rounded-xl px-4 py-2 min-w-[150px]"
+            >
+              <option value="">Tất cả vai trò</option>
+              <option value="user">Người dùng (USER)</option>
+              <option value="admin">Quản trị viên (ADMIN)</option>
+            </Select>
+            <Select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                useAdminStore.setState((state) => ({ users: { ...state.users, currentPage: 1 } }));
+              }}
+              className="border border-gray-200 rounded-xl px-4 py-2 min-w-[150px]"
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="active">Hoạt động</option>
+              <option value="banned">Bị khoá</option>
+            </Select>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-8">
         <DataTable
           columns={columns}
@@ -170,9 +231,7 @@ export function AdminUsers() {
           loading={users.loading}
           currentPage={page}
           totalPages={pageData.totalPages}
-          onPageChange={(p) => fetchUsers(p)}
-          searchable
-          searchFields={["displayName", "email"]}
+          onPageChange={(p) => useAdminStore.setState((state) => ({ users: { ...state.users, currentPage: p } }))}
         />
       </div>
 

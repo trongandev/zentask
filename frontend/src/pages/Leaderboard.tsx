@@ -8,6 +8,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useEtcStore } from "../services/etcService";
 import { Button } from "@/src/components/ui/Button";
+import { UserNameWithVip } from "../components/ui/UserNameWithVip";
 
 export function Leaderboard() {
   const { user } = useAuth();
@@ -273,9 +274,14 @@ export function Leaderboard() {
                 <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
                   <UserAvatar src={userItem.avatar} level={userItem.level} className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0" />
                   <div className="min-w-0 flex-1 flex flex-col justify-center">
-                    <h3 className={cn("font-bold text-sm md:text-base truncate group-hover:text-blue-600 transition-colors mb-0.5", userItem.isUser ? "text-blue-700" : "text-gray-900")}>
-                      {userItem.name} {userItem.isUser && "(Bạn)"}
-                    </h3>
+                    <UserNameWithVip
+                      name={userItem.name}
+                      isVip={userItem.isVip}
+                      className={cn(
+                        "text-sm md:text-base mb-0.5",
+                        userItem.isUser ? "text-blue-700" : "text-gray-900 group-hover:text-blue-600 transition-colors"
+                      )}
+                    />
                     <div className="flex items-center">
                       <UserLevelBadge level={userItem.level} size="sm" />
                     </div>
@@ -333,7 +339,11 @@ export function Leaderboard() {
                     className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0"
                   />
                   <div className="min-w-0 flex-1 flex flex-col justify-center">
-                    <h3 className="font-bold text-sm md:text-base truncate text-blue-700 mb-0.5">{user?.displayName || "Bạn"} (Bạn)</h3>
+                    <UserNameWithVip
+                      name={`${user?.displayName || "Bạn"} (Bạn)`}
+                      isVip={(user as any)?.isVip}
+                      className="text-sm md:text-base text-blue-700 mb-0.5"
+                    />
                     <div className="flex items-center">
                       <UserLevelBadge level={user?.level || 1} size="sm" />
                     </div>

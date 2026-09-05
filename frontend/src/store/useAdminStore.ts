@@ -16,7 +16,7 @@ interface AdminState {
   quizzes: CacheState<any>;
   quizHistory: CacheState<any>;
 
-  fetchUsers: (page: number, forceRefresh?: boolean) => Promise<void>;
+  fetchUsers: (page: number, forceRefresh?: boolean, filters?: { search?: string, role?: string, status?: string }) => Promise<void>;
   fetchTasks: (forceRefresh?: boolean) => Promise<void>;
   fetchVocabSets: (page: number, forceRefresh?: boolean) => Promise<void>;
   fetchVocab: (page: number, forceRefresh?: boolean) => Promise<void>;
@@ -36,18 +36,25 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   quizzes: { ...initialCacheState },
   quizHistory: { ...initialCacheState },
 
-  fetchUsers: async (page, forceRefresh = false) => {
+  fetchUsers: async (page, forceRefresh = false, filters = {}) => {
     const { users } = get();
-    if (!forceRefresh && users.pages[page] && users.currentPage === page) return; // Cached
+    const hasFilters = filters.search || filters.role || filters.status;
+    
+    // Only use cache if no filters are applied
+    if (!forceRefresh && !hasFilters && users.pages[page] && users.currentPage === page) return; // Cached
 
     set((state) => ({ users: { ...state.users, loading: true, currentPage: page } }));
-    const data = await adminService.getUsers(page, 10);
+    const data = await adminService.getUsers(page, 10, filters.search, filters.role, filters.status);
+    
     set((state) => ({
       users: {
         ...state.users,
         loading: false,
         totalItems: data.total || 0,
-        pages: { ...state.users.pages, [page]: { items: data.users || [], totalPages: data.totalPages || 1 } },
+        pages: hasFilters ? state.users.pages : { ...state.users.pages, [page]: { items: data.users || [], totalPages: data.totalPages || 1 } },
+        // For filtered data, we temporarily store it in a special "filtered" property to avoid messing up the main cache
+        filteredItems: hasFilters ? data.users : undefined,
+        filteredTotalPages: hasFilters ? data.totalPages : undefined,
       },
     }));
   },

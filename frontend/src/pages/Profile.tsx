@@ -38,6 +38,7 @@ import { friendsService } from "../services/friendsService";
 import { Modal } from "../components/ui/Modal";
 import axiosInstance from "@/src/services/axiosConfig";
 import { Button } from "@/src/components/ui/Button";
+import { UserNameWithVip } from "../components/ui/UserNameWithVip";
 
 const RECENT_ACTIVITIES = [
   { id: 1, action: "Đã hoàn thành bài Quiz", target: "Ngữ pháp cơ bản - Thì Hiện Tại", time: "2 giờ trước", icon: Target, color: "text-green-500" },
@@ -163,7 +164,6 @@ export function Profile() {
       setIsFriendLoading(false);
     }
   };
-
   const user = profileData
     ? {
         name: profileData.name,
@@ -187,6 +187,7 @@ export function Profile() {
         recentActivities: profileData.recentActivities || [],
         flashcardSets: profileData.flashcardSets || [],
         quizzes: profileData.quizzes || [],
+        isVip: profileData.isVip,
       }
     : null;
 
@@ -262,7 +263,8 @@ export function Profile() {
               </div>
 
               <div className="text-center md:text-left mt-2 md:mt-0 md:mb-4">
-                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900">{user.name}</h1>
+                {/* <h1 className="">{user.name}</h1> */}
+                <UserNameWithVip name={user.name} isVip={user.isVip} className={"text-2xl md:text-3xl font-extrabold text-gray-900"} />
                 <p className="text-gray-500 font-medium">{user.username}</p>
               </div>
             </div>

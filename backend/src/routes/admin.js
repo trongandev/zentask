@@ -199,11 +199,30 @@ router.get(
   asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || "";
+    const role = req.query.role || "";
+    const status = req.query.status || "";
 
-    const total = await User.countDocuments();
-    const totalPages = Math.ceil(total / limit);
+    const query = {};
+    if (search) {
+      query.$or = [
+        { displayName: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } }
+      ];
+    }
+    if (role) {
+      query.role = role;
+    }
+    if (status === "banned") {
+      query.isBanned = true;
+    } else if (status === "active") {
+      query.isBanned = { $ne: true };
+    }
 
-    const users = await User.find()
+    const total = await User.countDocuments(query);
+    const totalPages = Math.ceil(total / limit) || 1;
+
+    const users = await User.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)

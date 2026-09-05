@@ -15,6 +15,7 @@ const learningRoadmapSchema = new mongoose.Schema(
         words: [
           {
             word: { type: String, required: true },
+            phonetic: { type: String }, // phiên âm
             meaning: { type: String, required: true },
             pos: { type: String }, // part of speech
             example: { type: String }, // ví dụ
