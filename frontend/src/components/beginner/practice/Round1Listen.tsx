@@ -26,14 +26,10 @@ export function Round1Listen({ currentWord }: Round1ListenProps) {
           disabled={isLoading && loadingText === targetAudioText}
           className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 hover:bg-blue-200 hover:scale-110 transition-all disabled:opacity-75"
         >
-          {isLoading && loadingText === targetAudioText ? (
-            <Loader2 className="w-10 h-10 animate-spin" />
-          ) : (
-            <Volume2 className="w-10 h-10" />
-          )}
+          {isLoading && loadingText === targetAudioText ? <Loader2 className="w-10 h-10 animate-spin" /> : <Volume2 className="w-10 h-10" />}
         </Button>
-        <p className="text-xl font-medium text-slate-700 mb-2">{currentWord?.examples?.[0]?.en || currentWord?.term}</p>
-        <p className="text-slate-500 italic">"{currentWord?.examples?.[0]?.vi || currentWord?.translation}"</p>
+        <p className="text-xl font-medium text-slate-700 mb-2">{currentWord?.phonetic}</p>
+        <p className="text-slate-500 italic">"{currentWord?.meaning}"</p>
 
         <div className="mt-8 pt-6 border-t border-slate-100">
           <p className="font-bold text-3xl text-blue-600 tracking-wide">{currentWord?.term}</p>

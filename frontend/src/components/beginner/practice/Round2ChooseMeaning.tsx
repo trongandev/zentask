@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Volume2, CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
@@ -15,6 +15,14 @@ interface Round2ChooseMeaningProps {
 export function Round2ChooseMeaning({ topicId, currentWord, allLessonWords, isCorrect, onCheckAnswer }: Round2ChooseMeaningProps) {
   const { playAudio, isLoading, loadingText } = useTTSAudio();
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const initialPlayRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (currentWord && initialPlayRef.current !== currentWord.id) {
+      initialPlayRef.current = currentWord.id;
+      playAudio(currentWord.term);
+    }
+  }, [currentWord, playAudio]);
 
   const options = useMemo(() => {
     if (!currentWord) return [];

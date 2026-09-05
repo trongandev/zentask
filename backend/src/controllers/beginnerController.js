@@ -272,7 +272,8 @@ export const optInDailyLearning = async (req, res) => {
     const user = await User.findById(uid);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    user.learningPreferences = preferences;
+    user.preferences = user.preferences || {};
+    user.preferences.interests = preferences;
     user.dailyLearningOptIn = true;
     user.lastActiveDate = new Date();
     await user.save();

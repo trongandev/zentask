@@ -33,7 +33,7 @@ export const generatePersonalizedContent = async (user, mistakes) => {
     }
     const levelObj = langLevels.find((l) => l.id === userLevelId) || langLevels[0];
     const levelStr = levelObj.name;
-    const prefs = user.learningPreferences?.join(", ") || "General";
+    const prefs = (user.preferences?.interests || []).join(", ") || "General";
     const langInfo = LANG_MAP[targetLang] || LANG_MAP["en"];
     const langName = langInfo.name;
     const voice1 = langInfo.voices[0];

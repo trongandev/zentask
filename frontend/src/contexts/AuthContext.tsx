@@ -40,15 +40,19 @@ interface UserProfile {
   achievedBadges?: number[];
   appSettings?: AppSettings;
   onboarding?: OnboardingState;
-  targetLanguage?: string | null;
   languageLevel?: string;
-  learningPreferences?: string[];
   dailyLearningOptIn?: boolean;
   isVip?: boolean;
   vipUntil?: string | null;
   subscription?: {
     plan: string;
     status: string;
+  };
+  preferences: {
+    language: string;
+    interests: string[];
+    goal: string;
+    wordsPerDay: number;
   };
 }
 

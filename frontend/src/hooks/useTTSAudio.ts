@@ -87,7 +87,15 @@ export const useTTSAudio = () => {
     setIsLoading(true);
     setLoadingText(text);
     try {
-      const voice = language || getVoiceForLanguage(user?.targetLanguage);
+      const PREF_LANG_MAP: Record<string, string> = {
+        "Tiếng Anh": "en",
+        "Tiếng Nhật": "ja",
+        "Tiếng Trung": "zh",
+        "Tiếng Hàn": "ko",
+      };
+      const prefLang = user?.preferences?.language || "Tiếng Anh";
+      const targetLang = PREF_LANG_MAP[prefLang] || "en";
+      const voice = language || getVoiceForLanguage(targetLang);
       const cacheKey = `${text}_${voice}`;
 
       let audioUrl = audioCache.get(cacheKey);

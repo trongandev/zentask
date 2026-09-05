@@ -16,7 +16,15 @@ export const verifyToken = async (req, res, next) => {
       if (user.isBanned) {
         return res.status(403).json({ success: false, message: "Account has been banned" });
       }
-      req.user.targetLanguage = user.targetLanguage;
+      
+      const PREF_LANG_MAP = {
+        "Tiếng Anh": "en",
+        "Tiếng Nhật": "ja",
+        "Tiếng Trung": "zh",
+        "Tiếng Hàn": "ko",
+      };
+      
+      req.user.targetLanguage = PREF_LANG_MAP[user.preferences?.language] || "en";
     }
 
     next();

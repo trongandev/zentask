@@ -7,7 +7,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation, Link } from "react-router-dom";
 import { Sidebar } from "./components/Sidebar";
 import { Header } from "./components/Header";
-import { Home, MountainSnow, Copy, Globe, User } from "lucide-react";
+import { Home, MountainSnow, Copy, Globe, User, Trophy } from "lucide-react";
 
 import { AdminLayout } from "./components/AdminLayout";
 import { BeginnerLayout } from "./components/BeginnerLayout";
@@ -52,16 +52,16 @@ const PostDetail = lazy(() => import("./pages/PostDetail").then((m) => ({ defaul
 const Beginner = lazy(() => import("./pages/Beginner/Beginner").then((m) => ({ default: m.Beginner })));
 const BeginnerGrammar = lazy(() => import("./pages/Beginner/BeginnerGrammar").then((m) => ({ default: m.BeginnerGrammar })));
 const BeginnerGrammarLesson = lazy(() => import("./pages/Beginner/BeginnerGrammarLesson").then((m) => ({ default: m.BeginnerGrammarLesson })));
-const BeginnerSkills = lazy(() => import("./pages/Beginner/BeginnerSkills").then((m) => ({ default: m.BeginnerSkills })));
+const BeginnerSkills = lazy(() => import("./pages/Beginner/Skill/BeginnerSkills").then((m) => ({ default: m.BeginnerSkills })));
 const BeginnerSkillComingSoon = lazy(() => import("./pages/Beginner/BeginnerSkillComingSoon").then((m) => ({ default: m.BeginnerSkillComingSoon })));
-const BeginnerListening = lazy(() => import("./pages/Beginner/BeginnerListening").then((m) => ({ default: m.BeginnerListening })));
-const BeginnerListeningDetail = lazy(() => import("./pages/Beginner/BeginnerListeningDetail").then((m) => ({ default: m.BeginnerListeningDetail })));
-const BeginnerSpeaking = lazy(() => import("./pages/Beginner/BeginnerSpeaking").then((m) => ({ default: m.BeginnerSpeaking })));
-const BeginnerSpeakingDetail = lazy(() => import("./pages/Beginner/BeginnerSpeakingDetail").then((m) => ({ default: m.BeginnerSpeakingDetail })));
-const BeginnerReading = lazy(() => import("./pages/Beginner/BeginnerReading").then((m) => ({ default: m.BeginnerReading })));
-const BeginnerReadingDetail = lazy(() => import("./pages/Beginner/BeginnerReadingDetail").then((m) => ({ default: m.BeginnerReadingDetail })));
-const BeginnerWriting = lazy(() => import("./pages/Beginner/BeginnerWriting").then((m) => ({ default: m.BeginnerWriting })));
-const BeginnerWritingDetail = lazy(() => import("./pages/Beginner/BeginnerWritingDetail").then((m) => ({ default: m.BeginnerWritingDetail })));
+const BeginnerListening = lazy(() => import("./pages/Beginner/Skill/BeginnerListening").then((m) => ({ default: m.BeginnerListening })));
+const BeginnerListeningDetail = lazy(() => import("./pages/Beginner/Skill/BeginnerListeningDetail").then((m) => ({ default: m.BeginnerListeningDetail })));
+const BeginnerSpeaking = lazy(() => import("./pages/Beginner/Skill/BeginnerSpeaking").then((m) => ({ default: m.BeginnerSpeaking })));
+const BeginnerSpeakingDetail = lazy(() => import("./pages/Beginner/Skill/BeginnerSpeakingDetail").then((m) => ({ default: m.BeginnerSpeakingDetail })));
+const BeginnerReading = lazy(() => import("./pages/Beginner/Skill/BeginnerReading").then((m) => ({ default: m.BeginnerReading })));
+const BeginnerReadingDetail = lazy(() => import("./pages/Beginner/Skill/BeginnerReadingDetail").then((m) => ({ default: m.BeginnerReadingDetail })));
+const BeginnerWriting = lazy(() => import("./pages/Beginner/Skill/BeginnerWriting").then((m) => ({ default: m.BeginnerWriting })));
+const BeginnerWritingDetail = lazy(() => import("./pages/Beginner/Skill/BeginnerWritingDetail").then((m) => ({ default: m.BeginnerWritingDetail })));
 const BeginnerRank = lazy(() => import("./pages/Beginner/BeginnerRank").then((m) => ({ default: m.BeginnerRank })));
 const BeginnerArena = lazy(() => import("./pages/Beginner/BeginnerArena").then((m) => ({ default: m.BeginnerArena })));
 const BeginnerFlashcardDetail = lazy(() => import("./pages/Flashcard/BeginnerFlashcardDetail").then((m) => ({ default: m.BeginnerFlashcardDetail })));
@@ -248,7 +248,7 @@ function MainLayout() {
               { path: "/dashboard", label: "Tổng quan", icon: <Home className="w-6 h-6" /> },
               { path: "/beginner", label: "Lộ trình", icon: <MountainSnow className="w-6 h-6" /> },
               { path: "/flashcards", label: "Thẻ lật", icon: <Copy className="w-6 h-6" /> },
-              { path: "/community", label: "Cộng đồng", icon: <Globe className="w-6 h-6" /> },
+              { path: "/leaderboard", label: "Bảng xếp hạng", icon: <Trophy className="w-6 h-6" /> },
             ].map((item) => {
               const isActive = location.pathname.startsWith(item.path) && (item.path !== "/dashboard" || location.pathname === "/dashboard");
               return (

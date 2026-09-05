@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, Lock, Star, X, Play, BookOpen } from "lucide-react";
+import { Check, Lock, Star, X, Play, BookOpen, Volume2, Loader2 } from "lucide-react";
 import axiosInstance from "@/src/services/axiosConfig";
 import { useAuth } from "@/src/contexts/AuthContext";
 import { cn } from "@/src/lib/utils";
 import { Button } from "@/src/components/ui/Button";
 import { SEO } from "@/src/components/SEO";
+import { useTTSAudio } from "@/src/hooks/useTTSAudio";
 
 const PATH_OFFSETS = [0, 40, 60, 40, 0, -40, -60, -40];
 
@@ -23,10 +24,11 @@ interface Roadmap {
 }
 
 export function Beginner() {
+  const { playAudio, isLoading, loadingText } = useTTSAudio();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [selectedDay, setSelectedDay] = useState<RoadmapDay | null>(null);
   const [showWaitTomorrowModal, setShowWaitTomorrowModal] = useState(false);
   const [viewPhaseIndex, setViewPhaseIndex] = useState(0);
@@ -35,7 +37,7 @@ export function Beginner() {
 
   // Initial scroll and calculate viewPhase
   useEffect(() => {
-    if (!isLoading && roadmap) {
+    if (!isLoadingData && roadmap) {
       const maxCompletedDay = roadmap.completedDays?.length ? Math.max(...roadmap.completedDays) : 0;
       const activeDay = Math.min(roadmap.days.length, maxCompletedDay + 1);
       const initialPhase = Math.max(0, Math.floor((activeDay - 1) / 7));
@@ -45,12 +47,12 @@ export function Beginner() {
         currentNodeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 300);
     }
-  }, [roadmap, isLoading]);
+  }, [roadmap, isLoadingData]);
 
   useEffect(() => {
     const fetchRoadmap = async () => {
       if (!user) return;
-      setIsLoading(true);
+      setIsLoadingData(true);
       try {
         const res = await axiosInstance.get("/api/roadmap/me");
         setRoadmap(res.data);
@@ -60,7 +62,7 @@ export function Beginner() {
         }
         console.error("Failed to fetch roadmap", error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingData(false);
       }
     };
     fetchRoadmap();
@@ -237,7 +239,17 @@ export function Beginner() {
                 {selectedDay.words.map((w, idx) => (
                   <div key={idx} className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 flex flex-col gap-2">
                     <div className="flex items-end justify-between">
-                      <span className="font-black text-lg text-slate-800">{w.word}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-lg text-slate-800">{w.word}</span>
+                        <Button
+                          variant="custom"
+                          onClick={() => playAudio(w.word)}
+                          disabled={isLoading && loadingText === w.word}
+                          className="p-1.5 text-blue-500 hover:bg-blue-100 rounded-full transition-colors disabled:opacity-50"
+                        >
+                          {isLoading && loadingText === w.word ? <Loader2 className="w-4 h-4 animate-spin" /> : <Volume2 className="w-4 h-4" />}
+                        </Button>
+                      </div>
                       <div className="flex gap-2 items-center">
                         {w.phonetic && <span className="text-xs font-medium text-slate-500">{w.phonetic}</span>}
                         {w.pos && <span className="text-xs font-bold text-blue-500 bg-blue-100 px-2 py-1 rounded-md">{w.pos}</span>}
@@ -245,8 +257,16 @@ export function Beginner() {
                     </div>
                     <span className="font-bold text-slate-600">{w.meaning}</span>
                     {w.example && (
-                      <div className="mt-2 pt-2 border-t border-slate-200">
-                        <p className="text-sm font-medium text-slate-700 italic">"{w.example}"</p>
+                      <div className="mt-2 pt-2 border-t border-slate-200 relative">
+                        <p className="text-sm font-medium text-slate-700 italic pr-8">"{w.example}"</p>
+                        <Button
+                          variant="custom"
+                          onClick={() => playAudio(w.example)}
+                          disabled={isLoading && loadingText === w.example}
+                          className="absolute right-0 top-2 p-1 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
+                        >
+                          {isLoading && loadingText === w.example ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Volume2 className="w-3.5 h-3.5" />}
+                        </Button>
                         {w.example_translation && <p className="text-xs font-medium text-slate-500 mt-0.5">{w.example_translation}</p>}
                       </div>
                     )}

@@ -330,13 +330,19 @@ router.put(
     const user = await User.findById(req.user.uid);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (user.targetLanguage !== languageCode) {
-      user.learningPreferences = [];
-    }
-    user.targetLanguage = languageCode;
+    const REVERSE_LANG_MAP = {
+      "en": "Tiếng Anh",
+      "ja": "Tiếng Nhật",
+      "zh": "Tiếng Trung",
+      "ko": "Tiếng Hàn"
+    };
+    
+    user.preferences = user.preferences || {};
+    user.preferences.language = REVERSE_LANG_MAP[languageCode] || "Tiếng Anh";
 
     if (level) {
       user.languageLevel = level;
+      user.preferences.level = level;
 
       // Auto-complete previous topics if user skips to a higher level
       if (level !== "Beginner" && req.body.skipTopics) {
@@ -417,7 +423,7 @@ router.put(
 
     res.json({
       status: "success",
-      targetLanguage: languageCode,
+      preferences: user.preferences,
       rankId: user.rankId,
       tier: user.tier,
       languageLevel: user.languageLevel,
@@ -567,7 +573,7 @@ router.get(
       level: user.level || 1,
       xp: user.xp || 0,
       streak: user.streak || 0,
-      targetLanguage: user.targetLanguage || null,
+      preferences: user.preferences || {},
       rankId: user.rankId || 1,
       tier: user.tier || 3,
       stars: user.stars || 0,

@@ -313,7 +313,7 @@ export function registerArenaHandlers(io, socket) {
 
     let freshProfile = null;
     try {
-      freshProfile = await User.findById(uid).select("displayName photoURL rankId tier stars arenaMatchesPlayed targetLanguage").lean();
+      freshProfile = await User.findById(uid).select("displayName photoURL rankId tier stars arenaMatchesPlayed preferences").lean();
     } catch (err) {
       console.warn("[Arena] Cannot refresh user profile:", err.message);
     }

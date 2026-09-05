@@ -101,15 +101,6 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
-    targetLanguage: {
-      type: String,
-      default: 'en',
-    },
-
-    learningPreferences: {
-      type: [String],
-      default: [],
-    },
     preferences: {
       language: { type: String },
       interests: [{ type: String }],

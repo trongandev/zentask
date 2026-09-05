@@ -3,7 +3,7 @@ import { Modal } from "@/src/components/ui/Modal";
 import { Button } from "@/src/components/ui/Button";
 import { adminService } from "@/src/services/adminService";
 import toastService from "@/src/services/toastService";
-import { User, Activity, BrainCircuit, Library, Award, RefreshCw, AlertTriangle, Crown } from "lucide-react";
+import { User, Activity, BrainCircuit, Library, Award, RefreshCw, AlertTriangle, Crown, Check } from "lucide-react";
 import { UserAvatar } from "@/src/components/ui/UserAvatar";
 import { UserLevelBadge } from "@/src/components/ui/UserLevelBadge";
 import { getRankName } from "@/src/config/rankTopicConfig";
@@ -155,12 +155,37 @@ export function AdminUserDetailsModal({ isOpen, onClose, uid }: AdminUserDetails
                         <p className="text-2xl font-black text-blue-600">{data.stats?.beginnerCompletedLessons || 0}</p>
                       </div>
                     </div>
+
+                    {data.roadmap && (
+                      <div className="bg-white p-4 rounded-xl border border-slate-200">
+                        <h4 className="font-bold text-slate-800 mb-4">Lộ trình AI cá nhân hoá</h4>
+                        <div className="flex flex-wrap gap-4">
+                          {data.roadmap.days?.map((day: any) => {
+                            const isCompleted = data.roadmap.completedDays?.includes(day.day);
+                            return (
+                              <div
+                                key={day.day}
+                                title={day.topic}
+                                className={`w-12 h-12 rounded-full flex items-center justify-center relative shadow-[0_4px_0_0] border-[2px] border-white transition-all cursor-help ${
+                                  isCompleted
+                                    ? "bg-yellow-400 text-white shadow-[#d97706]"
+                                    : "bg-slate-200 text-slate-400 shadow-slate-300"
+                                }`}
+                              >
+                                {isCompleted ? <Check className="w-6 h-6 stroke-[3]" /> : <span className="font-bold text-sm">{day.day}</span>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="bg-red-50 p-4 rounded-xl border border-red-100">
                       <h4 className="font-bold text-red-800 mb-2 flex items-center gap-2">
                         <AlertTriangle className="w-5 h-5" /> Danger Zone
                       </h4>
-                      <p className="text-sm text-red-600 mb-4">Hành động này sẽ xoá toàn bộ tiến trình học lộ trình cơ bản của user. User sẽ phải học lại từ đầu. Không thể hoàn tác.</p>
-                      <Button variant="destructive" size="default" onClick={() => handleManageAction("RESET_BEGINNER_PROGRESS", {}, "Xoá toàn bộ tiến trình học cơ bản?")}>
+                      <p className="text-sm text-red-600 mb-4">Hành động này sẽ xoá toàn bộ tiến trình học lộ trình cơ bản và roadmap sinh ra bởi AI của user. User sẽ phải làm bài test lại từ đầu. Không thể hoàn tác.</p>
+                      <Button variant="destructive" size="default" onClick={() => handleManageAction("RESET_BEGINNER_PROGRESS", {}, "Xoá toàn bộ tiến trình học cơ bản và roadmap của user?")}>
                         Reset Lộ trình cơ bản
                       </Button>
                     </div>

@@ -3,6 +3,7 @@ import { Volume2, CheckCircle } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { useTTSAudio } from "../../../hooks/useTTSAudio";
 import { Button } from "@/src/components/ui/Button";
+import { useAuth } from "@/src/contexts/AuthContext";
 
 interface Round6ReverseQuizProps {
   topicId: string | undefined;
@@ -13,6 +14,7 @@ interface Round6ReverseQuizProps {
 }
 
 export function Round6ReverseQuiz({ topicId, currentWord, allLessonWords, isCorrect, onCheckAnswer }: Round6ReverseQuizProps) {
+  const { user } = useAuth();
   const { playAudio } = useTTSAudio();
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
@@ -33,7 +35,7 @@ export function Round6ReverseQuiz({ topicId, currentWord, allLessonWords, isCorr
 
   return (
     <div className="space-y-6 animate-in slide-in-from-right text-center flex flex-col items-center">
-      <h2 className="text-2xl font-bold text-slate-800 mb-8">Từ vựng tiếng Anh là gì?</h2>
+      <h2 className="text-2xl font-bold text-slate-800 mb-8">Từ vựng này trong {user?.preferences?.language} là gì?</h2>
 
       <div className="text-center mb-12">
         <p className="font-bold text-4xl text-slate-700 mb-4 px-4">{currentWord?.meaning}</p>

@@ -91,7 +91,7 @@ function InfoChip({ icon, children }: { icon?: React.ReactNode; children: React.
 }
 
 export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabled, answerStatus = null }: any) {
-  const { playAudio, isLoading, loadingText } = useTTSAudio();
+  const { playAudio, playSoundEffect, isLoading, loadingText } = useTTSAudio();
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -99,7 +99,7 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
   const options = useMemo(() => {
     if (mode !== "quiz") return [];
     const wrong = allCards
-      .filter((c) => c.id !== card.id && c.translation && normalizeAnswer(c.translation) !== normalizeAnswer(card.translation))
+      .filter((c: any) => c.id !== card.id && c.translation && normalizeAnswer(c.translation) !== normalizeAnswer(card.translation))
       .sort(() => 0.5 - Math.random())
       .slice(0, 3);
     return [card, ...wrong].sort(() => 0.5 - Math.random());
@@ -112,12 +112,36 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
     }
   }, [card, disabled, mode]);
 
-  // Auto play audio for listening mode
+  const initialPlayRef = useRef<string | null>(null);
+  const feedbackPlayRef = useRef<string | null>(null);
+
+  // Auto play audio on mount
   useEffect(() => {
-    if (mode === "listening" && !disabled) {
-      playAudio(card.term);
+    if (!disabled && ["quiz", "fill_blank", "listening", "typing"].includes(mode)) {
+      if (initialPlayRef.current !== card.id) {
+        initialPlayRef.current = card.id;
+        playAudio(card.term);
+      }
     }
-  }, [card, disabled, mode, playAudio]);
+  }, [card.id, card.term, disabled, mode, playAudio]);
+
+  // Play feedback audio when answered
+  useEffect(() => {
+    if (disabled && answerStatus !== null) {
+      if (feedbackPlayRef.current !== card.id) {
+        feedbackPlayRef.current = card.id;
+        if (answerStatus === true) {
+          if (["quiz", "listening", "guess", "typing"].includes(mode)) {
+            playAudio(card.term, undefined, "correct");
+          } else {
+            playSoundEffect("correct");
+          }
+        } else {
+          playSoundEffect("wrong");
+        }
+      }
+    }
+  }, [card.id, card.term, mode, disabled, answerStatus, playAudio, playSoundEffect]);
 
   const checkTypedAnswer = () => normalizeAnswer(inputValue) === normalizeAnswer(card.term);
 
@@ -147,7 +171,11 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
         <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-blue-200">Chọn nghĩa đúng</p>
         <h2 className="break-words text-4xl sm:text-5xl font-black text-white mb-3 tracking-wide">{card.term}</h2>
         {card.phonetic && <p className="mb-4 text-lg font-semibold text-white/60">/{card.phonetic}/</p>}
-        <Button onClick={() => playAudio(card.term)} disabled={isLoading && loadingText === card.term} className="mx-auto p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-75">
+        <Button
+          onClick={() => playAudio(card.term)}
+          disabled={isLoading && loadingText === card.term}
+          className="mx-auto p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-75"
+        >
           {isLoading && loadingText === card.term ? <Loader2 className="w-6 h-6 animate-spin" /> : <Volume2 className="w-6 h-6" />}
         </Button>
       </div>
@@ -206,7 +234,11 @@ export function ArenaGameRenderer({ mode, card, allCards, isX2, onAnswer, disabl
     <div className="w-full flex flex-col items-center">
       <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-8 sm:p-12 rounded-3xl w-full text-center mb-8 shadow-2xl relative">
         {isX2 && <div className="absolute top-0 right-0 bg-yellow-500 text-black font-black px-6 py-2 rounded-bl-3xl">X2 ĐIỂM</div>}
-        <Button onClick={() => playAudio(card.term)} disabled={isLoading && loadingText === card.term} className="mx-auto p-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-[0_0_30px_rgba(37,99,235,0.5)] animate-pulse disabled:opacity-75">
+        <Button
+          onClick={() => playAudio(card.term)}
+          disabled={isLoading && loadingText === card.term}
+          className="mx-auto p-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-[0_0_30px_rgba(37,99,235,0.5)] animate-pulse disabled:opacity-75"
+        >
           {isLoading && loadingText === card.term ? <Loader2 className="w-12 h-12 animate-spin" /> : <Volume2 className="w-12 h-12" />}
         </Button>
         <p className="text-blue-200 text-lg mt-6 uppercase tracking-widest font-bold">Nghe và gõ lại từ/cụm từ</p>

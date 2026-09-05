@@ -26,7 +26,12 @@ export function BeginnerLayout() {
   const isHideHeader =
     location.pathname.includes("/beginner/listening") ||
     location.pathname.includes("/beginner/speaking") ||
-    location.pathname.includes("/beginner/reading");
+    location.pathname.includes("/beginner/reading") ||
+    location.pathname.includes("/beginner/writing");
+
+  const isSkillDetail = Boolean(
+    location.pathname.match(/\/beginner\/(listening|speaking|reading|writing)\/.+/)
+  );
 
   return (
     <div className="flex min-h-[100dvh] bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
@@ -101,7 +106,7 @@ export function BeginnerLayout() {
       </div>
 
       {/* Mobile Bottom Navigation (Floating Dock) */}
-      {!isLessonPage && (
+      {!isLessonPage && !isSkillDetail && (
         <nav className="md:hidden fixed bottom-6 left-4 right-4 z-50">
           <div className="bg-white/90 backdrop-blur-xl border border-slate-200/50 shadow-2xl rounded-3xl flex justify-around items-center p-2 mx-auto max-w-sm">
             {navItems.map((item) => {

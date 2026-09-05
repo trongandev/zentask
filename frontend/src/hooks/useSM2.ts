@@ -15,7 +15,7 @@ import type { PracticeMode } from "../pages/Flashcard/FlashcardPractice";
  */
 export function getTypingTargetTime(term: string): number {
   const charCount = term.replace(/\s/g, "").length; // không tính khoảng trắng
-  return 1500 + charCount * 150;
+  return 5500 + charCount * 150;
 }
 
 /**

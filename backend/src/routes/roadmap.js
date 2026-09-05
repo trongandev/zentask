@@ -27,6 +27,7 @@ router.post("/init", async (req, res) => {
       interests: preferences.interests || [],
       goal: preferences.goal || "",
       wordsPerDay: preferences.wordsPerDay || 10,
+      level: preferences.level || "",
     };
 
     // Check if roadmap already exists
@@ -47,6 +48,7 @@ Target Language: ${user.preferences.language}
 Interests: ${user.preferences.interests.join(", ")}
 Goal: ${user.preferences.goal}
 Words per day: ${user.preferences.wordsPerDay}
+Current Level: ${user.preferences.level || "Beginner"}
 
 CRITICAL: To save tokens, output MUST be in this exact optimized plain-text format, nothing else. No markdown, no JSON, no explanations.
 RULES:

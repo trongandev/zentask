@@ -2,6 +2,7 @@ import { Router } from "express";
 import User from "../models/User.js";
 import { DailyTask, FlashcardSet, Flashcard, Quiz, QuizResult, BotConfig, SystemLog, CommunityPost, BannedIP, AttackerFeedback, AITokenUsage, BotJobSchedule, BeginnerProgress, UserLanguageProgress } from "../models/Schemas.js";
 import { verifyToken } from "../middleware/auth.js";
+import LearningRoadmap from "../models/LearningRoadmap.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { reloadJob, triggerJob } from "../../utils/jobManager.js";
 import {
@@ -707,13 +708,14 @@ router.get(
     const user = await User.findById(uid).lean();
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const [beginnerProgressCount, flashcardCount, quizCount, langProgress, flashcardSets, quizHistory] = await Promise.all([
+    const [beginnerProgressCount, flashcardCount, quizCount, langProgress, flashcardSets, quizHistory, roadmap] = await Promise.all([
       BeginnerProgress.countDocuments({ $or: [{ uid }, { userId: uid }] }),
       Flashcard.countDocuments({ userId: uid }),
       QuizResult.countDocuments({ uid }),
       UserLanguageProgress.findOne({ uid, language: user.targetLanguage || "en" }).lean(),
       FlashcardSet.find({ userId: uid }).sort({ createdAt: -1 }).lean(),
-      QuizResult.find({ uid }).populate("quizId", "title difficulty").sort({ createdAt: -1 }).lean()
+      QuizResult.find({ uid }).populate("quizId", "title difficulty").sort({ createdAt: -1 }).lean(),
+      LearningRoadmap.findOne({ userId: uid }).lean()
     ]);
 
     res.json({
@@ -725,7 +727,8 @@ router.get(
       },
       rankProgress: langProgress || { rankId: 1, tier: 3 },
       flashcardSets: flashcardSets || [],
-      quizHistory: quizHistory || []
+      quizHistory: quizHistory || [],
+      roadmap: roadmap || null
     });
   })
 );
@@ -767,7 +770,9 @@ router.put(
 
       case "RESET_BEGINNER_PROGRESS":
         await BeginnerProgress.deleteMany({ $or: [{ uid }, { userId: uid }] });
-        res.json({ status: "success", message: "Đã reset lộ trình học cơ bản" });
+        await LearningRoadmap.deleteMany({ userId: uid });
+        await User.findByIdAndUpdate(uid, { $set: { preferences: {} } });
+        res.json({ status: "success", message: "Đã reset lộ trình học cơ bản, roadmap và sở thích" });
         break;
 
       case "RESET_FLASHCARDS":

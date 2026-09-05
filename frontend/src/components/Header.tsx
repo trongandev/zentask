@@ -30,6 +30,13 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
   const { notifications, markAsRead } = useSocket();
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
+  const PREF_LANG_MAP: Record<string, string> = {
+    "Tiếng Anh": "en",
+    "Tiếng Nhật": "ja",
+    "Tiếng Trung": "zh",
+    "Tiếng Hàn": "ko",
+  };
+
   useEffect(() => {
     if (!localStorage.getItem("hideExtensionAd")) {
       setShowExtensionAd(true);
@@ -178,9 +185,9 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
         </div>
 
         <div className="flex items-center gap-4 lg:gap-6">
-          {user && user.targetLanguage && (
+          {user && (
             <Button onClick={() => setIsLanguageOpen(true)} className="w-8 h-6 rounded overflow-hidden shadow-sm hover:scale-110 transition-transform" title="Đổi ngôn ngữ">
-              <img src={`/flag/${user.targetLanguage}.svg`} alt="Current Language" className="w-full h-full object-cover" />
+              <img src={`/flag/${PREF_LANG_MAP[user.preferences?.language || "Tiếng Anh"] || "en"}.svg`} alt="Current Language" className="w-full h-full object-cover" />
             </Button>
           )}
 

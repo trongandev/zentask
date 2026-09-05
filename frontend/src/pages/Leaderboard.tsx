@@ -118,9 +118,9 @@ export function Leaderboard() {
   };
 
   const getRankBadge = (rank: number) => {
-    if (rank === 1) return <img src="/top/top1.png" alt="Top 1" className="w-10 h-10 object-contain drop-shadow-md" />;
-    if (rank === 2) return <img src="/top/top2.png" alt="Top 2" className="w-10 h-10 object-contain drop-shadow-md" />;
-    if (rank === 3) return <img src="/top/top3.png" alt="Top 3" className="w-10 h-10 object-contain drop-shadow-md" />;
+    if (rank === 1) return <img src="/top/top1.png" alt="Top 1" className="w-8 md:w-10 h-8 md:h-10 object-contain drop-shadow-md" />;
+    if (rank === 2) return <img src="/top/top2.png" alt="Top 2" className="w-8 md:w-10 h-8 md:h-10 object-contain drop-shadow-md" />;
+    if (rank === 3) return <img src="/top/top3.png" alt="Top 3" className="w-8 md:w-10 h-8 md:h-10 object-contain drop-shadow-md" />;
 
     return <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center font-bold text-gray-600 border border-gray-200">{rank}</div>;
   };
@@ -191,7 +191,7 @@ export function Leaderboard() {
                 key={rank.id}
                 className={cn(
                   "flex flex-col items-center justify-center p-4 rounded-2xl border transition-all",
-                  isCurrentRank ? "bg-blue-50 border-blue-200 shadow-sm" : "bg-gray-50/50 border-dashed border-gray-200 opacity-60 grayscale hover:grayscale-0",
+                  isCurrentRank ? "bg-blue-50 border-blue-200 shadow-sm" : "bg-gray-50/50 border-dashed border-gray-200 opacity-60",
                 )}
               >
                 <img src={`/rank/${rank.id}.png`} alt={rank.name} className="w-16 h-16 object-contain mb-3 drop-shadow-sm" />
@@ -277,10 +277,7 @@ export function Leaderboard() {
                     <UserNameWithVip
                       name={userItem.name}
                       isVip={userItem.isVip}
-                      className={cn(
-                        "text-sm md:text-base mb-0.5",
-                        userItem.isUser ? "text-blue-700" : "text-gray-900 group-hover:text-blue-600 transition-colors"
-                      )}
+                      className={cn("text-sm md:text-base mb-0.5", userItem.isUser ? "text-blue-700" : "text-gray-900 group-hover:text-blue-600 transition-colors")}
                     />
                     <div className="flex items-center">
                       <UserLevelBadge level={userItem.level} size="sm" />
@@ -339,11 +336,7 @@ export function Leaderboard() {
                     className="w-12 h-12 md:w-16 md:h-16 flex-shrink-0"
                   />
                   <div className="min-w-0 flex-1 flex flex-col justify-center">
-                    <UserNameWithVip
-                      name={`${user?.displayName || "Bạn"} (Bạn)`}
-                      isVip={(user as any)?.isVip}
-                      className="text-sm md:text-base text-blue-700 mb-0.5"
-                    />
+                    <UserNameWithVip name={`${user?.displayName || "Bạn"} (Bạn)`} isVip={(user as any)?.isVip} className="text-sm md:text-base text-blue-700 mb-0.5" />
                     <div className="flex items-center">
                       <UserLevelBadge level={user?.level || 1} size="sm" />
                     </div>
