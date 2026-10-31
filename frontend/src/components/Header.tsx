@@ -127,7 +127,7 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
       value: user?.xp?.toLocaleString() || "0",
     },
   ];
-
+  console.log(user.preferences?.language);
   const handleCloseAd = () => {
     localStorage.setItem("hideExtensionAd", "true");
     setShowExtensionAd(false);
@@ -276,7 +276,7 @@ export function Header({ isLeftSidebarOpen, onToggleLeftSidebar, onToggleMobileM
 
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2">
-                  <div className="px-4 py-2 border-b border-gray-100 mb-1 sm:hidden">
+                  <div className="px-4 py-2 border-b border-gray-100 mb-1 sm:hidden ">
                     <p className="text-sm font-bold text-gray-900 leading-tight">{user.displayName}</p>
                     <div className="mt-1">
                       <UserLevelBadge level={user.level} size="sm" />

@@ -95,28 +95,28 @@ export function Auth() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-900">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.34),transparent_34%),radial-gradient(circle_at_85%_20%,rgba(168,85,247,0.24),transparent_30%),linear-gradient(135deg,#020617_0%,#0f172a_48%,#111827_100%)]" />
-      <div className="absolute -left-28 top-24 h-72 w-72 rounded-full bg-blue-500/20 blur-3xl" />
-      <div className="absolute -right-24 bottom-16 h-80 w-80 rounded-full bg-violet-500/20 blur-3xl" />
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:44px_44px] opacity-40" />
+    <div className="relative min-h-screen overflow-hidden bg-slate-50 text-slate-900 font-sans">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.15),transparent_34%),radial-gradient(circle_at_85%_20%,rgba(163,230,53,0.15),transparent_30%),linear-gradient(135deg,#f8fafc_0%,#f1f5f9_48%,#e2e8f0_100%)]" />
+      <div className="absolute -left-28 top-24 h-72 w-72 rounded-full bg-blue-400/20 blur-3xl" />
+      <div className="absolute -right-24 bottom-16 h-80 w-80 rounded-full bg-green-400/20 blur-3xl" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:44px_44px] opacity-40" />
 
       <main className="relative z-10 flex min-h-screen items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="grid w-full max-w-[1100px] overflow-hidden rounded-[1.5rem] sm:rounded-[2.5rem] border border-white/15 bg-white/10 shadow-2xl shadow-black/40 backdrop-blur-2xl lg:grid-cols-[1.1fr_0.9fr]">
-          <section className="relative hidden h-full flex-col justify-between overflow-hidden bg-slate-900/70 p-8 sm:p-10 lg:flex lg:p-12 text-white">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_20%,rgba(96,165,250,0.24),transparent_32%),radial-gradient(circle_at_70%_70%,rgba(34,197,94,0.14),transparent_28%)]" />
+        <div className="grid w-full max-w-[1100px] overflow-hidden rounded-[2.5rem] border-[4px] border-white bg-white shadow-[0_12px_0_0_#e2e8f0] lg:grid-cols-[1.1fr_0.9fr]">
+          <section className="relative hidden h-full flex-col justify-between overflow-hidden bg-slate-50 p-8 sm:p-10 lg:flex lg:p-12">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_20%,rgba(96,165,250,0.1),transparent_32%),radial-gradient(circle_at_70%_70%,rgba(34,197,94,0.05),transparent_28%)]" />
             <div className="relative z-10">
               <Link to="/" className={cn("p-6 gap-5 flex items-center")}>
                 <img src="/logo.png" className={cn("flex-shrink-0 w-16")} alt="Logo" />
                 <div className="min-w-0">
-                  <h1 className="text-4xl font-extrabold  text-blue-600 tracking-tight font-heading">Zentask</h1>
-                  <p className="text-[12px] text-gray-400 font-medium truncate">Học tập hiệu quả hơn mỗi ngày</p>
+                  <h1 className="text-4xl font-black text-blue-600 tracking-tight font-heading">Zentask</h1>
+                  <p className="text-[12px] text-slate-500 font-bold tracking-wide truncate uppercase">Học tập hiệu quả hơn mỗi ngày</p>
                 </div>
               </Link>
 
               <div className="max-w-xl">
-                <h2 className="text-2xl sm:text-4xl font-black leading-[1.15] tracking-tight">Tất cả công cụ học tiếng Anh trong một nền tảng.</h2>
-                <p className="mt-4 text-base sm:text-lg leading-relaxed text-slate-300">
+                <h2 className="text-2xl sm:text-4xl font-black leading-[1.15] tracking-tight text-slate-800">Tất cả công cụ học tiếng Anh trong một nền tảng.</h2>
+                <p className="mt-4 text-base sm:text-lg leading-relaxed text-slate-500 font-medium">
                   ZenTask kết hợp flashcard, quiz, AI, luyện phát âm, sổ tay và Arena để biến việc học thành một hành trình rõ ràng, có tiến độ và có động lực.
                 </p>
               </div>
@@ -127,14 +127,14 @@ export function Auth() {
                   return (
                     <div
                       key={item.title}
-                      className="group flex gap-4 rounded-3xl border border-white/5 bg-white/[0.04] p-4 transition-all hover:bg-white/[0.08] hover:border-white/10 shadow-lg shadow-black/5"
+                      className="group flex gap-4 rounded-3xl border-2 border-slate-100 bg-white p-4 transition-all hover:-translate-y-1 hover:shadow-[0_8px_0_0_#e2e8f0] shadow-[0_4px_0_0_#e2e8f0]"
                     >
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-blue-200 transition-colors group-hover:bg-blue-500/20 group-hover:text-blue-100">
-                        <Icon className="h-6 w-6" />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-500 transition-colors group-hover:bg-blue-100 group-hover:text-blue-600">
+                        <Icon className="h-6 w-6 stroke-[2.5]" />
                       </div>
                       <div>
-                        <h3 className="font-extrabold text-white">{item.title}</h3>
-                        <p className="mt-1 text-sm leading-6 text-slate-300">{item.description}</p>
+                        <h3 className="font-black text-slate-800">{item.title}</h3>
+                        <p className="mt-1 text-sm leading-6 text-slate-500 font-medium">{item.description}</p>
                       </div>
                     </div>
                   );
@@ -148,9 +148,9 @@ export function Auth() {
               <div className="mb-8 flex items-center justify-between lg:hidden">
                 <Link to="/" className={cn("p-6 flex items-center")}>
                   <img src="/logo.png" className={cn("flex-shrink-0 w-10")} alt="Logo" />
-                  <div className="min-w-0">
-                    <h1 className="text-xl font-bold text-blue-600 tracking-tight font-heading">Zentask</h1>
-                    <p className="text-[10px] text-gray-500 font-medium truncate">Học tập hiệu quả hơn mỗi ngày</p>
+                  <div className="min-w-0 ml-3">
+                    <h1 className="text-xl font-black text-blue-600 tracking-tight font-heading">Zentask</h1>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate">Học tập hiệu quả hơn</p>
                   </div>
                 </Link>
                 <img
@@ -164,13 +164,13 @@ export function Auth() {
               </div>
 
               <div className="mb-8">
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">{authTitle}</h2>
-                <p className="mt-2.5 text-sm sm:text-base leading-relaxed text-slate-500">{authDescription}</p>
+                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-800">{authTitle}</h2>
+                <p className="mt-2.5 text-sm sm:text-base leading-relaxed text-slate-500 font-medium">{authDescription}</p>
               </div>
               <Button
                 type="button"
                 onClick={loginWithGoogle}
-                className="group flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 font-extrabold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:shadow-md disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98]"
+                className="group flex w-full items-center justify-center gap-3 rounded-2xl border-[3px] border-slate-200 bg-white px-5 py-3.5 font-bold text-slate-700 shadow-[0_4px_0_0_#e2e8f0] transition-all hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_6px_0_0_#cbd5e1] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 active:translate-y-1 active:shadow-[0_0px_0_0_#cbd5e1]"
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -181,17 +181,17 @@ export function Auth() {
                 Tiếp tục với Google
               </Button>
               <div className="my-6 flex items-center gap-4">
-                <div className="h-px flex-1 bg-slate-100" />
-                <span className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-slate-400">hoặc</span>
-                <div className="h-px flex-1 bg-slate-100" />
+                <div className="h-0.5 flex-1 bg-slate-100" />
+                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">hoặc</span>
+                <div className="h-0.5 flex-1 bg-slate-100" />
               </div>
-              <div className="mb-7 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1.5 ring-1 ring-slate-200">
+              <div className="mb-7 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1.5 border-2 border-slate-200">
                 <Button
                   type="button"
                   onClick={() => switchMode(true)}
                   className={cn(
-                    "rounded-xl px-4 py-3 text-sm font-extrabold transition-all",
-                    isLogin ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200" : "text-slate-500 hover:text-slate-800",
+                    "rounded-xl px-4 py-3 text-sm font-black transition-all border-[2px]",
+                    isLogin ? "bg-white text-blue-600 border-white shadow-[0_4px_0_0_#e2e8f0]" : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200/50",
                   )}
                 >
                   Đăng nhập
@@ -200,8 +200,8 @@ export function Auth() {
                   type="button"
                   onClick={() => switchMode(false)}
                   className={cn(
-                    "rounded-xl px-4 py-3 text-sm font-extrabold transition-all",
-                    !isLogin ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200" : "text-slate-500 hover:text-slate-800",
+                    "rounded-xl px-4 py-3 text-sm font-black transition-all border-[2px]",
+                    !isLogin ? "bg-white text-blue-600 border-white shadow-[0_4px_0_0_#e2e8f0]" : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-200/50",
                   )}
                 >
                   Đăng ký
@@ -210,11 +210,11 @@ export function Auth() {
 
               <form onSubmit={handleAuth} className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="auth-email" className="text-sm font-extrabold text-slate-700">
+                  <label htmlFor="auth-email" className="text-sm font-black text-slate-700">
                     Email
                   </label>
                   <div className="relative group">
-                    <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600" />
+                    <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500" />
                     <Input
                       id="auth-email"
                       type="email"
@@ -222,21 +222,21 @@ export function Auth() {
                       autoComplete="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="tenban@email.com"
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                      placeholder="email@example.com"
+                      className="w-full rounded-2xl border-[3px] border-slate-200 bg-slate-50 py-3.5 pl-12 pr-4 font-bold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
-                    <label htmlFor="auth-password" className="text-sm font-extrabold text-slate-700">
+                    <label htmlFor="auth-password" className="text-sm font-black text-slate-700">
                       Mật khẩu
                     </label>
                     {isLogin && <span className="text-xs font-bold text-slate-400">Tối thiểu 6 ký tự</span>}
                   </div>
                   <div className="relative group">
-                    <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-600" />
+                    <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500" />
                     <Input
                       id="auth-password"
                       type={showPassword ? "text" : "password"}
@@ -246,7 +246,7 @@ export function Auth() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder={isLogin ? "Nhập mật khẩu của bạn" : "Tạo mật khẩu an toàn"}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-12 pr-12 font-semibold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                      className="w-full rounded-2xl border-[3px] border-slate-200 bg-slate-50 py-3.5 pl-12 pr-12 font-bold text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20"
                     />
                     <Button
                       type="button"
@@ -254,7 +254,7 @@ export function Auth() {
                       className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                       aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                     >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      {showPassword ? <EyeOff className="h-5 w-5 stroke-[2.5]" /> : <Eye className="h-5 w-5 stroke-[2.5]" />}
                     </Button>
                   </div>
                 </div>
@@ -264,14 +264,14 @@ export function Auth() {
                 <Button
                   type="submit"
                   disabled={loading || (hasRecaptchaSiteKey && (!recaptchaReady || !recaptchaToken))}
-                  className="group mt-2 flex w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3.5 sm:py-4 text-sm sm:text-base font-black text-white shadow-lg shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-600/30 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 active:scale-[0.98]"
+                  className="group mt-4 flex w-full items-center justify-center gap-2.5 rounded-2xl bg-blue-500 px-5 py-3.5 sm:py-4 text-sm sm:text-base font-black text-white shadow-[0_6px_0_0_#2563eb] border-[3px] border-blue-500 transition-all hover:-translate-y-1 hover:shadow-[0_10px_0_0_#2563eb] hover:bg-blue-400 hover:border-blue-400 disabled:translate-y-0 disabled:shadow-[0_6px_0_0_#2563eb] disabled:cursor-not-allowed disabled:opacity-70 active:translate-y-1 active:shadow-[0_0px_0_0_#2563eb]"
                 >
                   {loading ? (
-                    <span className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    <span className="h-5 w-5 rounded-full border-4 border-white/30 border-t-white animate-spin" />
                   ) : (
                     <>
                       <span>{isLogin ? "Đăng nhập" : "Tạo tài khoản"}</span>
-                      {isLogin ? <LogIn className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
+                      {isLogin ? <LogIn className="h-5 w-5 stroke-[2.5]" /> : <UserPlus className="h-5 w-5 stroke-[2.5]" />}
                     </>
                   )}
                 </Button>

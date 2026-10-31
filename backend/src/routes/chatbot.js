@@ -355,10 +355,10 @@ async function startZaloBot() {
   }
 }
 
-// if (process.env.NODE_ENV === "production") {
-//   startZaloBot();
-// }
-startZaloBot();
+if (process.env.NODE_ENV === "production") {
+  startZaloBot();
+}
+// startZaloBot();
 export const getApi = () => api;
 
 export async function announceFlashDropEnd(dropMsgId) {

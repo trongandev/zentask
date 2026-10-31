@@ -246,8 +246,8 @@ function MainLayout() {
           <div className="bg-white/90 backdrop-blur-xl border border-slate-200/50 shadow-2xl rounded-3xl flex justify-around items-center p-2 mx-auto max-w-[90%]">
             {[
               { path: "/dashboard", label: "Tổng quan", icon: <Home className="w-6 h-6" /> },
-              { path: "/beginner", label: "Lộ trình", icon: <MountainSnow className="w-6 h-6" /> },
               { path: "/flashcards", label: "Thẻ lật", icon: <Copy className="w-6 h-6" /> },
+              { path: "/beginner", label: "Lộ trình", icon: <MountainSnow className="w-6 h-6" /> },
               { path: "/leaderboard", label: "Bảng xếp hạng", icon: <Trophy className="w-6 h-6" /> },
             ].map((item) => {
               const isActive = location.pathname.startsWith(item.path) && (item.path !== "/dashboard" || location.pathname === "/dashboard");
@@ -259,7 +259,6 @@ function MainLayout() {
                   className={cn("flex flex-col items-center gap-1 p-2 rounded-2xl transition-all min-w-[60px]", isActive ? "text-blue-600" : "text-slate-400 hover:text-slate-600")}
                 >
                   <div className={cn("p-1.5 rounded-xl transition-all duration-300", isActive ? "bg-blue-100 -translate-y-1" : "")}>{item.icon}</div>
-                  <span className={cn("text-[9px] font-black uppercase tracking-wider transition-all", isActive ? "opacity-100" : "opacity-0 h-0 overflow-hidden")}>{item.label}</span>
                 </Button>
               );
             })}
